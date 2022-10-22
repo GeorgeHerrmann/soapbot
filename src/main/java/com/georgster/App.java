@@ -25,11 +25,12 @@ public class App
           // MessageCreateEvent example
           Mono<Void> handlePingCommand = gateway.on(MessageCreateEvent.class, event -> {
             Message message = event.getMessage();
+            StringBuilder userMessage = new StringBuilder(message.getContent());
             StringBuilder fullMessage = new StringBuilder();
-            for (int i = 0; i < message.getContent().length(); i++) {
-              if (message.getContent().contains("!ping")) {
+            for (int i = 0; i < userMessage.length(); i++) {
+              if (userMessage.toString().contains("!ping")) {
+                userMessage.delete(userMessage.indexOf("!ping"), userMessage.indexOf("!ping") + 5);
                 fullMessage.append("pong!");
-                i+=5;
               }
             }
             
