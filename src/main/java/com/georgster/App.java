@@ -4,17 +4,28 @@ import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import reactor.core.publisher.Mono;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.entity.User;
+import java.util.Map;
+import java.util.HashMap;
 
 public class App
 {
+    private static final Map<String, Command> commands = new HashMap<>();
+
+    static {
+      commands.put("ping", event -> event.getMessage()
+          .getChannel().block()
+          .createMessage("Pong!").block());
+  }
     public static void main( String[] args )
     {
         String token = "MTAzMjY4NjkwMjAyNjk3MzIyNQ.GgDqeW.j8vKUUyniZkacPA0bd2PaG7L83_DIAY48_XXuo";
         DiscordClient client = DiscordClient.create(token);
-        Mono<Void> login = client.withGateway((GatewayDiscordClient gateway) -> {
+
+        client.login();
+
+        /*Mono<Void> login = client.withGateway((GatewayDiscordClient gateway) -> {
           // ReadyEvent example
           Mono<Void> printOnLogin = gateway.on(ReadyEvent.class, event ->
               Mono.fromRunnable(() -> {
@@ -42,8 +53,9 @@ public class App
         
           // combine them!
           return printOnLogin.and(handlePingCommand);
-        });
+        }); */
 
-        login.block();
+        client.login().block();
+
     }
 }
