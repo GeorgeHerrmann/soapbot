@@ -6,6 +6,9 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * The main class for SoapBot.
+ */
 public class App {
 
     public static void main(String[] args) {
