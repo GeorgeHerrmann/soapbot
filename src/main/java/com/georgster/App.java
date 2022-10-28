@@ -25,8 +25,8 @@ public class App {
                 break;
             }
           }
-      });
+        });
 
-      client.onDisconnect().block();
+        client.onDisconnect().block();
     }
 }
