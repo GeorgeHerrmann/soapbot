@@ -20,7 +20,9 @@ public class App {
           final String content = event.getMessage().getContent();
           final Map<String, Command> commands = new HashMap<>();
           Command pong = new PongCommand();
+          Command help = new HelpCommand(commands); //Because HelpCommand must have access to the map of all other commands, this object must be created LAST
           commands.put("ping", pong);
+          commands.put("help", help);
 
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.startsWith('!' + entry.getKey())) {

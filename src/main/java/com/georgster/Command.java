@@ -16,4 +16,6 @@ interface Command {
      * @param event The event of the message a user typed to active a {@code Command}.
      */
     void execute(MessageCreateEvent event);
+
+    String help();
 }

@@ -40,4 +40,9 @@ public class PongCommand implements Command {
         event.getMessage().getChannel().block().createMessage(fullMessage.toString()).block();
             
     }
+
+    public String help() {
+      return "Command: !ping" +
+      "\n!ping to have SOAP Bot respond with pong! for each 'ping' in your message";
+    }
 }
