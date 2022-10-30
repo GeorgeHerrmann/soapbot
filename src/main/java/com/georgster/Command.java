@@ -17,5 +17,10 @@ interface Command {
      */
     void execute(MessageCreateEvent event);
 
+    /**
+     * Provides information about usage for a {@code Command}.
+     * 
+     * @return A string containing information on how to use this {@code Command}.
+     */
     String help();
 }

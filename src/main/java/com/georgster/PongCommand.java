@@ -41,6 +41,9 @@ public class PongCommand implements Command {
             
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
       return "Command: !ping" +
       "\n!ping to have SOAP Bot respond with pong! for each 'ping' in your message";

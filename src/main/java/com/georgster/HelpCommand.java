@@ -3,16 +3,25 @@ package com.georgster;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.Map;
 
+/**
+ * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
+ */
 public class HelpCommand implements Command {
-    //!help - lists commands
-    //!help COMMAND - explains command
 
-    Map<String, Command> commands;
+    Map<String, Command> commands; //A Map of all commands SOAP Bot has
 
+    /**
+     * Creates a HelpCommand which contains a Map of all of SOAP Bot's commands and their associated object.
+     * 
+     * @param command a Map of all of SOAP Bot's commands.
+     */
     HelpCommand(Map<String, Command> command) {
         commands = command;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void execute(MessageCreateEvent event) {
         StringBuilder message = new StringBuilder(event.getMessage().getContent());
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
@@ -28,6 +37,9 @@ public class HelpCommand implements Command {
         event.getMessage().getChannel().block().createMessage(response.toString()).block();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !help" +
         "\n!help for a list of all commands" +
