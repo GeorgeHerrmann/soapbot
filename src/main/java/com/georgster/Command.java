@@ -8,7 +8,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  * given a defined command was at the beginning of the message. All commands have an associated execute function,
  * which defines what SoapBot should do after the command was given.
  */
-interface Command {
+public interface Command {
     /**
      * Executes the associated command after the {@code MessageCreateEvent was fired}.
      * Each implementation of a Command must implement this method in order to define the bot's

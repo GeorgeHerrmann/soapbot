@@ -5,6 +5,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.Map;
 import java.util.HashMap;
+import com.georgster.plinko.PlinkoCommand;
 
 /**
  * The main class for SoapBot.
@@ -20,8 +21,10 @@ public class App {
           final String content = event.getMessage().getContent();
           final Map<String, Command> commands = new HashMap<>();
           Command pong = new PongCommand();
-          Command help = new HelpCommand(commands); //Because HelpCommand must have access to the map of all other commands, this object must be created LAST
+          Command plinko = new PlinkoCommand();
+          Command help = new HelpCommand(commands);
           commands.put("ping", pong);
+          commands.put("plinko", plinko);
           commands.put("help", help);
 
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
