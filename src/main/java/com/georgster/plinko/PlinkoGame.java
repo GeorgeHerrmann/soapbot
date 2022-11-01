@@ -3,24 +3,27 @@ package com.georgster.plinko;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.Message;
+import java.util.Random;
 
 public class PlinkoGame {
 
     private String guild;
     private Channel channel;
+    private Random rand;
     private String[][] board = {
-        {"|"," "," "," "," "," "," "," "," "," "," "," ","|"},
-        {"\\"," ","."," ","."," ","."," ","."," ","."," ","/"},
-        {" ","\\"," ","."," ","."," ","."," ","."," ","/"," "},
-        {" ","/"," "," ","."," ","."," ","."," "," ","\\"," "},
-        {"/"," ","."," ","."," ","."," ","."," ","."," ","\\"},
-        {"\\"," "," ","."," ","."," ","."," ","."," "," ","/"},
-        {" ","\\"," "," ","."," ","."," ","."," "," ","/"," "},
-        {" ","/"," ","."," ","."," ","."," ","."," ","\\"," "},
-        {"/"," ","."," ","."," ","."," ","."," ","."," ","\\"},
-        {"\\"," "," ","."," ","."," ","."," ","."," ","/"},
-        {"|"," "," "," "," "," "," "," "," "," "," "," ","|"},
-        {"|","\\_","|","\\_","|","","|","\\_","|","\\_","|","\\_","|"}
+        {"|"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","|"},
+        {"\\"," ","."," ","."," ","."," ","."," ","."," ","."," ","/"},
+        {" ","\\"," ","."," ","."," ","."," ","."," ","."," ","/"," "},
+        {" ","/"," "," ","."," ","."," ","."," ","."," "," ","\\"," "},
+        {"/"," ","."," ","."," ","."," ","."," ","."," ","."," ","\\"},
+        {"\\"," "," ","."," ","."," ","."," ","."," ","."," "," ","/"},
+        {" ","\\"," "," ","."," ","."," ","."," ","."," "," ","/"," "},
+        {" ","/"," ","."," ","."," ","."," ","."," ","."," ","\\"," "},
+        {"/"," ","."," ","."," ","."," ","."," ","."," ","."," ","\\"},
+        {"\\"," "," ","."," ","."," ","."," ","."," ","."," "," ","/"},
+        {"|"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","|"},
+        {"|","\\_","|","\\_","|","\\_","|","\\_","|","\\_","|"}
     };
 
     /**
@@ -31,9 +34,16 @@ public class PlinkoGame {
     PlinkoGame(MessageCreateEvent event) {
         event.getGuildId().ifPresent(flake -> guild = flake.asString());
         channel = event.getMessage().getChannel().block();
+        rand = new Random();
     }
 
     protected void play() {
+        ((MessageChannel) getChannel()).createMessage("Placing initial chip:").block();
+        int spot = 0;
+        while (!board[0][spot].equals(" ")) {
+            spot = rand.nextInt(1, 17);
+        }
+        board[0][spot] = "0";
         StringBuilder sBoard = new StringBuilder();
         for (String[] x : board) {
             for (String y : x) {
@@ -41,7 +51,9 @@ public class PlinkoGame {
             }
             sBoard.append("\n");
         }
-        ((MessageChannel) getChannel()).createMessage(sBoard.toString()).block();
+        Message message = ((MessageChannel) getChannel()).createMessage(sBoard.toString()).block();
+        //message.delete().block();
+
     }
 
     /**

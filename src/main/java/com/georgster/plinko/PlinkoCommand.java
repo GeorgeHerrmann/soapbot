@@ -2,7 +2,6 @@ package com.georgster.plinko;
 
 import com.georgster.Command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
 
 public class PlinkoCommand implements Command {
     
