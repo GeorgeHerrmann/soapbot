@@ -8,6 +8,20 @@ public class PlinkoGame {
 
     private String guild;
     private Channel channel;
+    private String[][] board = {
+        {"|"," "," "," "," "," "," "," "," "," "," "," ","|"},
+        {"\\"," ","."," ","."," ","."," ","."," ","."," ","/"},
+        {" ","\\"," ","."," ","."," ","."," ","."," ","/"," "},
+        {" ","/"," "," ","."," ","."," ","."," "," ","\\"," "},
+        {"/"," ","."," ","."," ","."," ","."," ","."," ","\\"},
+        {"\\"," "," ","."," ","."," ","."," ","."," "," ","/"},
+        {" ","\\"," "," ","."," ","."," ","."," "," ","/"," "},
+        {" ","/"," ","."," ","."," ","."," ","."," ","\\"," "},
+        {"/"," ","."," ","."," ","."," ","."," ","."," ","\\"},
+        {"\\"," "," ","."," ","."," ","."," ","."," ","/"},
+        {"|"," "," "," "," "," "," "," "," "," "," "," ","|"},
+        {"|","\\_","|","\\_","|","","|","\\_","|","\\_","|","\\_","|"}
+    };
 
     /**
      * Creates a {@code PlinkoGame}. A {@code PlinkoReward} is based on the guild ID.
@@ -20,7 +34,14 @@ public class PlinkoGame {
     }
 
     protected void play() {
-        ((MessageChannel) getChannel()).createMessage("").block();
+        StringBuilder sBoard = new StringBuilder();
+        for (String[] x : board) {
+            for (String y : x) {
+                sBoard.append(y);
+            }
+            sBoard.append("\n");
+        }
+        ((MessageChannel) getChannel()).createMessage(sBoard.toString()).block();
     }
 
     /**
