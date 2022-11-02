@@ -20,17 +20,18 @@ public class PlinkoCommand implements Command {
     public void execute(MessageCreateEvent event) {
         StringBuilder message = new StringBuilder(event.getMessage().getContent());
         message.delete(message.indexOf("!plinko"), message.indexOf("!plinko") + 8);
+        PlinkoGame game = new PlinkoGame(event);
         if (message.toString().startsWith("play")) {
-            PlinkoGame game = new PlinkoGame(event);
             if (game.getGuild() != null) {
                 game.play();
             } else {
                 event.getMessage().getChannel().block().createMessage("I could not get the id of this server").block();
             }
-        } else if (message.toString().startsWith("rewards")) {
-            if (message.toString().contains("set")) {
+        } else if (message.toString().startsWith("board")) {
+            game.showBoard();
+            /*if (message.toString().contains("set")) {
                 
-            }
+            }*/
         } else {
             help();
         }
