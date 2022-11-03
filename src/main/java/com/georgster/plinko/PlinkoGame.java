@@ -38,8 +38,7 @@ public class PlinkoGame {
     }
 
     protected void play() {
-        int spot = rand.nextInt(1,17);
-        System.out.println("Initial Location at 0, " + spot);
+        int spot = rand.nextInt(2,15);
 
         StringBuilder sBoard = new StringBuilder();
         for (String[] x : board) {
@@ -48,16 +47,29 @@ public class PlinkoGame {
             }
             sBoard.append("\n");
         }
-
+        sBoard.setCharAt(spot, '0');
         Message message = ((MessageChannel) getChannel()).createMessage(sBoard.toString()).block();
+        sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
 
-        for (int i = 0; i < board.length - 1; i++) {
+        for (int i = 0; i < board.length; i++) {
+            spot = nextIndex(i, spot - (i - 1));
             sBoard.setCharAt(spot + (i * board[i].length), '0');
-            spot = nextIndex(i + 1, spot);
+            if (i == board.length - 1) {
+                System.out.println("Play reached the end");
+                if (sBoard.charAt((spot + (i * board[i].length)) - 1) == '|') {
+                    System.out.println("\tRemove to the left");
+                    sBoard.deleteCharAt((spot + (i * board[i].length)) - 1);
+                } else {
+                    System.out.println("\tRemove to the right");
+                    sBoard.deleteCharAt((spot + (i * board[i].length)) + 1);
+                }
+            }
             message.edit(spec -> {
                 spec.setContent(sBoard.toString());
             }).block();
-            //sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
+            if (i != board.length - 1) {
+                sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
+            }
         }
         ((MessageChannel) getChannel()).createMessage("done.").block();
 
@@ -65,30 +77,27 @@ public class PlinkoGame {
 
     
     private int nextIndex(int first, int second) {
-        System.out.println("Examining: " + first + ", " + second);
         int nextIndex = second;
-        if (board[first][second].equals("|")) {
-            System.out.print("\tI am initially at a |: ");
+        if (first == board.length - 1) {
             while (board[first][nextIndex].equals("|")) {
                 nextIndex = rand.nextInt(nextIndex - 1, nextIndex + 2);
             }
-            System.out.println("New Spot: " + first + ", " + nextIndex);
-        }
+            nextIndex += (second / 2);
+        } else {
             
-        if (board[first][second - 1].equals("/") || board[first][second + 1].equals("/")) {
-            System.out.print("\tI found a /:");
-            nextIndex = second < 5 ? second + 2 : second - 2;
-            System.out.println("I am now at: " + first + ", " + nextIndex);
+        if (board[first][second + 1].equals("/")) {
+            nextIndex = second - 2;
+        }
+        if (board[first][second - 1].equals("\\")) {
+            nextIndex = second + 2;
         }
         if (board[first][nextIndex].equals(".")) {
-            System.out.print("\tI found a . : ");
             while (board[first][nextIndex].equals(".")) {
                 nextIndex = rand.nextInt(nextIndex - 1, nextIndex + 2);
             }
-            System.out.println("I have placed myself at: " + first + ", " + nextIndex);
-        
         }
-        return nextIndex;
+    }
+        return nextIndex + first;
     }
 
     protected void showBoard() {
