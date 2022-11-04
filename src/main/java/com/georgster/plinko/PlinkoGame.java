@@ -4,6 +4,8 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.Message;
+
+import java.time.Duration;
 import java.util.Random;
 
 public class PlinkoGame {
@@ -23,7 +25,7 @@ public class PlinkoGame {
         {"/"," ","."," ","."," ","."," ","."," ","."," ","."," ","\\"," "," "},
         {"\\"," "," ","."," ","."," ","."," ","."," ","."," "," ","/"," "," "},
         {"|"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","|"},
-        {"|","\\_","|","\\_","|","\\_","|","\\_","|","\\_","|"," "," "," "," "," "," "}
+        {"I","_","I","_","I","_","I","_","I","_","I"," "," "," "," "," "," "}
     };
 
     /**
@@ -38,7 +40,7 @@ public class PlinkoGame {
     }
 
     protected void play() {
-        int spot = rand.nextInt(2,15);
+        int spot = rand.nextInt(2,14);
 
         StringBuilder sBoard = new StringBuilder();
         for (String[] x : board) {
@@ -54,41 +56,28 @@ public class PlinkoGame {
         for (int i = 0; i < board.length; i++) {
             spot = nextIndex(i, spot - (i - 1));
             sBoard.setCharAt(spot + (i * board[i].length), '0');
-            if (i == board.length - 1) {
-                System.out.println("Play reached the end");
-                if (sBoard.charAt((spot + (i * board[i].length)) - 1) == '|') {
-                    System.out.println("\tRemove to the left");
-                    sBoard.deleteCharAt((spot + (i * board[i].length)) - 1);
-                } else {
-                    System.out.println("\tRemove to the right");
-                    sBoard.deleteCharAt((spot + (i * board[i].length)) + 1);
-                }
-            }
-            message.edit(spec -> {
-                spec.setContent(sBoard.toString());
-            }).block();
+            message.edit().withContentOrNull(sBoard.toString()).delayElement(Duration.ofMillis(500)).block();
             if (i != board.length - 1) {
                 sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
             }
         }
-        ((MessageChannel) getChannel()).createMessage("done.").block();
 
     }
 
     
     private int nextIndex(int first, int second) {
+        if (second > board.length - 3) second -= 3;
         int nextIndex = second;
         if (first == board.length - 1) {
-            while (board[first][nextIndex].equals("|")) {
+            while (!board[first][nextIndex].equals("_")) {
                 nextIndex = rand.nextInt(nextIndex - 1, nextIndex + 2);
             }
-            nextIndex += (second / 2);
-        } else {
+        }
             
-        if (board[first][second + 1].equals("/")) {
+        if (board[first][second + 1].equals("/") || board[first][second].equals("/")) {
             nextIndex = second - 2;
         }
-        if (board[first][second - 1].equals("\\")) {
+        if (board[first][second - 1].equals("\\") || board[first][second].equals("\\")) {
             nextIndex = second + 2;
         }
         if (board[first][nextIndex].equals(".")) {
@@ -96,7 +85,6 @@ public class PlinkoGame {
                 nextIndex = rand.nextInt(nextIndex - 1, nextIndex + 2);
             }
         }
-    }
         return nextIndex + first;
     }
 
