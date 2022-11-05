@@ -4,6 +4,9 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.Map;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import com.georgster.plinko.PlinkoCommand;
 
@@ -13,7 +16,13 @@ import com.georgster.plinko.PlinkoCommand;
 public class App {
 
     public static void main(String[] args) {
-        final String token = "MTAzMjY4NjkwMjAyNjk3MzIyNQ.GgDqeW.j8vKUUyniZkacPA0bd2PaG7L83_DIAY48_XXuo";
+        String token = "";
+        try {
+          token = Files.readString( Path.of(System.getProperty("user.dir") + "\\key.txt") );
+        } catch (IOException e) {
+          e.printStackTrace();
+          System.exit(0);
+        }
         final GatewayDiscordClient client = DiscordClientBuilder.create(token).build().login().block();
 
         /* Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid */
