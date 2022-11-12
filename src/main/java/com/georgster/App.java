@@ -31,10 +31,12 @@ public class App {
           final Map<String, Command> commands = new HashMap<>();
           Command pong = new PongCommand();
           Command plinko = new PlinkoCommand();
+          Command soap = new SoapCommand();
           Command help = new HelpCommand(commands);
           commands.put("ping", pong);
           commands.put("plinko", plinko);
           commands.put("help", help);
+          commands.put("soapbot", soap);
 
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.startsWith('!' + entry.getKey())) {

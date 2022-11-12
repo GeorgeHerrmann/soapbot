@@ -22,11 +22,8 @@ public class PlinkoCommand implements Command {
         message.delete(message.indexOf("!plinko"), message.indexOf("!plinko") + 8);
         PlinkoGame game = new PlinkoGame(event);
         if (message.toString().startsWith("play")) {
-            if (game.getGuild() != null) {
-                game.play();
-            } else {
-                event.getMessage().getChannel().block().createMessage("I could not get the id of this server").block();
-            }
+            message.delete(message.indexOf("play"), message.indexOf("play") + 5);
+            game.play();
         } else if (message.toString().startsWith("board")) {
             game.showBoard();
             /*if (message.toString().contains("set")) {
