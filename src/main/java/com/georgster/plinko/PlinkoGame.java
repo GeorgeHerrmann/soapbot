@@ -4,6 +4,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.Message;
+
 import java.time.Duration;
 import java.util.Random;
 
@@ -12,7 +13,6 @@ public class PlinkoGame {
     private String guild;
     private Channel channel;
     private Random rand;
-    private int reward;
     private String[][] board = {
         {"|"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," ","|"},
         {"\\"," ","."," ","."," ","."," ","."," ","."," ","."," ","/"," "," "},
@@ -37,7 +37,6 @@ public class PlinkoGame {
         event.getGuildId().ifPresent(flake -> guild = flake.asString());
         channel = event.getMessage().getChannel().block();
         rand = new Random();
-        reward = 0;
     }
 
     protected void play() {
@@ -50,11 +49,9 @@ public class PlinkoGame {
             }
             sBoard.append("\n");
         }
-        sBoard.setCharAt(spot - 1, '0');
+        sBoard.setCharAt(spot, '0');
         Message message = ((MessageChannel) getChannel()).createMessage(sBoard.toString()).block();
         sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
-
-        spot = spot + (spot - 1);
 
         for (int i = 0; i < board.length; i++) {
             spot = nextIndex(i, spot - (i - 1));
@@ -62,10 +59,8 @@ public class PlinkoGame {
             message.edit().withContentOrNull(sBoard.toString()).delayElement(Duration.ofMillis(500)).block();
             if (i != board.length - 1) {
                 sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
-                reward = spot;
             }
         }
-        ((MessageChannel) getChannel()).createMessage("The reward location for this game was: " + reward).block();
 
     }
 
