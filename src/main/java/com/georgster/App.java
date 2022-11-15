@@ -2,6 +2,7 @@ package com.georgster;
 
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.Map;
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import com.georgster.plinko.PlinkoCommand;
+import com.georgster.profile.ProfileHandler;
 
 /**
  * The main class for SoapBot.
@@ -24,6 +26,13 @@ public class App {
           System.exit(0);
         }
         final GatewayDiscordClient client = DiscordClientBuilder.create(token).build().login().block();
+
+        client.getEventDispatcher().on(GuildCreateEvent.class).subscribe(event -> {
+          String guild = event.getGuild().getId().asString();
+          if (!ProfileHandler.serverProfileExists(guild)) {
+            ProfileHandler.createServerProfile(guild);
+          }
+        });
 
         /* Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
