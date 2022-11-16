@@ -10,7 +10,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  */
 public interface Command {
     /**
-     * Executes the associated command after the {@code MessageCreateEvent was fired}.
+     * Executes the associated command after the {@code MessageCreateEvent} was fired.
      * Each implementation of a Command must implement this method in order to define the bot's
      * actions following a command input.
      * @param event The event of the message a user typed to active a {@code Command}.

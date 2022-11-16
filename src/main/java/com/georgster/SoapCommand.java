@@ -6,10 +6,17 @@ import java.util.Scanner;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
+/**
+ * A SoapCommand is represents the actions following a "!soapbot" command.
+ */
 public class SoapCommand implements Command {
+
+    /**
+     * {@inheritDoc}
+     */
     public void execute(MessageCreateEvent event) {
         String version = "";
-        File myObj = new File("pom.xml");
+        File myObj = new File("pom.xml"); //Reads the version number from the pom.xml file
         Scanner myReader;
         try {
             myReader = new Scanner(myObj);
@@ -23,12 +30,15 @@ public class SoapCommand implements Command {
             myReader.close();
             event.getMessage().getChannel().block().createMessage("Soap Bot Version: " + version +
             "\nView my repository and source code at: https://github.com/GeorgeHerrmann/soapbot").block();
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) { //Should only be thrown if there is an issue with the pom.xml file
             event.getMessage().getChannel().block().createMessage("Couldn't find version file").block();
             e.printStackTrace();
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !soapbot " +
         "\nGives information about SOAP Bot";

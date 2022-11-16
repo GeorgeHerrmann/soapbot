@@ -25,6 +25,7 @@ import com.georgster.profile.ProfileHandler;
 public class App {
 
     public static void main(String[] args) {
+        /* Initial formation and login of the bot */
         String token = "";
         try {
           token = Files.readString( Path.of(System.getProperty("user.dir"), "key.txt") );
@@ -33,12 +34,16 @@ public class App {
           System.exit(0);
         }
         final GatewayDiscordClient client = DiscordClientBuilder.create(token).build().gateway()
-        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING))
+        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING)) //The intents the bot will work with
         .login().block();
 
 
-        client.getEventDispatcher().on(GuildCreateEvent.class).subscribe(event -> {
-          List<Member> members = event.getGuild().getMembers().buffer().blockFirst();
+        /*
+         * The GuildCreateEvent is fired each time SOAP Bot logs in to a server, either upon the program start or when it is added to a new server.
+         * It is here that we use the Profile Handler to generate a profile for a guild and its members if one doesn't exist yet.
+         */
+        client.getEventDispatcher().on(GuildCreateEvent.class).subscribe(event -> { //Subscribing to an event meant SOAP Bot is now "listening" for these events
+          List<Member> members = event.getGuild().getMembers().buffer().blockFirst(); //Stores all members of the guild this event was fired from in a List
           String guild = event.getGuild().getId().asString();
           if (!ProfileHandler.serverProfileExists(guild)) {
             ProfileHandler.createServerProfile(guild);
@@ -52,27 +57,27 @@ public class App {
           }
         });
 
-        /* Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid */
+        /* 
+         * A MessageCreateEvent is fired each time a message is sent in a server and channel SOAP Bot has access to.
+         * Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid.
+         */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
           final String content = event.getMessage().getContent();
           final Map<String, Command> commands = new HashMap<>();
-          Command pong = new PongCommand();
-          Command plinko = new PlinkoCommand();
-          Command soap = new SoapCommand();
-          Command help = new HelpCommand(commands);
-          commands.put("ping", pong);
-          commands.put("plinko", plinko);
-          commands.put("help", help);
-          commands.put("soapbot", soap);
+          /* Hard-defined commands that SOAP Bot has access to are stored in this HashMap */
+          commands.put("ping", new PongCommand());
+          commands.put("plinko", new PlinkoCommand());
+          commands.put("help", new HelpCommand(commands));
+          commands.put("soapbot", new SoapCommand());
 
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.startsWith('!' + entry.getKey())) {
-                entry.getValue().execute(event);
+                entry.getValue().execute(event); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }
           }
         });
 
-        client.onDisconnect().block();
+        client.onDisconnect().block(); //Disconnects the bot from the server upon program termination
     }
 }
