@@ -1,2 +1,3 @@
 key.txt
-/src/main/java/com/georgster/profile/profiles/*
+src/main/java/com/georgster/profile/profiles/*
+target/classes/com/georgster/profile/profiles/*
