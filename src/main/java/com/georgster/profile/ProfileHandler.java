@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.FileWriter;
 
 /*
@@ -35,7 +37,7 @@ public class ProfileHandler {
     }
 
     public static void updateUserProfile(Profile profile) {
-        Gson parser = new Gson();
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, profile.getGuildId(), "users", profile.getMemberId() + ".json").toString())) {
             writer.write(parser.toJson(profile));
         } catch (IOException e) {
