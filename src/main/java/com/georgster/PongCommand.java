@@ -29,7 +29,7 @@ public class PongCommand implements Command {
     @Override
     public void execute(MessageCreateEvent event) {
         Message message = event.getMessage();
-        StringBuilder userMessage = new StringBuilder(message.getContent());
+        StringBuilder userMessage = new StringBuilder(message.getContent().toLowerCase());
         StringBuilder fullMessage = new StringBuilder();
         for (int i = 0; i < userMessage.length(); i++) {
           if (userMessage.toString().contains(msg)) {

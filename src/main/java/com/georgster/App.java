@@ -63,6 +63,9 @@ public class App {
          */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
           final String content = event.getMessage().getContent();
+          if (content.equals(content.toUpperCase())) {
+            event.getMessage().getChannel().block().createMessage("Please stop yelling at me :(").block();
+          }
           final Map<String, Command> commands = new HashMap<>();
           /* Hard-defined commands that SOAP Bot has access to are stored in this HashMap */
           commands.put("ping", new PongCommand());
@@ -71,7 +74,7 @@ public class App {
           commands.put("soapbot", new SoapCommand());
 
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
-            if (content.startsWith('!' + entry.getKey())) {
+            if (content.toLowerCase().startsWith('!' + entry.getKey())) {
                 entry.getValue().execute(event); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }

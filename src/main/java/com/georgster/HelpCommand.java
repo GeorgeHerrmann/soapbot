@@ -23,7 +23,7 @@ public class HelpCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event) {
-        StringBuilder message = new StringBuilder(event.getMessage().getContent());
+        StringBuilder message = new StringBuilder(event.getMessage().getContent().toLowerCase());
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
         message.delete(message.indexOf("!help"), message.indexOf("!help") + 6);
         for (final Map.Entry<String, Command> entry : commands.entrySet()) {

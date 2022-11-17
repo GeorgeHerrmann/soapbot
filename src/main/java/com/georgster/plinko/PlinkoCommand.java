@@ -26,7 +26,7 @@ public class PlinkoCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event) {
-        StringBuilder message = new StringBuilder(event.getMessage().getContent()); //This is the user's message that prompted this execution
+        StringBuilder message = new StringBuilder(event.getMessage().getContent().toLowerCase()); //This is the user's message that prompted this execution
         message.delete(message.indexOf("!plinko"), message.indexOf("!plinko") + 8);
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (message.toString().startsWith("play")) {
