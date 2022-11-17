@@ -63,7 +63,7 @@ public class App {
          */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
           final String content = event.getMessage().getContent();
-          if (content.equals(content.toUpperCase())) {
+          if (content.startsWith("!") && content.equals(content.toUpperCase())) {
             event.getMessage().getChannel().block().createMessage("Please stop yelling at me :(").block();
           }
           final Map<String, Command> commands = new HashMap<>();
