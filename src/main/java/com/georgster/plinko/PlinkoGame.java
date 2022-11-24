@@ -129,7 +129,7 @@ public class PlinkoGame {
     }
 
     protected int getReward(int spot) {
-        
+        return 0;
     }
 
     /* Shows a blank version of the Plinko Board. */
