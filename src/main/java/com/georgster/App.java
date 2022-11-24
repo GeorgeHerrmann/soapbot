@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.georgster.plinko.PlinkoCommand;
-import com.georgster.profile.Profile;
+import com.georgster.profile.UserProfile;
 import com.georgster.profile.ProfileHandler;
 
 /**
@@ -53,7 +53,7 @@ public class App {
             if (!ProfileHandler.userProfileExists(member, guild)) {
               ProfileHandler.createUserProfile(member, guild);
             }
-            ProfileHandler.updateUserProfile(new Profile(guild, member, members.get(i).getUsername()));
+            ProfileHandler.updateUserProfile(new UserProfile(guild, member, members.get(i).getUsername()));
           }
         });
 

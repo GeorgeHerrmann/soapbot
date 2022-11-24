@@ -87,6 +87,8 @@ public class PlinkoGame {
             message.edit().withContentOrNull(sBoard.toString()).delayElement(Duration.ofMillis(500)).block();
             if (i != board.length - 1) { //We want to keep the chip in the final spot once the game is over
                 sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " "); //Easy way to find where the chip is in sBoard
+            } else {
+                getReward(spot);
             }
         }
 
@@ -124,6 +126,10 @@ public class PlinkoGame {
         }
         /* We add the number of rows because we must take into account the number of new line characters that will be in the string representation of the board */
         return nextIndex + first;
+    }
+
+    protected int getReward(int spot) {
+        
     }
 
     /* Shows a blank version of the Plinko Board. */

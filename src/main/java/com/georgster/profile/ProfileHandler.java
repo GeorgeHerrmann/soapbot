@@ -61,7 +61,7 @@ public class ProfileHandler {
      * 
      * @param profile The object containing all data associated with this {@code Member}.
      */
-    public static void updateUserProfile(Profile profile) {
+    public static void updateUserProfile(UserProfile profile) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, profile.getGuildId(), "users", profile.getMemberId() + ".json").toString())) {
             writer.write(parser.toJson(profile));

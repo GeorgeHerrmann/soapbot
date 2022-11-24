@@ -3,7 +3,7 @@ package com.georgster.profile;
 /**
  * A Profile holds data regarding a user's inside a specific Discord server.
  */
-public class Profile {
+public class UserProfile {
     /* All data a profile needs to hold is instantiated here */
     private String guildId; //Snowflake Guild ID associated with this user's profile in a guild
     private String memberId; //Snowflake member ID
@@ -16,7 +16,7 @@ public class Profile {
      * @param userId the {@code Snowflake} ID of the {@code Member} this profile is for.
      * @param user the username of the user
      */
-    public Profile(String serverId, String userId, String user) {
+    public UserProfile(String serverId, String userId, String user) {
         guildId = serverId;
         memberId = userId;
         username = user;
