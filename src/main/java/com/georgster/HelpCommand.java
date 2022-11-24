@@ -3,6 +3,8 @@ package com.georgster;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.Map;
 
+import com.georgster.api.ActionWriter;
+
 /**
  * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
  */
@@ -35,6 +37,7 @@ public class HelpCommand implements Command {
             }
         }
         event.getMessage().getChannel().block().createMessage(response.toString()).block();
+        ActionWriter.writeAction("HelpCommand");
     }
 
     /**
