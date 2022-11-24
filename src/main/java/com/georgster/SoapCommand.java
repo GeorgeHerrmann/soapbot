@@ -36,7 +36,7 @@ public class SoapCommand implements Command {
             event.getMessage().getChannel().block().createMessage("Couldn't find version file").block();
             e.printStackTrace();
         }
-        ActionWriter.writeAction("SoapCommand");
+        ActionWriter.writeAction("Showing information about SOAP Bot");
     }
 
     /**

@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
+import com.georgster.api.ActionWriter;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
 import com.georgster.profile.ProfileHandler;
@@ -46,6 +47,7 @@ public class App {
           List<Member> members = event.getGuild().getMembers().buffer().blockFirst(); //Stores all members of the guild this event was fired from in a List
           String guild = event.getGuild().getId().asString();
           if (!ProfileHandler.serverProfileExists(guild)) {
+            ActionWriter.writeAction("Creating a profile for " + event.getGuild().getName());
             ProfileHandler.createServerProfile(guild);
           }
           for (int i = 0; i < members.size(); i++) {

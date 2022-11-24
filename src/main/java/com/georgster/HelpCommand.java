@@ -37,7 +37,7 @@ public class HelpCommand implements Command {
             }
         }
         event.getMessage().getChannel().block().createMessage(response.toString()).block();
-        ActionWriter.writeAction("HelpCommand");
+        ActionWriter.writeAction("Executing the Help Command");
     }
 
     /**
