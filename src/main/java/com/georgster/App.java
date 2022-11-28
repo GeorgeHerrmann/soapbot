@@ -7,6 +7,13 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
+import discord4j.voice.AudioProvider;
+
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 
 import java.util.Map;
 import java.io.IOException;
@@ -19,6 +26,7 @@ import com.georgster.api.ActionWriter;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
 import com.georgster.profile.ProfileHandler;
+import com.georgster.music.LavaPlayerAudioProvider;
 
 /**
  * The main class for SoapBot.
@@ -26,6 +34,17 @@ import com.georgster.profile.ProfileHandler;
 public class App {
 
     public static void main(String[] args) {
+        // Creates AudioPlayer instances and translates URLs to AudioTrack instances
+        final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+        // This is an optimization strategy that Discord4J can utilize. It is not important to understand
+        playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
+        // Allow playerManager to parse remote sources like YouTube links
+        AudioSourceManagers.registerRemoteSources(playerManager);
+        // Create an AudioPlayer so Discord4J can receive audio data
+        final AudioPlayer player = playerManager.createPlayer();
+        // We will be creating LavaPlayerAudioProvider in the next step
+        LavaPlayerAudioProvider provider = new LavaPlayerAudioProvider(player);
+
         /* Initial formation and login of the bot */
         String token = "";
         try {
@@ -85,4 +104,5 @@ public class App {
 
         client.onDisconnect().block(); //Disconnects the bot from the server upon program termination
     }
+
 }
