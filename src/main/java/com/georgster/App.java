@@ -27,6 +27,8 @@ import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.music.LavaPlayerAudioProvider;
+import com.georgster.music.PlayMusicCommand;
+import com.georgster.music.StopMusicCommand;
 
 /**
  * The main class for SoapBot.
@@ -34,16 +36,13 @@ import com.georgster.music.LavaPlayerAudioProvider;
 public class App {
 
     public static void main(String[] args) {
-        // Creates AudioPlayer instances and translates URLs to AudioTrack instances
+        /* This sets up an audio configuration so SOAP Bot can join and "speak" in channels */
         final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
-        // This is an optimization strategy that Discord4J can utilize. It is not important to understand
+        // This is an optimization strategy that Discord4J can utilize, (it was in the docs i dunno what it does to be honest)
         playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
-        // Allow playerManager to parse remote sources like YouTube links
-        AudioSourceManagers.registerRemoteSources(playerManager);
-        // Create an AudioPlayer so Discord4J can receive audio data
-        final AudioPlayer player = playerManager.createPlayer();
-        // We will be creating LavaPlayerAudioProvider in the next step
-        LavaPlayerAudioProvider provider = new LavaPlayerAudioProvider(player);
+        AudioSourceManagers.registerRemoteSources(playerManager); //Allows the player to receive "remote" audio sources
+        final AudioPlayer player = playerManager.createPlayer(); //How Discord receives audio data
+        AudioProvider provider = new LavaPlayerAudioProvider(player); //Implements LavaPlayer's audio provider in SOAP Bot
 
         /* Initial formation and login of the bot */
         String token = "";
@@ -54,7 +53,7 @@ public class App {
           System.exit(0);
         }
         final GatewayDiscordClient client = DiscordClientBuilder.create(token).build().gateway()
-        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING)) //The intents the bot will work with
+        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING, Intent.GUILD_VOICE_STATES)) //The intents the bot will work with
         .login().block();
 
 
@@ -93,6 +92,8 @@ public class App {
           commands.put("plinko", new PlinkoCommand());
           commands.put("help", new HelpCommand(commands));
           commands.put("soapbot", new SoapCommand());
+          commands.put("play", new PlayMusicCommand(provider, playerManager, player));
+          commands.put("stop", new StopMusicCommand(player));
 
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.toLowerCase().startsWith('!' + entry.getKey())) {
