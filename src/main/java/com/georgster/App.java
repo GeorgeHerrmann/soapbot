@@ -16,6 +16,9 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 
 import java.util.Map;
+
+import org.apache.http.client.config.RequestConfig;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +43,12 @@ public class App {
         final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
         // This is an optimization strategy that Discord4J can utilize, (it was in the docs i dunno what it does to be honest)
         playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
+        playerManager.setHttpRequestConfigurator(config ->
+        RequestConfig.copy(config)
+            .setSocketTimeout(10000)
+            .setConnectTimeout(10000)
+            .build()
+        );
         AudioSourceManagers.registerRemoteSources(playerManager); //Allows the player to receive "remote" audio sources
         final AudioPlayer player = playerManager.createPlayer(); //How Discord receives audio data
         AudioProvider provider = new LavaPlayerAudioProvider(player); //Implements LavaPlayer's audio provider in SOAP Bot
