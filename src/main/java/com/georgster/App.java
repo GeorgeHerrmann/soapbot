@@ -45,8 +45,8 @@ public class App {
         playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
         playerManager.setHttpRequestConfigurator(config ->
         RequestConfig.copy(config)
-            .setSocketTimeout(10000)
-            .setConnectTimeout(10000)
+            .setSocketTimeout(100000)
+            .setConnectTimeout(100000)
             .build()
         );
         AudioSourceManagers.registerRemoteSources(playerManager); //Allows the player to receive "remote" audio sources
