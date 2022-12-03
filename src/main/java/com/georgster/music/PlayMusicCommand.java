@@ -3,7 +3,6 @@ package com.georgster.music;
 import java.util.Arrays;
 import java.util.List;
 
-import com.georgster.App;
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;

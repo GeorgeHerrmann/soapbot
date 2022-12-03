@@ -20,7 +20,7 @@ public final class TrackScheduler implements AudioLoadResultHandler {
 
     @Override
     public void trackLoaded(final AudioTrack track) {
-        channel.createMessage("Now Playing: " + track.getIdentifier());
+        channel.createMessage("Now Playing: " + track.getIdentifier()).block();
         player.playTrack(track);
     }
 
