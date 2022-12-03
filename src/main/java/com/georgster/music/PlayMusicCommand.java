@@ -3,6 +3,7 @@ package com.georgster.music;
 import java.util.Arrays;
 import java.util.List;
 
+import com.georgster.App;
 import com.georgster.Command;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -35,12 +36,12 @@ public class PlayMusicCommand implements Command {
                 if (voiceState != null) {
                     final VoiceChannel channel = voiceState.getChannel().block();
                     if (channel != null) {
-                        channel.join()/*.withProvider(provider)*/.block();
+                        channel.join().withProvider(provider).block();
                     }
                 }
             }
-            //final TrackScheduler scheduler = new TrackScheduler(player, event.getMessage().getChannel().block());
-            //playerManager.loadItem(command.get(1), scheduler);
+            final TrackScheduler scheduler = new TrackScheduler(player, event.getMessage().getChannel().block());
+            playerManager.loadItem(command.get(1), scheduler);
         } else {
             event.getMessage().getChannel().block().createMessage(help()).block();
         }

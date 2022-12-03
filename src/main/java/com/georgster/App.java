@@ -106,7 +106,8 @@ public class App {
 
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.toLowerCase().startsWith('!' + entry.getKey())) {
-                entry.getValue().execute(event); //The execute(event) method of each Command is the entry point for logic for a command
+                runNow(() -> entry.getValue().execute(event));
+                //entry.getValue().execute(event); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }
           }
@@ -114,5 +115,18 @@ public class App {
 
         client.onDisconnect().block(); //Disconnects the bot from the server upon program termination
     }
+
+    /**
+     * Creates and immediately starts a new daemon thread that executes
+     * {@code target.run()}. This method, which may be called from any thread,
+     * will return immediately its the caller.
+     * @param target the object whose {@code run} method is invoked when this
+     *               thread is started
+     */
+    public static void runNow(Runnable target) {
+      Thread t = new Thread(target);
+      t.setDaemon(true);
+      t.start();
+  } // runNow
 
 }
