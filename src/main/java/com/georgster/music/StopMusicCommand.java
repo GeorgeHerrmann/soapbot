@@ -1,6 +1,7 @@
 package com.georgster.music;
 
 import com.georgster.Command;
+import com.georgster.api.ActionWriter;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -15,6 +16,7 @@ public class StopMusicCommand implements Command {
 
     public void execute(MessageCreateEvent event) {
         player.stopTrack();
+        ActionWriter.writeAction("Stopping audio playback in a voice channel");
     }
 
     public String help() {

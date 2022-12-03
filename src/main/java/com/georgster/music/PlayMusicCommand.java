@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.georgster.App;
 import com.georgster.Command;
+import com.georgster.api.ActionWriter;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
@@ -36,12 +37,14 @@ public class PlayMusicCommand implements Command {
                 if (voiceState != null) {
                     final VoiceChannel channel = voiceState.getChannel().block();
                     if (channel != null) {
+                        ActionWriter.writeAction("Joining a voice channel");
                         channel.join().withProvider(provider).block();
                     }
                 }
             }
             final TrackScheduler scheduler = new TrackScheduler(player, event.getMessage().getChannel().block());
             playerManager.loadItem(command.get(1), scheduler);
+            ActionWriter.writeAction("Playing audio in a discord channel");
         } else {
             event.getMessage().getChannel().block().createMessage(help()).block();
         }
