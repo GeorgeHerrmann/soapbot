@@ -20,7 +20,7 @@ public final class TrackScheduler implements AudioLoadResultHandler {
 
     @Override
     public void trackLoaded(final AudioTrack track) {
-        // LavaPlayer found an audio source for us to play
+        channel.createMessage("Now Playing: " + track.getIdentifier());
         player.playTrack(track);
     }
 
