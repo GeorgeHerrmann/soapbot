@@ -17,8 +17,6 @@ import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBu
 
 import java.util.Map;
 
-import org.apache.http.client.config.RequestConfig;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +29,9 @@ import com.georgster.profile.UserProfile;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.music.LavaPlayerAudioProvider;
 import com.georgster.music.PlayMusicCommand;
-import com.georgster.music.StopMusicCommand;
+import com.georgster.music.ShowQueueCommand;
+import com.georgster.music.SkipMusicCommand;
+import com.georgster.music.TrackScheduler;
 
 /**
  * The main class for SoapBot.
@@ -41,16 +41,15 @@ public class App {
     public static void main(String[] args) {
         /* This sets up an audio configuration so SOAP Bot can join and "speak" in channels */
         final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+
         // This is an optimization strategy that Discord4J can utilize, (it was in the docs i dunno what it does to be honest)
         playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
-        playerManager.setHttpRequestConfigurator(config ->
-        RequestConfig.copy(config)
-            .setSocketTimeout(100000)
-            .setConnectTimeout(100000)
-            .build()
-        );
+
         AudioSourceManagers.registerRemoteSources(playerManager); //Allows the player to receive "remote" audio sources
         final AudioPlayer player = playerManager.createPlayer(); //How Discord receives audio data
+
+        TrackScheduler scheduler = new TrackScheduler(player);
+
         AudioProvider provider = new LavaPlayerAudioProvider(player); //Implements LavaPlayer's audio provider in SOAP Bot
 
         /* Initial formation and login of the bot */
@@ -64,6 +63,16 @@ public class App {
         final GatewayDiscordClient client = DiscordClientBuilder.create(token).build().gateway()
         .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING, Intent.GUILD_VOICE_STATES)) //The intents the bot will work with
         .login().block();
+
+        final Map<String, Command> commands = new HashMap<>();
+        /* Hard-defined commands that SOAP Bot has access to are stored in this HashMap */
+        commands.put("ping", new PongCommand());
+        commands.put("plinko", new PlinkoCommand());
+        commands.put("help", new HelpCommand(commands));
+        commands.put("soapbot", new SoapCommand());
+        commands.put("play", new PlayMusicCommand(provider, playerManager, player, scheduler));
+        commands.put("skip", new SkipMusicCommand(player, scheduler));
+        commands.put("queue", new ShowQueueCommand(scheduler.getQueue()));
 
 
         /*
@@ -95,15 +104,7 @@ public class App {
           if (content.startsWith("!") && content.equals(content.toUpperCase())) {
             event.getMessage().getChannel().block().createMessage("Please stop yelling at me :(").block();
           }
-          final Map<String, Command> commands = new HashMap<>();
-          /* Hard-defined commands that SOAP Bot has access to are stored in this HashMap */
-          commands.put("ping", new PongCommand());
-          commands.put("plinko", new PlinkoCommand());
-          commands.put("help", new HelpCommand(commands));
-          commands.put("soapbot", new SoapCommand());
-          commands.put("play", new PlayMusicCommand(provider, playerManager, player));
-          commands.put("stop", new StopMusicCommand(player));
-
+          
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.toLowerCase().startsWith('!' + entry.getKey())) {
                 runNow(() -> entry.getValue().execute(event));
