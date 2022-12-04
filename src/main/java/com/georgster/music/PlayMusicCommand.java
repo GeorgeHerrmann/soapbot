@@ -13,17 +13,21 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.voice.AudioProvider;
+import discord4j.voice.VoiceConnection;
 
 public class PlayMusicCommand implements Command {
 
-    private AudioProvider provider;
-    private AudioPlayerManager playerManager;
-    private AudioPlayer player;
+    private final AudioProvider provider;
+    private final AudioPlayerManager playerManager;
+    private final AudioPlayer player;
+    private final TrackScheduler scheduler;
 
-    public PlayMusicCommand(AudioProvider voiceProvider, AudioPlayerManager manager, AudioPlayer musicPlayer) {
+    public PlayMusicCommand(AudioProvider voiceProvider, AudioPlayerManager manager, AudioPlayer musicPlayer, TrackScheduler scheduler) {
       provider = voiceProvider;
       playerManager = manager;
       player = musicPlayer;
+      this.scheduler = scheduler;
+      player.addListener(scheduler);
     }
 
     public void execute(MessageCreateEvent event) {
@@ -37,23 +41,25 @@ public class PlayMusicCommand implements Command {
                     final VoiceChannel channel = voiceState.getChannel().block();
                     if (channel != null) {
                         ActionWriter.writeAction("Joining a voice channel");
-                        channel.join().withProvider(provider).block();
+                        VoiceConnection connection = channel.join().withProvider(provider).block();
+                        scheduler.setChannelData(event.getMessage().getChannel().block(), connection);
+                        playerManager.loadItem(command.get(1), scheduler);
+                        ActionWriter.writeAction("Playing audio in a discord channel");
                     }
                 }
             }
-            final TrackScheduler scheduler = new TrackScheduler(player, event.getMessage().getChannel().block());
-            playerManager.loadItem(command.get(1), scheduler);
-            ActionWriter.writeAction("Playing audio in a discord channel");
         } else {
             event.getMessage().getChannel().block().createMessage(help()).block();
         }
     }
 
     public String help() {
-        return "Command: !play & !stop" +
+        return "Command: !play, !skip & !queue" +
         "\nUsage:" +
-        "\n\t!play [YOUTUBE LINK] to play audio from a YouTube Video in the voice channel you are in" +
-        "\n\t!stop to stop playing audio";
+        "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
+        "\n\t!skip to skip the current track" +
+        "\n\t!skip all to skip all tracks in the queue" +
+        "\n\t!queue to see all tracks in the queue";
     }
     
 }
