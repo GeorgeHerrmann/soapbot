@@ -77,7 +77,7 @@ public class PlinkoGame {
          *  - Asking nextIndex where the next location of the chip should be based on where it is now.
          *  - nextIndex returns the index of the x and y axis added together.
          *  - Determining where the row (or y axis) is inside of sBoard by:
-         *      -  multiplying the total number of rows by which row it is currently at
+         *      - multiplying the total number of rows by which row it is currently at
          *      - then adding the x (or column) value to that.
          *  - It edits that message after a delay of 500ms (to prevent overloading the api with edit calls), then reverts where the chip was back to the char it had before
          */
