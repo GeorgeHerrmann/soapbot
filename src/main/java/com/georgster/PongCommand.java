@@ -1,5 +1,7 @@
 package com.georgster;
 
+import com.georgster.api.ActionWriter;
+
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 
@@ -38,7 +40,7 @@ public class PongCommand implements Command {
           }
         }
         event.getMessage().getChannel().block().createMessage(fullMessage.toString()).block();
-            
+        ActionWriter.writeAction("Responding to !ping");
     }
 
     /**

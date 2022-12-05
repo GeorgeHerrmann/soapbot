@@ -1,6 +1,8 @@
 package com.georgster.plinko;
 
 import com.georgster.Command;
+import com.georgster.api.ActionWriter;
+
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
@@ -31,8 +33,10 @@ public class PlinkoCommand implements Command {
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (message.toString().startsWith("play")) {
             message.delete(message.indexOf("play"), message.indexOf("play") + 5);
+            ActionWriter.writeAction("Simulating a game of Plinko");
             game.play();
         } else if (message.toString().startsWith("board")) {
+            ActionWriter.writeAction("Showing a blank Plinko Board");
             game.showBoard();
         } else {
             event.getMessage().getChannel().block().createMessage(help()).block();

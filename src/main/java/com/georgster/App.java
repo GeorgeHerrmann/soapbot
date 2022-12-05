@@ -7,17 +7,31 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
+import discord4j.voice.AudioProvider;
+
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 
 import java.util.Map;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
+import com.georgster.api.ActionWriter;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
 import com.georgster.profile.ProfileHandler;
+import com.georgster.music.LavaPlayerAudioProvider;
+import com.georgster.music.PlayMusicCommand;
+import com.georgster.music.ShowQueueCommand;
+import com.georgster.music.SkipMusicCommand;
+import com.georgster.music.TrackScheduler;
 
 /**
  * The main class for SoapBot.
@@ -25,6 +39,19 @@ import com.georgster.profile.ProfileHandler;
 public class App {
 
     public static void main(String[] args) {
+        /* This sets up an audio configuration so SOAP Bot can join and "speak" in channels */
+        final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+
+        // This is an optimization strategy that Discord4J can utilize, (it was in the docs i dunno what it does to be honest)
+        playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
+
+        AudioSourceManagers.registerRemoteSources(playerManager); //Allows the player to receive "remote" audio sources
+        final AudioPlayer player = playerManager.createPlayer(); //How Discord receives audio data
+
+        TrackScheduler scheduler = new TrackScheduler(player);
+
+        AudioProvider provider = new LavaPlayerAudioProvider(player); //Implements LavaPlayer's audio provider in SOAP Bot
+
         /* Initial formation and login of the bot */
         String token = "";
         try {
@@ -34,8 +61,18 @@ public class App {
           System.exit(0);
         }
         final GatewayDiscordClient client = DiscordClientBuilder.create(token).build().gateway()
-        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING)) //The intents the bot will work with
+        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING, Intent.GUILD_VOICE_STATES)) //The intents the bot will work with
         .login().block();
+
+        final Map<String, Command> commands = new HashMap<>();
+        /* Hard-defined commands that SOAP Bot has access to are stored in this HashMap */
+        commands.put("ping", new PongCommand());
+        commands.put("plinko", new PlinkoCommand());
+        commands.put("help", new HelpCommand(commands));
+        commands.put("soapbot", new SoapCommand());
+        commands.put("play", new PlayMusicCommand(provider, playerManager, player, scheduler));
+        commands.put("skip", new SkipMusicCommand(player, scheduler));
+        commands.put("queue", new ShowQueueCommand(scheduler.getQueue()));
 
 
         /*
@@ -46,6 +83,7 @@ public class App {
           List<Member> members = event.getGuild().getMembers().buffer().blockFirst(); //Stores all members of the guild this event was fired from in a List
           String guild = event.getGuild().getId().asString();
           if (!ProfileHandler.serverProfileExists(guild)) {
+            ActionWriter.writeAction("Creating a profile for " + event.getGuild().getName());
             ProfileHandler.createServerProfile(guild);
           }
           for (int i = 0; i < members.size(); i++) {
@@ -66,16 +104,11 @@ public class App {
           if (content.startsWith("!") && content.equals(content.toUpperCase())) {
             event.getMessage().getChannel().block().createMessage("Please stop yelling at me :(").block();
           }
-          final Map<String, Command> commands = new HashMap<>();
-          /* Hard-defined commands that SOAP Bot has access to are stored in this HashMap */
-          commands.put("ping", new PongCommand());
-          commands.put("plinko", new PlinkoCommand());
-          commands.put("help", new HelpCommand(commands));
-          commands.put("soapbot", new SoapCommand());
-
+          
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.toLowerCase().startsWith('!' + entry.getKey())) {
-                entry.getValue().execute(event); //The execute(event) method of each Command is the entry point for logic for a command
+                runNow(() -> entry.getValue().execute(event));
+                //entry.getValue().execute(event); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }
           }
@@ -83,4 +116,18 @@ public class App {
 
         client.onDisconnect().block(); //Disconnects the bot from the server upon program termination
     }
+
+    /**
+     * Creates and immediately starts a new daemon thread that executes
+     * {@code target.run()}. This method, which may be called from any thread,
+     * will return immediately its the caller.
+     * @param target the object whose {@code run} method is invoked when this
+     *               thread is started
+     */
+    public static void runNow(Runnable target) {
+      Thread t = new Thread(target);
+      t.setDaemon(true);
+      t.start();
+  } // runNow
+
 }

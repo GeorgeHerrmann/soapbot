@@ -18,7 +18,7 @@ import java.io.FileWriter;
 public class ProfileHandler {
 
     /* Holds the location of the profiles directory */
-    static final String PROFILELOCATION = Paths.get(System.getProperty("user.dir"), "src", "main", "java", "com", "georgster", "profile", "profiles").toString();
+    private static final String PROFILELOCATION = Paths.get(System.getProperty("user.dir"), "src", "main", "java", "com", "georgster", "profile", "profiles").toString();
 
     /**
      * ProfileHandler is a utility class and does not need to be constructed.

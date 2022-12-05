@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import com.georgster.api.ActionWriter;
+
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
@@ -23,7 +25,7 @@ public class SoapCommand implements Command {
             while (myReader.hasNextLine()) {
                 version = myReader.nextLine();
                 if (version.contains("<version>")) {
-                    version = version.substring(version.indexOf("<version>") + 9, version.indexOf("<version>") + 13);
+                    version = version.substring(version.indexOf("<version>") + 9, version.indexOf("<version>") + 14);
                     break;
                 }
             }
@@ -34,6 +36,7 @@ public class SoapCommand implements Command {
             event.getMessage().getChannel().block().createMessage("Couldn't find version file").block();
             e.printStackTrace();
         }
+        ActionWriter.writeAction("Showing information about SOAP Bot");
     }
 
     /**
