@@ -28,17 +28,19 @@ public class PlinkoCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event) {
+        ActionWriter.writeAction("Having the Plinko Command parser check the contents of a !plinko command");
         StringBuilder message = new StringBuilder(event.getMessage().getContent().toLowerCase()); //This is the user's message that prompted this execution
         message.delete(message.indexOf("!plinko"), message.indexOf("!plinko") + 8);
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (message.toString().startsWith("play")) {
             message.delete(message.indexOf("play"), message.indexOf("play") + 5);
-            ActionWriter.writeAction("Simulating a game of Plinko");
+            ActionWriter.writeAction("Beginning the simulation of a plinko game");
             game.play();
         } else if (message.toString().startsWith("board")) {
             ActionWriter.writeAction("Showing a blank Plinko Board");
             game.showBoard();
         } else {
+            ActionWriter.writeAction("Showing information on how to use the plinko command");
             event.getMessage().getChannel().block().createMessage(help()).block();
         }
     }

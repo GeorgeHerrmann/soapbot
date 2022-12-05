@@ -28,6 +28,7 @@ public class HelpCommand implements Command {
         StringBuilder message = new StringBuilder(event.getMessage().getContent().toLowerCase());
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
         message.delete(message.indexOf("!help"), message.indexOf("!help") + 6);
+        ActionWriter.writeAction("Having the HelpCommand parser parse the contents of a !help command request");
         for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (message.toString().startsWith(entry.getKey())) {
                 response = new StringBuilder(entry.getValue().help());
@@ -36,8 +37,8 @@ public class HelpCommand implements Command {
                 response.append(entry.getKey() + " ");
             }
         }
+        ActionWriter.writeAction("Responding to a !help command request");
         event.getMessage().getChannel().block().createMessage(response.toString()).block();
-        ActionWriter.writeAction("Executing the Help Command");
     }
 
     /**

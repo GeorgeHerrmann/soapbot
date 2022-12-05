@@ -3,6 +3,7 @@ package com.georgster.music;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
+import com.georgster.api.ActionWriter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -26,6 +27,7 @@ public class ShowQueueCommand implements Command {
             }
             x++;
         }
+        ActionWriter.writeAction("Showing the current audio track queue");
         event.getMessage().getChannel().block().createMessage(response.toString()).block();
     }
 

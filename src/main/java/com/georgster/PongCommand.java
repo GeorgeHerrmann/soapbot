@@ -33,14 +33,17 @@ public class PongCommand implements Command {
         Message message = event.getMessage();
         StringBuilder userMessage = new StringBuilder(message.getContent().toLowerCase());
         StringBuilder fullMessage = new StringBuilder();
+        ActionWriter.writeAction("Having the pong command parser check the contents of a !ping command");
+        int counter = 0;
         for (int i = 0; i < userMessage.length(); i++) {
           if (userMessage.toString().contains(msg)) {
             userMessage.delete(userMessage.indexOf(msg), userMessage.indexOf(msg) + 4);
             fullMessage.append("pong!");
+            counter++;
           }
         }
+        ActionWriter.writeAction("Responding to a !ping command request with " + counter + " pongs");
         event.getMessage().getChannel().block().createMessage(fullMessage.toString()).block();
-        ActionWriter.writeAction("Responding to !ping");
     }
 
     /**

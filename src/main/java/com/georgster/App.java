@@ -39,6 +39,7 @@ import com.georgster.music.TrackScheduler;
 public class App {
 
     public static void main(String[] args) {
+        ActionWriter.writeAction("Setting up SOAP Bot's audio interface");
         /* This sets up an audio configuration so SOAP Bot can join and "speak" in channels */
         final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
 
@@ -53,6 +54,7 @@ public class App {
         AudioProvider provider = new LavaPlayerAudioProvider(player); //Implements LavaPlayer's audio provider in SOAP Bot
 
         /* Initial formation and login of the bot */
+        ActionWriter.writeAction("Logging SOAP Bot into Discord");
         String token = "";
         try {
           token = Files.readString( Path.of(System.getProperty("user.dir"), "key.txt") );
@@ -64,6 +66,7 @@ public class App {
         .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES, Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING, Intent.GUILD_VOICE_STATES)) //The intents the bot will work with
         .login().block();
 
+        ActionWriter.writeAction("Defining SOAP Bot's commands map");
         final Map<String, Command> commands = new HashMap<>();
         /* Hard-defined commands that SOAP Bot has access to are stored in this HashMap */
         commands.put("ping", new PongCommand());
@@ -80,6 +83,7 @@ public class App {
          * It is here that we use the Profile Handler to generate a profile for a guild and its members if one doesn't exist yet.
          */
         client.getEventDispatcher().on(GuildCreateEvent.class).subscribe(event -> { //Subscribing to an event meant SOAP Bot is now "listening" for these events
+          ActionWriter.writeAction("Logging in to server: " + event.getGuild().getName());
           List<Member> members = event.getGuild().getMembers().buffer().blockFirst(); //Stores all members of the guild this event was fired from in a List
           String guild = event.getGuild().getId().asString();
           if (!ProfileHandler.serverProfileExists(guild)) {
@@ -91,6 +95,7 @@ public class App {
             if (!ProfileHandler.userProfileExists(member, guild)) {
               ProfileHandler.createUserProfile(member, guild);
             }
+            ActionWriter.writeAction("Updating user profile number " + i + " in " + event.getGuild().getName());
             ProfileHandler.updateUserProfile(new UserProfile(guild, member, members.get(i).getUsername()));
           }
         });
@@ -100,21 +105,24 @@ public class App {
          * Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid.
          */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
+          ActionWriter.writeAction("Parsing the contents of a message sent in a server");
           final String content = event.getMessage().getContent();
           if (content.startsWith("!") && content.equals(content.toUpperCase())) {
+            ActionWriter.writeAction("Getting yelled at");
             event.getMessage().getChannel().block().createMessage("Please stop yelling at me :(").block();
           }
           
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.toLowerCase().startsWith('!' + entry.getKey())) {
-                runNow(() -> entry.getValue().execute(event));
-                //entry.getValue().execute(event); //The execute(event) method of each Command is the entry point for logic for a command
+                ActionWriter.writeAction("Placing the " + entry.getKey() + " command on a new Daemon thread and executing it");
+                runNow(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }
           }
         });
 
         client.onDisconnect().block(); //Disconnects the bot from the server upon program termination
+        ActionWriter.writeAction("Logging off and shutting down");
     }
 
     /**

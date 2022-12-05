@@ -26,7 +26,7 @@ public class SkipMusicCommand implements Command {
                 event.getMessage().getChannel().block().createMessage("Skipping the currently playing track").block();
             }
             player.stopTrack();
-            ActionWriter.writeAction("Skipping the currently playing track in a voice channel");
+            ActionWriter.writeAction("Skipping one or more tracks in a voice channel");
         }
     }
 

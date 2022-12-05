@@ -8,6 +8,8 @@ import discord4j.core.object.entity.Message;
 import java.time.Duration;
 import java.util.Random;
 
+import com.georgster.api.ActionWriter;
+
 /**
  * A PlinkoGame represents a game of plinko that is created on a "!plinko play:" command.
  * Each PlinkoGame is associated with the following:
@@ -55,6 +57,7 @@ public class PlinkoGame {
      * Simulates the {@code PlinkoGame} inside the {@code Channel} it was started.
      */
     protected void play() {
+        ActionWriter.writeAction("Beginning setup of a PlinkoGame");
         int spot = rand.nextInt(2,14); //Initially, spot randomly generates the first location for the Plinko chip
 
         /* sBoard will be used to hold the string representation of the plinko game, which will be used for the API call */
@@ -85,9 +88,11 @@ public class PlinkoGame {
             spot = nextIndex(i, spot - (i - 1));
             sBoard.setCharAt(spot + (i * board[i].length), '0'); //Note we don't multiply by board[i].length - 1 because we must include the \n character inside sBoard
             message.edit().withContentOrNull(sBoard.toString()).delayElement(Duration.ofMillis(500)).block();
+            ActionWriter.writeAction("Updating the Plinko Board in a plinko game and sending the request to Discord's API");
             if (i != board.length - 1) { //We want to keep the chip in the final spot once the game is over
                 sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " "); //Easy way to find where the chip is in sBoard
             } else {
+                ActionWriter.writeAction("Determining the reward for a Plinko Game");
                 getReward(spot);
             }
         }
@@ -102,6 +107,7 @@ public class PlinkoGame {
      * @return The index of where the chip should be in the next iteration of the game.
      */
     private int nextIndex(int first, int second) {
+        ActionWriter.writeAction("Calculating the next location of the Plinko Chip in a Plinko Game");
         if (second > board.length - 3) second -= 3; //On the off chance the chip goes out of bounds, this pulls it back within the scope of the board
         int nextIndex = second; //nextIndex is what will ultimately hold the next location of the chip throughout this method
         if (first == board.length - 1) { //This means we're at the end of the game and must determine which "hole" the chip should go into
