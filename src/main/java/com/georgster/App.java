@@ -105,7 +105,6 @@ public class App {
          * Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid.
          */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
-          ActionWriter.writeAction("Parsing the contents of a message sent in a server");
           final String content = event.getMessage().getContent();
           if (content.startsWith("!") && content.equals(content.toUpperCase())) {
             ActionWriter.writeAction("Getting yelled at");
