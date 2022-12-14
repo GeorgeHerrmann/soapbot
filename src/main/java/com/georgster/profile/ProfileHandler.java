@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
+
+import com.georgster.reserve.ReserveEvent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 
 import java.io.FileWriter;
 
@@ -79,6 +82,14 @@ public class ProfileHandler {
     public static void createServerProfile(String id) {
         File profile = new File(Paths.get(PROFILELOCATION, id).toString());
         profile.mkdir();
+        profile = new File(Paths.get(PROFILELOCATION, id, "events.json").toString());
+        try {
+            if (!profile.createNewFile()) {
+                throw new IOException();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         profile = new File(Paths.get(PROFILELOCATION, id, "users").toString());
         profile.mkdir();
     }
@@ -90,6 +101,97 @@ public class ProfileHandler {
      * @return true if the profile exists already, false otherwise.
      */
     public static boolean serverProfileExists(String id) {
-        return Files.exists(Paths.get(PROFILELOCATION, id), LinkOption.NOFOLLOW_LINKS);
+        return (Files.exists(Paths.get(PROFILELOCATION, id), LinkOption.NOFOLLOW_LINKS)) //Checks if the server profile directory exists
+        && (Files.exists(Paths.get(PROFILELOCATION, id, "events.json"), LinkOption.NOFOLLOW_LINKS)) //Checks if the events.json file exists
+        && (Files.exists(Paths.get(PROFILELOCATION, id, "users"), LinkOption.NOFOLLOW_LINKS)); //Checks if the users directory exists
     }
+
+    /**
+     * Adds an event to the server's event list.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @param event the {@code ReserveEvent} object to be added to the server's event list.
+     */
+    public static void addEvent(String id, ReserveEvent event) {
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
+        if (serverProfileExists(id)) {
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString(), true)) {
+                writer.write(parser.toJson(event));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Checks if an event is already in the server's event list.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @param event the {@code ReserveEvent} object to be checked against the server's event list.
+     * @return true if the event is already in the server's event list, false otherwise.
+     */
+    public static boolean checkEventDuplicates(String id, ReserveEvent event) {
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
+        String eventJson = "";
+        if (serverProfileExists(id)) {
+            JsonElement element = parser.toJsonTree(event);
+            if (element.isJsonObject()) {
+                eventJson = element.getAsJsonObject().get("identifier").getAsString();
+                try {
+                    String events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
+                    if (events.contains(": \"" + eventJson + "\"")) { //If the provided ReserveEvent is in the file, return true
+                        return true;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false; //If any
+    }
+
+    /**
+     * Makes a ReserveEvent object from the server's event list.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @param eventIdentifier the identifier of the event to be pulled from the server's event list.
+     * @return the {@code ReserveEvent} object that was pulled from the server's event list.
+     */
+    public static ReserveEvent pullEvent(String id, String eventIdentifier) {
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
+        if (serverProfileExists(id)) {
+            try {
+                String events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
+                if (events.contains(": \"" + eventIdentifier + "\"")) { //If the provided ReserveEvent is in the file
+                    events = events.substring(events.indexOf();
+                    return parser.fromJson(events, ReserveEvent.class);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Removes an event from the server's event list.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @param event the {@code ReserveEvent} object to be removed from the server's event list.
+     */
+    public static void removeEvent(String id, ReserveEvent event) {
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
+        if (serverProfileExists(id)) {
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString())) {
+                String events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
+                if (events.contains(": \"" + event.getIdentifier() + "\"")) { //If the provided ReserveEvent is in the file
+                    events = events.replace(parser.toJson(event), ""); //Remove the event from the file
+                    writer.write(events);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
