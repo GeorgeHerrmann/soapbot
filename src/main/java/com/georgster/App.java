@@ -24,8 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.georgster.api.ActionWriter;
+import com.georgster.dm.MessageCommand;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
+import com.georgster.reserve.ReserveCommand;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.music.LavaPlayerAudioProvider;
 import com.georgster.music.PlayMusicCommand;
@@ -76,6 +78,8 @@ public class App {
         commands.put("play", new PlayMusicCommand(provider, playerManager, player, scheduler));
         commands.put("skip", new SkipMusicCommand(player, scheduler));
         commands.put("queue", new ShowQueueCommand(scheduler.getQueue()));
+        commands.put("dm", new MessageCommand());
+        commands.put("reserve", new ReserveCommand());
 
 
         /*

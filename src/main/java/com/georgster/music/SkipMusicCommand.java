@@ -6,16 +6,30 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
+/**
+ * Represents the bot's actions following the !skip command.
+ */
 public class SkipMusicCommand implements Command {
 
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
 
+    /**
+     * Will skip the currently playing track or all tracks in the queue.
+     * 
+     * @param player
+     * @param scheduler
+     */
     public SkipMusicCommand(AudioPlayer player, TrackScheduler scheduler) {
         this.player = player;
         this.scheduler = scheduler;
     }
 
+    /**
+     * Will skip the currently playing track or all tracks in the queue.
+     * 
+     * @param event the event that triggered the command
+     */
     public void execute(MessageCreateEvent event) {
         if (scheduler.isActive()) {
             String message = event.getMessage().getContent();
@@ -30,6 +44,9 @@ public class SkipMusicCommand implements Command {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !play, !skip & !queue" +
         "\nUsage:" +

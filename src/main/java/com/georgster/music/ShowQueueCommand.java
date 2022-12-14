@@ -8,14 +8,27 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
+/**
+ * Represents the bot's actions following the !queue command.
+ */
 public class ShowQueueCommand implements Command {
 
     private LinkedBlockingQueue<AudioTrack> queue;
 
+    /**
+     * Will show the current queue of audio tracks.
+     * 
+     * @param queue the quque held in the TrackScheduler
+     */
     public ShowQueueCommand(LinkedBlockingQueue<AudioTrack> queue) {
         this.queue = queue;
     }
 
+    /**
+     * Will show the current queue of audio tracks.
+     * 
+     * @param execute the event that triggered the command
+     */
     public void execute(MessageCreateEvent event) {
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;
@@ -31,6 +44,9 @@ public class ShowQueueCommand implements Command {
         event.getMessage().getChannel().block().createMessage(response.toString()).block();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !play, !skip & !queue" +
         "\nUsage:" +

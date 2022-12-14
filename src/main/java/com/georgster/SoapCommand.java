@@ -47,4 +47,5 @@ public class SoapCommand implements Command {
         return "Command: !soapbot " +
         "\nGives information about SOAP Bot";
     }
+
 }
