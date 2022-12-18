@@ -11,18 +11,36 @@ public class ReserveEvent {
     private int numPeople;
     private int numReserved;
     private String time;
+    private String channel;
     
+    /**
+     * Constructs a ReserveEvent object with an identifier, number of people, number of people reserved, and time.
+     * 
+     * @param identifier the name of the event
+     * @param numPeople the number of people needed to start the event
+     * @param numReserved the number of people that have reserved for the event
+     * @param time the time the event will start
+     */
+    public ReserveEvent(String identifier, int numPeople, int numReserved, String time, String channel) {
+        this.identifier = identifier;
+        this.numPeople = numPeople;
+        this.numReserved = numReserved;
+        this.time = time;
+        this.channel = channel;
+    }
+
     /**
      * Constructs a ReserveEvent object with an identifier, number of people, and time.
      * @param identifier the name of the event
      * @param numPeople the number of people needed to start the event
      * @param time the time the event will start
      */
-    public ReserveEvent(String identifier, int numPeople, String time) {
+    public ReserveEvent(String identifier, int numPeople, String time, String channel) {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.time = time;
-        numReserved = 1;
+        this.numReserved = 1;
+        this.channel = channel;
     }
 
     /**
@@ -30,9 +48,26 @@ public class ReserveEvent {
      * @param identifier the name of the event
      * @param numPeople the number of people needed to start the event
      */
-    public ReserveEvent(String identifier, int numPeople) {
+    public ReserveEvent(String identifier, int numPeople, String channel) {
         this.identifier = identifier;
         this.numPeople = numPeople;
+        this.numReserved = 1;
+        this.time = "00:00";
+        this.channel = channel;
+    }
+
+    /**
+     * Constructs a ReserveEvent object with an identifier and time.
+     * 
+     * @param identifier the name of the event
+     * @param time the time the event will start
+     */
+    public ReserveEvent(String identifier, String time, String channel) {
+        this.identifier = identifier;
+        this.time = time;
+        this.numPeople = 9999;
+        this.numReserved = 1;
+        this.channel = channel;
     }
 
     /**
@@ -79,12 +114,39 @@ public class ReserveEvent {
     }
 
     /**
+     * Returns the channel the event was created in.
+     * 
+     * @return the channel the event was created in
+     */
+    public String getChannel() {
+        return channel;
+    }
+
+    /**
      * Returns true if the event is full, false otherwise.
      * 
      * @return true if the event is full, false otherwise
      */
     public boolean isFull() {
         return numReserved >= numPeople;
+    }
+
+    /**
+     * Returns true if the event has no time, false otherwise.
+     * 
+     * @return true if the event has no time, false otherwise
+     */
+    public boolean isTimeless() {
+        return time.equals("00:00");
+    }
+
+    /**
+     * Returns true if the event has no player cap, false otherwise.
+     * 
+     * @return true if the event has no player cap, false otherwise
+     */
+    public boolean isUnlimited() {
+        return numPeople == 9999;
     }
 
 }

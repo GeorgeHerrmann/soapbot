@@ -4,6 +4,8 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Timer;
 
+import com.georgster.profile.ProfileHandler;
+
 import discord4j.core.object.entity.channel.MessageChannel;
 
 /**
@@ -25,10 +27,33 @@ public class ReserveEventHandler {
      * @param event the event to be scheduled
      * @param channel the channel to send the event to
      */
-    protected static void scheduleEvent(ReserveEvent event, MessageChannel channel) {
-        LocalTime eventTime = LocalTime.parse(event.getTime());
-        long seconds = (LocalTime.now().until(eventTime, ChronoUnit.SECONDS)) * 1000;
-        new Timer().schedule(new ReserveEventTask(event, channel), seconds);
+    protected static void scheduleEvent(ReserveEvent event, MessageChannel channel, String id) {
+        if (event.isTimeless()) {
+            validateTimelessEvent(event, id);
+            ReserveEventTask task = new ReserveEventTask(event, channel, id);
+            task.run();
+        } else {
+            LocalTime eventTime = LocalTime.parse(event.getTime());
+            long seconds = (LocalTime.now().until(eventTime, ChronoUnit.SECONDS)) * 1000;
+            new Timer().schedule(new ReserveEventTask(event, channel, id), seconds);
+        }
+    }
+
+    protected static void restartEvents(String id, MessageChannel channel) {
+        for (ReserveEvent event : ProfileHandler.getEvents(id)) {
+            scheduleEvent(event, channel, id);
+        }
+    }
+
+    private static void validateTimelessEvent(ReserveEvent event, String id) {
+        while (!ProfileHandler.pullEvent(id, event.getIdentifier()).isFull()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+        }
     }
 
 

@@ -103,7 +103,6 @@ public class App {
             ProfileHandler.updateUserProfile(new UserProfile(guild, member, members.get(i).getUsername()));
           }
         });
-
         /* 
          * A MessageCreateEvent is fired each time a message is sent in a server and channel SOAP Bot has access to.
          * Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid.

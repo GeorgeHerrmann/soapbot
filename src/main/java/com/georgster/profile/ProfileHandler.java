@@ -1,15 +1,21 @@
 package com.georgster.profile;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.georgster.reserve.ReserveEvent;
+import com.georgster.reserve.ReserveEventHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.stream.JsonReader;
 
 import java.io.FileWriter;
 
@@ -158,13 +164,36 @@ public class ProfileHandler {
      * @return the {@code ReserveEvent} object that was pulled from the server's event list.
      */
     public static ReserveEvent pullEvent(String id, String eventIdentifier) {
-        Gson parser = new GsonBuilder().setPrettyPrinting().create();
         if (serverProfileExists(id)) {
-            try {
-                String events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
-                if (events.contains(": \"" + eventIdentifier + "\"")) { //If the provided ReserveEvent is in the file
-                    events = events.substring(events.indexOf();
-                    return parser.fromJson(events, ReserveEvent.class);
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    int numPeople = 0;
+                    int numReserved = 0;
+                    String time = "";
+                    String name = reader.nextName();
+                    String identifier = reader.nextString();
+                    if (name.equals("identifier") && identifier.equals(eventIdentifier)) {
+                        if (reader.nextName().equals("numPeople")) {
+                            numPeople = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("numReserved")) {
+                            numReserved = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("time")) {
+                            time = reader.nextString();
+                        }
+                        return new ReserveEvent(identifier, numPeople, numReserved, time);
+                    } else {
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                    }
+                    reader.endObject();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -182,16 +211,70 @@ public class ProfileHandler {
     public static void removeEvent(String id, ReserveEvent event) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
         if (serverProfileExists(id)) {
+            String events = "";
+            try {
+                events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString())) {
-                String events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
-                if (events.contains(": \"" + event.getIdentifier() + "\"")) { //If the provided ReserveEvent is in the file
-                    events = events.replace(parser.toJson(event), ""); //Remove the event from the file
-                    writer.write(events);
-                }
+                events = events.replace(parser.toJson(event), ""); //Remove the event from the file
+                writer.write(events);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    public static boolean eventExists(String id, String identifier) {
+        if (serverProfileExists(id)) {
+            try  {
+                String contents = Files.readString(Path.of(PROFILELOCATION, id, "events.json"));
+                return contents.contains(": \"" + identifier + "\"");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public static List<ReserveEvent> getEvents(String id) {
+        List<ReserveEvent> events = new ArrayList<>();
+        if (serverProfileExists(id)) {
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    int numPeople = 0;
+                    int numReserved = 0;
+                    String time = "";
+                    String name = reader.nextName();
+                    String identifier = reader.nextString();
+                    if (name.equals("identifier")) {
+                        if (reader.nextName().equals("numPeople")) {
+                            numPeople = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("numReserved")) {
+                            numReserved = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("time")) {
+                            time = reader.nextString();
+                        }
+                        events.add(new ReserveEvent(identifier, numPeople, numReserved, time));
+                    } else {
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                    }
+                    reader.endObject();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return events;
+    }
 }
