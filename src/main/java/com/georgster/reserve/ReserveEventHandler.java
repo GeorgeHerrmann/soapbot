@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Timer;
 
 import com.georgster.profile.ProfileHandler;
+import com.georgster.util.SoapGeneralHandler;
 
 import discord4j.core.object.entity.channel.MessageChannel;
 
@@ -39,7 +40,7 @@ public class ReserveEventHandler {
         }
     }
 
-    protected static void restartEvents(String id, MessageChannel channel) {
+    public static void restartEvent(String id, MessageChannel channel) {
         for (ReserveEvent event : ProfileHandler.getEvents(id)) {
             scheduleEvent(event, channel, id);
         }

@@ -3,11 +3,12 @@ package com.georgster.reserve;
 import java.util.Arrays;
 import java.util.List;
 
-import com.georgster.App;
 import com.georgster.Command;
 import com.georgster.profile.ProfileHandler;
+import com.georgster.util.SoapGeneralHandler;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.channel.TextChannel;
 
 /*
  * !reserve "name" "playercount" "time" (optional)
@@ -21,20 +22,30 @@ public class ReserveCommand implements Command {
             return;
         }
         try {
-            ReserveEvent reserve = assignCorrectCommand(message, event.getGuild().block().getId().asString());
+            TextChannel channel = (TextChannel) event.getMessage().getChannel().block();
+            ReserveEvent reserve = assignCorrectCommand(message, event.getGuild().block().getId().asString(), channel.getName());
 
             if (ProfileHandler.checkEventDuplicates(event.getGuild().block().getId().asString(), reserve)) {
                 if (!reserve.isFull()) {
-                    ProfileHandler.removeEvent(event.getGuild().block().getId().asString(), reserve);
-                    reserve.addReserved();
-                    ProfileHandler.addEvent(event.getGuild().block().getId().asString(), reserve);
-                    event.getMessage().getChannel().block().createMessage("Number of people reserved to event " + reserve.getIdentifier() + ": " + reserve.getReserved() + "/" + reserve.getNumPeople()).block();
+                    event.getMessage().getAuthor().ifPresent(user -> {
+                        if (reserve.alreadyReserved(user.getTag())) {
+                            event.getMessage().getChannel().block().createMessage("You have already reserved for this event").block();
+                        } else {
+                            reserve.addReservedUser(user.getTag());
+                            ProfileHandler.removeEvent(event.getGuild().block().getId().asString(), reserve);
+                            reserve.addReserved();
+                            reserve.addReservedUser(user.getTag());
+                            ProfileHandler.addEvent(event.getGuild().block().getId().asString(), reserve);
+                            event.getMessage().getChannel().block().createMessage("Number of people reserved to event " + reserve.getIdentifier() + ": " + reserve.getReserved() + "/" + reserve.getNumPeople()).block();
+                        }
+                    });
                 } else {
                     event.getMessage().getChannel().block().createMessage("Event " + reserve.getIdentifier() + " is full").block();
                 }
             } else {
+                event.getMessage().getAuthor().ifPresent(user -> reserve.addReservedUser(user.getTag()));
                 ProfileHandler.addEvent(event.getGuild().block().getId().asString(), reserve);
-                App.runNow(() -> ReserveEventHandler.scheduleEvent(reserve, event.getMessage().getChannel().block(), event.getGuild().block().getId().asString()));
+                SoapGeneralHandler.runDaemon(() -> ReserveEventHandler.scheduleEvent(reserve, event.getMessage().getChannel().block(), event.getGuild().block().getId().asString()));
                 String messageString = "";
                 if (reserve.isTimeless()) {
                     messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getNumPeople() + " spots available!";
@@ -51,7 +62,7 @@ public class ReserveCommand implements Command {
 
     }
 
-    private ReserveEvent assignCorrectCommand(List<String> message, String id) throws IllegalArgumentException {
+    private ReserveEvent assignCorrectCommand(List<String> message, String id, String channelName) throws IllegalArgumentException {
 
         if (message.size() == 2) {
             if (ProfileHandler.eventExists(id, message.get(1))) {
@@ -59,12 +70,12 @@ public class ReserveCommand implements Command {
             }
         } else if (message.size() == 3) {
             try {
-                return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)));
+                return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), channelName);
             } catch (NumberFormatException e) {
-                return new ReserveEvent(message.get(1), message.get(2));
+                return new ReserveEvent(message.get(1), message.get(2), channelName);
             }
         } else if (message.size() == 4) {
-            return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), message.get(3));
+            return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), message.get(3), channelName);
         }
         throw new IllegalArgumentException("Incorrect Reserve Event Format");
     }

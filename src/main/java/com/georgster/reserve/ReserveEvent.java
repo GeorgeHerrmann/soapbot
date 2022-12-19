@@ -1,5 +1,7 @@
 package com.georgster.reserve;
 
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A ReserveEvent object is created when a user uses the !reserve command
@@ -12,6 +14,7 @@ public class ReserveEvent {
     private int numReserved;
     private String time;
     private String channel;
+    private List<String> reservedUsers;
     
     /**
      * Constructs a ReserveEvent object with an identifier, number of people, number of people reserved, and time.
@@ -21,12 +24,13 @@ public class ReserveEvent {
      * @param numReserved the number of people that have reserved for the event
      * @param time the time the event will start
      */
-    public ReserveEvent(String identifier, int numPeople, int numReserved, String time, String channel) {
+    public ReserveEvent(String identifier, int numPeople, int numReserved, String time, String channel, List<String> reservedUsers) {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.numReserved = numReserved;
         this.time = time;
         this.channel = channel;
+        this.reservedUsers = reservedUsers;
     }
 
     /**
@@ -41,6 +45,7 @@ public class ReserveEvent {
         this.time = time;
         this.numReserved = 1;
         this.channel = channel;
+        reservedUsers = new ArrayList<>();
     }
 
     /**
@@ -54,6 +59,7 @@ public class ReserveEvent {
         this.numReserved = 1;
         this.time = "00:00";
         this.channel = channel;
+        reservedUsers = new ArrayList<>();
     }
 
     /**
@@ -68,6 +74,7 @@ public class ReserveEvent {
         this.numPeople = 9999;
         this.numReserved = 1;
         this.channel = channel;
+        reservedUsers = new ArrayList<>();
     }
 
     /**
@@ -84,6 +91,15 @@ public class ReserveEvent {
      */
     public void addReserved() {
         numReserved++;
+    }
+
+    /**
+     * Adds a person to the number of people that have reserved for the event.
+     * 
+     * @param user the user to add
+     */
+    public void addReservedUser(String user) {
+        reservedUsers.add(user);
     }
 
     /**
@@ -122,6 +138,10 @@ public class ReserveEvent {
         return channel;
     }
 
+    public List<String> getReservedUsers() {
+        return reservedUsers;
+    }
+
     /**
      * Returns true if the event is full, false otherwise.
      * 
@@ -147,6 +167,16 @@ public class ReserveEvent {
      */
     public boolean isUnlimited() {
         return numPeople == 9999;
+    }
+
+    /**
+     * Returns true if the user has already reserved for the event, false otherwise.
+     * 
+     * @param user the user to check
+     * @return true if the user has already reserved for the event, false otherwise
+     */
+    public boolean alreadyReserved(String user) {
+        return reservedUsers.contains(user);
     }
 
 }

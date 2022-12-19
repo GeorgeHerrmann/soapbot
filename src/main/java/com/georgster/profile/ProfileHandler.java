@@ -171,6 +171,8 @@ public class ProfileHandler {
                     reader.beginObject();
                     int numPeople = 0;
                     int numReserved = 0;
+                    String channel = "";
+                    List<String> reservedUsers = new ArrayList<>();
                     String time = "";
                     String name = reader.nextName();
                     String identifier = reader.nextString();
@@ -184,8 +186,22 @@ public class ProfileHandler {
                         if (reader.nextName().equals("time")) {
                             time = reader.nextString();
                         }
-                        return new ReserveEvent(identifier, numPeople, numReserved, time);
+                        if (reader.nextName().equals("channel")) {
+                            channel = reader.nextString();
+                        }
+                        if (reader.nextName().equals("reservedUsers")) {
+                            reader.beginArray();
+                            while (reader.hasNext()) {
+                                reservedUsers.add(reader.nextString());
+                            }
+                            reader.endArray();
+                        }
+                        return new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers);
                     } else {
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
                         reader.skipValue();
                         reader.skipValue();
                         reader.skipValue();
@@ -245,8 +261,10 @@ public class ProfileHandler {
                 reader.setLenient(true);
                 while (reader.hasNext()) {
                     reader.beginObject();
+                    List<String> reservedUsers = new ArrayList<>();
                     int numPeople = 0;
                     int numReserved = 0;
+                    String channel = "";
                     String time = "";
                     String name = reader.nextName();
                     String identifier = reader.nextString();
@@ -260,8 +278,22 @@ public class ProfileHandler {
                         if (reader.nextName().equals("time")) {
                             time = reader.nextString();
                         }
-                        events.add(new ReserveEvent(identifier, numPeople, numReserved, time));
+                        if (reader.nextName().equals("channel")) {
+                            channel = reader.nextString();
+                        }
+                        if (reader.nextName().equals("reservedUsers")) {
+                            reader.beginArray();
+                            while (reader.hasNext()) {
+                                reservedUsers.add(reader.nextString());
+                            }
+                            reader.endArray();
+                        }
+                        events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers));
                     } else {
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
+                        reader.skipValue();
                         reader.skipValue();
                         reader.skipValue();
                         reader.skipValue();

@@ -20,8 +20,12 @@ public class ReserveEventTask extends TimerTask {
 
     @Override
     public void run() {
-       channel.createMessage("Event " + event.getIdentifier() + " has started!\n" +
-       "\t- " + ProfileHandler.pullEvent(id, event.getIdentifier()).getReserved() + "/" + event.getNumPeople() + " people reserved to this event").block();
+        StringBuilder response = new StringBuilder("Event " + event.getIdentifier() + " has started!\n" +
+        "\t- " + ProfileHandler.pullEvent(id, event.getIdentifier()).getReserved() + "/" + event.getNumPeople() + " reserved with the following people:");
+        for (String name : ProfileHandler.pullEvent(id, event.getIdentifier()).getReservedUsers()) {
+            response.append("\n\t\t- " + name);
+        }
+       channel.createMessage(response.toString()).block();
        ProfileHandler.removeEvent(id, ProfileHandler.pullEvent(id, event.getIdentifier()));
     }
 
