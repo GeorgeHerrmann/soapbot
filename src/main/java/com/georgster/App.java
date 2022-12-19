@@ -5,6 +5,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
 import discord4j.voice.AudioProvider;
@@ -28,6 +30,9 @@ import com.georgster.dm.MessageCommand;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
 import com.georgster.reserve.ReserveCommand;
+import com.georgster.reserve.ReserveEvent;
+import com.georgster.reserve.ReserveEventHandler;
+import com.georgster.util.SoapGeneralHandler;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.music.LavaPlayerAudioProvider;
 import com.georgster.music.PlayMusicCommand;
@@ -87,9 +92,13 @@ public class App {
          * It is here that we use the Profile Handler to generate a profile for a guild and its members if one doesn't exist yet.
          */
         client.getEventDispatcher().on(GuildCreateEvent.class).subscribe(event -> { //Subscribing to an event meant SOAP Bot is now "listening" for these events
+          String guild = event.getGuild().getId().asString();
+          List<GuildChannel> channels = event.getGuild().getChannels().buffer().blockFirst();
+          for (ReserveEvent reserve : ProfileHandler.getEvents(guild)) {
+            ReserveEventHandler.restartEvent(guild, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels));
+          }
           ActionWriter.writeAction("Logging in to server: " + event.getGuild().getName());
           List<Member> members = event.getGuild().getMembers().buffer().blockFirst(); //Stores all members of the guild this event was fired from in a List
-          String guild = event.getGuild().getId().asString();
           if (!ProfileHandler.serverProfileExists(guild)) {
             ActionWriter.writeAction("Creating a profile for " + event.getGuild().getName());
             ProfileHandler.createServerProfile(guild);
@@ -117,7 +126,7 @@ public class App {
           for (final Map.Entry<String, Command> entry : commands.entrySet()) {
             if (content.toLowerCase().startsWith('!' + entry.getKey())) {
                 ActionWriter.writeAction("Placing the " + entry.getKey() + " command on a new Daemon thread and executing it");
-                runNow(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
+                SoapGeneralHandler.runDaemon(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }
           }
@@ -126,18 +135,5 @@ public class App {
         client.onDisconnect().block(); //Disconnects the bot from the server upon program termination
         ActionWriter.writeAction("Logging off and shutting down");
     }
-
-    /**
-     * Creates and immediately starts a new daemon thread that executes
-     * {@code target.run()}. This method, which may be called from any thread,
-     * will return immediately its the caller.
-     * @param target the object whose {@code run} method is invoked when this
-     *               thread is started
-     */
-    public static void runNow(Runnable target) {
-      Thread t = new Thread(target);
-      t.setDaemon(true);
-      t.start();
-  } // runNow
 
 }
