@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.api.ActionWriter;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.util.SoapGeneralHandler;
 import com.google.gson.Gson;
@@ -11,18 +12,20 @@ import com.google.gson.JsonObject;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
+/**
+ * Represents the command for managing events.
+ */
 public class EventCommand implements Command {
 
-/*
- * !event list for all events
- * !event "name" for a specific event
- * !event unreserve "name" to unreserve from an event
- */
+    /**
+     * {@inheritDoc}
+     */
     public void execute(MessageCreateEvent event) {
         List<String> message = Arrays.asList(event.getMessage().getContent().split(" "));
         try {
             String id = event.getGuild().block().getId().asString();
             if (message.get(1).equals("list")) {
+                ActionWriter.writeAction("Showing all events in a text channel");
                 StringBuilder response = new StringBuilder();
                 if (ProfileHandler.areEvents(id)) {
                     for (ReserveEvent reserve : ProfileHandler.getEvents(id)) {
@@ -39,6 +42,7 @@ public class EventCommand implements Command {
                     SoapGeneralHandler.sendTextMessageInChannel("There are no events currently active", event.getMessage().getChannel().block());
                 }
             } else if (message.get(1).equals("unreserve")) {
+                ActionWriter.writeAction("Unreserving a user from an event");
                 if (ProfileHandler.eventExists(id, message.get(2))) {
                     for (ReserveEvent reserve: ProfileHandler.getEvents(id)) {
                         if (reserve.getIdentifier().equals(message.get(2))) {
@@ -58,6 +62,7 @@ public class EventCommand implements Command {
                 }
             } else {
                 if (ProfileHandler.eventExists(id, message.get(1))) {
+                    ActionWriter.writeAction("Showing information about a specific event");
                     Gson parser = new Gson();
                     ReserveEvent reserve = ProfileHandler.pullEvent(id, message.get(1));
                     JsonObject reserveObject = parser.toJsonTree(reserve).getAsJsonObject();
@@ -86,6 +91,9 @@ public class EventCommand implements Command {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !events" +
         "\nUsage:" +

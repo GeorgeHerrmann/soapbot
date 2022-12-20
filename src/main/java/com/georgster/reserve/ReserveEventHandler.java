@@ -47,6 +47,15 @@ public class ReserveEventHandler {
         }
     }
 
+    /**
+     * Validates that a timeless event is still valid. If the event is not valid, it
+     * is cancelled. A valid event is one that still exists in the server's events.json
+     * and still needs to reach the number of people needed to start the event.
+     * 
+     * @param event the event to be validated
+     * @param id the id of the {@code Guild} the event is being validated for
+     * @return true if the event is valid, false otherwise
+     */
     private static boolean validateTimelessEvent(ReserveEvent event, String id) {
         try {
             while (ProfileHandler.eventExists(id, event.getIdentifier()) && !ProfileHandler.pullEvent(id, event.getIdentifier()).isFull()) {

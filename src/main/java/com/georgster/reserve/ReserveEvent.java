@@ -154,6 +154,11 @@ public class ReserveEvent {
         return channel;
     }
 
+    /**
+     * Returns the list of users that have reserved for the event.
+     * 
+     * @return the list of users that have reserved for the event
+     */
     public List<String> getReservedUsers() {
         return reservedUsers;
     }

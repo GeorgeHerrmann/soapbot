@@ -4,17 +4,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.api.ActionWriter;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.util.SoapGeneralHandler;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.TextChannel;
 
-/*
- * !reserve "name" "playercount" "time" (optional)
- * !reserve "name"
+/**
+ * Represents the command for reserving to and creating events.
  */
 public class ReserveCommand implements Command {
+    /**
+     * {@inheritDoc}
+     */
     public void execute(MessageCreateEvent event) {
         List<String> message = Arrays.asList(event.getMessage().getContent().split(" "));
         if (message.size() < 2) {
@@ -31,6 +34,7 @@ public class ReserveCommand implements Command {
                         if (reserve.alreadyReserved(user.getTag())) {
                             event.getMessage().getChannel().block().createMessage("You have already reserved for this event").block();
                         } else {
+                            ActionWriter.writeAction("Reserving a user to event " + reserve.getIdentifier() + " in guild " + event.getGuild().block().getId().asString());
                             ProfileHandler.removeEvent(event.getGuild().block().getId().asString(), reserve);
                             reserve.addReserved();
                             reserve.addReservedUser(user.getTag());
@@ -42,6 +46,7 @@ public class ReserveCommand implements Command {
                     event.getMessage().getChannel().block().createMessage("Event " + reserve.getIdentifier() + " is full").block();
                 }
             } else {
+                ActionWriter.writeAction("Creating a new event " + reserve.getIdentifier() + " in guild " + event.getGuild().block().getId().asString());
                 event.getMessage().getAuthor().ifPresent(user -> reserve.addReservedUser(user.getTag()));
                 ProfileHandler.addEvent(event.getGuild().block().getId().asString(), reserve);
                 SoapGeneralHandler.runDaemon(() -> ReserveEventHandler.scheduleEvent(reserve, event.getMessage().getChannel().block(), event.getGuild().block().getId().asString()));
@@ -61,6 +66,15 @@ public class ReserveCommand implements Command {
 
     }
 
+    /**
+     * Assigns the correct ReserveEvents based on the user's command message.
+     * 
+     * @param message The user's command message
+     * @param id The guild's id
+     * @param channelName The channel's name
+     * @return The ReserveEvent that the user wants to create or reserve to
+     * @throws IllegalArgumentException If the user's command message is in the wrong format
+     */
     private ReserveEvent assignCorrectCommand(List<String> message, String id, String channelName) throws IllegalArgumentException {
 
         if (message.size() == 2) {
@@ -91,6 +105,9 @@ public class ReserveCommand implements Command {
         throw new IllegalArgumentException("Incorrect Reserve Event Format");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !reserve" +
         "\nUsage:" +
