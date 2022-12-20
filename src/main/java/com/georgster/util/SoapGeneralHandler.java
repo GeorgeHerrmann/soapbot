@@ -1,6 +1,7 @@
 package com.georgster.util;
 
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -41,6 +42,45 @@ public class SoapGeneralHandler {
                 return channel;
         }
         return null;
+    }
+
+    /**
+     * Converts a time string to a standard 24 hour time string
+     * for Time classes to use.
+     * 
+     * @param time the time string to convert
+     * @return the converted time string
+     */
+    public static String timeConverter(String time) throws IllegalArgumentException {
+        time = time.toUpperCase();
+        int hour;
+        int minute;
+        try {
+            String[] timeArray = time.split(":");
+            hour = Integer.parseInt(timeArray[0]);
+            minute = Integer.parseInt(timeArray[1].substring(0, 2));
+            if (timeArray[1].contains("PM") && hour != 12) {
+                hour += 12;
+            } else if (timeArray[1].contains("AM") && hour == 12) {
+                hour = 0;
+            }
+        } catch (PatternSyntaxException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            try {
+                if (time.contains("PM") && Integer.parseInt(time.substring(0, time.indexOf("PM"))) != 12) {
+                    hour = Integer.parseInt(time.substring(0, time.indexOf("PM"))) + 12;
+                    minute = 0;
+                } else if (time.contains("AM") && Integer.parseInt(time.substring(0, time.indexOf("AM"))) == 12) {
+                    hour = 0;
+                    minute = 0;
+                } else {
+                    hour = Integer.parseInt(time.substring(0, time.indexOf("PM")));
+                    minute = 0;
+                }
+            } catch (Exception e2) {
+                throw new IllegalArgumentException("Invalid time format, valid times formats are 1:00pm, 1pm, 01:00, 1:00PM, 1PM, 01:00PM, 1:00am, 1am, 01:00am, 1:00AM, 1AM, 01:00AM");
+            }
+        }
+        return String.format("%02d:%02d", hour, minute);
     }
 
     /**

@@ -2,7 +2,6 @@ package com.georgster.music;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.georgster.App;
 import com.georgster.util.SoapGeneralHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;

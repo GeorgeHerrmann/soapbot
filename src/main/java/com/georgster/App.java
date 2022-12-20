@@ -29,6 +29,7 @@ import com.georgster.api.ActionWriter;
 import com.georgster.dm.MessageCommand;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
+import com.georgster.reserve.EventCommand;
 import com.georgster.reserve.ReserveCommand;
 import com.georgster.reserve.ReserveEvent;
 import com.georgster.reserve.ReserveEventHandler;
@@ -85,6 +86,7 @@ public class App {
         commands.put("queue", new ShowQueueCommand(scheduler.getQueue()));
         commands.put("dm", new MessageCommand());
         commands.put("reserve", new ReserveCommand());
+        commands.put("events", new EventCommand());
 
 
         /*
@@ -93,9 +95,12 @@ public class App {
          */
         client.getEventDispatcher().on(GuildCreateEvent.class).subscribe(event -> { //Subscribing to an event meant SOAP Bot is now "listening" for these events
           String guild = event.getGuild().getId().asString();
-          List<GuildChannel> channels = event.getGuild().getChannels().buffer().blockFirst();
-          for (ReserveEvent reserve : ProfileHandler.getEvents(guild)) {
-            ReserveEventHandler.restartEvent(guild, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels));
+          if (ProfileHandler.areEvents(guild)) {
+            ActionWriter.writeAction("Restarting events for " + event.getGuild().getName());
+            List<GuildChannel> channels = event.getGuild().getChannels().buffer().blockFirst();
+            for (ReserveEvent reserve : ProfileHandler.getEvents(guild)) {
+              ReserveEventHandler.scheduleEvent(reserve, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels), guild);
+            }
           }
           ActionWriter.writeAction("Logging in to server: " + event.getGuild().getName());
           List<Member> members = event.getGuild().getMembers().buffer().blockFirst(); //Stores all members of the guild this event was fired from in a List
