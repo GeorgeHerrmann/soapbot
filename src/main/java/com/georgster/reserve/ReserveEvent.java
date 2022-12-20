@@ -94,12 +94,28 @@ public class ReserveEvent {
     }
 
     /**
+     * Removes a person from the number of people that have reserved for the event.
+     */
+    public void removeReserved() {
+        numReserved--;
+    }
+
+    /**
      * Adds a person to the number of people that have reserved for the event.
      * 
      * @param user the user to add
      */
     public void addReservedUser(String user) {
         reservedUsers.add(user);
+    }
+
+    /**
+     * Removes a person from the reserved users list.
+     * 
+     * @param user the user to remove
+     */
+    public void removeReservedUser(String user) {
+        reservedUsers.remove(user);
     }
 
     /**

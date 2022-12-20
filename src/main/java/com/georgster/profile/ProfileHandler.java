@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.reserve.ReserveEvent;
-import com.georgster.reserve.ReserveEventHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -242,6 +241,13 @@ public class ProfileHandler {
         }
     }
 
+    /**
+     * Checks if an event exists in the server's event list.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @param identifier the identifier of the event to be checked against the server's event list.
+     * @return true if the event exists in the server's event list, false otherwise.
+     */
     public static boolean eventExists(String id, String identifier) {
         if (serverProfileExists(id)) {
             try  {
@@ -254,6 +260,12 @@ public class ProfileHandler {
         return false;
     }
 
+    /**
+     * Gets the list of events from the server's event list.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @return the list of {@code ReserveEvent} objects from the server's event list.
+     */
     public static List<ReserveEvent> getEvents(String id) {
         List<ReserveEvent> events = new ArrayList<>();
         if (serverProfileExists(id)) {
@@ -308,5 +320,23 @@ public class ProfileHandler {
             }
         }
         return events;
+    }
+
+    /**
+     * Checks if the server has any events.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @return {@code true} if the server has events, {@code false} otherwise.
+     */
+    public static boolean areEvents(String id) {
+        if (serverProfileExists(id)) {
+            try {
+                String contents = Files.readString(Path.of(PROFILELOCATION, id, "events.json"));
+                return contents.contains("identifier");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 }

@@ -31,7 +31,6 @@ public class ReserveCommand implements Command {
                         if (reserve.alreadyReserved(user.getTag())) {
                             event.getMessage().getChannel().block().createMessage("You have already reserved for this event").block();
                         } else {
-                            reserve.addReservedUser(user.getTag());
                             ProfileHandler.removeEvent(event.getGuild().block().getId().asString(), reserve);
                             reserve.addReserved();
                             reserve.addReservedUser(user.getTag());
@@ -48,16 +47,16 @@ public class ReserveCommand implements Command {
                 SoapGeneralHandler.runDaemon(() -> ReserveEventHandler.scheduleEvent(reserve, event.getMessage().getChannel().block(), event.getGuild().block().getId().asString()));
                 String messageString = "";
                 if (reserve.isTimeless()) {
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getNumPeople() + " spots available!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else if (reserve.isUnlimited()) {
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + reserve.getTime()+ "!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + reserve.getTime()+ "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else {
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + reserve.getTime() + " with " + reserve.getNumPeople() + " spots available!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + reserve.getTime() + " with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
                 event.getMessage().getChannel().block().createMessage(messageString).block();
             }
         } catch (IllegalArgumentException e) {
-            event.getMessage().getChannel().block().createMessage("This event doesn't exist. Type !help reserve to see how to make a new event.").block();
+            event.getMessage().getChannel().block().createMessage(e.getMessage()).block();
         }
 
     }
@@ -67,20 +66,41 @@ public class ReserveCommand implements Command {
         if (message.size() == 2) {
             if (ProfileHandler.eventExists(id, message.get(1))) {
                 return ProfileHandler.pullEvent(id, message.get(1));
+            } else {
+                throw new IllegalArgumentException("This event doesn't exist. Type !help reserve to see how to make a new event.");
             }
         } else if (message.size() == 3) {
             try {
                 return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), channelName);
             } catch (NumberFormatException e) {
-                return new ReserveEvent(message.get(1), message.get(2), channelName);
+                try {
+                    return new ReserveEvent(message.get(1), SoapGeneralHandler.timeConverter(message.get(2)), channelName);
+                } catch (IllegalArgumentException e2) {
+                    throw new IllegalArgumentException(e2.getMessage());
+                }
             }
         } else if (message.size() == 4) {
-            return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), message.get(3), channelName);
+            try {
+                return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), SoapGeneralHandler.timeConverter(message.get(3)), channelName);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
         }
         throw new IllegalArgumentException("Incorrect Reserve Event Format");
     }
 
     public String help() {
-        return "placeholder";
+        return "Command: !reserve" +
+        "\nUsage:" +
+        "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME]' to create a new event with for a specific time with a certain number of people" +
+        "\n\t\t - This event will pop when the specified time hits" +
+        "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT]' to create a new event with a certain number of people" +
+        "\n\t\t - This event will pop when the specified number of people have reserved" +
+        "\n\t- '!reserve [EVENTNAME] [TIME]' to create a new event for a specific time" +
+        "\n\t\t - This event will pop when the specified time hits" +
+        "\n\t- '!reserve [EVENTNAME]' to reserve to an event that already exists" +
+        "\n\t - !events for information about the event command";
     }
 }

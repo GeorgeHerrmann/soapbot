@@ -3,6 +3,7 @@ package com.georgster.reserve;
 import java.util.TimerTask;
 
 import com.georgster.profile.ProfileHandler;
+import com.georgster.util.SoapGeneralHandler;
 
 import discord4j.core.object.entity.channel.MessageChannel;
 
@@ -20,13 +21,15 @@ public class ReserveEventTask extends TimerTask {
 
     @Override
     public void run() {
-        StringBuilder response = new StringBuilder("Event " + event.getIdentifier() + " has started!\n" +
-        "\t- " + ProfileHandler.pullEvent(id, event.getIdentifier()).getReserved() + "/" + event.getNumPeople() + " reserved with the following people:");
-        for (String name : ProfileHandler.pullEvent(id, event.getIdentifier()).getReservedUsers()) {
-            response.append("\n\t\t- " + name);
+        if (ProfileHandler.eventExists(id, event.getIdentifier())) {
+            StringBuilder response = new StringBuilder("Event " + event.getIdentifier() + " has started!\n" +
+            "\t- " + ProfileHandler.pullEvent(id, event.getIdentifier()).getReserved() + "/" + event.getNumPeople() + " reserved with the following people:");
+            for (String name : ProfileHandler.pullEvent(id, event.getIdentifier()).getReservedUsers()) {
+                response.append("\n\t\t- " + name);
+            }
+            SoapGeneralHandler.sendTextMessageInChannel(response.toString(), channel);
+            ProfileHandler.removeEvent(id, ProfileHandler.pullEvent(id, event.getIdentifier()));
         }
-       channel.createMessage(response.toString()).block();
-       ProfileHandler.removeEvent(id, ProfileHandler.pullEvent(id, event.getIdentifier()));
     }
 
 }

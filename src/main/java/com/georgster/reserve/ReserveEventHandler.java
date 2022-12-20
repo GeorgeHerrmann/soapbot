@@ -27,34 +27,39 @@ public class ReserveEventHandler {
      * 
      * @param event the event to be scheduled
      * @param channel the channel to send the event to
+     * @param id the id of the {@code Guild} the event is being scheduled for
      */
-    protected static void scheduleEvent(ReserveEvent event, MessageChannel channel, String id) {
+    public static void scheduleEvent(ReserveEvent event, MessageChannel channel, String id) {
         if (event.isTimeless()) {
-            validateTimelessEvent(event, id);
-            ReserveEventTask task = new ReserveEventTask(event, channel, id);
-            task.run();
+            if (validateTimelessEvent(event, id)) {
+                ReserveEventTask task = new ReserveEventTask(event, channel, id);
+                task.run();
+            }
         } else {
             LocalTime eventTime = LocalTime.parse(event.getTime());
             long seconds = (LocalTime.now().until(eventTime, ChronoUnit.SECONDS)) * 1000;
-            new Timer().schedule(new ReserveEventTask(event, channel, id), seconds);
-        }
-    }
-
-    public static void restartEvent(String id, MessageChannel channel) {
-        for (ReserveEvent event : ProfileHandler.getEvents(id)) {
-            scheduleEvent(event, channel, id);
-        }
-    }
-
-    private static void validateTimelessEvent(ReserveEvent event, String id) {
-        while (!ProfileHandler.pullEvent(id, event.getIdentifier()).isFull()) {
             try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
+                new Timer().schedule(new ReserveEventTask(event, channel, id), seconds);
+            } catch (IllegalArgumentException e) {
+                SoapGeneralHandler.sendTextMessageInChannel("The time specified for the event is in the past, this event will not be scheduled", channel);
+                ProfileHandler.removeEvent(id, event);
             }
         }
+    }
+
+    private static boolean validateTimelessEvent(ReserveEvent event, String id) {
+        try {
+            while (ProfileHandler.eventExists(id, event.getIdentifier()) && !ProfileHandler.pullEvent(id, event.getIdentifier()).isFull()) {
+                Thread.sleep(1000);
+            }
+            if (!ProfileHandler.eventExists(id, event.getIdentifier())) {
+                return false;
+            }
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+        return true;
     }
 
 
