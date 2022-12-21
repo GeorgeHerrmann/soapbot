@@ -85,7 +85,7 @@ public class EventCommand implements Command {
                     response.append("\nReserved users:\n");
                     for (String user : reserve.getReservedUsers()) {
                         Member member = SoapGeneralHandler.memberMatcher(user, event.getGuild().block().getMembers().buffer().blockFirst());
-                        response.append("\t- " + member.getDisplayName() + "\n");
+                        response.append("\t- " + member.getMention() + "\n");
                     }
                     SoapGeneralHandler.sendTextMessageInChannel(response.toString(), event.getMessage().getChannel().block());
                 } else {
