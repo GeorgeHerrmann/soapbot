@@ -19,7 +19,7 @@ public class ReserveCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event) {
-        List<String> message = Arrays.asList(event.getMessage().getContent().split(" "));
+        List<String> message = Arrays.asList(event.getMessage().getContent().toLowerCase().split(" "));
         if (message.size() < 2) {
             event.getMessage().getChannel().block().createMessage(help()).block();
             return;
@@ -83,7 +83,7 @@ public class ReserveCommand implements Command {
             } else {
                 throw new IllegalArgumentException("This event doesn't exist. Type !help reserve to see how to make a new event.");
             }
-        } else if (message.size() == 3) {
+        } else if (message.size() == 3 && !ProfileHandler.eventExists(id, message.get(1))) {
             try {
                 return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), channelName);
             } catch (NumberFormatException e) {
@@ -93,7 +93,7 @@ public class ReserveCommand implements Command {
                     throw new IllegalArgumentException(e2.getMessage());
                 }
             }
-        } else if (message.size() == 4) {
+        } else if (message.size() == 4 && !ProfileHandler.eventExists(id, message.get(1))) {
             try {
                 return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), SoapGeneralHandler.timeConverter(message.get(3)), channelName);
             } catch (NumberFormatException e) {
@@ -102,7 +102,7 @@ public class ReserveCommand implements Command {
                 throw new IllegalArgumentException(e.getMessage());
             }
         }
-        throw new IllegalArgumentException("Incorrect Reserve Event Format");
+        throw new IllegalArgumentException("Incorrect Reserve Event Format or this event already exists, simply type !reserve [EVENTNAME] if you want to reserve to an event that exists.");
     }
 
     /**

@@ -81,6 +81,10 @@ public class EventCommand implements Command {
                         response.append("\t- Time: " + reserveObject.get("time").getAsString() + "\n");
                         response.append("This event will pop at " + reserve.getTime());
                     }
+                    response.append("\nReserved users:\n");
+                    for (String user : reserve.getReservedUsers()) {
+                        response.append("\t- " + user + "\n");
+                    }
                     SoapGeneralHandler.sendTextMessageInChannel(response.toString(), event.getMessage().getChannel().block());
                 } else {
                     SoapGeneralHandler.sendTextMessageInChannel("This event does not exist, type !events list for a list of all active events", event.getMessage().getChannel().block());
