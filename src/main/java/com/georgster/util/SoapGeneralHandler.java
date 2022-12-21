@@ -85,6 +85,8 @@ public class SoapGeneralHandler {
 
     /**
      * Converts a 24 hour time string to a 12 hour time string.
+     * Note that this method does not check for valid time strings,
+     * it is intended to be used after the timeConverter method.
      * 
      * @param time the time string to convert
      * @return the converted time string
