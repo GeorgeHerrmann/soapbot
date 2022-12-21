@@ -99,7 +99,9 @@ public class App {
             ActionWriter.writeAction("Restarting events for " + event.getGuild().getName());
             List<GuildChannel> channels = event.getGuild().getChannels().buffer().blockFirst();
             for (ReserveEvent reserve : ProfileHandler.getEvents(guild)) {
-              ReserveEventHandler.scheduleEvent(reserve, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels), guild);
+              SoapGeneralHandler.runDaemon(() -> 
+                ReserveEventHandler.scheduleEvent(reserve, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels), guild)
+              );
             }
           }
           ActionWriter.writeAction("Logging in to server: " + event.getGuild().getName());
