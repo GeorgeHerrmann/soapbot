@@ -6,7 +6,9 @@ import com.georgster.api.ActionWriter;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.util.SoapGeneralHandler;
 
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 /**
  * The task associated with a ReserveEvent object once the event has started.
@@ -39,7 +41,8 @@ public class ReserveEventTask extends TimerTask {
             StringBuilder response = new StringBuilder("Event " + event.getIdentifier() + " has started!\n" +
             "\t- " + ProfileHandler.pullEvent(id, event.getIdentifier()).getReserved() + "/" + event.getNumPeople() + " reserved with the following people:");
             for (String name : ProfileHandler.pullEvent(id, event.getIdentifier()).getReservedUsers()) {
-                response.append("\n\t\t- " + name);
+                Member member = SoapGeneralHandler.memberMatcher(name, ((TextChannel) channel).getGuild().block().getMembers().buffer().blockFirst());
+                response.append("\n\t\t- " + member.getMention());
             }
             SoapGeneralHandler.sendTextMessageInChannel(response.toString(), channel);
             ProfileHandler.removeEvent(id, ProfileHandler.pullEvent(id, event.getIdentifier()));

@@ -3,6 +3,7 @@ package com.georgster.util;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -40,6 +41,21 @@ public class SoapGeneralHandler {
         for (GuildChannel channel : channels) {
             if (channel.getType() == Channel.Type.GUILD_TEXT && channel.getName().equals(channelName))
                 return channel;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the member that matches the memberTag parameter from the list of members.
+     * 
+     * @param memberTag the tag of the member to match
+     * @param members the list of members to search through
+     * @return the member that matches the memberTag parameter
+     */
+    public static Member memberMatcher(String memberTag, List<Member> members) {
+        for (Member member : members) {
+            if (member.getTag().equals(memberTag))
+                return member;
         }
         return null;
     }

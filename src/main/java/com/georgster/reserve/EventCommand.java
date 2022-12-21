@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
 
 /**
  * Represents the command for managing events.
@@ -83,7 +84,8 @@ public class EventCommand implements Command {
                     }
                     response.append("\nReserved users:\n");
                     for (String user : reserve.getReservedUsers()) {
-                        response.append("\t- " + user + "\n");
+                        Member member = SoapGeneralHandler.memberMatcher(user, event.getGuild().block().getMembers().buffer().blockFirst());
+                        response.append("\t- " + member.getDisplayName() + "\n");
                     }
                     SoapGeneralHandler.sendTextMessageInChannel(response.toString(), event.getMessage().getChannel().block());
                 } else {
