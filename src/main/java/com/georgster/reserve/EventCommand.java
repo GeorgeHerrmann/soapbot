@@ -63,7 +63,7 @@ public class EventCommand implements Command {
                 }
             } else {
                 if (ProfileHandler.eventExists(id, message.get(1))) {
-                    ActionWriter.writeAction("Showing information about a specific event");
+                    ActionWriter.writeAction("Showing information about a specific event in a text channel");
                     Gson parser = new Gson();
                     ReserveEvent reserve = ProfileHandler.pullEvent(id, message.get(1));
                     JsonObject reserveObject = parser.toJsonTree(reserve).getAsJsonObject();
@@ -85,7 +85,7 @@ public class EventCommand implements Command {
                     response.append("\nReserved users:\n");
                     for (String user : reserve.getReservedUsers()) {
                         Member member = SoapGeneralHandler.memberMatcher(user, event.getGuild().block().getMembers().buffer().blockFirst());
-                        response.append("\t- " + member.getMention() + "\n");
+                        response.append("\t- " + member.getMention() + "\n"); //Will mention the user
                     }
                     SoapGeneralHandler.sendTextMessageInChannel(response.toString(), event.getMessage().getChannel().block());
                 } else {
