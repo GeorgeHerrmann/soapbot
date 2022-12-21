@@ -85,6 +85,7 @@ public class ReserveCommand implements Command {
             }
         } else if (message.size() == 3 && !ProfileHandler.eventExists(id, message.get(1))) {
             try {
+                if (Integer.parseInt(message.get(2)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), channelName);
             } catch (NumberFormatException e) {
                 try {
@@ -95,6 +96,7 @@ public class ReserveCommand implements Command {
             }
         } else if (message.size() == 4 && !ProfileHandler.eventExists(id, message.get(1))) {
             try {
+                if (Integer.parseInt(message.get(2)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), SoapGeneralHandler.timeConverter(message.get(3)), channelName);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
