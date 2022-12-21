@@ -28,12 +28,12 @@ public class EventCommand implements Command {
                 ActionWriter.writeAction("Showing all events in a text channel");
                 StringBuilder response = new StringBuilder();
                 if (ProfileHandler.areEvents(id)) {
+                    response.append("All events:\n");
                     for (ReserveEvent reserve : ProfileHandler.getEvents(id)) {
-                        response.append("All events:\n");
                         if (reserve.isTimeless()) {
                             response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
                         } else {
-                            response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + reserve.getTime() + "\n");
+                            response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapGeneralHandler.convertToAmPm(reserve.getTime()) + "\n");
                         }
                     }
                     response.append("Type !events [NAME] for more information about a specific event");
@@ -78,8 +78,8 @@ public class EventCommand implements Command {
                         response.append("\t- This event has no associated time\n");
                         response.append("This event will pop once the needed number of people have reserved to it");
                     } else {
-                        response.append("\t- Time: " + reserveObject.get("time").getAsString() + "\n");
-                        response.append("This event will pop at " + reserve.getTime());
+                        response.append("\t- Time: " + SoapGeneralHandler.convertToAmPm(reserveObject.get("time").getAsString()) + "\n");
+                        response.append("This event will pop at " + SoapGeneralHandler.convertToAmPm(reserve.getTime()));
                     }
                     response.append("\nReserved users:\n");
                     for (String user : reserve.getReservedUsers()) {

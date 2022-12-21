@@ -84,6 +84,28 @@ public class SoapGeneralHandler {
     }
 
     /**
+     * Converts a 24 hour time string to a 12 hour time string.
+     * 
+     * @param time the time string to convert
+     * @return the converted time string
+     */
+    public static String convertToAmPm(String time) {
+        String[] timeArray = time.split(":");
+        int hour = Integer.parseInt(timeArray[0]);
+        int minute = Integer.parseInt(timeArray[1]);
+        String amPm = "AM";
+        if (hour > 12) {
+            hour -= 12;
+            amPm = "PM";
+        } else if (hour == 12) {
+            amPm = "PM";
+        } else if (hour == 0) {
+            hour = 12;
+        }
+        return String.format("%02d:%02d%s", hour, minute, amPm);
+    }
+
+    /**
      * Creates and immediately starts a new daemon thread that executes
      * {@code target.run()}. This method, which may be called from any thread,
      * will return immediately its the caller.

@@ -54,9 +54,9 @@ public class ReserveCommand implements Command {
                 if (reserve.isTimeless()) {
                     messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else if (reserve.isUnlimited()) {
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + reserve.getTime()+ "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapGeneralHandler.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else {
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + reserve.getTime() + " with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapGeneralHandler.convertToAmPm(reserve.getTime()) + " with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
                 event.getMessage().getChannel().block().createMessage(messageString).block();
             }
