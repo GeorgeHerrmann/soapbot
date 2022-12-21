@@ -1,6 +1,7 @@
 package com.georgster.reserve;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Timer;
 
@@ -37,7 +38,7 @@ public class ReserveEventHandler {
             }
         } else {
             LocalTime eventTime = LocalTime.parse(event.getTime());
-            long seconds = (LocalTime.now().until(eventTime, ChronoUnit.SECONDS)) * 1000;
+            long seconds = (LocalTime.now(ZoneId.of("-05:00")).until(eventTime, ChronoUnit.SECONDS)) * 1000;
             try {
                 new Timer().schedule(new ReserveEventTask(event, channel, id), seconds);
             } catch (IllegalArgumentException e) {
