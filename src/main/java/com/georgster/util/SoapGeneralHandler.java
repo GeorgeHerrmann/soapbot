@@ -32,6 +32,7 @@ public class SoapGeneralHandler {
 
     /**
      * Returns the channel that matches the channelName parameter from the list of channels.
+     * Must be fired from a method that has access to a list of channels.
      * 
      * @param channelName the name of the channel to match
      * @param channels the list of channels to search through
@@ -39,7 +40,7 @@ public class SoapGeneralHandler {
      */
     public static Channel channelMatcher(String channelName, List<GuildChannel> channels) {
         for (GuildChannel channel : channels) {
-            if (channel.getType() == Channel.Type.GUILD_TEXT && channel.getName().equals(channelName))
+            if (channel.getType() == Channel.Type.GUILD_TEXT && channel.getName().equals(channelName)) //Only really used to match text channels
                 return channel;
         }
         return null;
@@ -47,6 +48,7 @@ public class SoapGeneralHandler {
 
     /**
      * Returns the member that matches the memberTag parameter from the list of members.
+     * Must be fired from a method that has access to a list of members.
      * 
      * @param memberTag the tag of the member to match
      * @param members the list of members to search through
@@ -68,10 +70,10 @@ public class SoapGeneralHandler {
      * @return the converted time string
      */
     public static String timeConverter(String time) throws IllegalArgumentException {
-        time = time.toUpperCase();
+        time = time.toUpperCase(); //Users can use either 'am' or 'AM'
         int hour;
         int minute;
-        try {
+        try { //If the time string is in the format 1:00pm, 1:00PM, 01:00, 01:00PM, etc.
             String[] timeArray = time.split(":");
             hour = Integer.parseInt(timeArray[0]);
             minute = Integer.parseInt(timeArray[1].substring(0, 2));
@@ -80,7 +82,7 @@ public class SoapGeneralHandler {
             } else if (timeArray[1].contains("AM") && hour == 12) {
                 hour = 0;
             }
-        } catch (PatternSyntaxException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
+        } catch (PatternSyntaxException | NumberFormatException | ArrayIndexOutOfBoundsException e) { //If the time string is in the format 1pm, 1PM, etc.
             try {
                 if (time.contains("PM") && Integer.parseInt(time.substring(0, time.indexOf("PM"))) != 12) {
                     hour = Integer.parseInt(time.substring(0, time.indexOf("PM"))) + 12;
@@ -92,7 +94,7 @@ public class SoapGeneralHandler {
                     hour = Integer.parseInt(time.substring(0, time.indexOf("PM")));
                     minute = 0;
                 }
-            } catch (Exception e2) {
+            } catch (Exception e2) { //If the time string is in an invalid format, it will get caught here
                 throw new IllegalArgumentException("Invalid time format, valid times formats are 1:00pm, 1pm, 01:00, 1:00PM, 1PM, 01:00PM, 1:00am, 1am, 01:00am, 1:00AM, 1AM, 01:00AM");
             }
         }
@@ -108,7 +110,7 @@ public class SoapGeneralHandler {
      * @return the converted time string
      */
     public static String convertToAmPm(String time) {
-        String[] timeArray = time.split(":");
+        String[] timeArray = time.split(":"); //We can assume an exact format here because the timeConverter method should have already been called
         int hour = Integer.parseInt(timeArray[0]);
         int minute = Integer.parseInt(timeArray[1]);
         String amPm = "AM";
@@ -132,7 +134,7 @@ public class SoapGeneralHandler {
      */
     public static void runDaemon(Runnable target) {
         Thread t = new Thread(target);
-        t.setDaemon(true);
+        t.setDaemon(true); //Daemon threads will not prevent the program from exiting
         t.start();
     }
 

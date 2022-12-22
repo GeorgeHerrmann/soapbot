@@ -94,44 +94,48 @@ public class App {
          * It is here that we use the Profile Handler to generate a profile for a guild and its members if one doesn't exist yet.
          */
         client.getEventDispatcher().on(GuildCreateEvent.class).subscribe(event -> { //Subscribing to an event meant SOAP Bot is now "listening" for these events
-          String guild = event.getGuild().getId().asString();
-          if (ProfileHandler.areEvents(guild)) {
-            ActionWriter.writeAction("Restarting events for " + event.getGuild().getName());
+          String guild = event.getGuild().getId().asString(); //The ID of the guild this event was fired from
+          /*
+           * If the guild this event was fired from has events scheduled, we will restart them.
+           */
+          if (ProfileHandler.areEvents(guild)) { //Checks to see if there are any events at all for this guild
+            ActionWriter.writeAction("Restarting events for " + event.getGuild().getName()); //Note that the ActionWriter is what tells SOAP Api what is happening
+            //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
             List<GuildChannel> channels = event.getGuild().getChannels().buffer().blockFirst();
-            for (ReserveEvent reserve : ProfileHandler.getEvents(guild)) {
+            for (ReserveEvent reserve : ProfileHandler.getEvents(guild)) { //For each event in the guild's events list
               SoapGeneralHandler.runDaemon(() -> 
-                ReserveEventHandler.scheduleEvent(reserve, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels), guild)
+                ReserveEventHandler.scheduleEvent(reserve, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels), guild) //We schedule the event again
               );
             }
           }
           ActionWriter.writeAction("Logging in to server: " + event.getGuild().getName());
           List<Member> members = event.getGuild().getMembers().buffer().blockFirst(); //Stores all members of the guild this event was fired from in a List
-          if (!ProfileHandler.serverProfileExists(guild)) {
+          if (!ProfileHandler.serverProfileExists(guild)) { //If the guild this event was fired from does not have a profile scheme, or has an out of date profile scheme, we create one
             ActionWriter.writeAction("Creating a profile for " + event.getGuild().getName());
             ProfileHandler.createServerProfile(guild);
           }
-          for (int i = 0; i < members.size(); i++) {
+          for (int i = 0; i < members.size(); i++) { //Same idea for Members
             String member = members.get(i).getId().asString();
             if (!ProfileHandler.userProfileExists(member, guild)) {
               ProfileHandler.createUserProfile(member, guild);
             }
             ActionWriter.writeAction("Updating user profile number " + i + " in " + event.getGuild().getName());
-            ProfileHandler.updateUserProfile(new UserProfile(guild, member, members.get(i).getUsername()));
+            ProfileHandler.updateUserProfile(new UserProfile(guild, member, members.get(i).getUsername())); //We will always update the user's profile to make sure it is up to date
           }
         });
         /* 
          * A MessageCreateEvent is fired each time a message is sent in a server and channel SOAP Bot has access to.
-         * Note that client could technically be null here, however we can safely assume that will not be the case since our token should always be valid.
+         * We will parse the message and execute the associated command if it is a valid command.
          */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
           final String content = event.getMessage().getContent();
-          if (content.startsWith("!") && content.equals(content.toUpperCase())) {
+          if (content.startsWith("!") && content.equals(content.toUpperCase())) { //Very necessary
             ActionWriter.writeAction("Getting yelled at");
             event.getMessage().getChannel().block().createMessage("Please stop yelling at me :(").block();
           }
           
-          for (final Map.Entry<String, Command> entry : commands.entrySet()) {
-            if (content.toLowerCase().startsWith('!' + entry.getKey())) {
+          for (final Map.Entry<String, Command> entry : commands.entrySet()) { //We check the message against each command in the commands map
+            if (content.toLowerCase().startsWith('!' + entry.getKey())) { //If it matches we create a new thread and execute the command
                 ActionWriter.writeAction("Placing the " + entry.getKey() + " command on a new Daemon thread and executing it");
                 SoapGeneralHandler.runDaemon(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
                 break;

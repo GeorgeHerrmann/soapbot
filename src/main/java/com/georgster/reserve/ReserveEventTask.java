@@ -36,16 +36,16 @@ public class ReserveEventTask extends TimerTask {
      */
     @Override
     public void run() {
-        if (ProfileHandler.eventExists(id, event.getIdentifier())) {
+        if (ProfileHandler.eventExists(id, event.getIdentifier())) { //As long as the event still exists in the server's events.json
             ActionWriter.writeAction("Starting event " + event.getIdentifier());
             StringBuilder response = new StringBuilder("Event " + event.getIdentifier() + " has started!\n" +
             "\t- " + ProfileHandler.pullEvent(id, event.getIdentifier()).getReserved() + "/" + event.getNumPeople() + " reserved with the following people:");
-            for (String name : ProfileHandler.pullEvent(id, event.getIdentifier()).getReservedUsers()) {
+            for (String name : ProfileHandler.pullEvent(id, event.getIdentifier()).getReservedUsers()) { //We add the names of the people who reserved to the event
                 Member member = SoapGeneralHandler.memberMatcher(name, ((TextChannel) channel).getGuild().block().getMembers().buffer().blockFirst());
                 response.append("\n\t\t- " + member.getMention());
             }
             SoapGeneralHandler.sendTextMessageInChannel(response.toString(), channel);
-            ProfileHandler.removeEvent(id, ProfileHandler.pullEvent(id, event.getIdentifier()));
+            ProfileHandler.removeEvent(id, ProfileHandler.pullEvent(id, event.getIdentifier())); //After the event has started, we remove it from the server's events.json
         }
     }
 

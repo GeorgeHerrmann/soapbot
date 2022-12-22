@@ -119,7 +119,7 @@ public class ProfileHandler {
      */
     public static void addEvent(String id, ReserveEvent event) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        if (serverProfileExists(id)) {
+        if (serverProfileExists(id)) { //Writes a JSON representation of the event to the events.json file
             try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString(), true)) {
                 writer.write(parser.toJson(event));
             } catch (IOException e) {
@@ -134,7 +134,9 @@ public class ProfileHandler {
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param event the {@code ReserveEvent} object to be checked against the server's event list.
      * @return true if the event is already in the server's event list, false otherwise.
+     * @deprecated This method is not currently used. Use eventExists() instead.
      */
+    @Deprecated
     public static boolean checkEventDuplicates(String id, ReserveEvent event) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
         String eventJson = "";
@@ -166,7 +168,7 @@ public class ProfileHandler {
         if (serverProfileExists(id)) {
             try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
                 reader.setLenient(true);
-                while (reader.hasNext()) {
+                while (reader.hasNext()) { //Iterates through the events.json file
                     reader.beginObject();
                     int numPeople = 0;
                     int numReserved = 0;
@@ -175,7 +177,7 @@ public class ProfileHandler {
                     String time = "";
                     String name = reader.nextName();
                     String identifier = reader.nextString();
-                    if (name.equals("identifier") && identifier.equals(eventIdentifier)) {
+                    if (name.equals("identifier") && identifier.equals(eventIdentifier)) { //If the identifier matches the one we're looking for, return the event
                         if (reader.nextName().equals("numPeople")) {
                             numPeople = reader.nextInt();
                         }
@@ -300,7 +302,7 @@ public class ProfileHandler {
                             }
                             reader.endArray();
                         }
-                        events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers));
+                        events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
                     } else {
                         reader.skipValue();
                         reader.skipValue();

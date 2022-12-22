@@ -28,7 +28,7 @@ public class ReserveCommand implements Command {
             TextChannel channel = (TextChannel) event.getMessage().getChannel().block();
             ReserveEvent reserve = assignCorrectCommand(message, event.getGuild().block().getId().asString(), channel.getName());
 
-            if (ProfileHandler.checkEventDuplicates(event.getGuild().block().getId().asString(), reserve)) {
+            if (ProfileHandler.checkEventDuplicates(event.getGuild().block().getId().asString(), reserve)) { //Change to eventExists()
                 if (!reserve.isFull()) {
                     event.getMessage().getAuthor().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
@@ -77,30 +77,31 @@ public class ReserveCommand implements Command {
      */
     private ReserveEvent assignCorrectCommand(List<String> message, String id, String channelName) throws IllegalArgumentException {
 
-        if (message.size() == 2) {
-            if (ProfileHandler.eventExists(id, message.get(1))) {
+        if (message.size() == 2) { //Means the user is trying to reserve to an event that already exists
+            if (ProfileHandler.eventExists(id, message.get(1))) { //If the event exists, we get the event and return it
                 return ProfileHandler.pullEvent(id, message.get(1));
             } else {
                 throw new IllegalArgumentException("This event doesn't exist. Type !help reserve to see how to make a new event.");
             }
-        } else if (message.size() == 3 && !ProfileHandler.eventExists(id, message.get(1))) {
+        } else if (message.size() == 3 && !ProfileHandler.eventExists(id, message.get(1))) { //Creating an event that is either Unlimited or Timeless
             try {
                 if (Integer.parseInt(message.get(2)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
-                return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), channelName);
-            } catch (NumberFormatException e) {
+                return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), channelName); //If the user only inputs a number, the event is Timeless
+            } catch (NumberFormatException e) { //If it is not a number, it is a time
                 try {
-                    return new ReserveEvent(message.get(1), SoapGeneralHandler.timeConverter(message.get(2)), channelName);
-                } catch (IllegalArgumentException e2) {
+                    return new ReserveEvent(message.get(1), SoapGeneralHandler.timeConverter(message.get(2)), channelName); //Creates an Unlimited event
+                } catch (IllegalArgumentException e2) { //If both of these fail, the user's command message is in the wrong format
                     throw new IllegalArgumentException(e2.getMessage());
                 }
             }
-        } else if (message.size() == 4 && !ProfileHandler.eventExists(id, message.get(1))) {
-            try {
+        } else if (message.size() == 4 && !ProfileHandler.eventExists(id, message.get(1))) { //Creates a new event that has a number of slots and a time
+            try { //If the event doesn't already exist, we can attempt to create a new one
                 if (Integer.parseInt(message.get(2)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
+                //Should be in the format !reserve [EVENTNAME] [NUMPEOPLE] [TIME]
                 return new ReserveEvent(message.get(1), Integer.parseInt(message.get(2)), SoapGeneralHandler.timeConverter(message.get(3)), channelName);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException e) { //If the user's command is in the wrong format
                 throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
                 throw new IllegalArgumentException(e.getMessage());
             }
         }

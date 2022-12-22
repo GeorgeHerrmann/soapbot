@@ -5,8 +5,13 @@ import java.util.List;
 
 /**
  * A ReserveEvent object is created when a user uses the !reserve command
- * with a new identifier. The identifier is the name of the event, and the
- * numPeople is the number of people that are needed to start the event.
+ * with a new identifier. Every ReserveEvent object has an identifier, number,
+ * of people needed to start the event, number of people reserved, a time,
+ * the name of the channel the event was reserved in, and a list of reserved users.
+ * 
+ * An event that is Timeless has no associated time, while an event that is
+ * Unlimited has no associated number of people needed to start the event. A ReserveEvent
+ * cannot be both Timeless and Unlimited.
  */
 public class ReserveEvent {
     private String identifier;
@@ -17,12 +22,16 @@ public class ReserveEvent {
     private List<String> reservedUsers;
     
     /**
-     * Constructs a ReserveEvent object with an identifier, number of people, number of people reserved, and time.
+     * Constructs a ReserveEvent object with an identifier, number of people, number of people
+     * reserved, time, channel name, and a list of reserved users. This constructor is used when a ReserveEvent
+     * is pulled from the database.
      * 
      * @param identifier the name of the event
      * @param numPeople the number of people needed to start the event
      * @param numReserved the number of people that have reserved for the event
      * @param time the time the event will start
+     * @param channel the name of the channel the event was reserved in
+     * @param reservedUsers a list of users that have reserved for the event
      */
     public ReserveEvent(String identifier, int numPeople, int numReserved, String time, String channel, List<String> reservedUsers) {
         this.identifier = identifier;
@@ -34,44 +43,50 @@ public class ReserveEvent {
     }
 
     /**
-     * Constructs a ReserveEvent object with an identifier, number of people, and time.
+     * Constructs a ReserveEvent object with an identifier, number of people, time, and channel name.
+     * This constructor is used when a ReserveEvent that is neither Unlimited nor Timeless is created.
      * @param identifier the name of the event
      * @param numPeople the number of people needed to start the event
      * @param time the time the event will start
+     * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, int numPeople, String time, String channel) {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.time = time;
-        this.numReserved = 1;
+        this.numReserved = 1; //We will always start with one person reserved
         this.channel = channel;
-        reservedUsers = new ArrayList<>();
+        reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
     }
 
     /**
-     * Constructs a ReserveEvent object with an identifier and number of people.
+     * Constructs a ReserveEvent object with an identifier number of people and channel name.
+     * This constructor is used when a ReserveEvent that is Timeless is created.
      * @param identifier the name of the event
      * @param numPeople the number of people needed to start the event
+     * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, int numPeople, String channel) {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.numReserved = 1;
-        this.time = "00:00";
+        this.time = "00:00"; //A Timeless event will always be at 00:00
         this.channel = channel;
         reservedUsers = new ArrayList<>();
     }
 
     /**
-     * Constructs a ReserveEvent object with an identifier and time.
+     * Constructs a ReserveEvent object with an identifier, time and channel name.
+     * This constructor is used when a ReserveEvent that is Unlimited is created.
      * 
      * @param identifier the name of the event
      * @param time the time the event will start
+     * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, String time, String channel) {
         this.identifier = identifier;
         this.time = time;
-        this.numPeople = 9999;
+        this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start
         this.numReserved = 1;
         this.channel = channel;
         reservedUsers = new ArrayList<>();

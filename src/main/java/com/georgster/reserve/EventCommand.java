@@ -23,9 +23,9 @@ public class EventCommand implements Command {
      */
     public void execute(MessageCreateEvent event) {
         List<String> message = Arrays.asList(event.getMessage().getContent().split(" "));
-        try {
+        try { //Checks to see the command if valid
             String id = event.getGuild().block().getId().asString();
-            if (message.get(1).equals("list")) {
+            if (message.get(1).equals("list")) { //Shows the list of events
                 ActionWriter.writeAction("Showing all events in a text channel");
                 StringBuilder response = new StringBuilder();
                 if (ProfileHandler.areEvents(id)) {
@@ -42,13 +42,13 @@ public class EventCommand implements Command {
                 } else {
                     SoapGeneralHandler.sendTextMessageInChannel("There are no events currently active", event.getMessage().getChannel().block());
                 }
-            } else if (message.get(1).equals("unreserve")) {
+            } else if (message.get(1).equals("unreserve")) { //Unreserves from an event
                 ActionWriter.writeAction("Unreserving a user from an event");
                 if (ProfileHandler.eventExists(id, message.get(2))) {
                     for (ReserveEvent reserve: ProfileHandler.getEvents(id)) {
                         if (reserve.getIdentifier().equals(message.get(2))) {
                             ProfileHandler.removeEvent(id, reserve);
-                            event.getMessage().getAuthor().ifPresent(user -> reserve.removeReservedUser(user.getTag()));
+                            event.getMessage().getAuthor().ifPresent(user -> reserve.removeReservedUser(user.getTag())); //Gets the user's tag and removes them from the list
                             reserve.removeReserved();
                             if (reserve.getReserved() > 0) {
                                 ProfileHandler.addEvent(id, reserve);
@@ -61,7 +61,7 @@ public class EventCommand implements Command {
                 } else {
                     SoapGeneralHandler.sendTextMessageInChannel("Event does not exist", event.getMessage().getChannel().block());
                 }
-            } else {
+            } else { //Shows information about an event
                 if (ProfileHandler.eventExists(id, message.get(1))) {
                     ActionWriter.writeAction("Showing information about a specific event in a text channel");
                     Gson parser = new Gson();
