@@ -10,5 +10,7 @@ Current features:
   - Playing audio tracks (via YouTube, Soundcloud, etc.) in a voice channel
     - Features a queue system allowing queueing of one track at a time or a whole playlist at once
     - Features the option to show the queue and skip tracks in the queue (or skip all tracks)
+  - Creating to and reserving for events with a full save system
+    - Allows the flexibility of multiple types of events
   - Basic text-based responses to commands in text-channels
   - Saves and loads data via "profiles" for SOAP Bot to keep track of basic user information even when the bot goes offline or is reloaded
