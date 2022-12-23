@@ -84,14 +84,15 @@ public class SoapGeneralHandler {
             }
         } catch (PatternSyntaxException | NumberFormatException | ArrayIndexOutOfBoundsException e) { //If the time string is in the format 1pm, 1PM, etc.
             try {
-                if (time.contains("PM") && Integer.parseInt(time.substring(0, time.indexOf("PM"))) != 12) {
-                    hour = Integer.parseInt(time.substring(0, time.indexOf("PM"))) + 12;
+                if (time.contains("PM")) {
+                    hour = Integer.parseInt(time.substring(0, time.indexOf("PM")));
+                    hour = Integer.parseInt(time.substring(0, time.indexOf("PM"))) == 12 ? hour : hour + 12;
                     minute = 0;
                 } else if (time.contains("AM") && Integer.parseInt(time.substring(0, time.indexOf("AM"))) == 12) {
                     hour = 0;
                     minute = 0;
                 } else {
-                    hour = Integer.parseInt(time.substring(0, time.indexOf("PM")));
+                    hour = Integer.parseInt(time.substring(0, time.indexOf("AM")));
                     minute = 0;
                 }
             } catch (Exception e2) { //If the time string is in an invalid format, it will get caught here
