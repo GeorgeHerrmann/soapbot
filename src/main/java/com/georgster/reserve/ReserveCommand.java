@@ -20,25 +20,26 @@ public class ReserveCommand implements Command {
      */
     public void execute(MessageCreateEvent event) {
         List<String> message = Arrays.asList(event.getMessage().getContent().toLowerCase().split(" "));
+        String id = event.getGuild().block().getId().asString();
         if (message.size() < 2) {
             event.getMessage().getChannel().block().createMessage(help()).block();
             return;
         }
         try {
             TextChannel channel = (TextChannel) event.getMessage().getChannel().block();
-            ReserveEvent reserve = assignCorrectCommand(message, event.getGuild().block().getId().asString(), channel.getName());
+            ReserveEvent reserve = assignCorrectCommand(message, id, channel.getName());
 
-            if (ProfileHandler.checkEventDuplicates(event.getGuild().block().getId().asString(), reserve)) { //Change to eventExists()
+            if (ProfileHandler.eventExists(id, reserve.getIdentifier())) { //Change to eventExists()
                 if (!reserve.isFull()) {
                     event.getMessage().getAuthor().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
                             event.getMessage().getChannel().block().createMessage("You have already reserved for this event").block();
                         } else {
                             ActionWriter.writeAction("Reserving a user to event " + reserve.getIdentifier() + " in guild " + event.getGuild().block().getId().asString());
-                            ProfileHandler.removeEvent(event.getGuild().block().getId().asString(), reserve);
+                            ProfileHandler.removeEvent(id, reserve);
                             reserve.addReserved();
                             reserve.addReservedUser(user.getTag());
-                            ProfileHandler.addEvent(event.getGuild().block().getId().asString(), reserve);
+                            ProfileHandler.addEvent(id, reserve);
                             event.getMessage().getChannel().block().createMessage("Number of people reserved to event " + reserve.getIdentifier() + ": " + reserve.getReserved() + "/" + reserve.getNumPeople()).block();
                         }
                     });
@@ -48,7 +49,7 @@ public class ReserveCommand implements Command {
             } else {
                 ActionWriter.writeAction("Creating a new event " + reserve.getIdentifier() + " in guild " + event.getGuild().block().getId().asString());
                 event.getMessage().getAuthor().ifPresent(user -> reserve.addReservedUser(user.getTag()));
-                ProfileHandler.addEvent(event.getGuild().block().getId().asString(), reserve);
+                ProfileHandler.addEvent(id, reserve);
                 SoapGeneralHandler.runDaemon(() -> ReserveEventHandler.scheduleEvent(reserve, event.getMessage().getChannel().block(), event.getGuild().block().getId().asString()));
                 String messageString = "";
                 if (reserve.isTimeless()) {
