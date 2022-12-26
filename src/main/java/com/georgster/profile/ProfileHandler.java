@@ -10,11 +10,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.georgster.reserve.ReserveEvent;
+import com.georgster.events.reserve.ReserveEvent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 
 import java.io.FileWriter;
 
@@ -112,49 +112,21 @@ public class ProfileHandler {
     }
 
     /**
-     * Adds an event to the server's event list.
+     * Adds an object to the server's profile file based on the supplied {@code ProfileType}.
      * 
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
-     * @param event the {@code ReserveEvent} object to be added to the server's event list.
+     * @param object the object to be added to the profile file.
+     * @param type the type of the server's profile that the object should be added to.
      */
-    public static void addEvent(String id, ReserveEvent event) {
+    public static void addObject(String id, Object object, ProfileType type) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        if (serverProfileExists(id)) { //Writes a JSON representation of the event to the events.json file
-            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString(), true)) {
-                writer.write(parser.toJson(event));
+        if (serverProfileExists(id)) { //Writes a JSON representation of the object to the profile file
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString(), true)) {
+                writer.write(parser.toJson(object));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Checks if an event is already in the server's event list.
-     * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
-     * @param event the {@code ReserveEvent} object to be checked against the server's event list.
-     * @return true if the event is already in the server's event list, false otherwise.
-     * @deprecated This method is not currently used. Use eventExists() instead.
-     */
-    @Deprecated
-    public static boolean checkEventDuplicates(String id, ReserveEvent event) {
-        Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        String eventJson = "";
-        if (serverProfileExists(id)) {
-            JsonElement element = parser.toJsonTree(event);
-            if (element.isJsonObject()) {
-                eventJson = element.getAsJsonObject().get("identifier").getAsString();
-                try {
-                    String events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
-                    if (events.contains(": \"" + eventJson + "\"")) { //If the provided ReserveEvent is in the file, return true
-                        return true;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return false; //If any
     }
 
     /**
@@ -197,18 +169,14 @@ public class ProfileHandler {
                             }
                             reader.endArray();
                         }
+                        if (reader.nextName().equals("type")) {
+                            reader.skipValue();
+                        }
                         return new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers);
                     } else {
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
+                        while(reader.peek() != JsonToken.END_OBJECT) {
+                            reader.skipValue();
+                        }
                     }
                     reader.endObject();
                 }
@@ -220,23 +188,20 @@ public class ProfileHandler {
     }
 
     /**
-     * Removes an event from the server's event list.
+     * Removes an object from the server's profile file based on the supplied {@code ProfileType}.
      * 
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
-     * @param event the {@code ReserveEvent} object to be removed from the server's event list.
+     * @param object the object to be removed from the profile file.
+     * @param type the type of the server's profile that the object should be removed from.
      */
-    public static void removeEvent(String id, ReserveEvent event) {
+    public static void removeObject(String id, Object object, ProfileType type) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
         if (serverProfileExists(id)) {
-            String events = "";
-            try {
-                events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString())) {
-                events = events.replace(parser.toJson(event), ""); //Remove the event from the file
-                writer.write(events);
+            String objects = "";
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString())) {
+                objects = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json"))));
+                objects = objects.replace(parser.toJson(object), ""); //Remove the event from the file
+                writer.write(objects);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -255,6 +220,27 @@ public class ProfileHandler {
             try  {
                 String contents = Files.readString(Path.of(PROFILELOCATION, id, "events.json"));
                 return contents.contains(": \"" + identifier + "\"");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if an object exists in the server's profile file based on the supplied {@code ProfileType}.
+     * 
+     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
+     * @param object the object to be checked against the profile file.
+     * @param type the type of the server's profile that the object should be checked against.
+     * @return true if the object exists in the server's profile file, false otherwise.
+     */
+    public static boolean objectExists(String id, Object object, ProfileType type) {
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
+        if (serverProfileExists(id)) {
+            try {
+                String contents = Files.readString(Path.of(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")));
+                return contents.contains(parser.toJson(object));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -302,18 +288,14 @@ public class ProfileHandler {
                             }
                             reader.endArray();
                         }
+                        if (reader.nextName().equals("type")) {
+                            reader.skipValue();
+                        }
                         events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
                     } else {
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
+                       while(reader.peek() != JsonToken.END_OBJECT) {
+                           reader.skipValue();
+                       }
                     }
                     reader.endObject();
                 }

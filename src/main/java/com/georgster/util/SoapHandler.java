@@ -11,12 +11,12 @@ import discord4j.core.object.entity.channel.MessageChannel;
 /**
  * Intended to house all the general SOAP Bot methods that are not specific to any one class.
  */
-public class SoapGeneralHandler {
+public class SoapHandler {
 
     /**
      * Private constructor to prevent instantiation.
      */
-    private SoapGeneralHandler() {
+    private SoapHandler() {
         throw new IllegalStateException("Utility class");
     }
 

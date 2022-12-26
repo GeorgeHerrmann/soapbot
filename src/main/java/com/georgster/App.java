@@ -27,13 +27,13 @@ import java.util.List;
 
 import com.georgster.api.ActionWriter;
 import com.georgster.dm.MessageCommand;
+import com.georgster.events.SoapEventHandler;
+import com.georgster.events.reserve.EventCommand;
+import com.georgster.events.reserve.ReserveCommand;
+import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
-import com.georgster.reserve.EventCommand;
-import com.georgster.reserve.ReserveCommand;
-import com.georgster.reserve.ReserveEvent;
-import com.georgster.reserve.ReserveEventHandler;
-import com.georgster.util.SoapGeneralHandler;
+import com.georgster.util.SoapHandler;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.music.LavaPlayerAudioProvider;
 import com.georgster.music.PlayMusicCommand;
@@ -103,8 +103,8 @@ public class App {
             //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
             List<GuildChannel> channels = event.getGuild().getChannels().buffer().blockFirst();
             for (ReserveEvent reserve : ProfileHandler.getEvents(guild)) { //For each event in the guild's events list
-              SoapGeneralHandler.runDaemon(() -> 
-                ReserveEventHandler.scheduleEvent(reserve, (MessageChannel) SoapGeneralHandler.channelMatcher(reserve.getChannel(), channels), guild) //We schedule the event again
+              SoapHandler.runDaemon(() -> 
+                SoapEventHandler.scheduleEvent(reserve, (MessageChannel) SoapHandler.channelMatcher(reserve.getChannel(), channels), guild) //We schedule the event again
               );
             }
           }
@@ -137,7 +137,7 @@ public class App {
           for (final Map.Entry<String, Command> entry : commands.entrySet()) { //We check the message against each command in the commands map
             if (content.toLowerCase().startsWith('!' + entry.getKey())) { //If it matches we create a new thread and execute the command
                 ActionWriter.writeAction("Placing the " + entry.getKey() + " command on a new Daemon thread and executing it");
-                SoapGeneralHandler.runDaemon(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
+                SoapHandler.runDaemon(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }
           }

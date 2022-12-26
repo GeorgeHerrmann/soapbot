@@ -1,7 +1,23 @@
-package com.georgster.reserve;
+package com.georgster.events.reserve;
 
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.georgster.api.ActionWriter;
+import com.georgster.events.SoapEvent;
+import com.georgster.events.SoapEventType;
+import com.georgster.profile.ProfileHandler;
+import com.georgster.profile.ProfileType;
+import com.georgster.util.SoapHandler;
+
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 /**
  * A ReserveEvent object is created when a user uses the !reserve command
@@ -13,13 +29,14 @@ import java.util.List;
  * Unlimited has no associated number of people needed to start the event. A ReserveEvent
  * cannot be both Timeless and Unlimited.
  */
-public class ReserveEvent {
+public class ReserveEvent implements SoapEvent {
     private String identifier;
     private int numPeople;
     private int numReserved;
     private String time;
     private String channel;
     private List<String> reservedUsers;
+    private SoapEventType type = SoapEventType.RESERVE;
     
     /**
      * Constructs a ReserveEvent object with an identifier, number of people, number of people
@@ -70,7 +87,7 @@ public class ReserveEvent {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.numReserved = 1;
-        this.time = "00:00"; //A Timeless event will always be at 00:00
+        this.time = "99:99"; //A Timeless event will always be at 99:99
         this.channel = channel;
         reservedUsers = new ArrayList<>();
     }
@@ -90,6 +107,38 @@ public class ReserveEvent {
         this.numReserved = 1;
         this.channel = channel;
         reservedUsers = new ArrayList<>();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean fulfilled() {
+        if (isTimeless()) {
+            return numReserved >= numPeople;
+        } else {
+            LocalTime eventTime = LocalTime.parse(getTime()); //We keep the time as a string in the event, so we need to parse it to a LocalTime object
+            long seconds = (LocalTime.now(ZoneId.of("-05:00")).until(eventTime, ChronoUnit.SECONDS)); //How many seconds until the event is scheduled to start
+            return seconds <= 0;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void onFulfill(Guild guild) {
+        String id = guild.getId().asString();
+        if (ProfileHandler.eventExists(id, getIdentifier())) { //As long as the event still exists in the server's events.json
+            Channel discordChannel = SoapHandler.channelMatcher(channel, guild.getChannels().buffer().blockFirst()); //We get the channel the event was reserved in
+            ActionWriter.writeAction("Starting event " + identifier);
+            StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
+            "\t- " + numReserved + "/" + numPeople + " reserved with the following people:");
+            for (String name : reservedUsers) { //We add the names of the people who reserved to the event
+                Member member = SoapHandler.memberMatcher(name, ((TextChannel) discordChannel).getGuild().block().getMembers().buffer().blockFirst());
+                response.append("\n\t\t- " + member.getMention());
+            }
+            SoapHandler.sendTextMessageInChannel(response.toString(), (MessageChannel) discordChannel);
+            ProfileHandler.removeObject(id, this, ProfileType.EVENTS); //After the event has started, we remove it from the server's events.json
+        }
     }
 
     /**
@@ -179,6 +228,15 @@ public class ReserveEvent {
     }
 
     /**
+     * Returns the type of the event.
+     * 
+     * @return the type of the event
+     */
+    public SoapEventType getType() {
+        return type;
+    }
+
+    /**
      * Returns true if the event is full, false otherwise.
      * 
      * @return true if the event is full, false otherwise
@@ -193,7 +251,7 @@ public class ReserveEvent {
      * @return true if the event has no time, false otherwise
      */
     public boolean isTimeless() {
-        return time.equals("00:00");
+        return time.equals("99:99");
     }
 
     /**
