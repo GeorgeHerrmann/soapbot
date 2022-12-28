@@ -33,6 +33,7 @@ import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
+import com.georgster.util.CommandParser;
 import com.georgster.util.SoapHandler;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.music.LavaPlayerAudioProvider;
@@ -139,6 +140,20 @@ public class App {
                 ActionWriter.writeAction("Placing the " + entry.getKey() + " command on a new Daemon thread and executing it");
                 SoapHandler.runDaemon(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
+            } else if (content.toLowerCase().startsWith("!test")) {
+              String pattern = "1|O V|R";
+              CommandParser parser = new CommandParser(pattern);
+              StringBuilder response = new StringBuilder("The CommandParser has parsed the following with pattern " + pattern + ": ");
+              try {
+                for (String s : parser.parse(content)) {
+                  response.append("\"" + s + "\" ");
+                }
+              } catch (Exception e) {
+                response = new StringBuilder("The CommandParser has thrown an exception: " + e.getMessage());
+                e.printStackTrace();
+              }
+              SoapHandler.sendTextMessageInChannel(response.toString(), event.getMessage().getChannel().block());
+              break;
             }
           }
         });
