@@ -18,9 +18,13 @@ import java.util.List;
  * 
  * The "req" or required can be defined by putting a R for required, or an O for optional.
  * 
- * A pattern that has a varying number of arguments and an optional argument may
- * not always return the correct list of arguments, unless specific argument identifiers
- * are set using the addIdentifiers() method.
+ * A pattern that has a varying number of arguments may not always return the desired
+ * output unless the parser is given identifiers and/or rules. Identifiers are strings
+ * that are used to identify arguments, and rules are strings that define how the parser
+ * should parse the command. The parser will return the first set of arguments that match
+ * the pattern, and the identifiers and rules will be used to determine how argument
+ * are "grouped" for the returning list. Rules and identifiers are optional, but may help
+ * the parser return the desired output.
  * 
  * For example, a valid pattern would be "V|R 1|R" which means that the command must 
  * start with a varying number of required arguments, followed by a required argument.
@@ -36,10 +40,10 @@ import java.util.List;
  * @author George Herrmann
  */
 public class CommandParser {
-    private String pattern;
-    private List<String> rulesList;
-    private List<String> patternList;
-    private List<String> identifiers;
+    private String pattern; //A string that defines the arguments of a command
+    private List<String> rulesList; //A list of the rules split by spaces
+    private List<String> patternList; //A list of the pattern split by spaces
+    private List<String> identifiers; //A list of the identifiers
 
     /**
      * Creates a new CommandParser with the given pattern.
@@ -67,7 +71,7 @@ public class CommandParser {
      * Identifiers may help the parser if there is only one variable argument, but is really only necessary
      * if there are multiple variable arguments.
      * 
-     * NOTE: Adding rules and/or identifiersis only necessary if you have a varying amount of 
+     * NOTE: Adding rules and/or identifiers is only necessary if you have a varying amount of 
      * arguments, otherwise the parser will automatically correctly parse the command.
      * @param identifiers The identifiers to use for parsing commands.
      */
@@ -78,24 +82,36 @@ public class CommandParser {
     }
 
     /**
+     * Clears all identifiers from the parser.
+     */
+    public void clearIdentifiers() {
+        identifiers.clear();
+    }
+
+    /**
      * Adds rules to the parser. Rules are strings that define the format for the arguments
      * of a command. If a rule is set using this method, a rule for every argument in the
      * pattern must be set. For example: if the pattern is "V|R 1|R", then two rules must be set.
      * For optional arguments, the parser will not throw an exception if the argument does not
      * match the rule, but will simply ignore it. However, if the argument is required and
-     * does not match the rule, the parser will throw an exception. Multiple rules for
-     * one argument can be specified with a |.
+     * does not match the rule, the parser will throw an exception. Multiple rules for one argument 
+     * can be specified with a | for 'or' and a & for 'and', however you can only pair 'and' for E rules (as E rules are mutually exclusive)
+     * because there is no reason you would want, for example, an argument to be the last argument OR a number,
+     * since that means anything that is a number is already valid.
      * 
      * Valid rules are as follows:
      * - "N" if this argument must contain a number
      * - "!N" if this argument must not contain a number
      * - "S" if this argument must contain a string
      * - "!S" if this argument must not contain a string
+     * - "I" if this argument must be an identifier
      * - "T" if this argument must contain a time
      * - "X" if this argument has no rules
+     * - "E1" if this argument must be the last argument
+     * - "E2" if this argument must be the second to last argument
      * 
      * For example: the reserve command is in the format V|R 1|O 1|O. The varying
-     * argument has no rules, however both the optional argument must contain a number.
+     * argument has no rules, however both the optional arguments must contain a number.
      * Therefore, the rules would be "X N N". With these rules in place, a parse() of
      * "reserve testing parser 2" would return ["testing parser", "2"]. If no rules
      * were set, the parse() would return "testing" "parser" "2".
@@ -112,8 +128,8 @@ public class CommandParser {
             throw new IllegalArgumentException("The number of rules must match the number of arguments in the pattern.");
         } else {
             for (String s : split) {
-                if (!s.equals("N") && !s.equals("!N") && !s.equals("S") && !s.equals("!S") && !s.equals("X")) {
-                    throw new IllegalArgumentException("Rules must be in the format N, !N, S, !S, or X.");
+                if (!s.contains("N") && !s.contains("!N") && !s.contains("S") && !s.contains("!S") && !s.contains("X") && !s.contains("T") && !s.contains("E") && !s.contains("I")) {
+                    throw new IllegalArgumentException("Rules must be in the format N, !N, S, !S, I, X, T, E1, or E2.");
                 } else {
                     rulesList.add(s);
                 }
@@ -125,7 +141,7 @@ public class CommandParser {
      * Parses the given input and returns a list of arguments that match the pattern of
      * this CommandParser. If the input does not match the pattern, an IllegalArgumentException
      * is thrown. If this parser has rules and/or identifiers set, they are used to help
-     * accurately parse the input, otherwise the parser will parse in this order:
+     * accurately parse the input, otherwise the parser will indiscriminately parse in this order:
      * 
      * 1. All required arguments, with varying arguments being treated as one argument.
      * 2. All optional arguments, with varying arguments being treated as one argument.
@@ -138,111 +154,163 @@ public class CommandParser {
         List<String> command = new ArrayList<>(Arrays.asList(input.split(" "))); //Get each argument of the command
         command.remove(0);
         List<String> args = new ArrayList<>();
+        List<Integer> added = new ArrayList<>();
         if (rulesList.isEmpty()) {
             for (int i = 0; i < patternList.size(); i++) {
                 rulesList.add("X");
             }
         }
-        int examined = 0;
         int loc = 0;
         int holder = 0;
         /*
          * First examine only required arguments, varying arguments get one spot here 
-         * If its a number it gets that many spots, if its a V it gets one spot. Examined
-         * is the number of arguments in command that have been examined. Loc is the
+         * otherwise if its a number it gets that many spots. Loc is the
          * index in command that is being examined. Holder is the index in args that
-         * the argument is being added to. If there is not enough room for required arguments
-         * we throw an IllegalArgumentException.
+         * the argument is being added to. Added is a list of the indexes in command that
+         * have been filled. If there is not enough room for required arguments, or no arguments
+         * satisfy the rule for the argument we throw an IllegalArgumentException.
          */
-        for (String s : patternList) {
+        for (String s : patternList) { //The list of patterns determines how long our output will be
             String[] split = s.split("|");
-            if (split[2].equals("R")) {
-                if (split[0].equals("V")) {
-                    args.add(holder, command.get(loc));
-                    examined ++;
-                    holder ++;
-                    loc ++;
-                } else {
-                    int num = Integer.parseInt(split[0]);
-                    if (command.size() - examined < num) {
-                        throw new IllegalArgumentException("Not enough arguments for required arguments.");
+            if (split[2].equals("R")) { //We only want to examine required arguments first
+                /*
+                 * We will continue moving loc until we find an argument that matches the rule
+                 */
+                while (!matchesRule(command.get(loc), rulesList.get(holder), command) || added.contains(loc)) {
+                    loc++;
+                    if (loc >= command.size()) { //If we run out of room, no arguments satisfy the rule or pattern
+                        throw new IllegalArgumentException("The command does not match the pattern.");
                     }
+                }
+                if (split[0].equals("V")) { //Varying arguments, for now, get one spot
+                    args.add(command.get(loc));
+                    holder++; //Holder is maintained throughout each "section" of the parse
+                    added.add(loc);
+                    loc = 0; //We want to examine each argument on every pass
+                } else {
                     StringBuilder sb = new StringBuilder();
+                    int num = Integer.parseInt(split[0]);
+                    if (loc + num > command.size()) { //If there is not enough room for the number of arguments, we throw an exception
+                        throw new IllegalArgumentException("The command does not match the pattern.");
+                    }
                     for (int i = 0; i < num; i++) {
-                        sb.append(command.get(loc + i)).append(" ");
-                    }
-                    args.add(holder, sb.toString().trim());
-                    examined += num;
-                    loc += num;
-                    holder ++;
-                }
-            }
-        }
-        loc = 0;
-        holder = 0;
-        /*
-         * Now examine optional arguments. If examined is less than the size of command
-         * then we have space for optional arguments, otherwise we skip this step.
-         * If the argument is a number, we add that many arguments to args.
-         * If the argument is a V, we add one argument to args. If the argument in command
-         * we are examining matches the current spot in args, we must shift the rest of args
-         * to the right by one, and add the argument to the current spot. If the argument
-         * does not match the current spot in args, we add it to the next spot in args.
-         */
-        for (String s : patternList) {
-            if (examined < command.size()) {
-                String[] split = s.split("|");
-                if (split[2].equals("O")) {
-                    if (split[0].equals("V")) {
-                        try {
-                            if (loc < command.size()) {
-                                int x = loc;
-                                for (int i = holder; i < args.size(); i++) {
-                                    args.set(i, shiftElementsRight(args.get(i), command.subList(x + 1, command.size())));
-                                    x++;
-                                }
-                                args.add(holder, command.get(loc));
-                            } else {
-                                args.add(holder, command.get(loc));
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            args.add(holder, command.get(loc));
-                        }
-                        holder ++;
+                        sb.append(command.get(loc) + " ");
+                        added.add(loc);
                         loc ++;
-                        examined ++;
-                    } else {
-                        int num = Integer.parseInt(split[0]);
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < num; i++) {
-                            sb.append(command.get(loc + i)).append(" ");
-                        }
-                        try {
-                            if (loc < command.size()) {
-                                int x = loc;
-                                for (int i = holder; i < args.size(); i++) {
-                                    args.set(i, shiftElementsRight(args.get(i), command.subList(x + 1, command.size())));
-                                    x++;
-                                }
-                                args.add(holder, command.get(loc));
-                            } else {
-                                args.add(holder, sb.toString().trim());
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            args.add(holder, sb.toString().trim());
-                        }
-                        holder ++;
-                        loc += num;
-                        examined += num;
                     }
-                } else {
-                    loc += args.get(holder).split(" ").length; //We must take into account the required argument already examined
+                    args.add(sb.toString().trim());
                     holder ++;
+                    loc = 0;
                 }
+            }
+        }
+        /* Required arguments done */
+        loc = 0;
+        holder = 0;
+        
+        /*
+         * Now examine optional arguments, if any exist. If there is not enough room for optional arguments,
+         * this step is effectively skipped. Instead of throwing an exception is no arguments satisfy the rule for
+         * the part of the pattern, we just move on to the next part of the pattern. Since we have already filled
+         * some spots for the required arguments, we may need to shift elements in args to make room for optional
+         * arguments.
+         */
+        for (String s : patternList) { //We loop through again, this time examining optional arguments
+            String[] split = s.split("|");
+            if (split[2].equals("O")) {
+                /* We move loc until we have found an argument that matches the rule, or until we hit a new argument */
+                while (loc < command.size() && (!matchesRule(command.get(loc), rulesList.get(holder), command) || added.contains(loc))) {
+                    loc++;
+                    /*if (loc >= command.size()) {
+                        break;
+                    }*/
+                }
+                if (loc < command.size()) { //If we have not run out of room, we have found an argument that matches the rule
+                    if (split[0].equals("V")) { //Varying arguments still get one spot
+                        //if (loc > command.size()) break;
+                        StringBuilder sb = new StringBuilder();
+                        args.add(holder, ""); //We add a new argument at the spot
+                        /*
+                         * In order to ensure that the arguments are in the correct order, and that we are able to
+                         * move elements around later on. We follow this shifting process:
+                         * - adjuster1 keeps track of any multiple word arguments that we have passed,
+                         *  so that we can shift the rest of the arguments to the right by the correct amount.
+                         * - adjuster2 is the same, however it will be used to shift the rest of the arguments
+                         *  past the optional argument to the right by the correct amount.
+                         * - If we need to shift elements to the right, we do so by calling shiftElementsRight
+                         *  on each element beyond the optional argument, and append the "lost" element to
+                         *  the end of the optional argument we are adding in.
+                         */
+                        int adjuster1 = 0; //It starts at zero
+                        for (int x = 0; x < holder; x++) { //We want to keep note of all the arguments we have passed
+                            if (args.get(x).split(" ").length > 1) { //Holder will already reflect any single-word arguments
+                                adjuster1 += args.get(x).split(" ").length - 1; //So we only need to adjust for multi-word arguments
+                            }
+                        }
+                        int adjuster2 = adjuster1 == 0 ? adjuster1 : adjuster1 - 1; //Adjuster2 keeps track of arguments beyond the optional argument we're adding in
+                        if (holder < args.size() - 1) { //If we are not at the end, we're going to shift the rest of the args to the right
+                            for (int j = 0; j < (args.size() - holder) - 1; j++) { //We need to shift the rest of the arguments beyond the index of holder
+                                adjuster2 += args.get(holder + j + 1).split(" ").length - 1; //Adjuster2 will keep track of multi-word arguments beyond holder's index
+                                args.set(holder + j + 1, shiftElementsRight(args.get(holder + j + 1), command.subList((holder + j + 1 + adjuster2), command.size())));
+                            }
+                        }
+                        if (holder >= args.size() - 1) { //We simply want to add what's at loc if we're already at the end
+                            sb.append(command.get(loc) + " ");
+                        } else { //Otherwise shiftElementsRight has already added it in, so we need to add what was lost by shifting
+                            sb.append(command.get(holder + adjuster1) + " ");
+                        }
+                        added.add(loc); //Add our new argument to the list of added arguments
+                        args.set(holder, sb.toString().trim());
+                        holder ++;
+                        loc = 0;
+                    } else {
+                        StringBuilder sb = new StringBuilder();
+                        int num = Integer.parseInt(split[0]);
+                        if (loc + num > command.size()) {
+                            break;
+                        }
+                        if (loc < command.size()) {
+                            args.add(holder, "");
+                            int adjuster1 = num - 1;
+                            for (int x = 0; x < holder; x++) {
+                                if (args.get(x).split(" ").length > 1) {
+                                    adjuster1 += args.get(x).split(" ").length - 1;
+                                }
+                            }
+                            int adjuster2 = adjuster1 == 0 ? adjuster1 : adjuster1 - 1;
+                            for (int i = 0; i < num; i++) { //This process is identical to the one above, except we are adding in multiple arguments
+                                if (holder < args.size() - 1) { //If we are not at the end, we're going to shift the rest of the args to the right
+                                    for (int j = 0; j < (args.size() - holder) - 1; j++) {
+                                        adjuster2 += args.get(holder + j + 1).split(" ").length - 1;
+                                        args.set(holder + j + 1, shiftElementsRight(args.get(holder + j + 1), command.subList((holder + j + 1 + adjuster2), command.size())));
+                                    }
+                                }
+                                if (holder >= args.size() - 1) {
+                                    sb.append(command.get(loc) + " ");
+                                } else {
+                                    if (num > 1) {
+                                        sb.append(command.get((holder + adjuster1 - 1) + i) + " ");
+                                    } else {
+                                        sb.append(command.get(holder + adjuster1) + " ");
+                                    }
+                                }
+                                added.add(loc);
+                                loc ++;
+                            }
+                            args.set(holder, sb.toString().trim());
+                            holder ++;
+                            loc = 0;
+                        }
+                    }
+                }
+            } else {
+                holder ++;
             }
         }
         loc = 0;
         holder = 0;
+
+        
         /*
          * Now examine the varying arguments. If examined is less than the size of command
          * then we have space for varying arguments, otherwise we skip this step.
@@ -250,64 +318,80 @@ public class CommandParser {
          * if necessary. We do this until we reach the end of command, or we reach an identifier
          * from the identifiers list.
          */
-        for (String s : patternList) {
-            if (examined < command.size()) {
-                String[] split = s.split("|");
-                if (split[0].equals("V")) {
-                        while (examined < command.size() && !identifiers.contains(command.get(loc))) {
-                            int x = loc;
-                            List<String> temp = Arrays.asList(args.get(holder).split(" "));
-                            String leftover = temp.get(0);
-                            for (int i = holder; i < args.size(); i++) { //Shift all following elements to the right
-                                temp = Arrays.asList(args.get(i).split(" "));
-                                if (temp.size() > 1) {
-                                    temp = new ArrayList<>(temp.subList(1, temp.size()));
-                                    temp.addAll(command.subList(x + 1, command.size()));
-                                    args.set(i, shiftElementsRight(args.get(i), temp));
-                                } else {
-                                    args.set(i, shiftElementsRight(args.get(i), command.subList(x + 1, command.size())));
-                                }
-                                x++;
-                            }
-                            temp = Arrays.asList(args.get(holder).split(" "));
-                            if (temp.size() > 1) {
-                                args.set(holder, leftover + " " + args.get(holder)); //Add the new element to the current spot
-                            } else {
-                                args.set(holder, command.get(loc) + " " + args.get(holder)); //Add the new element to the current spot
-                            }
-                            loc ++;
-                            examined++;
+        for (String s : patternList) { //One final pass through the pattern list
+            String[] split = s.split("|");
+            if (split[0].equals("V")) { //Only examine varying arguments
+                /*
+                 * We want to find the first argument that matches the rule for the varying argument,
+                 * and that has not already been added to args (since we've already examined) the rules
+                 * for other arguments.
+                 */
+                while (loc < command.size() && (!matchesRule(command.get(loc), rulesList.get(holder), command) || added.contains(loc))) {
+                    loc++;
+                    if (loc >= command.size()) {
+                        break;
+                    }
+                }
+                /*
+                 * Identifiers are used to "stop" the varying arguments. We want to loop through the entire
+                 * command now, adding unused arguments to args and shifting if necessary. The shifting process
+                 * is extremely similar as before, but since we're not adding in new arguments to our args list,
+                 * we adjust the numbers a bit since we're simply modifying the existing arguments.
+                 */
+                while (loc < command.size() && !identifiers.contains(command.get(loc)) && !added.contains(loc)) {
+                    StringBuilder sb = new StringBuilder();
+                    int adjuster1 = 0; //Now adjuster keeps track of all the arguments that have been added to args
+                    for (int x = 0; x <= holder; x++) {
+                        adjuster1 += args.get(x).split(" ").length;
+                    }
+                    int adjuster2 = adjuster1 == 0 ? adjuster1 : adjuster1 - 1; //Makes sure adjuster2 doesn't go negative
+                    if (holder < args.size() - 1) { //If we are not at the end, we're going to shift the rest of the args to the right
+                        for (int j = 0; j < (args.size() - holder) - 1; j++) { //We shift just as before
+                            adjuster2 += args.get(holder + j + 1).split(" ").length - 1;
+                            args.set(holder + j + 1, shiftElementsRight(args.get(holder + j + 1), command.subList((holder + j + adjuster2 + 1), command.size())));
                         }
-                        holder ++;
-                } else {
-                    loc += args.get(holder).split(" ").length; //We must take into account the required argument already examined
-                    holder ++;
+                    }
+                    if (holder >= args.size() - 1) {
+                        sb.append(command.get(loc) + " ");
+                    } else {
+                        sb.append(command.get(holder + adjuster1) + " ");
+                    }
+                    added.add(loc);
+                    args.set(holder, args.get(holder) + " " + sb.toString().trim());
+                    loc ++;
                 }
             }
+            holder ++; //Since we're not going to add any new arguments, we're always going to increment holder
         }
-        return args;
+        
+        return args; //If we have made it here, the input command was valid and the parser gave us a valid output
         
     }
     /**
      * Shifts all elements (separated by spaces) in one to the elements in follows to the right by one.
      * For example: shiftElementsRight("Hello world", ["world", "testing", "this"]) would return
      * "world testing this." Another example would be shiftElementsRight("hello", ["world"]) would
-     * return "world". This method should only be called from parse if there are extra spots available in args,
-     * as it will shift all elements in one to the right without checking if there is enough room.
+     * return "world".
      * 
      * @param one The string to shift the elements of
      * @param follows The list of elements following the string
      * @return The string with the elements shifted to the right
      */
     private String shiftElementsRight(String one, List<String> follows) {
-        if (one == null || one.equals("") || follows == null || follows.isEmpty()) {
+        if (one == null || one.equals("") || follows == null || follows.isEmpty()) { //Effectively if parser reached end of command
             return one;
+        } else if (one.split(" ").length == 1) { //If there is only one element in one, we just want the next element in follows
+            try {
+                return follows.get(1);
+            } catch (IndexOutOfBoundsException e) { //Again, if the parser reached the end of the command
+                return follows.get(0);
+            }
         }
         String[] split = one.split(" ");
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < split.length; i++) {
-            if (i == follows.size()) break;
-            sb.append(follows.get(i)).append(" ");
+        for (int i = 0; i < split.length; i++) { //Go through each element in one
+            if (i == follows.size()) break; //If one has more elements than follows, this ensures we don't go out of bounds
+            sb.append(follows.get(i)).append(" "); //We maintain number of elements in one, adding the next element in follows
         }
         return sb.toString().trim();
     }
@@ -322,44 +406,95 @@ public class CommandParser {
      * - "!S" if this argument must not contain a string
      * - "T" if this argument must contain a time
      * - "X" if this argument has no rules
-     * Multiple rules for
-     * one argument can be specified with a |.
+     * - "I" if this argument must be an identifier
+     * - "E1" if this argument must is the last argument
+     * - "E2" if this argument must be the second to last argument
+     * 
+     * Multiple rules for one argument can be specified with a | for or
+     * and a & for and, however you can only pair 'and' for E rules (as E rules are mutually exclusive)
+     * because there is no reason you would want, for example, an argument to be the last argument OR a number,
+     * since that means anything that is a number is already valid.
      * 
      * @param arg The argument to check
      * @param rule The rule to check against
      * @return True if the argument matches the rule, false otherwise
      */
-    private boolean matchesRule(String arg, String rule) {
-        if (rule.contains("X")) return true;
-        boolean returns = false;
-        if (rule.contains("N") && !returns) {
+    private boolean matchesRule(String arg, String rule, List<String> command) {
+        if (rule.contains("X")) return true; //X rules are always valid
+        boolean returns = false; //Returns is used to keep track of whether or not the argument matches the rule
+        boolean and = true; //And is used to keep track of whether or not we are using an 'and' rule
+
+        if (rule.contains("E")) { //For "ending" arguments
+            if (rule.contains("&")) and = false; //If we are using an 'and' rule, 
+            String[] split = rule.split("&");
+            for (String s : split) {
+                if (s.contains("E")) {
+                    int num = Integer.parseInt(s.substring(1));
+                    if (num == 1) {
+                        returns = arg.equals(command.get(command.size() - 1));
+                    } else if (num == 2) {
+                        returns = arg.equals(command.get(command.size() - 2));
+                    }
+                    if (!returns) {
+                        return false; //E rules are mutually exclusive, so if we fail here, we can return false
+                    }
+                }
+            }
+        }
+        /* For each rule, we only want to examine if returns isn't already true or if we are using an 'and' rule */
+        if (rule.contains("N") && (!returns || !and)) { //If the arg must be a number
             try {
                 Integer.parseInt(arg);
                 returns = !rule.contains("!");
+                if (returns) and = true;
             } catch (NumberFormatException e) {
                 returns = rule.contains("!");
+                if (returns) and = true;
             }
-        } if (rule.contains("S") && !returns) {
+        }
+        if (rule.contains("S") && (!returns || !and)) { //If the arg must have a letter
             for (int i = 0; i < arg.length(); i++) {
                 if (Character.isLetter(arg.charAt(i))) {
                     returns = !rule.contains("!");
+                    if (returns) and = true;
                 }
             }
-        } if (rule.contains("T") && !returns) {
+        }
+        if (rule.contains("T") && (!returns || !and)) { //If the arg must be in a time format the timeConverter accepts
             try {
                 SoapHandler.timeConverter(arg);
                 returns = true;
+                if (returns) and = true;
             } catch (IllegalArgumentException e) {
                 returns = false;
+                if (returns) and = true;
             }
         }
-        return returns;
+        if (rule.contains("I") && (!returns || !and)) { //If the arg must be an identifier
+            if (identifiers.contains(arg)) {
+                returns = true;
+            } else {
+                returns = false;
+            }
+            if (returns) and = true;
+        }
+        return (returns && and); //Both returns and and must be true for the argument to match the rule
     }
 
+    /**
+     * Returns this parser's pattern
+     * 
+     * @return The pattern of this parser
+     */
     public String getPattern() {
         return pattern;
     }
 
+    /**
+     * Sets this parser's pattern
+     * 
+     * @param pattern The new pattern for this parser
+     */
     public void setPattern(String pattern) {
         this.pattern = pattern;
     }
