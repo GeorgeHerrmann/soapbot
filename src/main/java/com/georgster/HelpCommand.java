@@ -4,13 +4,17 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.Map;
 
 import com.georgster.api.ActionWriter;
+import com.georgster.util.CommandParser;
+import com.georgster.util.GuildManager;
+import com.georgster.util.ParseBuilder;
 
 /**
  * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
  */
 public class HelpCommand implements Command {
 
-    Map<String, Command> commands; //A Map of all commands SOAP Bot has
+    private static final String PATTERN = "1|R"; //A regex pattern to parse the contents of a !help command request
+    private Map<String, Command> commands; //A Map of all commands SOAP Bot has
 
     /**
      * Creates a HelpCommand which contains a Map of all of SOAP Bot's commands and their associated object.
@@ -24,13 +28,19 @@ public class HelpCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event) {
-        StringBuilder message = new StringBuilder(event.getMessage().getContent().toLowerCase());
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        CommandParser parser = new ParseBuilder(PATTERN).build();
+        parser.parse(event.getMessage().getContent());
+        String arg;
+        try {
+            arg = parser.get(1);
+        } catch (IndexOutOfBoundsException e) {
+            arg = "";
+        }
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
-        message.delete(message.indexOf("!help"), message.indexOf("!help") + 6);
         ActionWriter.writeAction("Having the HelpCommand parser parse the contents of a !help command request");
         for (final Map.Entry<String, Command> entry : commands.entrySet()) {
-            if (message.toString().startsWith(entry.getKey())) {
+            if (arg.toLowerCase().equals(entry.getKey())) {
                 response = new StringBuilder(entry.getValue().help());
                 break;
             } else {
@@ -38,7 +48,7 @@ public class HelpCommand implements Command {
             }
         }
         ActionWriter.writeAction("Responding to a !help command request");
-        event.getMessage().getChannel().block().createMessage(response.toString()).block();
+        manager.sendText(response.toString());
     }
 
     /**

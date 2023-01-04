@@ -2,6 +2,8 @@ package com.georgster.music;
 
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
+import com.georgster.util.CommandParser;
+import com.georgster.util.GuildManager;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -13,6 +15,7 @@ public class SkipMusicCommand implements Command {
 
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
+    private static final String PATTERN = "1|O";
 
     /**
      * Will skip the currently playing track or all tracks in the queue.
@@ -30,14 +33,15 @@ public class SkipMusicCommand implements Command {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(MessageCreateEvent event) {
+    public void execute(MessageCreateEvent event, GuildManager manager) {
         if (scheduler.isActive()) {
-            String message = event.getMessage().getContent();
-            if (message.contains("all")) {
+            CommandParser parser = new CommandParser(PATTERN);
+            parser.parse(event.getMessage().getContent().toLowerCase());
+            if (parser.get(1).equals("all")) {
                 scheduler.clearQueue();
-                event.getMessage().getChannel().block().createMessage("Skipping all tracks in the queue").block();
+                manager.sendText("Skipping all tracks in the queue");
             } else {
-                event.getMessage().getChannel().block().createMessage("Skipping the currently playing track").block();
+                manager.sendText("Skipping the currently playing track");
             }
             player.stopTrack();
             ActionWriter.writeAction("Skipping one or more tracks in a voice channel");

@@ -1,9 +1,12 @@
 package com.georgster;
 
+import java.util.List;
+
 import com.georgster.api.ActionWriter;
+import com.georgster.util.CommandParser;
+import com.georgster.util.GuildManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
 
 /**
  * A PongCommand simply will return all instances of a user's message of "ping"
@@ -29,21 +32,18 @@ public class PongCommand implements Command {
      * {@inheritDoc}
      */
     @Override
-    public void execute(MessageCreateEvent event) {
-        Message message = event.getMessage();
-        StringBuilder userMessage = new StringBuilder(message.getContent().toLowerCase());
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        List<String> args = CommandParser.parseGeneric(event.getMessage().getContent());
         StringBuilder fullMessage = new StringBuilder();
         ActionWriter.writeAction("Having the pong command parser check the contents of a !ping command");
         int counter = 0;
-        for (int i = 0; i < userMessage.length(); i++) {
-          if (userMessage.toString().contains(msg)) {
-            userMessage.delete(userMessage.indexOf(msg), userMessage.indexOf(msg) + 4);
-            fullMessage.append("pong!");
+        while(args.contains(msg)) {
+            args.remove(msg);
+            fullMessage.append("pong! ");
             counter++;
-          }
         }
         ActionWriter.writeAction("Responding to a !ping command request with " + counter + " pongs");
-        event.getMessage().getChannel().block().createMessage(fullMessage.toString()).block();
+        manager.sendText(fullMessage.toString());
     }
 
     /**

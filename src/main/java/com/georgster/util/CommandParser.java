@@ -44,6 +44,7 @@ public class CommandParser {
     private List<String> rulesList; //A list of the rules split by spaces
     private List<String> patternList; //A list of the pattern split by spaces
     private List<String> identifiers; //A list of the identifiers
+    private List<String> arguments; //A list of the parsed arguments
 
     /**
      * Creates a new CommandParser with the given pattern.
@@ -53,11 +54,13 @@ public class CommandParser {
      * the argument is required.
      * 
      * @param pattern The pattern to use for parsing commands.
+     * @throws IllegalArgumentException If the pattern is not in the correct format.
      */
     public CommandParser(String pattern) throws IllegalArgumentException {
         this.pattern = pattern;
         identifiers = new ArrayList<>();
         rulesList = new ArrayList<>();
+        arguments = new ArrayList<>();
         try {
             this.patternList = new ArrayList<>(List.of(pattern.split(" ")));
         } catch (Exception e) {
@@ -137,6 +140,17 @@ public class CommandParser {
         }
     }
 
+
+    /**
+     * Simply parses the input by splitting it by spaces and
+     * returns the result.
+     * 
+     * @param input The input to parse.
+     * @return A list of arguments split by spaces.
+     */
+    public static List<String> parseGeneric(String input) {
+        return List.of(input.split(" "));
+    }
     /**
      * Parses the given input and returns a list of arguments that match the pattern of
      * this CommandParser. If the input does not match the pattern, an IllegalArgumentException
@@ -364,7 +378,8 @@ public class CommandParser {
             holder ++; //Since we're not going to add any new arguments, we're always going to increment holder
         }
         
-        return args; //If we have made it here, the input command was valid and the parser gave us a valid output
+        arguments = args; //If we have made it here, the input command was valid and the parser gave us a valid output
+        return args;
         
     }
     /**
@@ -499,5 +514,214 @@ public class CommandParser {
         this.pattern = pattern;
     }
 
+    /**
+     * Returns the list of arguments parsed by this parser
+     * 
+     * @return The list of arguments parsed by this parser
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public List<String> getArguments() throws NullPointerException {
+        if (!arguments.isEmpty()) {
+            return arguments;
+        } else {
+            throw new NullPointerException("No command has been parsed by this parser yet.");
+        }
+    }
 
+    /**
+     * Returns the first argument in the parsed command that matches the given rule.
+     * 
+     * @param rule The rule to match against
+     * @return The first argument in the parsed command that matches the given rule, or null if no argument matches the rule
+     */
+    public String getMatchingRule(String rule) {
+        List<String> args = getArguments(); //Ensures that the arguments are parsed
+        for (String s : args) {
+            if (matchesRule(s, rule, args)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns all arguments in the parsed command that match the given rule.
+     * 
+     * @param rule The rule to match against
+     * @return All arguments in the parsed command that match the given rule, or an empty list if no arguments match the rule
+     */
+    public List<String> getMatchingRules(String rule) {
+        List<String> args = getArguments(); //Ensures that the arguments are parsed
+        List<String> returns = new ArrayList<>();
+        for (String s : args) {
+            if (matchesRule(s, rule, args)) {
+                returns.add(s);
+            }
+        }
+        return returns;
+    }
+
+    /**
+     * Returns a list of all required arguments in the parsed command.
+     * 
+     * @return A list of all required arguments in the parsed command
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public List<String> getRequired() throws NullPointerException {
+        List<String> args = getArguments(); //Ensures that the arguments are parsed
+        int adjuster = 0; //First adjuster will contain the number of required arguments
+        for (String s : patternList) {
+            if (s.contains("R")) {
+                adjuster++;
+            }
+        }
+        adjuster = args.size() - adjuster; //Represents how many optional arguments there are
+        List<String> returns = new ArrayList<>();
+        /* 
+         * Since the parser will fill in optional arguments from left to right,
+         * we only need to account for the number of optional arguments adjuster has.
+         */
+        for (int i = 0; i < args.size(); i++) {
+            if (patternList.get(i).contains("O") && adjuster > 0) {
+                adjuster--;
+            } else {
+                returns.add(args.get(i));
+            }
+        }
+        return returns;
+    }
+
+    /**
+     * Returns a list of all optional arguments in the parsed command.
+     * 
+     * @return A list of all optional arguments in the parsed command
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public List<String> getOptional() throws NullPointerException {
+        List<String> args = getArguments(); //Ensures that the arguments are parsed
+        int adjuster = 0; //First adjuster will contain the number of required arguments
+        for (String s : patternList) {
+            if (s.contains("R")) {
+                adjuster++;
+            }
+        }
+        adjuster = args.size() - adjuster; //Represents how many optional arguments there are
+        List<String> returns = new ArrayList<>();
+        /* 
+         * Since the parser will fill in optional arguments from left to right,
+         * we only need to account for the number of optional arguments adjuster has.
+         */
+        for (int i = 0; i < args.size(); i++) {
+            if (patternList.get(i).contains("O") && adjuster > 0) {
+                returns.add(args.get(i));
+                adjuster--;
+            }
+        }
+        return returns;
+    }
+
+    /**
+     * Returns a list of all variable arguments in the parsed command.
+     * 
+     * @return A list of all variable arguments in the parsed command
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public List<String> getVariable() throws NullPointerException {
+        List<String> args = getArguments(); //Ensures that the arguments are parsed
+        List<String> returns = new ArrayList<>();
+        String temp;
+        int adjuster = 0; //First adjuster will contain the number of required arguments
+        for (int i = 0; i < args.size(); i++) { //Finds all required arguments that are variables first
+            temp = patternList.get(i);
+            if (temp.contains("R")) {
+                if (temp.contains("V")) {
+                    returns.add(args.get(i));
+                }
+                adjuster++;
+            }
+        }
+        adjuster = args.size() - adjuster; //Represents how many optional arguments there are
+        for (int i = 0; i < args.size(); i++) { //Finds all optional arguments that are variables
+            temp = patternList.get(i);
+            if (temp.contains("O") && temp.contains("V") && adjuster > 0) { //Only added if there is room
+                returns.add(args.get(i));
+                adjuster --;
+            }
+        }
+        return returns;
+    }
+
+    /**
+     * Returns a list of all arguments in the parsed command that are of the given size.
+     * 
+     * @param size The size of the arguments to return
+     * @param variable Whether or not to include variable arguments, true to include, false to exclude
+     * @return A list of all arguments in the parsed command that are of the given size
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public List<String> getOfSize(int size, boolean variable) throws NullPointerException {
+        List<String> args = getArguments(); //Ensures that the arguments are parsed
+        List<String> returns = new ArrayList<>();
+        String temp;
+        for (int i = 0; i < args.size(); i++) {
+            temp = args.get(i);
+            if (temp.length() == size) {
+                if (!variable) {
+                    if (!patternList.get(i).contains("V")) {
+                        returns.add(temp);
+                    }
+                } else {
+                    returns.add(temp);
+                }
+            }
+        }
+        return returns;
+    }
+
+    /**
+     * Returns the argument at the given index in the parsed command.
+     * 
+     * @param index The index of the argument to return
+     * @return The argument at the given index in the parsed command
+     * @throws IndexOutOfBoundsException If the index is out of range
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public String get(int index) throws IndexOutOfBoundsException, NullPointerException {
+        return getArguments().get(index); //Ensures that the arguments are parsed
+    }
+
+    /**
+     * Returns the number of arguments in the parsed command.
+     * 
+     * @return The number of arguments in the parsed command
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public int numArgs() throws NullPointerException {
+        return getArguments().size(); //Ensures that the arguments are parsed
+    }
+
+    /**
+     * Returns the arguments at the given index range in the parsed command.
+     * 
+     * @param index1 The index of the first argument to return (inclusive)
+     * @param index2 The index of the last argument to return (exclusive)
+     * @return The arguments at the given index range in the parsed command
+     * @throws IndexOutOfBoundsException If the index is out of range
+     * @throws NullPointerException If no command has been parsed by this parser yet
+     */
+    public List<String> getCombined(int index1, int index2) throws IndexOutOfBoundsException, NullPointerException {
+        List<String> args = getArguments(); //Ensures that the arguments are parsed
+        return args.subList(index1, index2);
+    }
+
+    /**
+     * Inserts an argument at the given index in this parser's arguments list.
+     * 
+     * @param arg
+     * @param index
+     * @throws IndexOutOfBoundsException If the index is out of range
+     */
+    public void insert(String arg, int index) throws IndexOutOfBoundsException {
+        arguments.add(index, arg);
+    }
 }

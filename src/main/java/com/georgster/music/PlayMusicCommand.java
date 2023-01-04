@@ -1,10 +1,9 @@
 package com.georgster.music;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
+import com.georgster.util.CommandParser;
+import com.georgster.util.GuildManager;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
@@ -24,6 +23,7 @@ public class PlayMusicCommand implements Command {
     private final AudioPlayerManager playerManager;
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
+    private static final String PATTERN = "1|R";
 
     /**
      * Plays music in a discord channel.
@@ -46,10 +46,10 @@ public class PlayMusicCommand implements Command {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(MessageCreateEvent event) {
-        final String content = event.getMessage().getContent();
-        final List<String> command = Arrays.asList(content.split(" ")); //Each "arument" is separated by a space
-        if (command.size() >= 2) { //Checks to see if there were arguments after !play
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        try {
+            CommandParser parser = new CommandParser(PATTERN);
+            parser.parse(event.getMessage().getContent().toLowerCase());
             final Member member = event.getMember().orElse(null); //Makes sure the member is valid
             if (member != null) {
                 final VoiceState voiceState = member.getVoiceState().block();
@@ -59,13 +59,13 @@ public class PlayMusicCommand implements Command {
                         ActionWriter.writeAction("Joining a voice channel");
                         VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
                         scheduler.setChannelData(event.getMessage().getChannel().block(), connection);
-                        playerManager.loadItem(command.get(1), scheduler);
+                        playerManager.loadItem(parser.get(1), scheduler);
                         ActionWriter.writeAction("Playing audio in a discord channel");
                     }
                 }
             }
-        } else {
-            event.getMessage().getChannel().block().createMessage(help()).block();
+        } catch (IllegalArgumentException e) {
+            manager.sendText(help());
         }
     }
 

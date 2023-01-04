@@ -5,13 +5,14 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
+import com.georgster.util.GuildManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 
 public class MessageCommand implements Command {
-    public void execute(MessageCreateEvent event) {
+    public void execute(MessageCreateEvent event, GuildManager manager) {
         Message message = event.getMessage();
         List<String> contents = Arrays.asList(message.getContent().split(" "));
 

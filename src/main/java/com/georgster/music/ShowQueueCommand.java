@@ -4,6 +4,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
+import com.georgster.util.GuildManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -29,19 +30,19 @@ public class ShowQueueCommand implements Command {
      * 
      * @param execute the event that triggered the command
      */
-    public void execute(MessageCreateEvent event) {
+    public void execute(MessageCreateEvent event, GuildManager manager) {
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;
         for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
             response.append("\t" + x + ") " + i.getInfo().title + "\n");
             if (response.length() >= 1800) {
-                event.getMessage().getChannel().block().createMessage(response.toString()).block();
+                manager.sendText(response.toString());
                 response = new StringBuilder();
             }
             x++;
         }
         ActionWriter.writeAction("Showing the current audio track queue");
-        event.getMessage().getChannel().block().createMessage(response.toString()).block();
+        manager.sendText(response.toString());
     }
 
     /**

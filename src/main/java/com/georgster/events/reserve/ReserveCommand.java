@@ -8,6 +8,7 @@ import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEventHandler;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.ProfileType;
+import com.georgster.util.GuildManager;
 import com.georgster.util.SoapHandler;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -17,10 +18,11 @@ import discord4j.core.object.entity.channel.TextChannel;
  * Represents the command for reserving to and creating events.
  */
 public class ReserveCommand implements Command {
+    private static final String PATTERN = "V|R 1|O 1|O";
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event) {
+    public void execute(MessageCreateEvent event, GuildManager manager) {
         List<String> message = Arrays.asList(event.getMessage().getContent().toLowerCase().split(" "));
         String id = event.getGuild().block().getId().asString();
         if (message.size() < 2) {

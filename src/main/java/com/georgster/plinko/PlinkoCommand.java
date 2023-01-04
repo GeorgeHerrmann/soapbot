@@ -2,6 +2,8 @@ package com.georgster.plinko;
 
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
+import com.georgster.util.CommandParser;
+import com.georgster.util.GuildManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
@@ -23,25 +25,24 @@ public class PlinkoCommand implements Command {
      * 
      * Note: If you are reading this the full Plinko features are mid development.
      */
+    private static final String PATTERN = "1|R 1|O";
 
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event) {
-        ActionWriter.writeAction("Having the Plinko Command parser check the contents of a !plinko command");
-        StringBuilder message = new StringBuilder(event.getMessage().getContent().toLowerCase()); //This is the user's message that prompted this execution
-        message.delete(message.indexOf("!plinko"), message.indexOf("!plinko") + 8);
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        CommandParser parser = new CommandParser(PATTERN);
+        parser.parse(event.getMessage().getContent().toLowerCase());
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
-        if (message.toString().startsWith("play")) {
-            message.delete(message.indexOf("play"), message.indexOf("play") + 5);
+        if (parser.get(0).equals("play")) {
             ActionWriter.writeAction("Beginning the simulation of a plinko game");
             game.play();
-        } else if (message.toString().startsWith("board")) {
+        } else if (parser.get(0).equals("board")) {
             ActionWriter.writeAction("Showing a blank Plinko Board");
             game.showBoard();
         } else {
             ActionWriter.writeAction("Showing information on how to use the plinko command");
-            event.getMessage().getChannel().block().createMessage(help()).block();
+            manager.sendText(help());
         }
     }
 

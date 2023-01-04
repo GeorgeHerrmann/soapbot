@@ -33,7 +33,7 @@ import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.profile.UserProfile;
-import com.georgster.util.CommandParser;
+import com.georgster.util.GuildManager;
 import com.georgster.util.SoapHandler;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.music.LavaPlayerAudioProvider;
@@ -129,16 +129,18 @@ public class App {
          * We will parse the message and execute the associated command if it is a valid command.
          */
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
+          GuildManager manager = new GuildManager(event.getGuild().block());
+          manager.setActiveChannel(event.getMessage().getChannel().block());
           final String content = event.getMessage().getContent();
           if (content.startsWith("!") && content.equals(content.toUpperCase())) { //Very necessary
             ActionWriter.writeAction("Getting yelled at");
-            event.getMessage().getChannel().block().createMessage("Please stop yelling at me :(").block();
+            manager.sendText("Please stop yelling at me :(");
           }
           
           for (final Map.Entry<String, Command> entry : commands.entrySet()) { //We check the message against each command in the commands map
             if (content.toLowerCase().startsWith('!' + entry.getKey())) { //If it matches we create a new thread and execute the command
                 ActionWriter.writeAction("Placing the " + entry.getKey() + " command on a new Daemon thread and executing it");
-                SoapHandler.runDaemon(() -> entry.getValue().execute(event)); //The execute(event) method of each Command is the entry point for logic for a command
+                SoapHandler.runDaemon(() -> entry.getValue().execute(event, manager)); //The execute(event) method of each Command is the entry point for logic for a command
                 break;
             }
           }
