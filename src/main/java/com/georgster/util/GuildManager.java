@@ -2,6 +2,8 @@ package com.georgster.util;
 
 import java.util.List;
 
+import com.georgster.profile.ProfileHandler;
+
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
@@ -18,6 +20,7 @@ import discord4j.core.object.entity.channel.VoiceChannel;
  */
 public class GuildManager {
     private Guild guild; //The guild that this GuildManager is managing
+    private ProfileHandler handler; //The ProfileHandler for this GuildManager
     private Channel activeChannel; //The channel that is currently active
 
     /**
@@ -27,6 +30,7 @@ public class GuildManager {
      */
     public GuildManager(Guild guild) {
         this.guild = guild;
+        this.handler = new ProfileHandler(guild.getId().asString());
     }
 
     /**
@@ -82,7 +86,7 @@ public class GuildManager {
             try {
                 ((TextChannel) activeChannel).createMessage(text).block();
             } catch (Exception e) {
-                throw new IllegalStateException("The active channel is not a text channel.");
+                throw new IllegalStateException("There was an issue sending the message to the active channel.");
             }
         }
     }
@@ -181,6 +185,12 @@ public class GuildManager {
         return null;
     }
 
-
-
+    /**
+     * Returns a {@code ProfileHandler} to manage this guild's profiles.
+     * 
+     * @return a {@code ProfileHandler} to manage this guild's profiles
+     */
+    public ProfileHandler getHandler() {
+        return handler;
+    }
 }

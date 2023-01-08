@@ -1,9 +1,7 @@
 package com.georgster.events;
+import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.profile.ProfileHandler;
-import com.georgster.util.SoapHandler;
-
-import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.entity.channel.TextChannel;
+import com.georgster.util.GuildManager;
 
 /**
  * Utility class for handling reserve events.
@@ -23,24 +21,28 @@ public class SoapEventHandler {
      * @param channel
      * @param id
      */
-    public static void scheduleEvent(SoapEvent event, MessageChannel channel, String id) {
-        if (ProfileHandler.eventExists(id, event.getIdentifier())) {
-            if (validateSoapEvent(event, id)) {
-                event.onFulfill(((TextChannel) channel).getGuild().block());
+    public static void scheduleEvent(SoapEvent event, GuildManager manager) {
+        if (manager.getHandler().eventExists(event.getIdentifier())) {
+            if (event.getType() == SoapEventType.RESERVE) {
+                manager.setActiveChannel(manager.getTextChannel(((ReserveEvent) event).getChannel()));
+            }
+            if (validateSoapEvent(event, manager)) {
+                event.onFulfill(manager);
             } else {
-                SoapHandler.sendTextMessageInChannel("Event " + event.getIdentifier() + " has been cancelled", channel);
+                manager.sendText("Event " + event.getIdentifier() + " has been cancelled");
             }
         }
     }
 
     
-    private static boolean validateSoapEvent(SoapEvent event, String id) {
+    private static boolean validateSoapEvent(SoapEvent event, GuildManager manager) {
+        ProfileHandler handler = manager.getHandler();
         try {
             /* Will continue to wait until the event has been removed/cancelled, or the fulfillment condition has been met */
-            while (ProfileHandler.eventExists(id, event.getIdentifier()) && !ProfileHandler.pullEvent(id, event.getIdentifier()).fulfilled()) {
+            while (handler.eventExists(event.getIdentifier()) && !handler.pullEvent(event.getIdentifier()).fulfilled()) {
                 Thread.sleep(2000);
             }
-            if (!ProfileHandler.eventExists(id, event.getIdentifier())) { //If it was removed we return false
+            if (handler.eventExists(event.getIdentifier())) { //If it was removed we return false
                 return false;
             }
         } catch (Exception e) { //If we are interrupted we return false

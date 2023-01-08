@@ -11,13 +11,7 @@ import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.ProfileType;
-import com.georgster.util.SoapHandler;
-
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.entity.channel.TextChannel;
+import com.georgster.util.GuildManager;
 
 /**
  * A ReserveEvent object is created when a user uses the !reserve command
@@ -71,7 +65,7 @@ public class ReserveEvent implements SoapEvent {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.time = time;
-        this.numReserved = 1; //We will always start with one person reserved
+        this.numReserved = 0; //We will always start with one person reserved
         this.channel = channel;
         reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
     }
@@ -86,7 +80,7 @@ public class ReserveEvent implements SoapEvent {
     public ReserveEvent(String identifier, int numPeople, String channel) {
         this.identifier = identifier;
         this.numPeople = numPeople;
-        this.numReserved = 1;
+        this.numReserved = 0;
         this.time = "99:99"; //A Timeless event will always be at 99:99
         this.channel = channel;
         reservedUsers = new ArrayList<>();
@@ -104,7 +98,7 @@ public class ReserveEvent implements SoapEvent {
         this.identifier = identifier;
         this.time = time;
         this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start
-        this.numReserved = 1;
+        this.numReserved = 0;
         this.channel = channel;
         reservedUsers = new ArrayList<>();
     }
@@ -125,19 +119,17 @@ public class ReserveEvent implements SoapEvent {
     /**
      * {@inheritDoc}
      */
-    public void onFulfill(Guild guild) {
-        String id = guild.getId().asString();
-        if (ProfileHandler.eventExists(id, getIdentifier())) { //As long as the event still exists in the server's events.json
-            Channel discordChannel = SoapHandler.channelMatcher(channel, guild.getChannels().buffer().blockFirst()); //We get the channel the event was reserved in
+    public void onFulfill(GuildManager manager) {
+        ProfileHandler handler = manager.getHandler();
+        if (handler.eventExists(identifier)) { //As long as the event still exists in the server's events.json
             ActionWriter.writeAction("Starting event " + identifier);
             StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
             "\t- " + numReserved + "/" + numPeople + " reserved with the following people:");
             for (String name : reservedUsers) { //We add the names of the people who reserved to the event
-                Member member = SoapHandler.memberMatcher(name, ((TextChannel) discordChannel).getGuild().block().getMembers().buffer().blockFirst());
-                response.append("\n\t\t- " + member.getMention());
+                response.append("\n\t\t- " + manager.getMember(name).getMention());
             }
-            SoapHandler.sendTextMessageInChannel(response.toString(), (MessageChannel) discordChannel);
-            ProfileHandler.removeObject(id, this, ProfileType.EVENTS); //After the event has started, we remove it from the server's events.json
+            manager.sendText(response.toString());
+            handler.removeObject(this, ProfileType.EVENTS); //After the event has started, we remove it from the server's events.json
         }
     }
 
@@ -153,32 +145,16 @@ public class ReserveEvent implements SoapEvent {
     /**
      * Adds a person to the number of people that have reserved for the event.
      */
-    public void addReserved() {
+    public void addReserved(String user) {
         numReserved++;
+        reservedUsers.add(user);
     }
 
     /**
      * Removes a person from the number of people that have reserved for the event.
      */
-    public void removeReserved() {
+    public void removeReserved(String user) {
         numReserved--;
-    }
-
-    /**
-     * Adds a person to the number of people that have reserved for the event.
-     * 
-     * @param user the user to add
-     */
-    public void addReservedUser(String user) {
-        reservedUsers.add(user);
-    }
-
-    /**
-     * Removes a person from the reserved users list.
-     * 
-     * @param user the user to remove
-     */
-    public void removeReservedUser(String user) {
         reservedUsers.remove(user);
     }
 

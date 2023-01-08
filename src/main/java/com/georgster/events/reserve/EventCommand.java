@@ -1,6 +1,5 @@
 package com.georgster.events.reserve;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
@@ -11,8 +10,6 @@ import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
 import com.georgster.util.ParseBuilder;
 import com.georgster.util.SoapHandler;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
@@ -27,16 +24,16 @@ public class EventCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
-        CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "unresere").withRules("X I").build();
-        parser.parse(event.getMessage().getContent().toLowerCase());
+        CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "unreserve").withRules("X I").build();
+        ProfileHandler handler = manager.getHandler();
         try { //Checks to see the command if valid
-            String id = event.getGuild().block().getId().asString();
-            if (parser.get(1).equals("list")) { //Shows the list of events
+            parser.parse(event.getMessage().getContent().toLowerCase());
+            if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
                 ActionWriter.writeAction("Showing all events in a text channel");
                 StringBuilder response = new StringBuilder();
-                if (ProfileHandler.areEvents(id)) {
+                if (handler.areEvents()) {
                     response.append("All events:\n");
-                    for (ReserveEvent reserve : ProfileHandler.getEvents(id)) {
+                    for (ReserveEvent reserve : handler.getEvents()) {
                         if (reserve.isTimeless()) {
                             response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
                         } else {
@@ -48,16 +45,15 @@ public class EventCommand implements Command {
                 } else {
                     manager.sendText("There are no events currently active");
                 }
-            } else if (parser.get(0).equals("unreserve")) { //Unreserves from an event
+            } else if (parser.getMatchingRule("I").equals("unreserve")) { //Unreserves from an event
                 ActionWriter.writeAction("Unreserving a user from an event");
-                if (ProfileHandler.eventExists(id, parser.get(2))) {
-                    for (ReserveEvent reserve: ProfileHandler.getEvents(id)) {
-                        if (reserve.getIdentifier().equals(parser.get(1))) {
-                            ProfileHandler.removeObject(id, reserve, ProfileType.EVENTS);
-                            event.getMessage().getAuthor().ifPresent(user -> reserve.removeReservedUser(user.getTag())); //Gets the user's tag and removes them from the list
-                            reserve.removeReserved();
+                if (handler.eventExists(parser.get(0))) {
+                    for (ReserveEvent reserve: handler.getEvents()) {
+                        if (reserve.getIdentifier().equals(parser.get(0))) {
+                            handler.removeObject(reserve, ProfileType.EVENTS);
+                            event.getMessage().getAuthor().ifPresent(user -> reserve.removeReserved(user.getTag())); //Gets the user's tag and removes them from the list
                             if (reserve.getReserved() > 0) {
-                                ProfileHandler.addObject(id, reserve, ProfileType.EVENTS);
+                                handler.addObject(reserve, ProfileType.EVENTS);
                                 manager.sendText("You have unreserved from event " + reserve.getIdentifier());
                             } else {
                                 manager.sendText("There are no more people reserved to this event, this event has been removed");
@@ -65,12 +61,12 @@ public class EventCommand implements Command {
                         }
                     }
                 } else {
-                    manager.sendText("Event does not exist");
+                    manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }
             } else { //Shows information about an event
-                if (ProfileHandler.eventExists(id, parser.get(0))) {
+                if (handler.eventExists(parser.get(0))) {
                     ActionWriter.writeAction("Showing information about a specific event in a text channel");
-                    ReserveEvent reserve = ProfileHandler.pullEvent(id, parser.get(0));
+                    ReserveEvent reserve = handler.pullEvent(parser.get(0));
                     StringBuilder response = new StringBuilder();
                     response.append("Event: " + reserve.getIdentifier() + "\n");
                     response.append("\tReserved: " + reserve.getReserved() + "\n");
@@ -104,8 +100,16 @@ public class EventCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public List<String> getAliases() {
+        return List.of("events", "event");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !events" +
+        "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t- !events list to list all events" +
         "\n\t- !events [NAME] for information about a specific event" +

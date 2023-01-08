@@ -1,5 +1,7 @@
 package com.georgster.plinko;
 
+import java.util.List;
+
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
 import com.georgster.util.CommandParser;
@@ -49,8 +51,15 @@ public class PlinkoCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public List<String> getAliases() {
+        return List.of("plinko");
+    }
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !plinko" +
+        "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t- '!plinko play' to simulate a game of plinko" +
         "\n\t- '!plinko board' to show an empty plinko board";

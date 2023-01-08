@@ -27,33 +27,35 @@ public class ProfileHandler {
 
     /* Holds the location of the profiles directory */
     private static final String PROFILELOCATION = Paths.get(System.getProperty("user.dir"), "src", "main", "java", "com", "georgster", "profile", "profiles").toString();
+    private final String id;
 
     /**
-     * ProfileHandler is a utility class and does not need to be constructed.
+     * Creates a new {@code ProfileHandler} for a Guild with the
+     * associated {@code Snowflake} ID.
+     * 
+     * @param id the {@code Snowflake} ID of the {@code Guild} that this {@code ProfileHandler} is for.
      */
-    private ProfileHandler() {
-        throw new IllegalStateException("ProfileHandler is not meant to be constructed");
+    public ProfileHandler(String id) {
+        this.id = id;
     }
 
     /**
      * Returns whether or not a user profile exists with the supplimented server and user IDs.
      * 
      * @param userId the {@code Snowflake} id of the {@code Member} who's profile is being examined.
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the user's profile for that Guild would be located.
      * @return true if the profile exists already, false otherwise.
      */
-    public static boolean userProfileExists(String userId, String serverId) {
-        return Files.exists(Paths.get(PROFILELOCATION, serverId, "users", userId + ".json"));
+    public boolean userProfileExists(String userId) {
+        return Files.exists(Paths.get(PROFILELOCATION, id, "users", userId + ".json"));
     }
 
     /**
      * Creates a user's profile based on the {@code Snowflake} ID of the {@code Guild} profile it should exist in.
      * 
      * @param userId the {@code Snowflake} id of the {@code Member} who's profile is being examined.
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the user's profile for that Guild would be located.
      */
-    public static void createUserProfile(String userId, String serverId) {
-        File profile = new File(Paths.get(PROFILELOCATION, serverId, "users", userId + ".json").toString());
+    public void createUserProfile(String userId) {
+        File profile = new File(Paths.get(PROFILELOCATION, id, "users", userId + ".json").toString());
         try {
             if (!profile.createNewFile()) {
                 throw new IOException();
@@ -69,7 +71,7 @@ public class ProfileHandler {
      * 
      * @param profile The object containing all data associated with this {@code Member}.
      */
-    public static void updateUserProfile(UserProfile profile) {
+    public void updateUserProfile(UserProfile profile) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, profile.getGuildId(), "users", profile.getMemberId() + ".json").toString())) {
             writer.write(parser.toJson(profile));
@@ -81,10 +83,8 @@ public class ProfileHandler {
     /**
      * Creates a servers's profile based on the {@code Snowflake} ID of the {@code Guild}.
      * A profile for a {@code Guild} exists inside a dedicated directory for that {@code Guild}.
-     * 
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      */
-    public static void createServerProfile(String id) {
+    public void createServerProfile() {
         File profile = new File(Paths.get(PROFILELOCATION, id).toString());
         profile.mkdir();
         profile = new File(Paths.get(PROFILELOCATION, id, "events.json").toString());
@@ -105,7 +105,7 @@ public class ProfileHandler {
      * @param serverId the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return true if the profile exists already, false otherwise.
      */
-    public static boolean serverProfileExists(String id) {
+    public boolean serverProfileExists() {
         return (Files.exists(Paths.get(PROFILELOCATION, id), LinkOption.NOFOLLOW_LINKS)) //Checks if the server profile directory exists
         && (Files.exists(Paths.get(PROFILELOCATION, id, "events.json"), LinkOption.NOFOLLOW_LINKS)) //Checks if the events.json file exists
         && (Files.exists(Paths.get(PROFILELOCATION, id, "users"), LinkOption.NOFOLLOW_LINKS)); //Checks if the users directory exists
@@ -118,9 +118,9 @@ public class ProfileHandler {
      * @param object the object to be added to the profile file.
      * @param type the type of the server's profile that the object should be added to.
      */
-    public static void addObject(String id, Object object, ProfileType type) {
+    public void addObject(Object object, ProfileType type) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        if (serverProfileExists(id)) { //Writes a JSON representation of the object to the profile file
+        if (serverProfileExists()) { //Writes a JSON representation of the object to the profile file
             try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString(), true)) {
                 writer.write(parser.toJson(object));
             } catch (IOException e) {
@@ -136,8 +136,8 @@ public class ProfileHandler {
      * @param eventIdentifier the identifier of the event to be pulled from the server's event list.
      * @return the {@code ReserveEvent} object that was pulled from the server's event list.
      */
-    public static ReserveEvent pullEvent(String id, String eventIdentifier) {
-        if (serverProfileExists(id)) {
+    public ReserveEvent pullEvent(String eventIdentifier) {
+        if (serverProfileExists()) {
             try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
                 reader.setLenient(true);
                 while (reader.hasNext()) { //Iterates through the events.json file
@@ -194,9 +194,9 @@ public class ProfileHandler {
      * @param object the object to be removed from the profile file.
      * @param type the type of the server's profile that the object should be removed from.
      */
-    public static void removeObject(String id, Object object, ProfileType type) {
+    public void removeObject(Object object, ProfileType type) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        if (serverProfileExists(id)) {
+        if (serverProfileExists()) {
             String objects = "";
             try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString())) {
                 objects = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json"))));
@@ -215,8 +215,8 @@ public class ProfileHandler {
      * @param identifier the identifier of the event to be checked against the server's event list.
      * @return true if the event exists in the server's event list, false otherwise.
      */
-    public static boolean eventExists(String id, String identifier) {
-        if (serverProfileExists(id)) {
+    public boolean eventExists(String identifier) {
+        if (serverProfileExists()) {
             try  {
                 String contents = Files.readString(Path.of(PROFILELOCATION, id, "events.json"));
                 return contents.contains(": \"" + identifier + "\"");
@@ -235,9 +235,9 @@ public class ProfileHandler {
      * @param type the type of the server's profile that the object should be checked against.
      * @return true if the object exists in the server's profile file, false otherwise.
      */
-    public static boolean objectExists(String id, Object object, ProfileType type) {
+    public boolean objectExists(Object object, ProfileType type) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        if (serverProfileExists(id)) {
+        if (serverProfileExists()) {
             try {
                 String contents = Files.readString(Path.of(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")));
                 return contents.contains(parser.toJson(object));
@@ -254,9 +254,9 @@ public class ProfileHandler {
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return the list of {@code ReserveEvent} objects from the server's event list.
      */
-    public static List<ReserveEvent> getEvents(String id) {
+    public List<ReserveEvent> getEvents() {
         List<ReserveEvent> events = new ArrayList<>();
-        if (serverProfileExists(id)) {
+        if (serverProfileExists()) {
             try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
                 reader.setLenient(true);
                 while (reader.hasNext()) {
@@ -312,8 +312,8 @@ public class ProfileHandler {
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return {@code true} if the server has events, {@code false} otherwise.
      */
-    public static boolean areEvents(String id) {
-        if (serverProfileExists(id)) {
+    public boolean areEvents() {
+        if (serverProfileExists()) {
             try {
                 String contents = Files.readString(Path.of(PROFILELOCATION, id, "events.json"));
                 return contents.contains("identifier");

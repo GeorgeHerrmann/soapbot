@@ -1,6 +1,6 @@
 package com.georgster.events;
 
-import discord4j.core.object.entity.Guild;
+import com.georgster.util.GuildManager;
 
 /**
  * A SOAPEvent is an object that holds information that will be used
@@ -37,5 +37,5 @@ public interface SoapEvent {
     /**
      * Represents the actions that will be taken when the event is fulfilled.
      */
-    public void onFulfill(Guild guild);
+    public void onFulfill(GuildManager manager);
 }

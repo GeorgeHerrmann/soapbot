@@ -119,7 +119,7 @@ public class CommandParser {
      * "reserve testing parser 2" would return ["testing parser", "2"]. If no rules
      * were set, the parse() would return "testing" "parser" "2".
      * 
-     * NOTE: Adding rules and/or identifiersis only necessary if you have a varying amount of 
+     * NOTE: Adding rules and/or identifiers is only necessary if you have a varying amount of 
      * arguments, otherwise the parser will automatically correctly parse the command.
      * @param rules The rules to use for parsing commands.
      * @throws IllegalArgumentException If the number of rules does not match the number of arguments in the pattern, or if the rules are not in the correct format.
@@ -149,7 +149,8 @@ public class CommandParser {
      * @return A list of arguments split by spaces.
      */
     public static List<String> parseGeneric(String input) {
-        return List.of(input.split(" "));
+        String[] split = input.substring(1).split(" ");
+        return new ArrayList<>(Arrays.asList(split));
     }
     /**
      * Parses the given input and returns a list of arguments that match the pattern of
@@ -166,7 +167,7 @@ public class CommandParser {
      */
     public List<String> parse(String input) throws IllegalArgumentException {
         List<String> command = new ArrayList<>(Arrays.asList(input.split(" "))); //Get each argument of the command
-        command.remove(0);
+        command.remove(0); //Remove the command itself
         List<String> args = new ArrayList<>();
         List<Integer> added = new ArrayList<>();
         if (rulesList.isEmpty()) {
@@ -235,13 +236,9 @@ public class CommandParser {
                 /* We move loc until we have found an argument that matches the rule, or until we hit a new argument */
                 while (loc < command.size() && (!matchesRule(command.get(loc), rulesList.get(holder), command) || added.contains(loc))) {
                     loc++;
-                    /*if (loc >= command.size()) {
-                        break;
-                    }*/
                 }
                 if (loc < command.size()) { //If we have not run out of room, we have found an argument that matches the rule
                     if (split[0].equals("V")) { //Varying arguments still get one spot
-                        //if (loc > command.size()) break;
                         StringBuilder sb = new StringBuilder();
                         args.add(holder, ""); //We add a new argument at the spot
                         /*
@@ -541,7 +538,7 @@ public class CommandParser {
                 return s;
             }
         }
-        return null;
+        return "";
     }
 
     /**

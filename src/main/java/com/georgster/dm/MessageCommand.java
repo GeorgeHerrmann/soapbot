@@ -12,6 +12,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 
 public class MessageCommand implements Command {
+
     public void execute(MessageCreateEvent event, GuildManager manager) {
         Message message = event.getMessage();
         List<String> contents = Arrays.asList(message.getContent().split(" "));
@@ -32,8 +33,16 @@ public class MessageCommand implements Command {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getAliases() {
+        return List.of("dm", "message", "msg");
+    }
+
     public String help() {
         return "Command: !message" +
+        "\nAliases: " + getAliases().toString() +
         "\n\t - !message @[USERS] [MESSAGE]" +
         "\n\t\t Ex: !message @georgster#8086 hello" + 
         "\n\t\t Or: !message @georgster#8086 @Milkmqn#9457 hello";

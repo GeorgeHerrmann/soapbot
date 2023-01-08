@@ -1,9 +1,11 @@
-package com.georgster;
+package com.georgster.misc;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Scanner;
 
+import com.georgster.Command;
 import com.georgster.api.ActionWriter;
 import com.georgster.util.GuildManager;
 
@@ -44,8 +46,16 @@ public class SoapCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public List<String> getAliases() {
+        return List.of("soapbot", "version", "info", "about", "bot");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !soapbot " +
+        "\nAliases: " + getAliases().toString() +
         "\nGives information about SOAP Bot";
     }
 

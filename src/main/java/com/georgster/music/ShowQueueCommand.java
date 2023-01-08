@@ -1,5 +1,6 @@
 package com.georgster.music;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
@@ -48,8 +49,16 @@ public class ShowQueueCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public List<String> getAliases() {
+        return List.of("queue", "q", "songs");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !play, !skip & !queue" +
+        "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
         "\n\t!skip to skip the current track" +

@@ -1,5 +1,7 @@
 package com.georgster.music;
 
+import java.util.List;
+
 import com.georgster.Command;
 import com.georgster.api.ActionWriter;
 import com.georgster.util.CommandParser;
@@ -64,7 +66,7 @@ public class PlayMusicCommand implements Command {
                     }
                 }
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
             manager.sendText(help());
         }
     }
@@ -72,8 +74,16 @@ public class PlayMusicCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public List<String> getAliases() {
+        return List.of("play");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !play, !skip & !queue" +
+        "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
         "\n\t!skip to skip the current track" +

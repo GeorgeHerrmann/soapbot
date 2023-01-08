@@ -1,7 +1,8 @@
-package com.georgster;
+package com.georgster.misc;
 
 import java.util.List;
 
+import com.georgster.Command;
 import com.georgster.api.ActionWriter;
 import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
@@ -24,7 +25,7 @@ public class PongCommand implements Command {
      * be more useful for more complex actions. It also allows me to easily make a map
      * to store all the commands in App.java.
      */
-    PongCommand() {
+    public PongCommand() {
         msg = "ping";
     }
 
@@ -35,7 +36,6 @@ public class PongCommand implements Command {
     public void execute(MessageCreateEvent event, GuildManager manager) {
         List<String> args = CommandParser.parseGeneric(event.getMessage().getContent());
         StringBuilder fullMessage = new StringBuilder();
-        ActionWriter.writeAction("Having the pong command parser check the contents of a !ping command");
         int counter = 0;
         while(args.contains(msg)) {
             args.remove(msg);
@@ -43,7 +43,14 @@ public class PongCommand implements Command {
             counter++;
         }
         ActionWriter.writeAction("Responding to a !ping command request with " + counter + " pongs");
-        manager.sendText(fullMessage.toString());
+        manager.sendText(fullMessage.toString().trim());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getAliases() {
+        return List.of("ping");
     }
 
     /**
@@ -51,6 +58,7 @@ public class PongCommand implements Command {
      */
     public String help() {
       return "Command: !ping" +
+      "\nAliases: " + getAliases().toString() +
       "\n!ping to have SOAP Bot respond with pong! for each 'ping' in your message";
     }
 }

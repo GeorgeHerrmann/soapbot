@@ -1,12 +1,14 @@
-package com.georgster;
+package com.georgster.misc;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import java.util.Map;
 
+import java.util.List;
+
+import com.georgster.Command;
+import com.georgster.CommandRegistry;
 import com.georgster.api.ActionWriter;
 import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
-import com.georgster.util.ParseBuilder;
 
 /**
  * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
@@ -14,37 +16,36 @@ import com.georgster.util.ParseBuilder;
 public class HelpCommand implements Command {
 
     private static final String PATTERN = "1|R"; //A regex pattern to parse the contents of a !help command request
-    private Map<String, Command> commands; //A Map of all commands SOAP Bot has
+    private CommandRegistry register; //SoapBot's Command Registry
 
     /**
-     * Creates a HelpCommand which contains a Map of all of SOAP Bot's commands and their associated object.
+     * Creates a HelpCommand which contains a register of all of SoapBot's commands.
      * 
      * @param command a Map of all of SOAP Bot's commands.
      */
-    HelpCommand(Map<String, Command> command) {
-        commands = command;
+    public HelpCommand(CommandRegistry register) {
+        this.register = register;
     }
 
     /**
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
-        CommandParser parser = new ParseBuilder(PATTERN).build();
-        parser.parse(event.getMessage().getContent());
+        CommandParser parser = new CommandParser(PATTERN);
         String arg;
+        parser.parse(event.getMessage().getContent());
         try {
-            arg = parser.get(1);
+            arg = parser.get(0).toLowerCase();
         } catch (IndexOutOfBoundsException e) {
             arg = "";
         }
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
-        ActionWriter.writeAction("Having the HelpCommand parser parse the contents of a !help command request");
-        for (final Map.Entry<String, Command> entry : commands.entrySet()) {
-            if (arg.toLowerCase().equals(entry.getKey())) {
-                response = new StringBuilder(entry.getValue().help());
+        for (Command command : register.getCommands()) {
+            if (command.getAliases().contains(arg)) {
+                response = new StringBuilder(command.help());
                 break;
             } else {
-                response.append(entry.getKey() + " ");
+                response.append(command.getAliases().get(0) + " ");
             }
         }
         ActionWriter.writeAction("Responding to a !help command request");
@@ -54,8 +55,16 @@ public class HelpCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public List<String> getAliases() {
+        return List.of("help");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !help" +
+        "\nAliases: " + getAliases().toString() +
         "\n!help for a list of all commands" +
         "\n!help [COMMAND] for help regarding a specific command";
     }
