@@ -92,6 +92,13 @@ public class SoapClient {
         .subscribe(this::onMessageCreate); //Executes onMessageCreate when a MessageCreateEvent is fired
     }
 
+    /**
+     * Defines SOAP Bot's actions when a GuildCreateEvent is fired.
+     * Here, we will check if the associated guild and all its members 
+     * have up to date profile schemes, and if not, we will create them.
+     * 
+     * @param event The GuildCreateEvent that was fired.
+     */
     private void onGuildCreate(GuildCreateEvent event) {
         GuildManager manager = new GuildManager(event.getGuild());
         ProfileHandler handler = manager.getHandler();
@@ -123,6 +130,13 @@ public class SoapClient {
         }
     }
 
+    /**
+     * Defines SOAP Bot's actions when a MessageCreateEvent is fired.
+     * Here, we will send the message to the CommandRegistry to be parsed have it
+     * execute the associated command if it is a valid command.
+     * 
+     * @param event The MessageCreateEvent that was fired.
+     */
     private void onMessageCreate(MessageCreateEvent event) {
         final String content = event.getMessage().getContent();
         if (content.startsWith("!") && content.equals(content.toUpperCase())) { //Very necessary
