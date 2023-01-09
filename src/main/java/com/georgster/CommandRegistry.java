@@ -28,7 +28,7 @@ public class CommandRegistry {
     /**
      * Creates a Command Register, registering all of SOAP Bot's pre-defined commands in it.
      * Any command that requires the SoapClient's objects (such as the AudioProvider, AudioPlayer, etc.)
-     * can access it through the client.
+     * can access it through the client parameter.
      * 
      * @param client The SoapClient that is running SOAP Bot.
      */
