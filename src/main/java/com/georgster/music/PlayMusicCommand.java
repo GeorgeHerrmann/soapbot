@@ -51,7 +51,7 @@ public class PlayMusicCommand implements Command {
     public void execute(MessageCreateEvent event, GuildManager manager) {
         try {
             CommandParser parser = new CommandParser(PATTERN);
-            parser.parse(event.getMessage().getContent().toLowerCase());
+            parser.parse(event.getMessage().getContent());
             final Member member = event.getMember().orElse(null); //Makes sure the member is valid
             if (member != null) {
                 final VoiceState voiceState = member.getVoiceState().block();
@@ -61,7 +61,7 @@ public class PlayMusicCommand implements Command {
                         ActionWriter.writeAction("Joining a voice channel");
                         VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
                         scheduler.setChannelData(event.getMessage().getChannel().block(), connection);
-                        playerManager.loadItem(parser.get(1), scheduler);
+                        playerManager.loadItem(parser.get(0), scheduler);
                         ActionWriter.writeAction("Playing audio in a discord channel");
                     }
                 }

@@ -17,7 +17,6 @@ public class SkipMusicCommand implements Command {
 
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
-    private static final String PATTERN = "1|O";
 
     /**
      * Will skip the currently playing track or all tracks in the queue.
@@ -37,9 +36,8 @@ public class SkipMusicCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         if (scheduler.isActive()) {
-            CommandParser parser = new CommandParser(PATTERN);
-            parser.parse(event.getMessage().getContent().toLowerCase());
-            if (parser.get(1).equals("all")) {
+            List<String> message = CommandParser.parseGeneric(event.getMessage().getContent());
+            if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();
                 manager.sendText("Skipping all tracks in the queue");
             } else {

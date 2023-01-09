@@ -167,8 +167,15 @@ public class CommandParser {
      */
     public List<String> parse(String input) throws IllegalArgumentException {
         List<String> command = new ArrayList<>(Arrays.asList(input.split(" "))); //Get each argument of the command
-        command.remove(0); //Remove the command itself
         List<String> args = new ArrayList<>();
+
+        if (command.size() == 1) {
+            arguments = args;
+            return args;
+        } else {
+            command.remove(0); //Remove the command itself
+        }
+        
         List<Integer> added = new ArrayList<>();
         if (rulesList.isEmpty()) {
             for (int i = 0; i < patternList.size(); i++) {

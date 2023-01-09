@@ -18,9 +18,10 @@ public class App {
           e.printStackTrace();
           System.exit(0);
         }
-        SoapClient client = new SoapClient(token);
-        client.listenToEvents();
-        client.start();
+        /* Creates a manager that will control the SoapClient for each Guild */
+        SoapClientManager soapManager = new SoapClientManager(token);
+        soapManager.listenToEvents(); //Subscribes the manager to Discord's event stream
+        soapManager.start(); //Starts the manager, finalizing the connection to Discord's API
     }
 
 }

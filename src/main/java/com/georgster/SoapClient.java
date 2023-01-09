@@ -14,82 +14,48 @@ import com.georgster.util.SoapHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 
-import discord4j.core.DiscordClientBuilder;
-import discord4j.core.GatewayDiscordClient;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.gateway.intent.Intent;
-import discord4j.gateway.intent.IntentSet;
 import discord4j.voice.AudioProvider;
 
 /**
- * An aggregation of all the shard-specific objects that SOAP Bot needs to run.
- * Controls the audio interface for SOAP Bot, houses the GatewayDiscordClient and CommandRegistry, and
- * subscribes to Discord's event stream.
+ * An aggregation of all the shard-specific objects that SOAP Bot needs to run for
+ * a single {@code Guild}. Each SoapClient handles all the events that occur in
+ * its associated {@code Guild} and houses its {@code CommandRegistry}.
  */
-public class SoapClient {
-    /* This sets up an audio configuration so SOAP Bot can join and "speak" in channels */
+public final class SoapClient {
+    private final Snowflake flake;
+
     private final AudioPlayerManager playerManager;
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
     private final AudioProvider provider;
 
     private final CommandRegistry registry;
-
-    private final GatewayDiscordClient client;
     
     /**
-     * Creates a new SoapClient with the given discord token to log in with.
-     * Upon creation, this SoapClient will immediately attempt to log in to Discord.
-     * 
-     * @param token The discord token to log in with.
+     * Creates a new {@code SoapClient} for the associated {@code Guild} represented
+     * by its unique {@code Snowflake}. Sets up an audio interface and
+     * constructs a new {@code CommandRegistry} for this client.
      */
-    public SoapClient(String token) {
+    protected SoapClient(Snowflake flake) {
+        this.flake = flake;
+
         playerManager = new DefaultAudioPlayerManager();
         // This is an optimization strategy that Discord4J can utilize
         playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
+        AudioSourceManagers.registerRemoteSources(playerManager);
         player = playerManager.createPlayer(); //How Discord receives audio data
         scheduler = new TrackScheduler(player);
         provider = new LavaPlayerAudioProvider(player); //Implements LavaPlayer's audio provider in SOAP Bot
 
         registry = new CommandRegistry(this);
-
-        client = DiscordClientBuilder.create(token).build().gateway()
-        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, //The intents the bot will work with
-        Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES,
-        Intent.GUILDS,
-        Intent.GUILD_MESSAGE_TYPING,
-        Intent.GUILD_VOICE_STATES))
-        .login().block();
-    }
-
-    /**
-     * Begins listening to all Discord's events that SOAP Bot needs to handle.
-     * These events are currently:
-     * <ul>
-     * <li>GuildCreateEvent</li>
-     * <li>MessageCreateEvent</li>
-     * </ul>
-     */
-    public void listenToEvents() {
-        /*
-         * The GuildCreateEvent is fired each time SOAP Bot logs in to a server, either upon the program start or when it is added to a new server.
-         * It is here that we use the Profile Handler to generate a profile for a guild and its members if one doesn't exist yet.
-         */
-        client.getEventDispatcher()
-        .on(GuildCreateEvent.class)
-        .subscribe(this::onGuildCreate); //Executes onGuildCreate when a GuildCreateEvent is fired
-        /* 
-         * A MessageCreateEvent is fired each time a message is sent in a server and channel SOAP Bot has access to.
-         * We will parse the message and execute the associated command if it is a valid command.
-         */
-        client.getEventDispatcher()
-        .on(MessageCreateEvent.class)
-        .subscribe(this::onMessageCreate); //Executes onMessageCreate when a MessageCreateEvent is fired
     }
 
     /**
@@ -99,7 +65,7 @@ public class SoapClient {
      * 
      * @param event The GuildCreateEvent that was fired.
      */
-    private void onGuildCreate(GuildCreateEvent event) {
+    protected void onGuildCreate(GuildCreateEvent event) {
         GuildManager manager = new GuildManager(event.getGuild());
         ProfileHandler handler = manager.getHandler();
         /*
@@ -137,7 +103,7 @@ public class SoapClient {
      * 
      * @param event The MessageCreateEvent that was fired.
      */
-    private void onMessageCreate(MessageCreateEvent event) {
+    protected void onMessageCreate(MessageCreateEvent event) {
         final String content = event.getMessage().getContent();
         if (content.startsWith("!") && content.equals(content.toUpperCase())) { //Very necessary
           ActionWriter.writeAction("Getting yelled at");
@@ -147,14 +113,13 @@ public class SoapClient {
         registry.getAndExecute(event);
     }
 
-
-
     /**
-     * Starts this Soap Client. This will block the current thread until the client disconnects.
-     * If this method is not called, the client will not connect successfully connect to Discord.
+     * Gets the {@code Snowflake} for the Guild this SoapClient is controlling.
+     * 
+     * @return the {@code Snowflake} for the Guild this SoapClient is controlling.
      */
-    public void start() {
-        client.onDisconnect().block();
+    protected Snowflake getSnowflake() {
+        return flake;
     }
 
     /**
@@ -162,7 +127,7 @@ public class SoapClient {
      * 
      * @return The AudioPlayerManager for this SoapClient.
      */
-    public AudioPlayerManager getPlayerManager() {
+    protected AudioPlayerManager getPlayerManager() {
         return playerManager;
     }
 
@@ -171,7 +136,7 @@ public class SoapClient {
      * 
      * @return The AudioPlayer for this SoapClient.
      */
-    public AudioPlayer getPlayer() {
+    protected AudioPlayer getPlayer() {
         return player;
     }
 
@@ -180,7 +145,7 @@ public class SoapClient {
      * 
      * @return The TrackScheduler for this SoapClient.
      */
-    public TrackScheduler getScheduler() {
+    protected TrackScheduler getScheduler() {
         return scheduler;
     }
 
@@ -189,7 +154,7 @@ public class SoapClient {
      * 
      * @return The AudioProvider for this SoapClient.
      */
-    public AudioProvider getProvider() {
+    protected AudioProvider getProvider() {
         return provider;
     }
 
@@ -198,7 +163,7 @@ public class SoapClient {
      * 
      * @return The CommandRegistry for this SoapClient.
      */
-    public CommandRegistry getRegistry() {
+    protected CommandRegistry getRegistry() {
         return registry;
     }
 }

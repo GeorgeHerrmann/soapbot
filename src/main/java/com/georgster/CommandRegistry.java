@@ -26,7 +26,8 @@ public class CommandRegistry {
     private final List<Command> commands = new ArrayList<>();
 
     /**
-     * Creates a Command Register, registering all of SOAP Bot's pre-defined commands in it.
+     * Creates a Command Register for the associated SoapClient, 
+     * registering all of SOAP Bot's pre-defined commands in it.
      * Any command that requires the SoapClient's objects (such as the AudioProvider, AudioPlayer, etc.)
      * can access it through the client parameter.
      * 
