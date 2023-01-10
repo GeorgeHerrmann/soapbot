@@ -5,6 +5,8 @@ import java.util.List;
 import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEventHandler;
 import com.georgster.events.reserve.ReserveEvent;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.music.LavaPlayerAudioProvider;
 import com.georgster.music.TrackScheduler;
 import com.georgster.profile.ProfileHandler;
@@ -66,11 +68,19 @@ public final class SoapClient {
      * @param event The GuildCreateEvent that was fired.
      */
     protected void onGuildCreate(GuildCreateEvent event) {
+        /* Though we could have the client itself distribute GuildManagers, we would still have to update it on each event fire
+        to ensure it has up to date Guild information, so it makes more sense to just make a new one with the Guild in the event */
         GuildManager manager = new GuildManager(event.getGuild());
+        MultiLogger logger = new MultiLogger(manager);
+
+        logger.append("Logging in to server: " + manager.getGuild().getName(),
+        LogDestination.DISCORD,
+        LogDestination.FILE,
+        LogDestination.SYSTEM);
         ProfileHandler handler = manager.getHandler();
         /*
          * If the guild this event was fired from has events scheduled, we will restart them.
-        */
+         */
         if (handler.areEvents()) { //Checks to see if there are any events at all for this guild
           ActionWriter.writeAction("Restarting events for " + manager.getGuild().getName()); //Note that the ActionWriter is what tells SOAP Api what is happening
           //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
@@ -94,6 +104,7 @@ public final class SoapClient {
           ActionWriter.writeAction("Updating user profile number " + i + " in " + event.getGuild().getName());
           handler.updateUserProfile(new UserProfile(manager.getId(), member, members.get(i).getUsername())); //We will always update the user's profile to make sure it is up to date
         }
+        logger.sendAll();
     }
 
     /**
@@ -109,7 +120,7 @@ public final class SoapClient {
           ActionWriter.writeAction("Getting yelled at");
           GuildManager.sendText("Please stop yelling at me :(", ((TextChannel) event.getMessage().getChannel().block()));
         }
-          
+        /* The registry will make a GuildManager if the command is valid, to avoid making managers where we don't need it */
         registry.getAndExecute(event);
     }
 

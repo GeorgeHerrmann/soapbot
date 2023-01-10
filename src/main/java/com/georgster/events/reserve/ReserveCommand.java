@@ -28,7 +28,7 @@ public class ReserveCommand implements Command {
         List<String> message = parser.parse(event.getMessage().getContent());
         ProfileHandler handler = manager.getHandler();
 
-        if (message.size() < 2) {
+        if (message.isEmpty()) {
             manager.sendText(help());
             return;
         }
@@ -87,8 +87,8 @@ public class ReserveCommand implements Command {
         ProfileHandler handler = manager.getHandler();
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();
         if (message.size() == 1) { //Means the user is trying to reserve to an event that already exists
-            if (handler.eventExists(message.get(1))) { //If the event exists, we get the event and return it
-                return handler.pullEvent(message.get(1));
+            if (handler.eventExists(message.get(0))) { //If the event exists, we get the event and return it
+                return handler.pullEvent(message.get(0));
             } else {
                 throw new IllegalArgumentException("This event doesn't exist. Type !help reserve to see how to make a new event.");
             }

@@ -177,10 +177,10 @@ public class GuildManager {
      * @param channelName The name of the channel to get
      * @return the {@code TextChannel} in this {@code Guild} that has the given name
      */
-    public Channel getTextChannel(String channelName) {
+    public TextChannel getTextChannel(String channelName) {
         for (GuildChannel channel : getTextChannels()) {
             if (channel.getType() == Channel.Type.GUILD_TEXT && channel.getName().equals(channelName)) //Only really used to match text channels
-                return channel;
+                return (TextChannel) channel;
         }
         return null;
     }

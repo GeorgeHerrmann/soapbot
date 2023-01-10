@@ -3,6 +3,8 @@ package com.georgster;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.georgster.logs.MultiLogger;
+
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
@@ -50,6 +52,7 @@ public final class SoapClientManager {
      * has been set up. Until this method is called, SOAP Bot is not fully logged in.
      */
     protected void start() {
+        MultiLogger.wipeFileLogs(); //Temporary
         discordClient.onDisconnect().block();
     }
 
