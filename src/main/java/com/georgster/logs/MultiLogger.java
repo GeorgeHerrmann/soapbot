@@ -11,25 +11,33 @@ import java.util.EnumMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.georgster.api.ActionWriter;
 import com.georgster.util.GuildManager;
 
 /**
  * Logs information to {@code LogDestinations} about SOAP Bot's systems.
  */
-public class MultiLogger {
+public class MultiLogger<T> {
     private static final String LOGFILELOCATION = Paths.get(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "logs", "data").toString();
 
-    private EnumMap<LogDestination, String> logs; //Each log message is mapped to its destination
+    private final EnumMap<LogDestination, String> logs; //Each log message is mapped to its destination
     private final GuildManager manager; //The manager for the Guild
+    private final Class<T> source;
 
     /**
-     * Creates a MultiLogger for the associated {@code Guild} in the {@code GuildManager}.
+     * Creates a MultiLogger for the associated {@code Guild} in the {@code GuildManager}
+     * from the source of the specified class.
      * 
      * @param manager The manager of the {@code Guild} for logs to be sent to.
+     * @param source The class of the object that is logging.
      */
-    public MultiLogger(GuildManager manager) {
+    public MultiLogger(GuildManager manager, Class<T> source) {
         logs = new EnumMap<>(LogDestination.class);
         this.manager = manager;
+        if (canLog()) {
+            manager.setActiveChannel(manager.getTextChannel("bot-logs"));
+        }
+        this.source = source;
     }
 
     /**
@@ -61,6 +69,30 @@ public class MultiLogger {
     }
 
     /**
+     * Sends the log messages bound for the specified {@code LogDestination} to their
+     * associated {@code LogDestinations}, then clears the log for that destination.
+     * 
+     * @param destination The destination to send.
+     */
+    public void send(LogDestination destination) {
+        switch (destination) {
+            case DISCORD:
+                logDiscord(logs.getOrDefault(LogDestination.DISCORD, ""));
+                break;
+            case SYSTEM:
+                logSystem(logs.getOrDefault(LogDestination.SYSTEM, ""));
+                break;
+            case FILE:
+                logFile(logs.getOrDefault(LogDestination.FILE, ""));
+                break;
+            case API:
+                logApi(logs.getOrDefault(LogDestination.API, ""));
+                break;
+        }
+        remove(destination);
+    }
+
+    /**
      * Sends all log messages to their associated {@code LogDestinations},
      * then clears the log.
      */
@@ -68,6 +100,7 @@ public class MultiLogger {
         logDiscord(logs.getOrDefault(LogDestination.DISCORD, ""));
         logSystem(logs.getOrDefault(LogDestination.SYSTEM, ""));
         logFile(logs.getOrDefault(LogDestination.FILE, ""));
+        logApi(logs.getOrDefault(LogDestination.API, ""));
         clear();
     }
 
@@ -78,7 +111,7 @@ public class MultiLogger {
      */
     public void logDiscord(String discord) {
         if (canLog() && !discord.isEmpty()) {
-            GuildManager.sendText(discord, manager.getTextChannel("bot-logs"));
+            manager.sendText(discord);
         }
     }
 
@@ -89,7 +122,7 @@ public class MultiLogger {
      */
     public void logSystem(String system) {
         if (!system.isEmpty()) {
-            Logger logger = LoggerFactory.getLogger(MultiLogger.class);
+            Logger logger = LoggerFactory.getLogger(source);
             logger.info(system);
         }
     }
@@ -100,12 +133,24 @@ public class MultiLogger {
      * @param file The message to be logged.
      */
     public void logFile(String file) {
-        if (!file.isEmpty()) { 
+        if (!file.isEmpty()) {
             try (FileWriter writer = new FileWriter(Paths.get(LOGFILELOCATION, "log.txt").toString(), true)) {
-                writer.write(file + "\n");
+                writer.write(source.getName() + ": " + file + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    /**
+     * Logs a message to SOAP Bot's {@code ActionWriter} which
+     * communicates with the SOAP Api.
+     * 
+     * @param api The message to be logged.
+     */
+    public void logApi(String api) {
+        if (!api.isEmpty()) {
+            ActionWriter.writeAction(api);
         }
     }
 

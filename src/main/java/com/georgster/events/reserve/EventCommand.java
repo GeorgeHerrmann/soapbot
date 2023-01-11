@@ -3,7 +3,8 @@ package com.georgster.events.reserve;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.ProfileType;
 import com.georgster.util.CommandParser;
@@ -24,14 +25,24 @@ public class EventCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<EventCommand> logger = new MultiLogger<>(manager, EventCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName() + "\n",
+        LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "unreserve").withRules("X I").build();
         ProfileHandler handler = manager.getHandler();
         try { //Checks to see the command if valid
             parser.parse(event.getMessage().getContent().toLowerCase());
+            String tag = event.getMessage().getAuthorAsMember().block().getTag();
             if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
-                ActionWriter.writeAction("Showing all events in a text channel");
+                logger.append("Showing all events in a text channel", LogDestination.API);
+                logger.append("\t" + tag + " is requesting a list of events\n",
+                LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+
                 StringBuilder response = new StringBuilder();
                 if (handler.areEvents()) {
+                    logger.append("\tThere are events currently active\n",
+                    LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
                     response.append("All events:\n");
                     for (ReserveEvent reserve : handler.getEvents()) {
                         if (reserve.isTimeless()) {
@@ -43,30 +54,49 @@ public class EventCommand implements Command {
                     response.append("Type !events [NAME] for more information about a specific event");
                     manager.sendText(response.toString());
                 } else {
+                    logger.append("\tThere are no events currently active\n",
+                    LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
                     manager.sendText("There are no events currently active");
                 }
             } else if (parser.getMatchingRule("I").equals("unreserve")) { //Unreserves from an event
-                ActionWriter.writeAction("Unreserving a user from an event");
+                logger.append("Unreserving a user from an event", LogDestination.API);
+
+                logger.append("\t" + tag + " is attempting to unreserve from an event\n",
+                LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
                 if (handler.eventExists(parser.get(0))) {
-                    for (ReserveEvent reserve: handler.getEvents()) {
+                    for (ReserveEvent reserve : handler.getEvents()) {
                         if (reserve.getIdentifier().equals(parser.get(0))) {
+
                             handler.removeObject(reserve, ProfileType.EVENTS);
                             event.getMessage().getAuthor().ifPresent(user -> reserve.removeReserved(user.getTag())); //Gets the user's tag and removes them from the list
+
+                            logger.append("\tRemoving " + event.getMessage().getAuthorAsMember().block().getTag() + " from event " + reserve.getIdentifier(),
+                            LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
                             if (reserve.getReserved() > 0) {
                                 handler.addObject(reserve, ProfileType.EVENTS);
                                 manager.sendText("You have unreserved from event " + reserve.getIdentifier());
                             } else {
+                                logger.append("\tRemoving event " + reserve.getIdentifier() + " from the list of events",
+                                LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
                                 manager.sendText("There are no more people reserved to this event, this event has been removed");
                             }
                         }
                     }
                 } else {
+                    logger.append("\tCould not find event " + parser.get(0),
+                    LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }
             } else { //Shows information about an event
+                logger.append("\t" + tag + " wants to see information about a specific event",
+                LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
                 if (handler.eventExists(parser.get(0))) {
-                    ActionWriter.writeAction("Showing information about a specific event in a text channel");
+                    logger.append("Showing information about a specific event in a text channel", LogDestination.API);
                     ReserveEvent reserve = handler.pullEvent(parser.get(0));
+
+                    logger.append("Showing information about event: " + reserve.getIdentifier() + "\n",
+                    LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+
                     StringBuilder response = new StringBuilder();
                     response.append("Event: " + reserve.getIdentifier() + "\n");
                     response.append("\tReserved: " + reserve.getReserved() + "\n");
@@ -93,8 +123,11 @@ public class EventCommand implements Command {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
+            logger.append("The user did not provide valid arguments, showing the help message\n",
+            LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
             manager.sendText(help());
         }
+        logger.sendAll();
     }
 
     /**

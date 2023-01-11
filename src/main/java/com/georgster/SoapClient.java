@@ -1,8 +1,5 @@
 package com.georgster;
 
-import java.util.List;
-
-import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEventHandler;
 import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.logs.LogDestination;
@@ -71,7 +68,7 @@ public final class SoapClient {
         /* Though we could have the client itself distribute GuildManagers, we would still have to update it on each event fire
         to ensure it has up to date Guild information, so it makes more sense to just make a new one with the Guild in the event */
         GuildManager manager = new GuildManager(event.getGuild());
-        MultiLogger logger = new MultiLogger(manager);
+        MultiLogger<SoapClient> logger = new MultiLogger<>(manager, SoapClient.class);
 
         logger.append("Logging in to server: " + manager.getGuild().getName(),
         LogDestination.DISCORD,
@@ -82,7 +79,13 @@ public final class SoapClient {
          * If the guild this event was fired from has events scheduled, we will restart them.
          */
         if (handler.areEvents()) { //Checks to see if there are any events at all for this guild
-          ActionWriter.writeAction("Restarting events for " + manager.getGuild().getName()); //Note that the ActionWriter is what tells SOAP Api what is happening
+          logger.append("\tRestarting events",
+          LogDestination.DISCORD,
+          LogDestination.FILE,
+          LogDestination.SYSTEM,
+          LogDestination.API);
+
+          logger.append(" for " + manager.getGuild().getName(), LogDestination.SYSTEM, LogDestination.FILE);
           //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
           for (ReserveEvent reserve : handler.getEvents()) { //For each event in the guild's events list
             SoapHandler.runDaemon(() -> 
@@ -90,20 +93,23 @@ public final class SoapClient {
             );
           }
         }
-        ActionWriter.writeAction("Logging in to server: " + manager.getGuild().getName());
-        List<Member> members = manager.getAllMembers(); //Stores all members of the guild this event was fired from in a List
+        //List<Member> members = manager.getAllMembers(); //Stores all members of the guild this event was fired from in a List
         if (!handler.serverProfileExists()) { //If the guild this event was fired from does not have a profile scheme, or has an out of date profile scheme, we create one
-          ActionWriter.writeAction("Creating a profile for " + manager.getGuild().getName());
+          logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(),
+          LogDestination.DISCORD, LogDestination.FILE, LogDestination.SYSTEM);
           handler.createServerProfile();
         }
-        for (int i = 0; i < members.size(); i++) { //Same idea for Members
-          String member = members.get(i).getId().asString();
-          if (!handler.userProfileExists(member)) {
-            handler.createUserProfile(member);
+        int x = 0;
+        for (Member member : manager.getAllMembers()) { //Same idea for Members
+          String id = member.getId().asString();
+          if (!handler.userProfileExists(id)) {
+            x++;
+            handler.createUserProfile(id);
           }
-          ActionWriter.writeAction("Updating user profile number " + i + " in " + event.getGuild().getName());
-          handler.updateUserProfile(new UserProfile(manager.getId(), member, members.get(i).getUsername())); //We will always update the user's profile to make sure it is up to date
+          handler.updateUserProfile(new UserProfile(manager.getId(), id, member.getUsername())); //We will always update the user's profile to make sure it is up to date
         }
+        logger.append("\n\t Updated " + x + " User Profiles for " + manager.getGuild().getName(),
+        LogDestination.DISCORD, LogDestination.FILE, LogDestination.SYSTEM);
         logger.sendAll();
     }
 
@@ -117,11 +123,12 @@ public final class SoapClient {
     protected void onMessageCreate(MessageCreateEvent event) {
         final String content = event.getMessage().getContent();
         if (content.startsWith("!") && content.equals(content.toUpperCase())) { //Very necessary
-          ActionWriter.writeAction("Getting yelled at");
           GuildManager.sendText("Please stop yelling at me :(", ((TextChannel) event.getMessage().getChannel().block()));
         }
         /* The registry will make a GuildManager if the command is valid, to avoid making managers where we don't need it */
-        registry.getAndExecute(event);
+        if (content.startsWith("!")) {
+          registry.getAndExecute(event);
+        }
     }
 
     /**

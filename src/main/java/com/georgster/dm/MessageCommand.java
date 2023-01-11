@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -14,6 +15,10 @@ import discord4j.core.object.entity.User;
 public class MessageCommand implements Command {
 
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName(),
+        LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE, LogDestination.API);
+
         Message message = event.getMessage();
         List<String> contents = Arrays.asList(message.getContent().split(" "));
 
@@ -25,12 +30,17 @@ public class MessageCommand implements Command {
         }
         if (!message.getUserMentions().isEmpty()) {
             for (User user : message.getUserMentions()) {
+                logger.append("\tFound User: " + user.getTag() + ", sending DM",
+                LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+
                 user.getPrivateChannel().block().createMessage(response.toString()).block();
-                ActionWriter.writeAction("Sending a DM to a user");
             }
         } else {
+            logger.append("\tNo users found, sending help message",
+            LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
             message.getChannel().block().createMessage(help()).block();
         }
+        logger.sendAll();
     }
 
     /**

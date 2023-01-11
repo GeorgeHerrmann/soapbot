@@ -6,16 +6,20 @@ package com.georgster.logs;
  */
 public enum LogDestination {
     /**
-     * Repsents logs that will go to a {@code Guild's} bot-logs channel
+     * Repsents logs that will go to a {@code Guild's} bot-logs channel.
      */
     DISCORD,
     /**
-     * Represents logs that will go to the standard output
+     * Represents logs that will go to the standard output.
      */
     SYSTEM,
     /**
-     * Represents logs that will go to a local log file
+     * Represents logs that will go to a local log file.
      */
-    FILE
+    FILE,
+    /**
+     * Represents logs that will go to the SOAP API.
+     */
+    API
 
 }
