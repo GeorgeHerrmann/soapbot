@@ -80,10 +80,7 @@ public final class SoapClient {
          */
         if (handler.areEvents()) { //Checks to see if there are any events at all for this guild
           logger.append("\tRestarting events",
-          LogDestination.DISCORD,
-          LogDestination.FILE,
-          LogDestination.SYSTEM,
-          LogDestination.API);
+          LogDestination.NONAPI, LogDestination.API);
 
           logger.append(" for " + manager.getGuild().getName(), LogDestination.SYSTEM, LogDestination.FILE);
           //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
@@ -95,8 +92,7 @@ public final class SoapClient {
         }
         //List<Member> members = manager.getAllMembers(); //Stores all members of the guild this event was fired from in a List
         if (!handler.serverProfileExists()) { //If the guild this event was fired from does not have a profile scheme, or has an out of date profile scheme, we create one
-          logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(),
-          LogDestination.DISCORD, LogDestination.FILE, LogDestination.SYSTEM);
+          logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(), LogDestination.NONAPI);
           handler.createServerProfile();
         }
         int x = 0;
@@ -108,8 +104,7 @@ public final class SoapClient {
           }
           handler.updateUserProfile(new UserProfile(manager.getId(), id, member.getUsername())); //We will always update the user's profile to make sure it is up to date
         }
-        logger.append("\n\t Updated " + x + " User Profiles for " + manager.getGuild().getName(),
-        LogDestination.DISCORD, LogDestination.FILE, LogDestination.SYSTEM);
+        logger.append("\n\t Updated " + x + " User Profiles for " + manager.getGuild().getName(), LogDestination.NONAPI);
         logger.sendAll();
     }
 
