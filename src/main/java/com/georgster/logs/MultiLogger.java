@@ -88,6 +88,8 @@ public class MultiLogger<T> {
             case API:
                 logApi(logs.getOrDefault(LogDestination.API, ""));
                 break;
+            case NONAPI:
+                logNonApi(logs.getOrDefault(LogDestination.NONAPI, ""));
         }
         remove(destination);
     }
@@ -101,7 +103,21 @@ public class MultiLogger<T> {
         logSystem(logs.getOrDefault(LogDestination.SYSTEM, ""));
         logFile(logs.getOrDefault(LogDestination.FILE, ""));
         logApi(logs.getOrDefault(LogDestination.API, ""));
+        logNonApi(logs.getOrDefault(LogDestination.NONAPI, ""));
         clear();
+    }
+
+    /**
+     * Logs a message to the DISCORD, SYSTEM and FILE {@code LogDestinations}.
+     * 
+     * @param nonApi The message to be logged.
+     */
+    public void logNonApi(String nonApi) {
+        if (!nonApi.isEmpty()) {
+            logDiscord(nonApi);
+            logSystem(nonApi);
+            logFile(nonApi);
+        }
     }
 
     /**

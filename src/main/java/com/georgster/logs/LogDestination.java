@@ -20,6 +20,10 @@ public enum LogDestination {
     /**
      * Represents logs that will go to the SOAP API.
      */
-    API
+    API,
+    /**
+     * Represents the DISCORD, SYSTEM and FILE Destinations.
+     */
+    NONAPI
 
 }
