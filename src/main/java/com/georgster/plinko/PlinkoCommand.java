@@ -3,7 +3,8 @@ package com.georgster.plinko;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
 
@@ -33,19 +34,29 @@ public class PlinkoCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<PlinkoCommand> logger = new MultiLogger<>(manager, PlinkoCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+
         CommandParser parser = new CommandParser(PATTERN);
-        parser.parse(event.getMessage().getContent().toLowerCase());
-        PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
-        if (parser.get(0).equals("play")) {
-            ActionWriter.writeAction("Beginning the simulation of a plinko game");
-            game.play();
-        } else if (parser.get(0).equals("board")) {
-            ActionWriter.writeAction("Showing a blank Plinko Board");
-            game.showBoard();
-        } else {
-            ActionWriter.writeAction("Showing information on how to use the plinko command");
+        try {
+            parser.parse(event.getMessage().getContent().toLowerCase());
+
+            logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+
+            PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
+            if (parser.get(0).equals("play")) {
+                logger.append("\tBeginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
+                game.play();
+            } else if (parser.get(0).equals("board")) {
+                logger.append("\tShowing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
+                game.showBoard();
+            }
+        } catch (Exception e) {
+            logger.append("\tInvalid command format", LogDestination.NONAPI);
             manager.sendText(help());
         }
+
+        logger.sendAll();
     }
 
     /**

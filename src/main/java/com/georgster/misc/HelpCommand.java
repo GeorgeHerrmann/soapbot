@@ -6,7 +6,8 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.CommandRegistry;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
 
@@ -31,25 +32,33 @@ public class HelpCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<HelpCommand> logger = new MultiLogger<>(manager, HelpCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName() + "\n");
+
         CommandParser parser = new CommandParser(PATTERN);
         String arg;
         parser.parse(event.getMessage().getContent());
         try {
+            logger.append("\tArguments found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
             arg = parser.get(0).toLowerCase();
         } catch (IndexOutOfBoundsException e) {
+            logger.append("\tNo arguments found\n", LogDestination.NONAPI);
             arg = "";
         }
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
         for (Command command : register.getCommands()) {
             if (command.getAliases().contains(arg)) {
+                logger.append("\tCommand found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
                 response = new StringBuilder(command.help());
                 break;
             } else {
                 response.append(command.getAliases().get(0) + " ");
             }
         }
-        ActionWriter.writeAction("Responding to a !help command request");
+        logger.append("Responding to a !help command request", LogDestination.API);
         manager.sendText(response.toString());
+
+        logger.sendAll();
     }
 
     /**

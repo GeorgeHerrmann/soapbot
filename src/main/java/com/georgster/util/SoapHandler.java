@@ -25,7 +25,9 @@ public class SoapHandler {
      * 
      * @param message the message to send
      * @param channel the channel to send the message to
+     * @deprecated Messages should be handled with a {@link GuildManager}
      */
+    @Deprecated
     public static void sendTextMessageInChannel(String message, MessageChannel channel) {
         channel.createMessage(message).block();
     }
@@ -37,7 +39,9 @@ public class SoapHandler {
      * @param channelName the name of the channel to match
      * @param channels the list of channels to search through
      * @return the channel that matches the channelName parameter
+     * @deprecated Channels should be handled with a {@link GuildManager}
      */
+    @Deprecated
     public static Channel channelMatcher(String channelName, List<GuildChannel> channels) {
         for (GuildChannel channel : channels) {
             if (channel.getType() == Channel.Type.GUILD_TEXT && channel.getName().equals(channelName)) //Only really used to match text channels
@@ -53,7 +57,9 @@ public class SoapHandler {
      * @param memberTag the tag of the member to match
      * @param members the list of members to search through
      * @return the member that matches the memberTag parameter
+     * @deprecated Members should be handled with a {@link GuildManager}
      */
+    @Deprecated
     public static Member memberMatcher(String memberTag, List<Member> members) {
         for (Member member : members) {
             if (member.getTag().equals(memberTag))

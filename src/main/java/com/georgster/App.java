@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public class App {
 
     public static void main(String[] args) {
-        
+      
         String token = "";
         try {
           token = Files.readString( Path.of(System.getProperty("user.dir"), "key.txt") );
@@ -18,6 +18,7 @@ public class App {
           e.printStackTrace();
           System.exit(0);
         }
+
         /* Creates a manager that will control the SoapClient for each Guild */
         SoapClientManager soapManager = new SoapClientManager(token);
         soapManager.listenToEvents(); //Subscribes the manager to Discord's event stream

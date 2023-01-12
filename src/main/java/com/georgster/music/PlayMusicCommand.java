@@ -3,7 +3,8 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -49,23 +50,32 @@ public class PlayMusicCommand implements Command {
      * @param event the event that triggered the command
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<PlayMusicCommand> logger = new MultiLogger<>(manager, PlayMusicCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+
         try {
             CommandParser parser = new CommandParser(PATTERN);
             parser.parse(event.getMessage().getContent());
+            logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+
             final Member member = event.getMember().orElse(null); //Makes sure the member is valid
             if (member != null) {
                 final VoiceState voiceState = member.getVoiceState().block();
                 if (voiceState != null) { //They must be in a voice channel
                     final VoiceChannel channel = voiceState.getChannel().block();
                     if (channel != null) { //And that channel must exist
-                        ActionWriter.writeAction("Joining a voice channel");
+                        logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
+                        LogDestination.NONAPI);
+
                         VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
                         scheduler.setChannelData(event.getMessage().getChannel().block(), connection);
                         playerManager.loadItem(parser.get(0), scheduler);
-                        ActionWriter.writeAction("Playing audio in a discord channel");
+                        logger.append("Playing audio in a discord channel", LogDestination.API);
                     }
                 }
             }
+
+            logger.sendAll();
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
             manager.sendText(help());
         }

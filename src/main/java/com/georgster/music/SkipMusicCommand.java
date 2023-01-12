@@ -3,7 +3,8 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -35,8 +36,12 @@ public class SkipMusicCommand implements Command {
      * @param event the event that triggered the command
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<SkipMusicCommand> logger = new MultiLogger<>(manager, SkipMusicCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+
         if (scheduler.isActive()) {
             List<String> message = CommandParser.parseGeneric(event.getMessage().getContent());
+            logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
             if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();
                 manager.sendText("Skipping all tracks in the queue");
@@ -44,7 +49,10 @@ public class SkipMusicCommand implements Command {
                 manager.sendText("Skipping the currently playing track");
             }
             player.stopTrack();
-            ActionWriter.writeAction("Skipping one or more tracks in a voice channel");
+            logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
+        } else {
+            logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
+            manager.sendText("No tracks are currently playing");
         }
     }
 

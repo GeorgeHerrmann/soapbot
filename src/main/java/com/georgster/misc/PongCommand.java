@@ -3,7 +3,8 @@ package com.georgster.misc;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
 
@@ -20,10 +21,7 @@ public class PongCommand implements Command {
     String msg;
 
     /**
-     * Creates a PongCommand object. Though this implementation of
-     * creating objects for each command seems trivial for this command, it will
-     * be more useful for more complex actions. It also allows me to easily make a map
-     * to store all the commands in App.java.
+     * Creates a PongCommand object.
      */
     public PongCommand() {
         msg = "ping";
@@ -34,6 +32,9 @@ public class PongCommand implements Command {
      */
     @Override
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+
         List<String> args = CommandParser.parseGeneric(event.getMessage().getContent());
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
@@ -42,8 +43,10 @@ public class PongCommand implements Command {
             fullMessage.append("pong! ");
             counter++;
         }
-        ActionWriter.writeAction("Responding to a !ping command request with " + counter + " pongs");
+        logger.append("\tResponding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
         manager.sendText(fullMessage.toString().trim());
+
+        logger.sendAll();
     }
 
     /**

@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
@@ -15,7 +16,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  */
 public class ShowQueueCommand implements Command {
 
-    private LinkedBlockingQueue<AudioTrack> queue;
+    private final LinkedBlockingQueue<AudioTrack> queue;
 
     /**
      * Will show the current queue of audio tracks.
@@ -32,17 +33,24 @@ public class ShowQueueCommand implements Command {
      * @param execute the event that triggered the command
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<ShowQueueCommand> logger = new MultiLogger<>(manager, ShowQueueCommand.class);
+        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;
+
+        logger.append("Showing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
+
         for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
             response.append("\t" + x + ") " + i.getInfo().title + "\n");
             if (response.length() >= 1800) {
+                logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
+
                 manager.sendText(response.toString());
                 response = new StringBuilder();
             }
             x++;
         }
-        ActionWriter.writeAction("Showing the current audio track queue");
         manager.sendText(response.toString());
     }
 

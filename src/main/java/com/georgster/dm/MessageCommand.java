@@ -17,7 +17,7 @@ public class MessageCommand implements Command {
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
         logger.append("Executing: " + this.getClass().getSimpleName(),
-        LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE, LogDestination.API);
+        LogDestination.NONAPI, LogDestination.API);
 
         Message message = event.getMessage();
         List<String> contents = Arrays.asList(message.getContent().split(" "));
@@ -30,14 +30,14 @@ public class MessageCommand implements Command {
         }
         if (!message.getUserMentions().isEmpty()) {
             for (User user : message.getUserMentions()) {
-                logger.append("\tFound User: " + user.getTag() + ", sending DM",
-                LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+                logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
+                LogDestination.NONAPI);
 
                 user.getPrivateChannel().block().createMessage(response.toString()).block();
             }
         } else {
-            logger.append("\tNo users found, sending help message",
-            LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+            logger.append("\n\tNo users found, sending help message",
+            LogDestination.NONAPI);
             message.getChannel().block().createMessage(help()).block();
         }
         logger.sendAll();
