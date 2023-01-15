@@ -70,10 +70,7 @@ public final class SoapClient {
         GuildManager manager = new GuildManager(event.getGuild());
         MultiLogger<SoapClient> logger = new MultiLogger<>(manager, SoapClient.class);
 
-        logger.append("Logging in to server: " + manager.getGuild().getName(),
-        LogDestination.DISCORD,
-        LogDestination.FILE,
-        LogDestination.SYSTEM);
+        logger.append("Logging in to server: " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
         ProfileHandler handler = manager.getHandler();
         /*
          * If the guild this event was fired from has events scheduled, we will restart them.
@@ -81,8 +78,6 @@ public final class SoapClient {
         if (handler.areEvents()) { //Checks to see if there are any events at all for this guild
           logger.append("\tRestarting events",
           LogDestination.NONAPI, LogDestination.API);
-
-          logger.append(" for " + manager.getGuild().getName(), LogDestination.SYSTEM, LogDestination.FILE);
           //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
           for (ReserveEvent reserve : handler.getEvents()) { //For each event in the guild's events list
             SoapHandler.runDaemon(() -> 
@@ -90,7 +85,6 @@ public final class SoapClient {
             );
           }
         }
-        //List<Member> members = manager.getAllMembers(); //Stores all members of the guild this event was fired from in a List
         if (!handler.serverProfileExists()) { //If the guild this event was fired from does not have a profile scheme, or has an out of date profile scheme, we create one
           logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(), LogDestination.NONAPI);
           handler.createServerProfile();
@@ -117,13 +111,8 @@ public final class SoapClient {
      */
     protected void onMessageCreate(MessageCreateEvent event) {
         final String content = event.getMessage().getContent();
-        if (content.startsWith("!") && content.equals(content.toUpperCase())) { //Very necessary
-          GuildManager.sendText("Please stop yelling at me :(", ((TextChannel) event.getMessage().getChannel().block()));
-        }
-        /* The registry will make a GuildManager if the command is valid, to avoid making managers where we don't need it */
-        if (content.startsWith("!")) {
-          registry.getAndExecute(event);
-        }
+        if (content.equals(content.toUpperCase())) GuildManager.sendText("Please stop yelling at me :(", ((TextChannel) event.getMessage().getChannel().block()));
+        registry.getAndExecute(event);
     }
 
     /**

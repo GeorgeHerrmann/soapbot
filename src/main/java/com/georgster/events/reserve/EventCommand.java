@@ -25,7 +25,7 @@ public class EventCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<EventCommand> logger = new MultiLogger<>(manager, EventCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n",
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n",
         LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
 
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "unreserve").withRules("X I").build();
@@ -69,7 +69,7 @@ public class EventCommand implements Command {
                                 handler.addObject(reserve, ProfileType.EVENTS);
                                 manager.sendText("You have unreserved from event " + reserve.getIdentifier());
                             } else {
-                                logger.append("\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
+                                logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
                                 manager.sendText("There are no more people reserved to this event, this event has been removed");
                             }
                         }

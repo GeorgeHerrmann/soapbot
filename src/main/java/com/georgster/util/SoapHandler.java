@@ -98,8 +98,7 @@ public class SoapHandler {
                     hour = 0;
                     minute = 0;
                 } else {
-                    hour = Integer.parseInt(time.substring(0, time.indexOf("AM")));
-                    minute = 0;
+                    throw new IllegalArgumentException("Does not specify AM/PM time");
                 }
             } catch (Exception e2) { //If the time string is in an invalid format, it will get caught here
                 throw new IllegalArgumentException("Invalid time format, valid times formats are 1:00pm, 1pm, 01:00, 1:00PM, 1PM, 01:00PM, 1:00am, 1am, 01:00am, 1:00AM, 1AM, 01:00AM");

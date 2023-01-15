@@ -35,7 +35,7 @@ public class PlinkoCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<PlinkoCommand> logger = new MultiLogger<>(manager, PlinkoCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new CommandParser(PATTERN);
         try {

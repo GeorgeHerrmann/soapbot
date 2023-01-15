@@ -51,7 +51,7 @@ public class PlayMusicCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<PlayMusicCommand> logger = new MultiLogger<>(manager, PlayMusicCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         try {
             CommandParser parser = new CommandParser(PATTERN);
@@ -66,10 +66,19 @@ public class PlayMusicCommand implements Command {
                     if (channel != null) { //And that channel must exist
                         logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
                         LogDestination.NONAPI);
-
                         VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
                         scheduler.setChannelData(event.getMessage().getChannel().block(), connection);
-                        playerManager.loadItem(parser.get(0), scheduler);
+
+                        int retryAttempts = 0;
+                        while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {
+                            logger.append("\tFailed to play audio, retrying...\n", LogDestination.NONAPI);
+                            retryAttempts++;
+                        }
+                        if (retryAttempts < 3) {
+                            logger.append("\tFailed to play audio, retry limit reached\n", LogDestination.NONAPI);
+                        } else {
+                            logger.append("\tSuccessfully start audio\n", LogDestination.NONAPI);
+                        }
                         logger.append("Playing audio in a discord channel", LogDestination.API);
                     }
                 }
@@ -78,6 +87,21 @@ public class PlayMusicCommand implements Command {
             logger.sendAll();
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
             manager.sendText(help());
+        }
+    }
+
+    /**
+     * Attempts to start audio playback given the url.
+     * 
+     * @param url the url of the audio to play
+     * @return true if the audio started successfully, false otherwise
+     */
+    private boolean attemptAudioStart(String url) {
+        try {
+            playerManager.loadItem(url, scheduler);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

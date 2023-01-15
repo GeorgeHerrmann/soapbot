@@ -16,7 +16,7 @@ public class App {
           token = Files.readString( Path.of(System.getProperty("user.dir"), "key.txt") );
         } catch (IOException e) {
           e.printStackTrace();
-          System.exit(0);
+          System.exit(1);
         }
 
         /* Creates a manager that will control the SoapClient for each Guild */

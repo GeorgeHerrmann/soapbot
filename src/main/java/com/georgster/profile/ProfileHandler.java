@@ -102,7 +102,6 @@ public class ProfileHandler {
     /**
      * Returns whether or not a server profile exists with the supplimented server ID.
      * 
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return true if the profile exists already, false otherwise.
      */
     public boolean serverProfileExists() {
@@ -114,7 +113,6 @@ public class ProfileHandler {
     /**
      * Adds an object to the server's profile file based on the supplied {@code ProfileType}.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param object the object to be added to the profile file.
      * @param type the type of the server's profile that the object should be added to.
      */
@@ -132,7 +130,6 @@ public class ProfileHandler {
     /**
      * Makes a ReserveEvent object from the server's event list.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param eventIdentifier the identifier of the event to be pulled from the server's event list.
      * @return the {@code ReserveEvent} object that was pulled from the server's event list.
      */
@@ -190,16 +187,15 @@ public class ProfileHandler {
     /**
      * Removes an object from the server's profile file based on the supplied {@code ProfileType}.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param object the object to be removed from the profile file.
      * @param type the type of the server's profile that the object should be removed from.
      */
     public void removeObject(Object object, ProfileType type) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
         if (serverProfileExists()) {
-            String objects = "";
-            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString())) {
-                objects = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json"))));
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString(), true)) {
+                String objects = Files.readString(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")));
+                wipe(type);
                 objects = objects.replace(parser.toJson(object), ""); //Remove the event from the file
                 writer.write(objects);
             } catch (IOException e) {
@@ -209,9 +205,23 @@ public class ProfileHandler {
     }
 
     /**
+     * Wipes the server's profile file based on the supplied {@code ProfileType}.
+     * 
+     * @param type the type of the server's profile that should be wiped.
+     */
+    public void wipe(ProfileType type) {
+        if (serverProfileExists()) {
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString())) {
+                writer.write("");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * Checks if an event exists in the server's event list.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param identifier the identifier of the event to be checked against the server's event list.
      * @return true if the event exists in the server's event list, false otherwise.
      */
@@ -230,7 +240,6 @@ public class ProfileHandler {
     /**
      * Checks if an object exists in the server's profile file based on the supplied {@code ProfileType}.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param object the object to be checked against the profile file.
      * @param type the type of the server's profile that the object should be checked against.
      * @return true if the object exists in the server's profile file, false otherwise.

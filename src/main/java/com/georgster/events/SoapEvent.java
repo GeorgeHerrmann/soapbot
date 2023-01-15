@@ -5,8 +5,7 @@ import com.georgster.util.GuildManager;
 /**
  * A SOAPEvent is an object that holds information that will be used
  * to schedule and fulfill said event. A SOAPEvent is scheduled upon
- * creation, and is fulfilled when the event when the conditions to
- * fulfill the event are met.
+ * creation, and is fulfilled when the conditions to fulfill the event are met.
  */
 public interface SoapEvent {
 

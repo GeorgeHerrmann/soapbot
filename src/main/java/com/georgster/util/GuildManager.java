@@ -178,9 +178,9 @@ public class GuildManager {
      * @return the {@code TextChannel} in this {@code Guild} that has the given name
      */
     public TextChannel getTextChannel(String channelName) {
-        for (GuildChannel channel : getTextChannels()) {
+        for (TextChannel channel : getTextChannels()) {
             if (channel.getType() == Channel.Type.GUILD_TEXT && channel.getName().equals(channelName)) //Only really used to match text channels
-                return (TextChannel) channel;
+                return channel;
         }
         return null;
     }

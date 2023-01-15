@@ -34,12 +34,12 @@ public class ShowQueueCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<ShowQueueCommand> logger = new MultiLogger<>(manager, ShowQueueCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;
 
-        logger.append("Showing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
+        logger.append("\tShowing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
 
         for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
             response.append("\t" + x + ") " + i.getInfo().title + "\n");
@@ -51,6 +51,8 @@ public class ShowQueueCommand implements Command {
             }
             x++;
         }
+        logger.sendAll();
+
         manager.sendText(response.toString());
     }
 

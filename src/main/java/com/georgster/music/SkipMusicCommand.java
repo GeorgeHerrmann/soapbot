@@ -37,7 +37,7 @@ public class SkipMusicCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<SkipMusicCommand> logger = new MultiLogger<>(manager, SkipMusicCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         if (scheduler.isActive()) {
             List<String> message = CommandParser.parseGeneric(event.getMessage().getContent());
@@ -54,6 +54,8 @@ public class SkipMusicCommand implements Command {
             logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
             manager.sendText("No tracks are currently playing");
         }
+
+        logger.sendAll();
     }
 
     /**

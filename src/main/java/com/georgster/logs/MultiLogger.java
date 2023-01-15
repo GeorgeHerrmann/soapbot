@@ -34,9 +34,6 @@ public class MultiLogger<T> {
     public MultiLogger(GuildManager manager, Class<T> source) {
         logs = new EnumMap<>(LogDestination.class);
         this.manager = manager;
-        if (canLog()) {
-            manager.setActiveChannel(manager.getTextChannel("bot-logs"));
-        }
         this.source = source;
     }
 
@@ -127,7 +124,7 @@ public class MultiLogger<T> {
      */
     public void logDiscord(String discord) {
         if (canLog() && !discord.isEmpty()) {
-            manager.sendText(discord);
+            GuildManager.sendText(discord, manager.getTextChannel("bot-logs"));
         }
     }
 

@@ -33,7 +33,7 @@ public class PongCommand implements Command {
     @Override
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         List<String> args = CommandParser.parseGeneric(event.getMessage().getContent());
         StringBuilder fullMessage = new StringBuilder();

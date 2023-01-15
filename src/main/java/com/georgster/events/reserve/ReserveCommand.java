@@ -26,20 +26,21 @@ public class ReserveCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<ReserveCommand> logger = new MultiLogger<>(manager, ReserveCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n");
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         try {
-            CommandParser parser = new ParseBuilder(PATTERN).withRules("X N|T T").build();
+            CommandParser parser = new ParseBuilder(PATTERN).withRules("X N|T N|T").build();
             List<String> message = parser.parse(event.getMessage().getContent());
             ProfileHandler handler = manager.getHandler();
 
             if (message.isEmpty()) {
                 logger.append("\tNo arguments found, sending help message", LogDestination.NONAPI);
+                logger.sendAll();
                 manager.sendText(help());
                 return;
             }
 
-            logger.append("\tArguments found: " + message.toString(), LogDestination.NONAPI);
+            logger.append("\tArguments found: " + message.toString() + "\n", LogDestination.NONAPI);
 
             ReserveEvent reserve = assignCorrectEvent(manager, parser);
 
@@ -78,6 +79,7 @@ public class ReserveCommand implements Command {
                 manager.sendText(messageString);
             }
         } catch (IllegalArgumentException e) {
+            logger.append("\tSending an error message", LogDestination.NONAPI);
             manager.sendText(e.getMessage());
         }
         logger.sendAll();
@@ -117,11 +119,10 @@ public class ReserveCommand implements Command {
             }
         } else if (message.size() == 3 && !handler.eventExists(message.get(0))) { //Creates a new event that has a number of slots and a time
             try { //If the event doesn't already exist, we can attempt to create a new one
-                if (Integer.parseInt(message.get(1)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
+                if (Integer.parseInt(parser.getMatchingRule("N")) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 //Should be in the format !reserve [EVENTNAME] [NUMPEOPLE] [TIME]
                 List<String> temp = parser.getMatchingRules("N");
                 int numPeople = Integer.parseInt(temp.get(temp.size() - 1));
-                manager.sendText(parser.getArguments().toString());
                 temp = parser.getMatchingRules("T");
                 String time = temp.get(temp.size() - 1);
                 return new ReserveEvent(message.get(0), numPeople, SoapHandler.timeConverter(time), channelName);
@@ -130,7 +131,7 @@ public class ReserveCommand implements Command {
             } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
                 throw new IllegalArgumentException(e.getMessage());
             } catch (IndexOutOfBoundsException e) { //If the name of the event has some issue the parser can't handle
-                throw new IllegalArgumentException("There is an issue with the name of the event. The event name cannot have a number unless is attached to a word." + 
+                throw new IllegalArgumentException("There is an issue with the name of the event. The event name cannot have a number unless it is attached to a word." + 
                 "\n\t- Example: !reserve 1 v 1 5 5:00pm is incorrect, but !reserve 1v1 5 5:00pm is correct.");
             }
         }

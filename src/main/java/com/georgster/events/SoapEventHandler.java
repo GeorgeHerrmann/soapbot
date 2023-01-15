@@ -16,10 +16,14 @@ public class SoapEventHandler {
     }
 
     /**
+     * Schedules a {@code SoapEvent} to be fulfilled for the Guild the {@code GuildManager} is managing.
+     * If the event is a {@code ReserveEvent} the active channel is set to the channel the event was reserved in.
+     * This method will wait and block the calling thread until the event has been
+     * cancelled, is no longer valid, or the event's {@code fulfilled()} condition has been met and will
+     * call {@code onFulfill()} on the event if the event is valid.
      * 
-     * @param event
-     * @param channel
-     * @param id
+     * @param event the event to be scheduled
+     * @param manager the GuildManager managing the guild the event is being scheduled for
      */
     public static void scheduleEvent(SoapEvent event, GuildManager manager) {
         if (manager.getHandler().eventExists(event.getIdentifier())) {
@@ -35,6 +39,14 @@ public class SoapEventHandler {
     }
 
     
+    /**
+     * Validates a {@code SoapEvent} by waiting until the event has been cancelled, is no longer validm
+     * or the event's {@code fulfilled()} condition has been met.
+     * 
+     * @param event the event to be validated
+     * @param manager the GuildManager managing the guild the event is being scheduled for
+     * @return true if the event is valid, false otherwise
+     */
     private static boolean validateSoapEvent(SoapEvent event, GuildManager manager) {
         ProfileHandler handler = manager.getHandler();
         try {

@@ -33,7 +33,7 @@ public class HelpCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<HelpCommand> logger = new MultiLogger<>(manager, HelpCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n");
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new CommandParser(PATTERN);
         String arg;

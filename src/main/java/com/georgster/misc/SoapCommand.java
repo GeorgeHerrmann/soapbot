@@ -22,15 +22,15 @@ public class SoapCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<SoapCommand> logger = new MultiLogger<>(manager, SoapCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         String version = "";
         File myObj = new File("pom.xml"); //Reads the version number from the pom.xml file
         Scanner myReader;
         try {
             myReader = new Scanner(myObj);
+            logger.append("\tReading SOAPBot's version information from its XML file", LogDestination.NONAPI);
             while (myReader.hasNextLine()) {
-                logger.append("\tReading SOAPBot's version information from its XML file", LogDestination.NONAPI);
                 version = myReader.nextLine();
                 if (version.contains("<version>")) {
                     version = version.substring(version.indexOf("<version>") + 9, version.indexOf("<version>") + 14);

@@ -16,7 +16,7 @@ public class MessageCommand implements Command {
 
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
-        logger.append("Executing: " + this.getClass().getSimpleName(),
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**",
         LogDestination.NONAPI, LogDestination.API);
 
         Message message = event.getMessage();

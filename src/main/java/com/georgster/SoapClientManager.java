@@ -76,6 +76,8 @@ public final class SoapClientManager {
          * We will distribute the event to the associated client.
          */
         dispatcher.on(MessageCreateEvent.class)
+        .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
+        .filter(message -> message.getMessage().getContent().startsWith("!"))
         .subscribe(event -> clients.get(event.getGuildId().get()).onMessageCreate(event)); //Executes onMessageCreate when a MessageCreateEvent is fired
     }
 
@@ -90,8 +92,8 @@ public final class SoapClientManager {
      * @param event The GuildCreateEvent that was fired.
      */
     private void distributeClient(GuildCreateEvent event) {
-        SoapClient newClient = new SoapClient(event.getGuild().getId());
-        clients.put(event.getGuild().getId(), newClient);
-        newClient.onGuildCreate(event);
+        Snowflake flake = event.getGuild().getId();
+        clients.computeIfAbsent(flake, SoapClient::new); //Creates a new SoapClient if one does not already exist for the Guild
+        clients.get(flake).onGuildCreate(event); //Distributes the event to the client
     }
 }
