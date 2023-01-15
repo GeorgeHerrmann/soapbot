@@ -59,6 +59,13 @@ public class ShowQueueCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public boolean hasWizard() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("queue", "q", "songs");
     }

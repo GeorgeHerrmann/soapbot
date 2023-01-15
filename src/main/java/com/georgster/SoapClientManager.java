@@ -27,6 +27,7 @@ public final class SoapClientManager {
      */
     private final Map<Snowflake, SoapClient> clients;
     private final GatewayDiscordClient discordClient; //Maintains the connection to Discord
+    private final EventDispatcher dispatcher;
 
     /**
      * Creates a new SoapClientManager to manage all SoapClients for each Guild SOAP Bot is in
@@ -44,6 +45,8 @@ public final class SoapClientManager {
         Intent.GUILD_MESSAGE_TYPING,
         Intent.GUILD_VOICE_STATES))
         .login().block();
+
+        this.dispatcher = discordClient.getEventDispatcher();
     }
 
     /**
@@ -65,7 +68,6 @@ public final class SoapClientManager {
      * </ul>
      */
     protected void listenToEvents() {
-        EventDispatcher dispatcher = discordClient.getEventDispatcher();
         /*
          * The manager's distributeClient method will handle this event.
          */

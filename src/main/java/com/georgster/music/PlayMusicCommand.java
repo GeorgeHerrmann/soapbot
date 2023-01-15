@@ -5,8 +5,8 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
+import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
@@ -103,6 +103,13 @@ public class PlayMusicCommand implements Command {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasWizard() {
+        return false;
     }
 
     /**

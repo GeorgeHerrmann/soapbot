@@ -8,10 +8,10 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.ProfileType;
-import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
-import com.georgster.util.ParseBuilder;
-import com.georgster.util.SoapHandler;
+import com.georgster.util.SoapUtility;
+import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -64,17 +64,17 @@ public class ReserveCommand implements Command {
                 logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
                 event.getMessage().getAuthor().ifPresent(user -> reserve.addReserved(user.getTag()));
                 handler.addObject(reserve, ProfileType.EVENTS);
-                SoapHandler.runDaemon(() -> SoapEventHandler.scheduleEvent(reserve, manager));
+                SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(reserve, manager));
                 String messageString = "";
                 if (reserve.isTimeless()) {
                     logger.append("\tThis event is timeless\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else if (reserve.isUnlimited()) {
                     logger.append("\tThis event is unlimited\n", LogDestination.NONAPI);
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapHandler.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else {
                     logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapHandler.convertToAmPm(reserve.getTime()) + " with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
                 manager.sendText(messageString);
             }
@@ -84,6 +84,13 @@ public class ReserveCommand implements Command {
         }
         logger.sendAll();
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasWizard() {
+        return false;
     }
 
 
@@ -112,7 +119,7 @@ public class ReserveCommand implements Command {
                 return new ReserveEvent(message.get(0), Integer.parseInt(message.get(1)), channelName); //If the user only inputs a number, the event is Timeless
             } catch (NumberFormatException e) { //If it is not a number, it is a time
                 try {
-                    return new ReserveEvent(message.get(0), SoapHandler.timeConverter(message.get(1)), channelName); //Creates an Unlimited event
+                    return new ReserveEvent(message.get(0), SoapUtility.timeConverter(message.get(1)), channelName); //Creates an Unlimited event
                 } catch (IllegalArgumentException e2) { //If both of these fail, the user's command message is in the wrong format
                     throw new IllegalArgumentException(e2.getMessage());
                 }
@@ -125,7 +132,7 @@ public class ReserveCommand implements Command {
                 int numPeople = Integer.parseInt(temp.get(temp.size() - 1));
                 temp = parser.getMatchingRules("T");
                 String time = temp.get(temp.size() - 1);
-                return new ReserveEvent(message.get(0), numPeople, SoapHandler.timeConverter(time), channelName);
+                return new ReserveEvent(message.get(0), numPeople, SoapUtility.timeConverter(time), channelName);
             } catch (NumberFormatException e) { //If the user's command is in the wrong format
                 throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
             } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format

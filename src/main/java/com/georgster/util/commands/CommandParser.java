@@ -1,8 +1,10 @@
-package com.georgster.util;
+package com.georgster.util.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.georgster.util.SoapUtility;
 
 
 /**
@@ -481,7 +483,7 @@ public class CommandParser {
         }
         if (rule.contains("T") && (!returns || !and)) { //If the arg must be in a time format the timeConverter accepts
             try {
-                SoapHandler.timeConverter(arg);
+                SoapUtility.timeConverter(arg);
                 returns = true;
                 if (returns) and = true;
             } catch (IllegalArgumentException e) {

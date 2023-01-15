@@ -8,8 +8,8 @@ import com.georgster.Command;
 import com.georgster.CommandRegistry;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
+import com.georgster.util.commands.CommandParser;
 
 /**
  * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
@@ -59,6 +59,13 @@ public class HelpCommand implements Command {
         manager.sendText(response.toString());
 
         logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasWizard() {
+        return false;
     }
 
     /**

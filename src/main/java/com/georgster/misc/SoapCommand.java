@@ -53,6 +53,13 @@ public class SoapCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public boolean hasWizard() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("soapbot", "version", "info", "about", "bot");
     }

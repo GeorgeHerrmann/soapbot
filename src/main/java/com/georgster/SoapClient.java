@@ -9,7 +9,7 @@ import com.georgster.music.TrackScheduler;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildManager;
-import com.georgster.util.SoapHandler;
+import com.georgster.util.SoapUtility;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -80,7 +80,7 @@ public final class SoapClient {
           LogDestination.NONAPI, LogDestination.API);
           //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
           for (ReserveEvent reserve : handler.getEvents()) { //For each event in the guild's events list
-            SoapHandler.runDaemon(() -> 
+            SoapUtility.runDaemon(() -> 
               SoapEventHandler.scheduleEvent(reserve, manager) //We schedule the event again
             );
           }

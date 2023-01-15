@@ -14,7 +14,7 @@ import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.util.GuildManager;
-import com.georgster.util.SoapHandler;
+import com.georgster.util.SoapUtility;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
@@ -34,6 +34,7 @@ public class CommandRegistry {
      * @param client The SoapClient that is running SOAP Bot.
      */
     public CommandRegistry(SoapClient client) {
+
         commands.add(new PongCommand());
         commands.add(new SoapCommand());
         commands.add(new HelpCommand(this));
@@ -58,7 +59,7 @@ public class CommandRegistry {
             if (command.getAliases().contains(attemptedCommand)) {
                 GuildManager manager = new GuildManager(event.getGuild().block());
                 manager.setActiveChannel((event.getMessage().getChannel().block()));
-                SoapHandler.runDaemon(() -> command.execute(event, manager));
+                SoapUtility.runDaemon(() -> command.execute(event, manager));
             }
         }
     }

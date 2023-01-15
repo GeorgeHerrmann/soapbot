@@ -1,71 +1,17 @@
 package com.georgster.util;
 
-import java.util.List;
 import java.util.regex.PatternSyntaxException;
-
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.entity.channel.MessageChannel;
 
 /**
  * Intended to house all the general SOAP Bot methods that are not specific to any one class.
  */
-public class SoapHandler {
+public class SoapUtility {
 
     /**
      * Private constructor to prevent instantiation.
      */
-    private SoapHandler() {
+    private SoapUtility() {
         throw new IllegalStateException("Utility class");
-    }
-
-    /**
-     * Sends a message to the channel that the command was sent from.
-     * 
-     * @param message the message to send
-     * @param channel the channel to send the message to
-     * @deprecated Messages should be handled with a {@link GuildManager}
-     */
-    @Deprecated
-    public static void sendTextMessageInChannel(String message, MessageChannel channel) {
-        channel.createMessage(message).block();
-    }
-
-    /**
-     * Returns the channel that matches the channelName parameter from the list of channels.
-     * Must be fired from a method that has access to a list of channels.
-     * 
-     * @param channelName the name of the channel to match
-     * @param channels the list of channels to search through
-     * @return the channel that matches the channelName parameter
-     * @deprecated Channels should be handled with a {@link GuildManager}
-     */
-    @Deprecated
-    public static Channel channelMatcher(String channelName, List<GuildChannel> channels) {
-        for (GuildChannel channel : channels) {
-            if (channel.getType() == Channel.Type.GUILD_TEXT && channel.getName().equals(channelName)) //Only really used to match text channels
-                return channel;
-        }
-        return null;
-    }
-
-    /**
-     * Returns the member that matches the memberTag parameter from the list of members.
-     * Must be fired from a method that has access to a list of members.
-     * 
-     * @param memberTag the tag of the member to match
-     * @param members the list of members to search through
-     * @return the member that matches the memberTag parameter
-     * @deprecated Members should be handled with a {@link GuildManager}
-     */
-    @Deprecated
-    public static Member memberMatcher(String memberTag, List<Member> members) {
-        for (Member member : members) {
-            if (member.getTag().equals(memberTag))
-                return member;
-        }
-        return null;
     }
 
     /**

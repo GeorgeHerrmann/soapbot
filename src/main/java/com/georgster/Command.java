@@ -31,6 +31,13 @@ public interface Command {
     public List<String> getAliases();
 
     /**
+     * Returns whether or not a {@code Command} has a {@code CommandWizard} associated with it.
+     * 
+     * @return {@code true} if the {@code Command} has a {@code CommandWizard}, {@code false} otherwise.
+     */
+    public boolean hasWizard();
+
+    /**
      * Provides information about usage for a {@code Command}.
      * 
      * @return A string containing information on how to use this {@code Command}.

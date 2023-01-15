@@ -5,8 +5,8 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
+import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -56,6 +56,13 @@ public class SkipMusicCommand implements Command {
         }
 
         logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasWizard() {
+        return false;
     }
 
     /**

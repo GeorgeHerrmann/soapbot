@@ -1,4 +1,4 @@
-package com.georgster.util;
+package com.georgster.util.commands;
 
 /**
  * Builds a CommandParser object.

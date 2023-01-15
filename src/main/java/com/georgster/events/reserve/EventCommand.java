@@ -7,10 +7,10 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.ProfileType;
-import com.georgster.util.CommandParser;
 import com.georgster.util.GuildManager;
-import com.georgster.util.ParseBuilder;
-import com.georgster.util.SoapHandler;
+import com.georgster.util.SoapUtility;
+import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
@@ -45,7 +45,7 @@ public class EventCommand implements Command {
                         if (reserve.isTimeless()) {
                             response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
                         } else {
-                            response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapHandler.convertToAmPm(reserve.getTime()) + "\n");
+                            response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
                         }
                     }
                     response.append("Type !events [NAME] for more information about a specific event");
@@ -97,8 +97,8 @@ public class EventCommand implements Command {
                         response.append("\t- This event has no associated time\n");
                         response.append("This event will pop once the needed number of people have reserved to it");
                     } else {
-                        response.append("\t- Time: " + SoapHandler.convertToAmPm(reserve.getTime()) + "\n");
-                        response.append("This event will pop at " + SoapHandler.convertToAmPm(reserve.getTime()));
+                        response.append("\t- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
+                        response.append("This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                     }
                     response.append("\nReserved users:\n");
                     for (String user : reserve.getReservedUsers()) {
@@ -119,6 +119,13 @@ public class EventCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    public boolean hasWizard() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("events", "event");
     }
@@ -132,7 +139,7 @@ public class EventCommand implements Command {
         "\nUsage:" +
         "\n\t- !events list to list all events" +
         "\n\t- !events [NAME] for information about a specific event" +
-        "\n\t- !events unreserve [NAME] to unreserve from an event" +
+        "\n\t- !events [NAME] unreserve to unreserve from an event" +
         "\n\t\t - An event will be removed if there are no more people reserved to it" +
         "\nType !help reserve for information about reserving to or creating an event";
     }
