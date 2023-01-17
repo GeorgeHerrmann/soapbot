@@ -26,7 +26,7 @@ public class SoapEventHandler {
      * @param manager the GuildManager managing the guild the event is being scheduled for
      */
     public static void scheduleEvent(SoapEvent event, GuildManager manager) {
-        if (manager.getHandler().eventExists(event.getIdentifier())) {
+        if (manager.getProfileHandler().eventExists(event.getIdentifier())) {
             if (event.getType() == SoapEventType.RESERVE) {
                 manager.setActiveChannel(manager.getTextChannel(((ReserveEvent) event).getChannel()));
             }
@@ -48,7 +48,7 @@ public class SoapEventHandler {
      * @return true if the event is valid, false otherwise
      */
     private static boolean validateSoapEvent(SoapEvent event, GuildManager manager) {
-        ProfileHandler handler = manager.getHandler();
+        ProfileHandler handler = manager.getProfileHandler();
         try {
             /* Will continue to wait until the event has been removed/cancelled, or the fulfillment condition has been met */
             while (handler.eventExists(event.getIdentifier()) && !handler.pullEvent(event.getIdentifier()).fulfilled()) {

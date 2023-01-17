@@ -3,6 +3,8 @@ package com.georgster.events.reserve;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.events.SoapEvent;
+import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.profile.ProfileHandler;
@@ -29,7 +31,7 @@ public class EventCommand implements Command {
         LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
 
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "unreserve").withRules("X I").build();
-        ProfileHandler handler = manager.getHandler();
+        ProfileHandler handler = manager.getProfileHandler();
         try { //Checks to see the command if valid
             parser.parse(event.getMessage().getContent().toLowerCase());
             logger.append("\tParsed: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
@@ -41,7 +43,9 @@ public class EventCommand implements Command {
                 if (handler.areEvents()) {
                     logger.append("\tShowing the user a list of events\n", LogDestination.NONAPI);
                     response.append("All events:\n");
-                    for (ReserveEvent reserve : handler.getEvents()) {
+                    List<SoapEvent> events = handler.getEvents(SoapEventType.RESERVE);
+                    for (int i = 0; i < events.size(); i++) {
+                        ReserveEvent reserve = (ReserveEvent) events.get(i);
                         if (reserve.isTimeless()) {
                             response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
                         } else {
@@ -57,7 +61,9 @@ public class EventCommand implements Command {
             } else if (parser.getMatchingRule("I").equals("unreserve")) { //Unreserves from an event
                 logger.append("Unreserving a user from an event", LogDestination.API);
                 if (handler.eventExists(parser.get(0))) {
-                    for (ReserveEvent reserve : handler.getEvents()) {
+                    List<SoapEvent> events = handler.getEvents(SoapEventType.RESERVE);
+                    for (int i = 0; i < events.size(); i++) {
+                        ReserveEvent reserve = (ReserveEvent) events.get(i);
                         if (reserve.getIdentifier().equals(parser.get(0))) {
 
                             handler.removeObject(reserve, ProfileType.EVENTS);

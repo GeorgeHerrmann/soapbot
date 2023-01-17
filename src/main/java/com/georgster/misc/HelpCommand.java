@@ -5,7 +5,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.CommandRegistry;
+import com.georgster.control.CommandRegistry;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;

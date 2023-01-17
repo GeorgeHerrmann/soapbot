@@ -1,7 +1,7 @@
-package com.georgster;
+package com.georgster.control;
 
+import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventHandler;
-import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.LavaPlayerAudioProvider;
@@ -71,7 +71,7 @@ public final class SoapClient {
         MultiLogger<SoapClient> logger = new MultiLogger<>(manager, SoapClient.class);
 
         logger.append("Logging in to server: " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
-        ProfileHandler handler = manager.getHandler();
+        ProfileHandler handler = manager.getProfileHandler();
         /*
          * If the guild this event was fired from has events scheduled, we will restart them.
          */
@@ -79,7 +79,7 @@ public final class SoapClient {
           logger.append("\tRestarting events",
           LogDestination.NONAPI, LogDestination.API);
           //We keep a list of all channels in this guild, where channelMatcher will get us Channel objects from their names
-          for (ReserveEvent reserve : handler.getEvents()) { //For each event in the guild's events list
+          for (SoapEvent reserve : handler.getEvents()) { //For each event in the guild's events list
             SoapUtility.runDaemon(() -> 
               SoapEventHandler.scheduleEvent(reserve, manager) //We schedule the event again
             );

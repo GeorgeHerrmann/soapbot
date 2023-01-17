@@ -1,8 +1,9 @@
-package com.georgster;
+package com.georgster.control;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.Command;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;

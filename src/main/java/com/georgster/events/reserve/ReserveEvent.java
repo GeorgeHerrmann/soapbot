@@ -120,7 +120,7 @@ public class ReserveEvent implements SoapEvent {
      * {@inheritDoc}
      */
     public void onFulfill(GuildManager manager) {
-        ProfileHandler handler = manager.getHandler();
+        ProfileHandler handler = manager.getProfileHandler();
         if (handler.eventExists(identifier)) { //As long as the event still exists in the server's events.json
             ActionWriter.writeAction("Starting event " + identifier);
             StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +

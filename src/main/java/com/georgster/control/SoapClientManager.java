@@ -1,4 +1,4 @@
-package com.georgster;
+package com.georgster.control;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,7 @@ public final class SoapClientManager {
      * 
      * @param token The token used to log in to Discord.
      */
-    protected SoapClientManager(String token) {
+    public SoapClientManager(String token) {
         clients = new HashMap<>();
 
         discordClient = DiscordClientBuilder.create(token).build().gateway()
@@ -54,7 +54,7 @@ public final class SoapClientManager {
      * {@code GatewayDiscordClient} disconnects. This method should be called last after this manager
      * has been set up. Until this method is called, SOAP Bot is not fully logged in.
      */
-    protected void start() {
+    public void start() {
         MultiLogger.wipeFileLogs(); //Temporary
         discordClient.onDisconnect().block();
     }
@@ -67,7 +67,7 @@ public final class SoapClientManager {
      * <li>MessageCreateEvent</li>
      * </ul>
      */
-    protected void listenToEvents() {
+    public void listenToEvents() {
         /*
          * The manager's distributeClient method will handle this event.
          */

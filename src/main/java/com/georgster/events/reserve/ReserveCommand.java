@@ -31,7 +31,7 @@ public class ReserveCommand implements Command {
         try {
             CommandParser parser = new ParseBuilder(PATTERN).withRules("X N|T N|T").build();
             List<String> message = parser.parse(event.getMessage().getContent());
-            ProfileHandler handler = manager.getHandler();
+            ProfileHandler handler = manager.getProfileHandler();
 
             if (message.isEmpty()) {
                 logger.append("\tNo arguments found, sending help message", LogDestination.NONAPI);
@@ -105,7 +105,7 @@ public class ReserveCommand implements Command {
     private ReserveEvent assignCorrectEvent(GuildManager manager, CommandParser parser) throws IllegalArgumentException {
 
         List<String> message = parser.getArguments();
-        ProfileHandler handler = manager.getHandler();
+        ProfileHandler handler = manager.getProfileHandler();
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();
         if (message.size() == 1) { //Means the user is trying to reserve to an event that already exists
             if (handler.eventExists(message.get(0))) { //If the event exists, we get the event and return it

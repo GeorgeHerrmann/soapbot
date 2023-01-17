@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.events.SoapEvent;
+import com.georgster.events.SoapEventType;
 import com.georgster.events.reserve.ReserveEvent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -263,8 +265,8 @@ public class ProfileHandler {
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return the list of {@code ReserveEvent} objects from the server's event list.
      */
-    public List<ReserveEvent> getEvents() {
-        List<ReserveEvent> events = new ArrayList<>();
+    public List<SoapEvent> getEvents() {
+        List<SoapEvent> events = new ArrayList<>();
         if (serverProfileExists()) {
             try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
                 reader.setLenient(true);
@@ -301,6 +303,59 @@ public class ProfileHandler {
                             reader.skipValue();
                         }
                         events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
+                    } else {
+                       while(reader.peek() != JsonToken.END_OBJECT) {
+                           reader.skipValue();
+                       }
+                    }
+                    reader.endObject();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return events;
+    }
+
+    public List<SoapEvent> getEvents(SoapEventType type) {
+        List<SoapEvent> events = new ArrayList<>();
+        if (serverProfileExists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    List<String> reservedUsers = new ArrayList<>();
+                    int numPeople = 0;
+                    int numReserved = 0;
+                    String channel = "";
+                    String time = "";
+                    String name = reader.nextName();
+                    String identifier = reader.nextString();
+                    if (name.equals("identifier")) {
+                        if (reader.nextName().equals("numPeople")) {
+                            numPeople = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("numReserved")) {
+                            numReserved = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("time")) {
+                            time = reader.nextString();
+                        }
+                        if (reader.nextName().equals("channel")) {
+                            channel = reader.nextString();
+                        }
+                        if (reader.nextName().equals("reservedUsers")) {
+                            reader.beginArray();
+                            while (reader.hasNext()) {
+                                reservedUsers.add(reader.nextString());
+                            }
+                            reader.endArray();
+                        }
+                        if (reader.nextName().equals("type")) {
+                            if (reader.nextString().equals(type.name())) {
+                                events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
+                            }
+                        }
                     } else {
                        while(reader.peek() != JsonToken.END_OBJECT) {
                            reader.skipValue();
