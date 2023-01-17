@@ -351,10 +351,8 @@ public class ProfileHandler {
                             }
                             reader.endArray();
                         }
-                        if (reader.nextName().equals("type")) {
-                            if (reader.nextString().equals(type.name())) {
-                                events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
-                            }
+                        if (reader.nextName().equals("type") && reader.nextString().equals(type.name())) {
+                            events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
                         }
                     } else {
                        while(reader.peek() != JsonToken.END_OBJECT) {

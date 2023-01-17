@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.events.SoapEvent;
+import com.georgster.events.SoapEventHandler;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.ProfileType;
 import com.georgster.util.GuildManager;
@@ -25,9 +26,25 @@ public class SoapEventManager {
         profileHandler.addObject(event, ProfileType.EVENTS);
     }
 
+    /**
+     * Removes the given event from this manager and the server profile.
+     * Once removed, the event will no longer be scheduled.
+     * 
+     * @param event the event to remove
+     */
     public void removeEvent(SoapEvent event) {
         events.remove(event);
         profileHandler.removeObject(event, ProfileType.EVENTS);
+    }
+
+    /**
+     * Removes all events from this manager and the server profile.
+     * Once removed, the events will no longer be scheduled.
+     * If no events are active, nothing happens.
+     */
+    public void removeAllEvents() {
+        events.forEach(event -> profileHandler.removeObject(event, ProfileType.EVENTS));
+        events.clear();
     }
 
     public void updateEvent(SoapEvent event) {
@@ -52,13 +69,29 @@ public class SoapEventManager {
         return events.contains(event);
     }
 
+    /**
+     * Checks if the events in this manager match the events in the server profile.
+     * 
+     * @return true if each event in this manager is in and matches exactly the event in the server profile, false otherwise.
+     */
     public boolean matchesServerProfile() {
         List<SoapEvent> profileEvents = profileHandler.getEvents();
+        int totalEvents = 0;
         for (SoapEvent event : events) {
             if (!profileEvents.contains(event)) {
                 return false;
             }
+            totalEvents++;
         }
+        return totalEvents == profileEvents.size();
+    }
+
+    public void scheduleAllEvents() {
+        events.forEach(event -> SoapEventHandler.scheduleEvent(event, manager));
+    }
+
+    public void scheduleEvent(SoapEvent event) {
+        SoapEventHandler.scheduleEvent(event, manager);
     }
 
     public List<SoapEvent> getEvents() {
