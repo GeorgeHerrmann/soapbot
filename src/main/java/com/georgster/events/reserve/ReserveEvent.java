@@ -249,4 +249,25 @@ public class ReserveEvent implements SoapEvent {
         return reservedUsers.contains(user);
     }
 
+    /**
+     * Returns true if the event matches the input event, false otherwise.
+     * 
+     * @param event the event to compare to
+     * @return true if the event matches the input event, false otherwise
+     */
+    public boolean same(SoapEvent compare) {
+
+        if (!(compare instanceof ReserveEvent)) {
+            return false;
+        }
+        ReserveEvent event = (ReserveEvent) compare;
+        return identifier.equals(event.getIdentifier())
+        && time.equals(event.getTime())
+        && channel.equals(event.getChannel())
+        && numPeople == event.getNumPeople()
+        && numReserved == event.getReserved()
+        && reservedUsers.equals(event.getReservedUsers())
+        && type == event.getType();
+    }
+
 }

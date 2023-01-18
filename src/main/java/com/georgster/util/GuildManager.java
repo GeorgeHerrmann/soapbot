@@ -2,8 +2,10 @@ package com.georgster.util;
 
 import java.util.List;
 
+import com.georgster.control.SoapEventManager;
 import com.georgster.profile.ProfileHandler;
 
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
@@ -21,6 +23,8 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 public class GuildManager {
     private Guild guild; //The guild that this GuildManager is managing
     private Channel activeChannel; //The channel that is currently active
+    private SoapEventManager eventManager; //The event manager for this guild
+    private EventDispatcher dispatcher; //The event dispatcher for this guild
 
     /**
      * Creates a new GuildManager for the given guild.
@@ -29,6 +33,41 @@ public class GuildManager {
      */
     public GuildManager(Guild guild) {
         this.guild = guild;
+    }
+
+    /**
+     * Creates a new GuildManager for the given guild.
+     * 
+     * @param guild the guild to manage
+     * @param eventManager the event manager for this guild
+     */
+    public GuildManager(Guild guild, SoapEventManager eventManager) {
+        this.guild = guild;
+        this.eventManager = eventManager;
+    }
+
+    /**
+     * Creates a new GuildManager for the given guild.
+     * 
+     * @param guild the guild to manage
+     * @param dispatcher the event dispatcher for this guild
+     */
+    public GuildManager(Guild guild, EventDispatcher dispatcher) {
+        this.guild = guild;
+        this.dispatcher = dispatcher;
+    }
+
+    /**
+     * Creates a new GuildManager for the given guild.
+     * 
+     * @param guild the guild to manage
+     * @param eventManager the event manager for this guild
+     * @param dispatcher the event dispatcher for this guild
+     */
+    public GuildManager(Guild guild, SoapEventManager eventManager, EventDispatcher dispatcher) {
+        this.guild = guild;
+        this.eventManager = eventManager;
+        this.dispatcher = dispatcher;
     }
 
     /**
@@ -190,5 +229,23 @@ public class GuildManager {
      */
     public ProfileHandler getProfileHandler() {
         return new ProfileHandler(guild.getId().asString());
+    }
+
+    /**
+     * Returns the {@code SoapEventManager} associated with this guild.
+     * 
+     * @return the {@code SoapEventManager} associated with this guild
+     */
+    public SoapEventManager getEventManager() {
+        return eventManager;
+    }
+
+    /**
+     * Returns the {@code EventDispatcher} associated with this guild.
+     * 
+     * @return the {@code EventDispatcher} associated with this guild
+     */
+    public EventDispatcher getEventDispatcher() {
+        return dispatcher;
     }
 }
