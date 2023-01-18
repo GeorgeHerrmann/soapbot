@@ -27,6 +27,14 @@ public interface SoapEvent {
     public SoapEventType getType();
 
     /**
+     * Returns whether or not the event is the same as the event being compared.
+     * 
+     * @param compare the event being compared to
+     * @return true if the events are the same, false otherwise
+     */
+    public boolean same(SoapEvent compare);
+
+    /**
      * Returns whether or not the conditions to fulfill the event have been met.
      * 
      * @return true if the conditions to fulfill the event have been met, false otherwise

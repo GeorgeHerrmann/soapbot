@@ -250,10 +250,7 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
-     * Returns true if the event matches the input event, false otherwise.
-     * 
-     * @param event the event to compare to
-     * @return true if the event matches the input event, false otherwise
+     * {@inheritDoc}
      */
     public boolean same(SoapEvent compare) {
 
