@@ -57,7 +57,7 @@ public class SoapEventManager {
     public void addEvent(SoapEvent event) {
         if (!eventExists(event)) {
             events.add(event);
-            profileHandler.addObject(event, ProfileType.EVENTS);
+            if (!profileHandler.eventExists(event.getIdentifier())) profileHandler.addObject(event, ProfileType.EVENTS);
             SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
         }
     }
