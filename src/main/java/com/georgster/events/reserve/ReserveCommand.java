@@ -42,7 +42,7 @@ public class ReserveCommand implements Command {
 
         try {
             CommandParser parser = new ParseBuilder(PATTERN).withRules("X N|T N|T").build();
-            List<String> message = parser.parse(event.getMessage().getContent());
+            List<String> message = parser.parse(event.getMessage().getContent().toLowerCase());
 
             if (message.isEmpty()) {
                 logger.append("\tNo arguments found, sending help message", LogDestination.NONAPI);
@@ -64,7 +64,7 @@ public class ReserveCommand implements Command {
                             logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
                             eventManager.updateEvent(reserve);
-                            manager.sendText(user.getUsername() + "has reserved to event " + reserve.getIdentifier() + 
+                            manager.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier() + 
                             "\n\t" + reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
                         }
                     });

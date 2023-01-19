@@ -1,6 +1,8 @@
 SOAPBot Version 2.0 Changes:
     - Fully reworked backend structure
+    
         - SOAP Bot in totality is controlled by the SoapClientManager
+        
         - A SoapClient controls the objects and actions SOAPBot will take in a specific Guild
             - Each Client has its own CommandRegistry, meaning Guild-specific commands are now possible
             - Each Client now has its own EventManager to easily keep track of all SoapEvents
