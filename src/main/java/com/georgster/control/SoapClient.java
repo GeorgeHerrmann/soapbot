@@ -48,6 +48,7 @@ public final class SoapClient {
         /* Though we could have the client itself distribute GuildManagers, we would still have to update it on each event fire
         to ensure it has up to date Guild information, so it makes more sense to just make a new one with the Guild in the event */
         GuildManager manager = new GuildManager(event.getGuild());
+
         MultiLogger<SoapClient> logger = new MultiLogger<>(manager, SoapClient.class);
         logger.append("Logging in to server: " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
         ProfileHandler handler = manager.getProfileHandler();

@@ -44,7 +44,7 @@ public class EventCommand implements Command {
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "unreserve").withRules("X I").build();
         try { //Checks to see the command if valid
             parser.parse(event.getMessage().getContent().toLowerCase());
-            logger.append("\tParsed: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
+            logger.append("\tArguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
 
             if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
                 logger.append("Showing all events in a text channel", LogDestination.API);

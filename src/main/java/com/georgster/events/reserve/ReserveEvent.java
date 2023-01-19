@@ -177,6 +177,15 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
+     * Returns the number of people that are available to reserve for the event.
+     * 
+     * @return the number of people that are available to reserve for the event
+     */
+    public int getAvailable() {
+        return numPeople - numReserved;
+    }
+
+    /**
      * Returns the time the event will start.
      * 
      * @return the time the event will start

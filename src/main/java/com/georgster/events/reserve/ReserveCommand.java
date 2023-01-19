@@ -7,7 +7,6 @@ import com.georgster.control.SoapEventManager;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.profile.ProfileHandler;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
@@ -60,12 +59,13 @@ public class ReserveCommand implements Command {
                 if (!reserve.isFull()) {
                     event.getMessage().getAuthor().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
-                            manager.sendText("You have already reserved for this event");
+                            manager.sendText("You have already reserved for this event, type !event " + reserve.getIdentifier() + " unreserve to unreserve");
                         } else {
                             logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
                             eventManager.updateEvent(reserve);
-                            manager.sendText("Number of people reserved to event " + reserve.getIdentifier() + ": " + reserve.getReserved() + "/" + reserve.getNumPeople());
+                            manager.sendText(user.getUsername() + "has reserved to event " + reserve.getIdentifier() + 
+                            "\n\t" + reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
                         }
                     });
                 } else {
@@ -78,13 +78,13 @@ public class ReserveCommand implements Command {
                 String messageString = "";
                 if (reserve.isTimeless()) {
                     logger.append("\tThis event is timeless\n", LogDestination.NONAPI);
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else if (reserve.isUnlimited()) {
                     logger.append("\tThis event is unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else {
                     logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getNumPeople() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
                 manager.sendText(messageString);
             }
@@ -115,15 +115,15 @@ public class ReserveCommand implements Command {
     private ReserveEvent assignCorrectEvent(GuildManager manager, CommandParser parser) throws IllegalArgumentException {
 
         List<String> message = parser.getArguments();
-        ProfileHandler handler = manager.getProfileHandler();
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();
+
         if (message.size() == 1) { //Means the user is trying to reserve to an event that already exists
-            if (handler.eventExists(message.get(0))) { //If the event exists, we get the event and return it
-                return handler.pullEvent(message.get(0));
+            if (eventManager.eventExists(message.get(0), TYPE)) { //If the event exists, we get the event and return it
+                return (ReserveEvent) eventManager.getEvent(message.get(0));
             } else {
                 throw new IllegalArgumentException("This event doesn't exist. Type !help reserve to see how to make a new event.");
             }
-        } else if (message.size() == 2 && !handler.eventExists(message.get(0))) { //Creating an event that is either Unlimited or Timeless
+        } else if (message.size() == 2 && !eventManager.eventExists(message.get(0), TYPE)) { //Creating an event that is either Unlimited or Timeless
             try {
                 if (Integer.parseInt(message.get(1)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 return new ReserveEvent(message.get(0), Integer.parseInt(message.get(1)), channelName); //If the user only inputs a number, the event is Timeless
@@ -134,7 +134,7 @@ public class ReserveCommand implements Command {
                     throw new IllegalArgumentException(e2.getMessage());
                 }
             }
-        } else if (message.size() == 3 && !handler.eventExists(message.get(0))) { //Creates a new event that has a number of slots and a time
+        } else if (message.size() == 3 && !eventManager.eventExists(message.get(0), TYPE)) { //Creates a new event that has a number of slots and a time
             try { //If the event doesn't already exist, we can attempt to create a new one
                 if (Integer.parseInt(parser.getMatchingRule("N")) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 //Should be in the format !reserve [EVENTNAME] [NUMPEOPLE] [TIME]
@@ -149,7 +149,7 @@ public class ReserveCommand implements Command {
                 throw new IllegalArgumentException(e.getMessage());
             } catch (IndexOutOfBoundsException e) { //If the name of the event has some issue the parser can't handle
                 throw new IllegalArgumentException("There is an issue with the name of the event. The event name cannot have a number unless it is attached to a word." + 
-                "\n\t- Example: !reserve 1 v 1 5 5:00pm is incorrect, but !reserve 1v1 5 5:00pm is correct.");
+                "\n\t- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
             }
         }
         throw new IllegalArgumentException("Incorrect Reserve Event Format or this event already exists, simply type !reserve [EVENTNAME] if you want to reserve to an event that exists.");
