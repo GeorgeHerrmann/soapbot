@@ -9,8 +9,6 @@ import java.util.List;
 import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
-import com.georgster.profile.ProfileHandler;
-import com.georgster.profile.ProfileType;
 import com.georgster.util.GuildManager;
 
 /**
@@ -120,17 +118,13 @@ public class ReserveEvent implements SoapEvent {
      * {@inheritDoc}
      */
     public void onFulfill(GuildManager manager) {
-        ProfileHandler handler = manager.getProfileHandler();
-        if (handler.eventExists(identifier)) { //As long as the event still exists in the server's events.json
-            ActionWriter.writeAction("Starting event " + identifier);
-            StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
-            "\t- " + numReserved + "/" + numPeople + " reserved with the following people:");
-            for (String name : reservedUsers) { //We add the names of the people who reserved to the event
-                response.append("\n\t\t- " + manager.getMember(name).getMention());
-            }
-            manager.sendText(response.toString());
-            handler.removeObject(this, ProfileType.EVENTS); //After the event has started, we remove it from the server's events.json
+        ActionWriter.writeAction("Starting event " + identifier);
+        StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
+        "\t- " + numReserved + "/" + numPeople + " reserved with the following people:");
+        for (String name : reservedUsers) { //We add the names of the people who reserved to the event
+            response.append("\n\t\t- " + manager.getMember(name).getMention());
         }
+        manager.sendText(response.toString());
     }
 
     /**
