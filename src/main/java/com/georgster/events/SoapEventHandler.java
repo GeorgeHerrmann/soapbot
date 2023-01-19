@@ -54,7 +54,7 @@ public class SoapEventHandler {
             while (eventManager.eventExists(event.getIdentifier()) && !eventManager.getEvent(event.getIdentifier()).fulfilled()) {
                 Thread.sleep(2000);
             }
-            if (eventManager.eventExists(event.getIdentifier())) { //If it was removed we return false
+            if (!eventManager.eventExists(event.getIdentifier())) { //If it was removed we return false
                 return false;
             }
         } catch (Exception e) { //If we are interrupted we return false
