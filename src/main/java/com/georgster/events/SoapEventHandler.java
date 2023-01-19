@@ -1,6 +1,6 @@
 package com.georgster.events;
+import com.georgster.control.SoapEventManager;
 import com.georgster.events.reserve.ReserveEvent;
-import com.georgster.profile.ProfileHandler;
 import com.georgster.util.GuildManager;
 
 /**
@@ -16,21 +16,22 @@ public class SoapEventHandler {
     }
 
     /**
-     * Schedules a {@code SoapEvent} to be fulfilled for the Guild the {@code GuildManager} is managing.
+     * Schedules a {@code SoapEvent} to be fulfilled for the Guild the event originated from.
      * If the event is a {@code ReserveEvent} the active channel is set to the channel the event was reserved in.
      * This method will wait and block the calling thread until the event has been
      * cancelled, is no longer valid, or the event's {@code fulfilled()} condition has been met and will
      * call {@code onFulfill()} on the event if the event is valid.
      * 
      * @param event the event to be scheduled
-     * @param manager the GuildManager managing the guild the event is being scheduled for
+     * @param eventManager the SoapEventManager managing the guild the event is being scheduled for
      */
-    public static void scheduleEvent(SoapEvent event, GuildManager manager) {
+    public static void scheduleEvent(SoapEvent event, SoapEventManager eventManager) {
+        GuildManager manager = new GuildManager(eventManager.getGuild());
         if (manager.getProfileHandler().eventExists(event.getIdentifier())) {
             if (event.getType() == SoapEventType.RESERVE) {
                 manager.setActiveChannel(manager.getTextChannel(((ReserveEvent) event).getChannel()));
             }
-            if (validateSoapEvent(event, manager)) {
+            if (validateSoapEvent(event, eventManager)) {
                 event.onFulfill(manager);
             } else {
                 manager.sendText("Event " + event.getIdentifier() + " has been cancelled");
@@ -44,17 +45,16 @@ public class SoapEventHandler {
      * or the event's {@code fulfilled()} condition has been met.
      * 
      * @param event the event to be validated
-     * @param manager the GuildManager managing the guild the event is being scheduled for
+     * @param eventManager the SoapEventManager managing the guild the event is being scheduled for
      * @return true if the event is valid, false otherwise
      */
-    private static boolean validateSoapEvent(SoapEvent event, GuildManager manager) {
-        ProfileHandler handler = manager.getProfileHandler();
+    private static boolean validateSoapEvent(SoapEvent event, SoapEventManager eventManager) {
         try {
             /* Will continue to wait until the event has been removed/cancelled, or the fulfillment condition has been met */
-            while (handler.eventExists(event.getIdentifier()) && !handler.pullEvent(event.getIdentifier()).fulfilled()) {
+            while (eventManager.eventExists(event.getIdentifier()) && !eventManager.getEvent(event.getIdentifier()).fulfilled()) {
                 Thread.sleep(2000);
             }
-            if (handler.eventExists(event.getIdentifier())) { //If it was removed we return false
+            if (eventManager.eventExists(event.getIdentifier())) { //If it was removed we return false
                 return false;
             }
         } catch (Exception e) { //If we are interrupted we return false

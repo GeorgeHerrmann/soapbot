@@ -95,16 +95,16 @@ public class GuildManager {
     }
     
     /**
-     * Returns the channel that this manager is actively performing actions in.
+     * Sets the channel that this manager is actively performing actions in.
      * 
-     * @param channel the channel that is currently active
+     * @param channel the new active channel
      */
     public void setActiveChannel(Channel channel) {
         activeChannel = channel;
     }
 
     /**
-     * Sets the channel that this manager is actively performing actions in.
+     * Returns the active channel for this manager.
      * 
      * @return the channel that is currently active
      */

@@ -95,7 +95,7 @@ public final class SoapClientManager {
      */
     private void distributeClient(GuildCreateEvent event) {
         Snowflake flake = event.getGuild().getId();
-        clients.computeIfAbsent(flake, SoapClient::new); //Creates a new SoapClient if one does not already exist for the Guild
+        clients.computeIfAbsent(flake, client -> new SoapClient(event.getGuild())); //Creates a new SoapClient if one does not already exist for the Guild
         clients.get(flake).onGuildCreate(event); //Distributes the event to the client
     }
 }

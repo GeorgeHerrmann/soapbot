@@ -1,4 +1,4 @@
-package com.georgster.music;
+package com.georgster.music.components;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -138,7 +138,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     /**
      * Clears the queue of tracks.
      */
-    protected void clearQueue() {
+    public void clearQueue() {
         queue.clear();
     }
 

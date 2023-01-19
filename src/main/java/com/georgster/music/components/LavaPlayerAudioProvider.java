@@ -1,4 +1,4 @@
-package com.georgster.music;
+package com.georgster.music.components;
 
 import java.nio.ByteBuffer;
 

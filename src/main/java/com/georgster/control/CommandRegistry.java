@@ -13,6 +13,7 @@ import com.georgster.misc.SoapCommand;
 import com.georgster.music.PlayMusicCommand;
 import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
+import com.georgster.music.components.AudioInterface;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
@@ -35,17 +36,17 @@ public class CommandRegistry {
      * @param client The SoapClient that is running SOAP Bot.
      */
     public CommandRegistry(SoapClient client) {
-
+        AudioInterface clientsInterface = client.getAudioInterface();
         commands.add(new PongCommand());
         commands.add(new SoapCommand());
         commands.add(new HelpCommand(this));
-        commands.add(new ReserveCommand());
-        commands.add(new EventCommand());
+        commands.add(new ReserveCommand(client.getEventManager()));
+        commands.add(new EventCommand(client.getEventManager()));
         commands.add(new MessageCommand());
         commands.add(new PlinkoCommand());
-        commands.add(new PlayMusicCommand(client.getProvider(), client.getPlayerManager(), client.getPlayer(), client.getScheduler()));
-        commands.add(new ShowQueueCommand(client.getScheduler().getQueue()));
-        commands.add(new SkipMusicCommand(client.getPlayer(), client.getScheduler()));
+        commands.add(new PlayMusicCommand(clientsInterface.getProvider(), clientsInterface.getPlayerManager(), clientsInterface.getPlayer(), clientsInterface.getScheduler()));
+        commands.add(new ShowQueueCommand(clientsInterface.getScheduler().getQueue()));
+        commands.add(new SkipMusicCommand(clientsInterface.getPlayer(), clientsInterface.getScheduler()));
     }
 
     /**
@@ -59,7 +60,7 @@ public class CommandRegistry {
         for (Command command : commands) {
             if (command.getAliases().contains(attemptedCommand)) {
                 GuildManager manager = new GuildManager(event.getGuild().block());
-                manager.setActiveChannel((event.getMessage().getChannel().block()));
+                manager.setActiveChannel(event.getMessage().getChannel().block());
                 SoapUtility.runDaemon(() -> command.execute(event, manager));
             }
         }

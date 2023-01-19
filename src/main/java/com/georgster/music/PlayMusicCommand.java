@@ -5,6 +5,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
+import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -74,7 +75,7 @@ public class PlayMusicCommand implements Command {
                             logger.append("\tFailed to play audio, retrying...\n", LogDestination.NONAPI);
                             retryAttempts++;
                         }
-                        if (retryAttempts < 3) {
+                        if (retryAttempts >= 3) {
                             logger.append("\tFailed to play audio, retry limit reached\n", LogDestination.NONAPI);
                         } else {
                             logger.append("\tSuccessfully start audio\n", LogDestination.NONAPI);

@@ -1,4 +1,4 @@
-package com.georgster.music;
+package com.georgster.music.components;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;

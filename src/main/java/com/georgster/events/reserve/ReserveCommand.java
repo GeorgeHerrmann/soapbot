@@ -3,11 +3,11 @@ package com.georgster.events.reserve;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.events.SoapEventHandler;
+import com.georgster.control.SoapEventManager;
+import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.profile.ProfileHandler;
-import com.georgster.profile.ProfileType;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
@@ -21,6 +21,19 @@ import discord4j.core.object.entity.channel.TextChannel;
  */
 public class ReserveCommand implements Command {
     private static final String PATTERN = "V|R 1|O 1|O";
+    private static final SoapEventType TYPE = SoapEventType.RESERVE;
+
+    private SoapEventManager eventManager;
+
+    /**
+     * Creates a new ReserveCommand with the associated {@code SoapEventManager}.
+     * 
+     * @param manager the event manager managing the events
+     */
+    public ReserveCommand(SoapEventManager manager) {
+        eventManager = manager;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -31,7 +44,6 @@ public class ReserveCommand implements Command {
         try {
             CommandParser parser = new ParseBuilder(PATTERN).withRules("X N|T N|T").build();
             List<String> message = parser.parse(event.getMessage().getContent());
-            ProfileHandler handler = manager.getProfileHandler();
 
             if (message.isEmpty()) {
                 logger.append("\tNo arguments found, sending help message", LogDestination.NONAPI);
@@ -44,16 +56,15 @@ public class ReserveCommand implements Command {
 
             ReserveEvent reserve = assignCorrectEvent(manager, parser);
 
-            if (handler.eventExists(reserve.getIdentifier())) {
+            if (eventManager.eventExists(reserve.getIdentifier(), TYPE)) {
                 if (!reserve.isFull()) {
                     event.getMessage().getAuthor().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
                             manager.sendText("You have already reserved for this event");
                         } else {
                             logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
-                            handler.removeObject(reserve, ProfileType.EVENTS);
                             reserve.addReserved(user.getTag());
-                            handler.addObject(reserve, ProfileType.EVENTS);
+                            eventManager.updateEvent(reserve);
                             manager.sendText("Number of people reserved to event " + reserve.getIdentifier() + ": " + reserve.getReserved() + "/" + reserve.getNumPeople());
                         }
                     });
@@ -63,8 +74,7 @@ public class ReserveCommand implements Command {
             } else {
                 logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
                 event.getMessage().getAuthor().ifPresent(user -> reserve.addReserved(user.getTag()));
-                handler.addObject(reserve, ProfileType.EVENTS);
-                SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(reserve, manager));
+                eventManager.addEvent(reserve);
                 String messageString = "";
                 if (reserve.isTimeless()) {
                     logger.append("\tThis event is timeless\n", LogDestination.NONAPI);
