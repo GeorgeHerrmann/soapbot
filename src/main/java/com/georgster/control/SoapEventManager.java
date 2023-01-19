@@ -70,7 +70,7 @@ public class SoapEventManager {
      */
     public void removeEvent(SoapEvent event) {
         events.remove(event);
-        profileHandler.removeObject(event, ProfileType.EVENTS);
+        profileHandler.removeObject(profileHandler.pullEvent(event.getIdentifier()), ProfileType.EVENTS);
     }
 
     /**

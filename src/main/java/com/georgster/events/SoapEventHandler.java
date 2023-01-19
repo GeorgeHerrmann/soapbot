@@ -36,7 +36,9 @@ public class SoapEventHandler {
             } else {
                 manager.sendText("Event " + event.getIdentifier() + " has been cancelled");
             }
-            eventManager.removeEvent(event);
+            if (eventManager.eventExists(event.getIdentifier())) {
+                eventManager.removeEvent(event);
+            }
         }
     }
 
