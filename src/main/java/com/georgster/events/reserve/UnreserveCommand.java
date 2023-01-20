@@ -37,8 +37,7 @@ public class UnreserveCommand implements Command {
                 ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
                 if (reserve.alreadyReserved(event.getMessage().getAuthorAsMember().block().getTag())) {
 
-                    logger.append("\tRemoving " + event.getMessage().getAuthorAsMember().block().getTag() + " from event " + reserve.getIdentifier(),
-                            LogDestination.NONAPI);
+                    logger.append("\tRemoving " + event.getMessage().getAuthorAsMember().block().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
                     reserve.removeReserved(event.getMessage().getAuthorAsMember().block().getTag());
                     if (reserve.getReserved() <= 0) {
                         eventManager.removeEvent(reserve);

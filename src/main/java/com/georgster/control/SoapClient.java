@@ -11,7 +11,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
 
 /**
@@ -62,16 +61,14 @@ public final class SoapClient {
           logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(), LogDestination.NONAPI);
           handler.createServerProfile();
         }
-        int x = 0;
-        for (Member member : manager.getAllMembers()) { //Same idea for Members
+        manager.getAllMembers().forEach(member -> {
           String id = member.getId().asString();
           if (!handler.userProfileExists(id)) {
-            x++;
             handler.createUserProfile(id);
           }
           handler.updateUserProfile(new UserProfile(manager.getId(), id, member.getUsername())); //We will always update the user's profile to make sure it is up to date
-        }
-        logger.append("\n\t Updated " + x + " User Profiles for " + manager.getGuild().getName(), LogDestination.NONAPI);
+        });
+        logger.append("\n\t Updated " + manager.getAllMembers().size() + " User Profiles for " + manager.getGuild().getName(), LogDestination.NONAPI);
         logger.sendAll();
     }
 

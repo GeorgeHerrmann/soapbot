@@ -91,7 +91,7 @@ public class SoapEventManager {
     public void updateEvent(SoapEvent event) {
         events.forEach(examiner -> {
             if (examiner.getIdentifier().equals(event.getIdentifier())) {
-                profileHandler.removeObject(examiner, ProfileType.EVENTS);
+                profileHandler.removeObject(profileHandler.pullEvent(event.getIdentifier()), ProfileType.EVENTS);
                 events.set(events.indexOf(examiner), event); //Replace the old event with the new one
                 profileHandler.addObject(event, ProfileType.EVENTS);
                 return;
