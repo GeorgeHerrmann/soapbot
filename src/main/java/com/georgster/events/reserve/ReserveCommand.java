@@ -159,7 +159,7 @@ public class ReserveCommand implements Command {
      * {@inheritDoc}
      */
     public List<String> getAliases() {
-        return List.of("reserve", "res");
+        return List.of("reserve", "res", "r");
     }
 
     /**

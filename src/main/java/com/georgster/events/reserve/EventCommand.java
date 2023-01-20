@@ -69,31 +69,6 @@ public class EventCommand implements Command {
                     logger.append("\tThere are no events currently active\n", LogDestination.NONAPI);
                     manager.sendText("There are no events currently active");
                 }
-            } else if (parser.getMatchingRule("I").equals("unreserve")) { //Unreserves from an event
-                logger.append("Unreserving a user from an event", LogDestination.API);
-                if (eventManager.eventExists(parser.get(0), TYPE)) {
-                    List<SoapEvent> events = eventManager.getEvents(SoapEventType.RESERVE);
-                    for (int i = 0; i < events.size(); i++) {
-                        ReserveEvent reserve = (ReserveEvent) events.get(i);
-                        if (reserve.getIdentifier().equals(parser.get(0))) {
-                            event.getMessage().getAuthor().ifPresent(user -> reserve.removeReserved(user.getTag())); //Gets the user's tag and removes them from the list
-
-                            logger.append("\tRemoving " + event.getMessage().getAuthorAsMember().block().getTag() + " from event " + reserve.getIdentifier(),
-                            LogDestination.NONAPI);
-                            if (reserve.getReserved() > 0) {
-                                eventManager.updateEvent(reserve);
-                                manager.sendText("You have unreserved from event " + reserve.getIdentifier());
-                            } else {
-                                eventManager.removeEvent(reserve);
-                                logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
-                                manager.sendText("There are no more people reserved to this event, this event has been removed");
-                            }
-                        }
-                    }
-                } else {
-                    logger.append("\tCould not find event " + parser.get(0), LogDestination.NONAPI);
-                    manager.sendText("This event does not exist, type !events list for a list of all active events");
-                }
             } else { //Shows information about an event
                 if (eventManager.eventExists(parser.get(0), TYPE)) {
                     logger.append("Showing information about a specific event in a text channel", LogDestination.API);
@@ -125,7 +100,7 @@ public class EventCommand implements Command {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }
             }
-        } catch (IndexOutOfBoundsException e) {
+        } catch (Exception e) {
             logger.append("The user did not provide valid arguments, showing the help message\n", LogDestination.NONAPI);
             manager.sendText(help());
         }
@@ -150,12 +125,12 @@ public class EventCommand implements Command {
      * {@inheritDoc}
      */
     public String help() {
-        return "Command: !events" +
+        return "Command: !events & !unreserve" +
         "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t- !events list to list all events" +
         "\n\t- !events [NAME] for information about a specific event" +
-        "\n\t- !events [NAME] unreserve to unreserve from an event" +
+        "\n\t- !unreserve [NAME] to unreserve from an event" +
         "\n\t\t - An event will be removed if there are no more people reserved to it" +
         "\nType !help reserve for information about reserving to or creating an event";
     }

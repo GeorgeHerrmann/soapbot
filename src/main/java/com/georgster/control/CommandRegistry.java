@@ -7,6 +7,7 @@ import com.georgster.Command;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
+import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.misc.HelpCommand;
 import com.georgster.misc.PongCommand;
 import com.georgster.misc.SoapCommand;
@@ -42,6 +43,7 @@ public class CommandRegistry {
         commands.add(new HelpCommand(this));
         commands.add(new ReserveCommand(client.getEventManager()));
         commands.add(new EventCommand(client.getEventManager()));
+        commands.add(new UnreserveCommand(client.getEventManager()));
         commands.add(new MessageCommand());
         commands.add(new PlinkoCommand());
         commands.add(new PlayMusicCommand(clientsInterface.getProvider(), clientsInterface.getPlayerManager(), clientsInterface.getPlayer(), clientsInterface.getScheduler()));
