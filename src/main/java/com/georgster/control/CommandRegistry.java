@@ -59,13 +59,13 @@ public class CommandRegistry {
      */
     public void getAndExecute(MessageCreateEvent event) {
         String attemptedCommand = event.getMessage().getContent().split(" ")[0].substring(1).toLowerCase();
-        for (Command command : commands) {
+        commands.forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
                 GuildManager manager = new GuildManager(event.getGuild().block());
                 manager.setActiveChannel(event.getMessage().getChannel().block());
                 SoapUtility.runDaemon(() -> command.execute(event, manager));
             }
-        }
+        });
     }
 
     /**

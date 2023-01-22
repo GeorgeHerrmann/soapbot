@@ -41,7 +41,7 @@ public class EventCommand implements Command {
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n",
         LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
 
-        CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "unreserve").withRules("X I").build();
+        CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping").withRules("X I").build();
         try { //Checks to see the command if valid
             parser.parse(event.getMessage().getContent().toLowerCase());
             logger.append("\tArguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
@@ -68,6 +68,21 @@ public class EventCommand implements Command {
                 } else {
                     logger.append("\tThere are no events currently active\n", LogDestination.NONAPI);
                     manager.sendText("There are no events currently active");
+                }
+            } else if (parser.getMatchingRule("I").equals("mention") || parser.getMatchingRule("I").equals("ping")) {
+                if (eventManager.eventExists(parser.get(0), TYPE)) {
+                    logger.append("Mentioning all users that have reserved to an event", LogDestination.API);
+                    ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
+
+                    logger.append("Mentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
+
+                    StringBuilder response = new StringBuilder();
+                    for (String user : reserve.getReservedUsers()) {
+                        response.append(manager.getMember(user).getMention() + " ");
+                    }
+                    manager.sendText(response.toString());
+                } else {
+                    manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }
             } else { //Shows information about an event
                 if (eventManager.eventExists(parser.get(0), TYPE)) {
