@@ -1,0 +1,84 @@
+package com.georgster.control.util;
+
+import com.georgster.control.SoapEventManager;
+import com.georgster.music.components.AudioInterface;
+
+import discord4j.core.event.EventDispatcher;
+import discord4j.core.object.entity.Guild;
+
+/**
+ * A Pipeline that carries active data from the {@code SoapClientManager} to its
+ * {@code SoapClients}.
+ */
+public class ClientPipeline {
+    private final EventDispatcher dispatcher;
+    private final Guild guild;
+    private AudioInterface audioInterface;
+    private SoapEventManager eventManager;
+
+    /**
+     * Creates a new ClientPipeline with the given {@code EventDispatcher} and
+     * {@code Guild}.
+     * 
+     * @param dispatcher the event dispatcher
+     * @param guild     the guild
+     */
+    public ClientPipeline(EventDispatcher dispatcher, Guild guild) {
+        this.dispatcher = dispatcher;
+        this.guild = guild;
+    }
+
+    /**
+     * Returns the event dispatcher.
+     * 
+     * @return the event dispatcher
+     */
+    public EventDispatcher getDispatcher() {
+        return dispatcher;
+    }
+
+    /**
+     * Returns the guild.
+     * 
+     * @return the guild
+     */
+    public Guild getGuild() {
+        return guild;
+    }
+
+    /**
+     * Returns the audio interface.
+     * 
+     * @return the audio interface
+     */
+    public AudioInterface getAudioInterface() {
+        return audioInterface;
+    }
+
+    /**
+     * Returns the event manager.
+     * 
+     * @return the event manager
+     */
+    public SoapEventManager getEventManager() {
+        return eventManager;
+    }
+
+    /**
+     * Sets the audio interface.
+     * 
+     * @param audioInterface the audio interface
+     */
+    public void setAudioInterface(AudioInterface audioInterface) {
+        this.audioInterface = audioInterface;
+    }
+
+    /**
+     * Sets the event manager.
+     * 
+     * @param eventManager the event manager
+     */
+    public void setEventManager(SoapEventManager eventManager) {
+        this.eventManager = eventManager;
+    }
+}

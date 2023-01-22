@@ -1,5 +1,6 @@
 package com.georgster.control;
 
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioInterface;
@@ -10,7 +11,6 @@ import com.georgster.util.GuildManager;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
 
 /**
@@ -29,11 +29,13 @@ public final class SoapClient {
      * by its unique {@code Snowflake}. Sets up an audio interface and
      * constructs a new {@code CommandRegistry} for this client.
      */
-    protected SoapClient(Guild guild) {
-        flake = guild.getId();
+    protected SoapClient(ClientPipeline pipeline) {
+        flake = pipeline.getGuild().getId();
         audioInterface = new AudioInterface();
-        eventManager = new SoapEventManager(guild);
-        registry = new CommandRegistry(this);
+        eventManager = new SoapEventManager(pipeline.getGuild());
+        pipeline.setAudioInterface(audioInterface);
+        pipeline.setEventManager(eventManager);
+        registry = new CommandRegistry(pipeline);
     }
 
     /**

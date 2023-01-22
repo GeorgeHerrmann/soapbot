@@ -74,12 +74,12 @@ public class EventCommand implements Command {
                     logger.append("Mentioning all users that have reserved to an event", LogDestination.API);
                     ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
 
-                    logger.append("Mentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
+                    logger.append("\tMentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                     StringBuilder response = new StringBuilder();
-                    for (String user : reserve.getReservedUsers()) {
+                    reserve.getReservedUsers().forEach(user -> {
                         response.append(manager.getMember(user).getMention() + " ");
-                    }
+                    });
                     manager.sendText(response.toString());
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
@@ -107,9 +107,9 @@ public class EventCommand implements Command {
                         response.append("This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                     }
                     response.append("\nReserved users:\n");
-                    for (String user : reserve.getReservedUsers()) {
+                    reserve.getReservedUsers().forEach(user -> {
                         response.append("\t- " + manager.getMember(user).getUsername() + "\n");
-                    }
+                    });
                     manager.sendText(response.toString());
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
@@ -145,6 +145,7 @@ public class EventCommand implements Command {
         "\nUsage:" +
         "\n\t- !events list to list all events" +
         "\n\t- !events [NAME] for information about a specific event" +
+        "\n\t- !events [NAME] mention to mention all users that have reserved to an event" +
         "\n\t- !unreserve [NAME] to unreserve from an event" +
         "\n\t\t - An event will be removed if there are no more people reserved to it" +
         "\nType !help reserve for information about reserving to or creating an event";

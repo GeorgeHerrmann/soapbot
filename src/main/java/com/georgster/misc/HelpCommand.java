@@ -37,11 +37,11 @@ public class HelpCommand implements Command {
 
         CommandParser parser = new CommandParser(PATTERN);
         String arg;
-        parser.parse(event.getMessage().getContent());
         try {
+            parser.parse(event.getMessage().getContent());
             logger.append("\tArguments found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
             arg = parser.get(0).toLowerCase();
-        } catch (IndexOutOfBoundsException e) {
+        } catch (Exception e) {
             logger.append("\tNo arguments found\n", LogDestination.NONAPI);
             arg = "";
         }

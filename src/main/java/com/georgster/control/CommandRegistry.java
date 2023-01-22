@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
@@ -26,6 +27,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  */
 public class CommandRegistry {
     
+    private final ClientPipeline pipeline;
     private final List<Command> commands = new ArrayList<>();
 
     /**
@@ -34,16 +36,17 @@ public class CommandRegistry {
      * Any command that requires the SoapClient's objects (such as the AudioProvider, AudioPlayer, etc.)
      * can access it through the client parameter.
      * 
-     * @param client The SoapClient that is running SOAP Bot.
+     * @param pipeline the ClientPipeline feeding this regitry's commands.
      */
-    public CommandRegistry(SoapClient client) {
-        AudioInterface clientsInterface = client.getAudioInterface();
+    public CommandRegistry(ClientPipeline pipeline) {
+        this.pipeline = pipeline;
+        AudioInterface clientsInterface = pipeline.getAudioInterface();
         commands.add(new PongCommand());
         commands.add(new SoapCommand());
         commands.add(new HelpCommand(this));
-        commands.add(new ReserveCommand(client.getEventManager()));
-        commands.add(new EventCommand(client.getEventManager()));
-        commands.add(new UnreserveCommand(client.getEventManager()));
+        commands.add(new ReserveCommand(pipeline.getEventManager()));
+        commands.add(new EventCommand(pipeline.getEventManager()));
+        commands.add(new UnreserveCommand(pipeline.getEventManager()));
         commands.add(new MessageCommand());
         commands.add(new PlinkoCommand());
         commands.add(new PlayMusicCommand(clientsInterface.getProvider(), clientsInterface.getPlayerManager(), clientsInterface.getPlayer(), clientsInterface.getScheduler()));
@@ -61,7 +64,12 @@ public class CommandRegistry {
         String attemptedCommand = event.getMessage().getContent().split(" ")[0].substring(1).toLowerCase();
         commands.forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
-                GuildManager manager = new GuildManager(event.getGuild().block());
+                GuildManager manager;
+                if (command.hasWizard()) {
+                    manager = new GuildManager(event.getGuild().block(), pipeline.getDispatcher());
+                } else {
+                    manager = new GuildManager(event.getGuild().block());
+                }
                 manager.setActiveChannel(event.getMessage().getChannel().block());
                 SoapUtility.runDaemon(() -> command.execute(event, manager));
             }
