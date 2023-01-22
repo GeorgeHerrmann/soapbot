@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux;
 
 public class CommandWizard {
 
-    private final GuildManager manager;
+    /*private final GuildManager manager;
     private final EventDispatcher dispatcher;
     private Message message;
     private Flux<MessageCreateEvent> caller;
@@ -33,7 +33,7 @@ public class CommandWizard {
             
         }
 
-    }
+    }*/
 
 
 }
