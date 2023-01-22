@@ -8,6 +8,7 @@ import com.georgster.profile.ProfileHandler;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -118,14 +119,15 @@ public class GuildManager {
      * @param text the message to send
      * @throws IllegalStateException if the active channel is not a text channel
      */
-    public void sendText(String text) throws IllegalStateException {
+    public Message sendText(String text) throws IllegalStateException {
         if (activeChannel != null) {
             try {
-                ((TextChannel) activeChannel).createMessage(text).block();
+                return ((TextChannel) activeChannel).createMessage(text).block();
             } catch (Exception e) {
                 throw new IllegalStateException("There was an issue sending the message to the active channel.");
             }
         }
+        return null;
     }
 
     /**
@@ -134,10 +136,11 @@ public class GuildManager {
      * @param text the message to send
      * @param channel the channel to send the message to
      */
-    public static void sendText(String text, TextChannel channel) {
+    public static Message sendText(String text, TextChannel channel) {
         if (channel != null) {
-            channel.createMessage(text).block();
+            return channel.createMessage(text).block();
         }
+        return null;
     }
 
     /**

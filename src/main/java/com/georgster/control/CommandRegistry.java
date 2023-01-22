@@ -17,6 +17,7 @@ import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
 import com.georgster.music.components.AudioInterface;
 import com.georgster.plinko.PlinkoCommand;
+import com.georgster.test.TestCommand;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 
@@ -52,6 +53,7 @@ public class CommandRegistry {
         commands.add(new PlayMusicCommand(clientsInterface.getProvider(), clientsInterface.getPlayerManager(), clientsInterface.getPlayer(), clientsInterface.getScheduler()));
         commands.add(new ShowQueueCommand(clientsInterface.getScheduler().getQueue()));
         commands.add(new SkipMusicCommand(clientsInterface.getPlayer(), clientsInterface.getScheduler()));
+        commands.add(new TestCommand());
     }
 
     /**
