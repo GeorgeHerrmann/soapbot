@@ -9,5 +9,9 @@ public enum ProfileType {
     /**
      * Represents a server's events.json profile.
      */
-    EVENTS
+    EVENTS,
+    /**
+     * Represents a server's permissions.json profile.
+     */
+    PERMISSIONS
 }

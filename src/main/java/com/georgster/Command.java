@@ -31,11 +31,12 @@ public interface Command {
     public List<String> getAliases();
 
     /**
-     * Returns whether or not a {@code Command} has a {@code CommandWizard} associated with it.
+     * Returns whether or not a {@code Command} needs the {@code SoapClientManager's}
+     * {@code EventDispatcher} upon execution.
      * 
-     * @return {@code true} if the {@code Command} has a {@code CommandWizard}, {@code false} otherwise.
+     * @return {@code true} if the {@code Command} needs the {@code EventDispatcher}, {@code false} otherwise.
      */
-    public boolean hasWizard();
+    public boolean needsDispatcher();
 
     /**
      * Provides information about usage for a {@code Command}.

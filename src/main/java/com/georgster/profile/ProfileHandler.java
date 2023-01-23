@@ -10,9 +10,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.control.PermissionsManager;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.reserve.ReserveEvent;
+import com.georgster.util.permissions.PermissibleAction;
+import com.georgster.util.permissions.PermissionGroup;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
@@ -91,9 +94,9 @@ public class ProfileHandler {
         profile.mkdir();
         profile = new File(Paths.get(PROFILELOCATION, id, "events.json").toString());
         try {
-            if (!profile.createNewFile()) {
-                throw new IOException();
-            }
+            profile.createNewFile();
+            profile = new File(Paths.get(PROFILELOCATION, id, "permissions.json").toString());
+            profile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -109,6 +112,7 @@ public class ProfileHandler {
     public boolean serverProfileExists() {
         return (Files.exists(Paths.get(PROFILELOCATION, id), LinkOption.NOFOLLOW_LINKS)) //Checks if the server profile directory exists
         && (Files.exists(Paths.get(PROFILELOCATION, id, "events.json"), LinkOption.NOFOLLOW_LINKS)) //Checks if the events.json file exists
+        && (Files.exists(Paths.get(PROFILELOCATION, id, "permissions.json"), LinkOption.NOFOLLOW_LINKS)) //Checks if the permissions.json file exists
         && (Files.exists(Paths.get(PROFILELOCATION, id, "users"), LinkOption.NOFOLLOW_LINKS)); //Checks if the users directory exists
     }
 
@@ -184,6 +188,75 @@ public class ProfileHandler {
             }
         }
         return null;
+    }
+
+    /**
+     * Makes a PermissionGroup object from the server's permission list.
+     * 
+     * @param name the name of the group to be pulled from the server's permission list.
+     * @return the {@code PermissionGroup} object that was pulled from the server's permission list, or null if the group doesn't exist.
+     */
+    public PermissionGroup pullGroup(String name) {
+        if (serverProfileExists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "permissions.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    String groupName = reader.nextName();
+                    if (groupName.equals(name)) {
+                        List<PermissibleAction> permissions = new ArrayList<>();
+                        reader.beginArray();
+                        while (reader.hasNext()) {
+                            permissions.add(PermissionsManager.getAction(reader.nextString()));
+                        }
+                        reader.endArray();
+                        return new PermissionGroup(groupName, permissions);
+                    } else {
+                        while(reader.peek() != JsonToken.END_OBJECT) {
+                            reader.skipValue();
+                        }
+                    }
+                    reader.endObject();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a list of all {@code PermissionGroup} objects in the server's permission list.
+     * 
+     * @return a list of all {@code PermissionGroup} objects in the server's permission list.
+     */
+    public List<PermissionGroup> pullGroups() {
+        List<PermissionGroup> groups = new ArrayList<>();
+        if (serverProfileExists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "permissions.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    String groupName = "";
+                    if (reader.nextName().equals("name")) {
+                        groupName = reader.nextString();
+                    }
+                    List<PermissibleAction> permissions = new ArrayList<>();
+                        if (reader.nextName().equals("actions")) {
+                            reader.beginArray();
+                        while (reader.hasNext()) {
+                            permissions.add(PermissionsManager.getAction(reader.nextString()));
+                        }
+                        reader.endArray();
+                    }
+                    groups.add(new PermissionGroup(groupName, permissions));
+                    reader.endObject();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return groups;
     }
 
     /**

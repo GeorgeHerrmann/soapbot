@@ -23,6 +23,7 @@ public final class SoapClient {
     private final AudioInterface audioInterface;
     private final CommandRegistry registry;
     private final SoapEventManager eventManager;
+    private final PermissionsManager permissionsManager;
     
     /**
      * Creates a new {@code SoapClient} for the associated {@code Guild} represented
@@ -33,6 +34,7 @@ public final class SoapClient {
         flake = pipeline.getGuild().getId();
         audioInterface = new AudioInterface();
         eventManager = new SoapEventManager(pipeline.getGuild());
+        permissionsManager = new PermissionsManager(pipeline);
         pipeline.setAudioInterface(audioInterface);
         pipeline.setEventManager(eventManager);
         registry = new CommandRegistry(pipeline);
@@ -53,11 +55,18 @@ public final class SoapClient {
         MultiLogger<SoapClient> logger = new MultiLogger<>(manager, SoapClient.class);
         logger.append("Logging in to server: " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
         ProfileHandler handler = manager.getProfileHandler();
-        /*
-         * If the guild this event was fired from has events scheduled, we will restart them.
-         */
+
         eventManager.restartEvents();
-        logger.append("\t Restarted " + eventManager.getEventCount() + " events for " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
+
+        if (permissionsManager.handlerHasGroups()) {
+            logger.append("\t Permissions Manager has groups, loading them", LogDestination.NONAPI);
+            permissionsManager.loadGroups();
+        } else {
+            logger.append("\t Permissions Manager does not have groups, setting up basic permissions", LogDestination.NONAPI);
+            permissionsManager.setupBasic();
+        }
+
+        logger.append("\n\t Restarted " + eventManager.getEventCount() + " events for " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
 
         if (!handler.serverProfileExists()) { //If the guild this event was fired from does not have a profile scheme, or has an out of date profile scheme, we create one
           logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(), LogDestination.NONAPI);

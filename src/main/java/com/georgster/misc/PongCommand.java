@@ -52,7 +52,7 @@ public class PongCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean hasWizard() {
+    public boolean needsDispatcher() {
         return false;
     }
 

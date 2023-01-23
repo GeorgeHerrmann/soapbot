@@ -67,7 +67,7 @@ public class CommandRegistry {
         commands.forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
                 GuildManager manager;
-                if (command.hasWizard()) {
+                if (command.needsDispatcher()) {
                     manager = new GuildManager(event.getGuild().block(), pipeline.getDispatcher());
                 } else {
                     manager = new GuildManager(event.getGuild().block());

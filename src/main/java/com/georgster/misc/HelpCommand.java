@@ -64,7 +64,7 @@ public class HelpCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean hasWizard() {
+    public boolean needsDispatcher() {
         return false;
     }
 

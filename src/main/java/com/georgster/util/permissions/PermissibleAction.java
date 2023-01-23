@@ -1,5 +1,8 @@
 package com.georgster.util.permissions;
 
 public enum PermissibleAction {
-    REMOVEEVENT
+    MANAGEEVENT,
+    MANAGEPERMISSIONS,
+    ADMIN,
+    DEFAULT
 }
