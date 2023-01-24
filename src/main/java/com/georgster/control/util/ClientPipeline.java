@@ -1,5 +1,6 @@
 package com.georgster.control.util;
 
+import com.georgster.control.PermissionsManager;
 import com.georgster.control.SoapEventManager;
 import com.georgster.music.components.AudioInterface;
 
@@ -15,6 +16,7 @@ public class ClientPipeline {
     private final Guild guild;
     private AudioInterface audioInterface;
     private SoapEventManager eventManager;
+    private PermissionsManager permissionsManager;
 
     /**
      * Creates a new ClientPipeline with the given {@code EventDispatcher} and
@@ -65,6 +67,15 @@ public class ClientPipeline {
     }
 
     /**
+     * Returns the permissions manager.
+     * 
+     * @return the permissions manager
+     */
+    public PermissionsManager getPermissionsManager() {
+        return permissionsManager;
+    }
+
+    /**
      * Sets the audio interface.
      * 
      * @param audioInterface the audio interface
@@ -80,5 +91,14 @@ public class ClientPipeline {
      */
     public void setEventManager(SoapEventManager eventManager) {
         this.eventManager = eventManager;
+    }
+
+    /**
+     * Sets the permissions manager.
+     * 
+     * @param permissionsManager the permissions manager
+     */
+    public void setPermissionsManager(PermissionsManager permissionsManager) {
+        this.permissionsManager = permissionsManager;
     }
 }

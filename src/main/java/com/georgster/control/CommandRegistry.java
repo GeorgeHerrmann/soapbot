@@ -20,6 +20,7 @@ import com.georgster.plinko.PlinkoCommand;
 import com.georgster.test.TestCommand;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.permissions.PermissionsCommand;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
@@ -53,6 +54,7 @@ public class CommandRegistry {
         commands.add(new PlayMusicCommand(clientsInterface.getProvider(), clientsInterface.getPlayerManager(), clientsInterface.getPlayer(), clientsInterface.getScheduler()));
         commands.add(new ShowQueueCommand(clientsInterface.getScheduler().getQueue()));
         commands.add(new SkipMusicCommand(clientsInterface.getPlayer(), clientsInterface.getScheduler()));
+        commands.add(new PermissionsCommand(pipeline.getPermissionsManager()));
         commands.add(new TestCommand());
     }
 

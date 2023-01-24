@@ -202,8 +202,12 @@ public class ProfileHandler {
                 reader.setLenient(true);
                 while (reader.hasNext()) {
                     reader.beginObject();
-                    String groupName = reader.nextName();
-                    if (groupName.equals(name)) {
+                    String groupName = "";
+                    if (reader.nextName().equals("name")) {
+                        groupName = reader.nextString();
+                    }
+                    if (groupName.equalsIgnoreCase(name)) {
+                        reader.nextName();
                         List<PermissibleAction> permissions = new ArrayList<>();
                         reader.beginArray();
                         while (reader.hasNext()) {
@@ -242,8 +246,8 @@ public class ProfileHandler {
                         groupName = reader.nextString();
                     }
                     List<PermissibleAction> permissions = new ArrayList<>();
-                        if (reader.nextName().equals("actions")) {
-                            reader.beginArray();
+                    if (reader.nextName().equals("actions")) {
+                        reader.beginArray();
                         while (reader.hasNext()) {
                             permissions.add(PermissionsManager.getAction(reader.nextString()));
                         }

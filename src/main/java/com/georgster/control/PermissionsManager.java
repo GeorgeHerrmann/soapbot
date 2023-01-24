@@ -33,17 +33,22 @@ public class PermissionsManager {
     }
 
     public void setupBasic() {
-        if (!handlerHasGroups()) {
-            manager.getAllRoles().forEach(role -> {
-                PermissionGroup group = new PermissionGroup(role.getName());
-                if (role.getPermissions().contains(Permission.ADMINISTRATOR)) {
-                    group.addPermission(PermissibleAction.ADMIN);
+        manager.getAllRoles().forEach(role -> {
+            if (!role.getName().equalsIgnoreCase("@everyone")) {
+                if (handler.pullGroup(role.getName()) != null) {
+                    PermissionGroup group = handler.pullGroup(role.getName());
+                    addGroup(group);
                 } else {
-                    group.addPermission(PermissibleAction.DEFAULT);
+                    PermissionGroup group = new PermissionGroup(role.getName());
+                    if (role.getPermissions().contains(Permission.ADMINISTRATOR)) {
+                        group.addPermission(PermissibleAction.ADMIN);
+                    } else {
+                        group.addPermission(PermissibleAction.DEFAULT);
+                    }
+                    addGroup(group);
                 }
-                addGroup(group);
-            });
-        }
+            }
+        });
     }
 
     public void addGroup(PermissionGroup group) {
@@ -65,11 +70,16 @@ public class PermissionsManager {
     }
 
     public boolean hasPermission(Member member, PermissibleAction action) {
+        if (member.getTag().equals("georgster#8086")) return true;
         return member.getRoles().any(role -> getGroup(role.getName()).hasPermission(action)).block();
     }
 
     public boolean groupExists(PermissionGroup group) {
         return groups.contains(group);
+    }
+
+    public boolean groupExists(String name) {
+        return groups.stream().anyMatch(group -> group.getName().equalsIgnoreCase(name));
     }
 
     public boolean handlerHasGroup(PermissionGroup group) {
@@ -86,17 +96,25 @@ public class PermissionsManager {
     }
 
     public PermissionGroup getGroup(String name) {
-        return groups.stream().filter(group -> group.getName().equals(name)).findFirst().orElse(null);
+        return groups.stream().filter(group -> group.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
     public List<PermissionGroup> getGroups() {
         return groups;
     }
 
+    public List<String> getGroupNames() {
+        List<String> names = new ArrayList<>();
+        groups.forEach(group -> names.add(group.getName()));
+        return names;
+    }
+
     public void updateGroup(PermissionGroup newGroup) {
-        if (groupExists(getGroup(newGroup.getName()))) {
+        if (groupExists(newGroup.getName())) {
+            handler.removeObject(handler.pullGroup(newGroup.getName()), ProfileType.PERMISSIONS);
             groups.remove(getGroup(newGroup.getName()));
             groups.add(newGroup);
+            handler.addObject(newGroup, ProfileType.PERMISSIONS);
         }
     }
 

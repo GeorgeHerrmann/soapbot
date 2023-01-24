@@ -77,9 +77,7 @@ public class EventCommand implements Command {
                     logger.append("\tMentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                     StringBuilder response = new StringBuilder();
-                    reserve.getReservedUsers().forEach(user -> {
-                        response.append(manager.getMember(user).getMention() + " ");
-                    });
+                    reserve.getReservedUsers().forEach(user -> response.append(manager.getMember(user).getMention() + " "));
                     manager.sendText(response.toString());
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
@@ -107,9 +105,7 @@ public class EventCommand implements Command {
                         response.append("This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                     }
                     response.append("\nReserved users:\n");
-                    reserve.getReservedUsers().forEach(user -> {
-                        response.append("\t- " + manager.getMember(user).getUsername() + "\n");
-                    });
+                    reserve.getReservedUsers().forEach(user -> response.append("\t- " + manager.getMember(user).getUsername() + "\n"));
                     manager.sendText(response.toString());
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");

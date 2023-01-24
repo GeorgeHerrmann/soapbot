@@ -37,6 +37,7 @@ public final class SoapClient {
         permissionsManager = new PermissionsManager(pipeline);
         pipeline.setAudioInterface(audioInterface);
         pipeline.setEventManager(eventManager);
+        pipeline.setPermissionsManager(permissionsManager);
         registry = new CommandRegistry(pipeline);
     }
 
@@ -58,13 +59,7 @@ public final class SoapClient {
 
         eventManager.restartEvents();
 
-        if (permissionsManager.handlerHasGroups()) {
-            logger.append("\t Permissions Manager has groups, loading them", LogDestination.NONAPI);
-            permissionsManager.loadGroups();
-        } else {
-            logger.append("\t Permissions Manager does not have groups, setting up basic permissions", LogDestination.NONAPI);
-            permissionsManager.setupBasic();
-        }
+        permissionsManager.setupBasic();
 
         logger.append("\n\t Restarted " + eventManager.getEventCount() + " events for " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
 

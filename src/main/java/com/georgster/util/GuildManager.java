@@ -200,7 +200,7 @@ public class GuildManager {
     /**
      * Returns the {@code Member} in this {@code Guild} that has the given tag.
      * 
-     * @param memberTag The tag of the member to get or null if no member with that tag exists
+     * @param memberTag The tag of the member to get
      * @return the {@code Member} in this {@code Guild} that has the given tag
      */
     public Member getMember(String memberTag) {
@@ -214,7 +214,7 @@ public class GuildManager {
     /**
      * Returns the {@code TextChannel} in this {@code Guild} that has the given name.
      * 
-     * @param channelName The name of the channel to get or null if no channel with that name exists
+     * @param channelName The name of the channel to get
      * @return the {@code TextChannel} in this {@code Guild} that has the given name
      */
     public TextChannel getTextChannel(String channelName) {
@@ -228,7 +228,7 @@ public class GuildManager {
     /**
      * Returns the {@code Role} in this {@code Guild} that has the given name.
      * 
-     * @param roleName The name of the role to get or null if no role with that name exists
+     * @param roleName The name of the role to get
      * @return the {@code Role} in this {@code Guild} that has the given name
      */
     public Role getRole(String roleName) {
