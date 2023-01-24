@@ -1,7 +1,12 @@
 package com.georgster.plinko;
 
+import java.util.List;
+
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
+import com.georgster.util.GuildManager;
+import com.georgster.util.commands.CommandParser;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
@@ -23,33 +28,56 @@ public class PlinkoCommand implements Command {
      * 
      * Note: If you are reading this the full Plinko features are mid development.
      */
+    private static final String PATTERN = "1|R 1|O";
 
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event) {
-        ActionWriter.writeAction("Having the Plinko Command parser check the contents of a !plinko command");
-        StringBuilder message = new StringBuilder(event.getMessage().getContent().toLowerCase()); //This is the user's message that prompted this execution
-        message.delete(message.indexOf("!plinko"), message.indexOf("!plinko") + 8);
-        PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
-        if (message.toString().startsWith("play")) {
-            message.delete(message.indexOf("play"), message.indexOf("play") + 5);
-            ActionWriter.writeAction("Beginning the simulation of a plinko game");
-            game.play();
-        } else if (message.toString().startsWith("board")) {
-            ActionWriter.writeAction("Showing a blank Plinko Board");
-            game.showBoard();
-        } else {
-            ActionWriter.writeAction("Showing information on how to use the plinko command");
-            event.getMessage().getChannel().block().createMessage(help()).block();
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<PlinkoCommand> logger = new MultiLogger<>(manager, PlinkoCommand.class);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+
+        CommandParser parser = new CommandParser(PATTERN);
+        try {
+            parser.parse(event.getMessage().getContent().toLowerCase());
+
+            logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+
+            PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
+            if (parser.get(0).equals("play")) {
+                logger.append("\tBeginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
+                game.play();
+            } else if (parser.get(0).equals("board")) {
+                logger.append("\tShowing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
+                game.showBoard();
+            }
+        } catch (Exception e) {
+            logger.append("\tInvalid command format", LogDestination.NONAPI);
+            manager.sendText(help());
         }
+
+        logger.sendAll();
     }
 
     /**
      * {@inheritDoc}
      */
+    public boolean needsDispatcher() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getAliases() {
+        return List.of("plinko");
+    }
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !plinko" +
+        "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t- '!plinko play' to simulate a game of plinko" +
         "\n\t- '!plinko board' to show an empty plinko board";

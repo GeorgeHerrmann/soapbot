@@ -10,11 +10,16 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.georgster.reserve.ReserveEvent;
+import com.georgster.control.PermissionsManager;
+import com.georgster.events.SoapEvent;
+import com.georgster.events.SoapEventType;
+import com.georgster.events.reserve.ReserveEvent;
+import com.georgster.util.permissions.PermissibleAction;
+import com.georgster.util.permissions.PermissionGroup;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 
 import java.io.FileWriter;
 
@@ -27,33 +32,35 @@ public class ProfileHandler {
 
     /* Holds the location of the profiles directory */
     private static final String PROFILELOCATION = Paths.get(System.getProperty("user.dir"), "src", "main", "java", "com", "georgster", "profile", "profiles").toString();
+    private final String id;
 
     /**
-     * ProfileHandler is a utility class and does not need to be constructed.
+     * Creates a new {@code ProfileHandler} for a Guild with the
+     * associated {@code Snowflake} ID.
+     * 
+     * @param id the {@code Snowflake} ID of the {@code Guild} that this {@code ProfileHandler} is for.
      */
-    private ProfileHandler() {
-        throw new IllegalStateException("ProfileHandler is not meant to be constructed");
+    public ProfileHandler(String id) {
+        this.id = id;
     }
 
     /**
      * Returns whether or not a user profile exists with the supplimented server and user IDs.
      * 
      * @param userId the {@code Snowflake} id of the {@code Member} who's profile is being examined.
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the user's profile for that Guild would be located.
      * @return true if the profile exists already, false otherwise.
      */
-    public static boolean userProfileExists(String userId, String serverId) {
-        return Files.exists(Paths.get(PROFILELOCATION, serverId, "users", userId + ".json"));
+    public boolean userProfileExists(String userId) {
+        return Files.exists(Paths.get(PROFILELOCATION, id, "users", userId + ".json"));
     }
 
     /**
      * Creates a user's profile based on the {@code Snowflake} ID of the {@code Guild} profile it should exist in.
      * 
      * @param userId the {@code Snowflake} id of the {@code Member} who's profile is being examined.
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the user's profile for that Guild would be located.
      */
-    public static void createUserProfile(String userId, String serverId) {
-        File profile = new File(Paths.get(PROFILELOCATION, serverId, "users", userId + ".json").toString());
+    public void createUserProfile(String userId) {
+        File profile = new File(Paths.get(PROFILELOCATION, id, "users", userId + ".json").toString());
         try {
             if (!profile.createNewFile()) {
                 throw new IOException();
@@ -69,7 +76,7 @@ public class ProfileHandler {
      * 
      * @param profile The object containing all data associated with this {@code Member}.
      */
-    public static void updateUserProfile(UserProfile profile) {
+    public void updateUserProfile(UserProfile profile) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, profile.getGuildId(), "users", profile.getMemberId() + ".json").toString())) {
             writer.write(parser.toJson(profile));
@@ -81,17 +88,15 @@ public class ProfileHandler {
     /**
      * Creates a servers's profile based on the {@code Snowflake} ID of the {@code Guild}.
      * A profile for a {@code Guild} exists inside a dedicated directory for that {@code Guild}.
-     * 
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      */
-    public static void createServerProfile(String id) {
+    public void createServerProfile() {
         File profile = new File(Paths.get(PROFILELOCATION, id).toString());
         profile.mkdir();
         profile = new File(Paths.get(PROFILELOCATION, id, "events.json").toString());
         try {
-            if (!profile.createNewFile()) {
-                throw new IOException();
-            }
+            profile.createNewFile();
+            profile = new File(Paths.get(PROFILELOCATION, id, "permissions.json").toString());
+            profile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,26 +107,26 @@ public class ProfileHandler {
     /**
      * Returns whether or not a server profile exists with the supplimented server ID.
      * 
-     * @param serverId the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return true if the profile exists already, false otherwise.
      */
-    public static boolean serverProfileExists(String id) {
+    public boolean serverProfileExists() {
         return (Files.exists(Paths.get(PROFILELOCATION, id), LinkOption.NOFOLLOW_LINKS)) //Checks if the server profile directory exists
         && (Files.exists(Paths.get(PROFILELOCATION, id, "events.json"), LinkOption.NOFOLLOW_LINKS)) //Checks if the events.json file exists
+        && (Files.exists(Paths.get(PROFILELOCATION, id, "permissions.json"), LinkOption.NOFOLLOW_LINKS)) //Checks if the permissions.json file exists
         && (Files.exists(Paths.get(PROFILELOCATION, id, "users"), LinkOption.NOFOLLOW_LINKS)); //Checks if the users directory exists
     }
 
     /**
-     * Adds an event to the server's event list.
+     * Adds an object to the server's profile file based on the supplied {@code ProfileType}.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
-     * @param event the {@code ReserveEvent} object to be added to the server's event list.
+     * @param object the object to be added to the profile file.
+     * @param type the type of the server's profile that the object should be added to.
      */
-    public static void addEvent(String id, ReserveEvent event) {
+    public void addObject(Object object, ProfileType type) {
         Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        if (serverProfileExists(id)) { //Writes a JSON representation of the event to the events.json file
-            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString(), true)) {
-                writer.write(parser.toJson(event));
+        if (serverProfileExists()) { //Writes a JSON representation of the object to the profile file
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString(), true)) {
+                writer.write(parser.toJson(object));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -129,43 +134,13 @@ public class ProfileHandler {
     }
 
     /**
-     * Checks if an event is already in the server's event list.
-     * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
-     * @param event the {@code ReserveEvent} object to be checked against the server's event list.
-     * @return true if the event is already in the server's event list, false otherwise.
-     * @deprecated This method is not currently used. Use eventExists() instead.
-     */
-    @Deprecated
-    public static boolean checkEventDuplicates(String id, ReserveEvent event) {
-        Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        String eventJson = "";
-        if (serverProfileExists(id)) {
-            JsonElement element = parser.toJsonTree(event);
-            if (element.isJsonObject()) {
-                eventJson = element.getAsJsonObject().get("identifier").getAsString();
-                try {
-                    String events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
-                    if (events.contains(": \"" + eventJson + "\"")) { //If the provided ReserveEvent is in the file, return true
-                        return true;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return false; //If any
-    }
-
-    /**
      * Makes a ReserveEvent object from the server's event list.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param eventIdentifier the identifier of the event to be pulled from the server's event list.
      * @return the {@code ReserveEvent} object that was pulled from the server's event list.
      */
-    public static ReserveEvent pullEvent(String id, String eventIdentifier) {
-        if (serverProfileExists(id)) {
+    public ReserveEvent pullEvent(String eventIdentifier) {
+        if (serverProfileExists()) {
             try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
                 reader.setLenient(true);
                 while (reader.hasNext()) { //Iterates through the events.json file
@@ -197,18 +172,14 @@ public class ProfileHandler {
                             }
                             reader.endArray();
                         }
+                        if (reader.nextName().equals("type")) {
+                            reader.skipValue();
+                        }
                         return new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers);
                     } else {
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
+                        while(reader.peek() != JsonToken.END_OBJECT) {
+                            reader.skipValue();
+                        }
                     }
                     reader.endObject();
                 }
@@ -220,23 +191,103 @@ public class ProfileHandler {
     }
 
     /**
-     * Removes an event from the server's event list.
+     * Makes a PermissionGroup object from the server's permission list.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
-     * @param event the {@code ReserveEvent} object to be removed from the server's event list.
+     * @param name the name of the group to be pulled from the server's permission list.
+     * @return the {@code PermissionGroup} object that was pulled from the server's permission list, or null if the group doesn't exist.
      */
-    public static void removeEvent(String id, ReserveEvent event) {
-        Gson parser = new GsonBuilder().setPrettyPrinting().create();
-        if (serverProfileExists(id)) {
-            String events = "";
-            try {
-                events = new String(Files.readAllBytes(Paths.get(PROFILELOCATION, id, "events.json")));
+    public PermissionGroup pullGroup(String name) {
+        if (serverProfileExists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "permissions.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    String groupName = reader.nextName();
+                    if (groupName.equals(name)) {
+                        List<PermissibleAction> permissions = new ArrayList<>();
+                        reader.beginArray();
+                        while (reader.hasNext()) {
+                            permissions.add(PermissionsManager.getAction(reader.nextString()));
+                        }
+                        reader.endArray();
+                        return new PermissionGroup(groupName, permissions);
+                    } else {
+                        while(reader.peek() != JsonToken.END_OBJECT) {
+                            reader.skipValue();
+                        }
+                    }
+                    reader.endObject();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, "events.json").toString())) {
-                events = events.replace(parser.toJson(event), ""); //Remove the event from the file
-                writer.write(events);
+        }
+        return null;
+    }
+
+    /**
+     * Returns a list of all {@code PermissionGroup} objects in the server's permission list.
+     * 
+     * @return a list of all {@code PermissionGroup} objects in the server's permission list.
+     */
+    public List<PermissionGroup> pullGroups() {
+        List<PermissionGroup> groups = new ArrayList<>();
+        if (serverProfileExists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "permissions.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    String groupName = "";
+                    if (reader.nextName().equals("name")) {
+                        groupName = reader.nextString();
+                    }
+                    List<PermissibleAction> permissions = new ArrayList<>();
+                        if (reader.nextName().equals("actions")) {
+                            reader.beginArray();
+                        while (reader.hasNext()) {
+                            permissions.add(PermissionsManager.getAction(reader.nextString()));
+                        }
+                        reader.endArray();
+                    }
+                    groups.add(new PermissionGroup(groupName, permissions));
+                    reader.endObject();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return groups;
+    }
+
+    /**
+     * Removes an object from the server's profile file based on the supplied {@code ProfileType}.
+     * 
+     * @param object the object to be removed from the profile file.
+     * @param type the type of the server's profile that the object should be removed from.
+     */
+    public void removeObject(Object object, ProfileType type) {
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
+        if (serverProfileExists()) {
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString(), true)) {
+                String objects = Files.readString(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")));
+                wipe(type);
+                objects = objects.replace(parser.toJson(object), ""); //Remove the event from the file
+                writer.write(objects);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Wipes the server's profile file based on the supplied {@code ProfileType}.
+     * 
+     * @param type the type of the server's profile that should be wiped.
+     */
+    public void wipe(ProfileType type) {
+        if (serverProfileExists()) {
+            try (FileWriter writer = new FileWriter(Paths.get(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")).toString())) {
+                writer.write("");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -246,15 +297,34 @@ public class ProfileHandler {
     /**
      * Checks if an event exists in the server's event list.
      * 
-     * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @param identifier the identifier of the event to be checked against the server's event list.
      * @return true if the event exists in the server's event list, false otherwise.
      */
-    public static boolean eventExists(String id, String identifier) {
-        if (serverProfileExists(id)) {
+    public boolean eventExists(String identifier) {
+        if (serverProfileExists()) {
             try  {
                 String contents = Files.readString(Path.of(PROFILELOCATION, id, "events.json"));
                 return contents.contains(": \"" + identifier + "\"");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if an object exists in the server's profile file based on the supplied {@code ProfileType}.
+     * 
+     * @param object the object to be checked against the profile file.
+     * @param type the type of the server's profile that the object should be checked against.
+     * @return true if the object exists in the server's profile file, false otherwise.
+     */
+    public boolean objectExists(Object object, ProfileType type) {
+        Gson parser = new GsonBuilder().setPrettyPrinting().create();
+        if (serverProfileExists()) {
+            try {
+                String contents = Files.readString(Path.of(PROFILELOCATION, id, (type.name().toLowerCase() + ".json")));
+                return contents.contains(parser.toJson(object));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -268,9 +338,9 @@ public class ProfileHandler {
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return the list of {@code ReserveEvent} objects from the server's event list.
      */
-    public static List<ReserveEvent> getEvents(String id) {
-        List<ReserveEvent> events = new ArrayList<>();
-        if (serverProfileExists(id)) {
+    public List<SoapEvent> getEvents() {
+        List<SoapEvent> events = new ArrayList<>();
+        if (serverProfileExists()) {
             try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
                 reader.setLenient(true);
                 while (reader.hasNext()) {
@@ -302,18 +372,65 @@ public class ProfileHandler {
                             }
                             reader.endArray();
                         }
+                        if (reader.nextName().equals("type")) {
+                            reader.skipValue();
+                        }
                         events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
                     } else {
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
-                        reader.skipValue();
+                       while(reader.peek() != JsonToken.END_OBJECT) {
+                           reader.skipValue();
+                       }
+                    }
+                    reader.endObject();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return events;
+    }
+
+    public List<SoapEvent> getEvents(SoapEventType type) {
+        List<SoapEvent> events = new ArrayList<>();
+        if (serverProfileExists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(Paths.get(PROFILELOCATION, id, "events.json").toString()))){
+                reader.setLenient(true);
+                while (reader.hasNext()) {
+                    reader.beginObject();
+                    List<String> reservedUsers = new ArrayList<>();
+                    int numPeople = 0;
+                    int numReserved = 0;
+                    String channel = "";
+                    String time = "";
+                    String name = reader.nextName();
+                    String identifier = reader.nextString();
+                    if (name.equals("identifier")) {
+                        if (reader.nextName().equals("numPeople")) {
+                            numPeople = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("numReserved")) {
+                            numReserved = reader.nextInt();
+                        }
+                        if (reader.nextName().equals("time")) {
+                            time = reader.nextString();
+                        }
+                        if (reader.nextName().equals("channel")) {
+                            channel = reader.nextString();
+                        }
+                        if (reader.nextName().equals("reservedUsers")) {
+                            reader.beginArray();
+                            while (reader.hasNext()) {
+                                reservedUsers.add(reader.nextString());
+                            }
+                            reader.endArray();
+                        }
+                        if (reader.nextName().equals("type") && reader.nextString().equals(type.name())) {
+                            events.add(new ReserveEvent(identifier, numPeople, numReserved, time, channel, reservedUsers)); //Add each event to the list
+                        }
+                    } else {
+                       while(reader.peek() != JsonToken.END_OBJECT) {
+                           reader.skipValue();
+                       }
                     }
                     reader.endObject();
                 }
@@ -330,8 +447,8 @@ public class ProfileHandler {
      * @param id the {@code Snowflake} id of the {@code Guild} where the profile folder would be located.
      * @return {@code true} if the server has events, {@code false} otherwise.
      */
-    public static boolean areEvents(String id) {
-        if (serverProfileExists(id)) {
+    public boolean areEvents() {
+        if (serverProfileExists()) {
             try {
                 String contents = Files.readString(Path.of(PROFILELOCATION, id, "events.json"));
                 return contents.contains("identifier");

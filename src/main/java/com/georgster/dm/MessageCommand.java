@@ -4,14 +4,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
+import com.georgster.util.GuildManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 
 public class MessageCommand implements Command {
-    public void execute(MessageCreateEvent event) {
+
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**",
+        LogDestination.NONAPI, LogDestination.API);
+
         Message message = event.getMessage();
         List<String> contents = Arrays.asList(message.getContent().split(" "));
 
@@ -23,16 +30,36 @@ public class MessageCommand implements Command {
         }
         if (!message.getUserMentions().isEmpty()) {
             for (User user : message.getUserMentions()) {
+                logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
+                LogDestination.NONAPI);
+
                 user.getPrivateChannel().block().createMessage(response.toString()).block();
-                ActionWriter.writeAction("Sending a DM to a user");
             }
         } else {
+            logger.append("\n\tNo users found, sending help message",
+            LogDestination.NONAPI);
             message.getChannel().block().createMessage(help()).block();
         }
+        logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean needsDispatcher() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getAliases() {
+        return List.of("dm", "message", "msg");
     }
 
     public String help() {
         return "Command: !message" +
+        "\nAliases: " + getAliases().toString() +
         "\n\t - !message @[USERS] [MESSAGE]" +
         "\n\t\t Ex: !message @georgster#8086 hello" + 
         "\n\t\t Or: !message @georgster#8086 @Milkmqn#9457 hello";

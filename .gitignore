@@ -6,3 +6,5 @@ target/classes/com/georgster/api/data/*
 target/maven-status/*
 target/maven-archiver/*
 target/soapbot-1.214.jar
+src/main/java/com/georgster/logs/data/log.txt
+target/classes/com/georgster/logs/data/log.txt

@@ -1,9 +1,12 @@
 package com.georgster.music;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
+import com.georgster.util.GuildManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -13,7 +16,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  */
 public class ShowQueueCommand implements Command {
 
-    private LinkedBlockingQueue<AudioTrack> queue;
+    private final LinkedBlockingQueue<AudioTrack> queue;
 
     /**
      * Will show the current queue of audio tracks.
@@ -29,19 +32,42 @@ public class ShowQueueCommand implements Command {
      * 
      * @param execute the event that triggered the command
      */
-    public void execute(MessageCreateEvent event) {
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<ShowQueueCommand> logger = new MultiLogger<>(manager, ShowQueueCommand.class);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;
+
+        logger.append("\tShowing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
+
         for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
             response.append("\t" + x + ") " + i.getInfo().title + "\n");
             if (response.length() >= 1800) {
-                event.getMessage().getChannel().block().createMessage(response.toString()).block();
+                logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
+
+                manager.sendText(response.toString());
                 response = new StringBuilder();
             }
             x++;
         }
-        ActionWriter.writeAction("Showing the current audio track queue");
-        event.getMessage().getChannel().block().createMessage(response.toString()).block();
+        logger.sendAll();
+
+        manager.sendText(response.toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean needsDispatcher() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getAliases() {
+        return List.of("queue", "q", "songs");
     }
 
     /**
@@ -49,6 +75,7 @@ public class ShowQueueCommand implements Command {
      */
     public String help() {
         return "Command: !play, !skip & !queue" +
+        "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
         "\n\t!skip to skip the current track" +

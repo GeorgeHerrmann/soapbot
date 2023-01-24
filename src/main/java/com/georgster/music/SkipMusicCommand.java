@@ -1,7 +1,13 @@
 package com.georgster.music;
 
+import java.util.List;
+
 import com.georgster.Command;
-import com.georgster.api.ActionWriter;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
+import com.georgster.music.components.TrackScheduler;
+import com.georgster.util.GuildManager;
+import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -30,18 +36,41 @@ public class SkipMusicCommand implements Command {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(MessageCreateEvent event) {
+    public void execute(MessageCreateEvent event, GuildManager manager) {
+        MultiLogger<SkipMusicCommand> logger = new MultiLogger<>(manager, SkipMusicCommand.class);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+
         if (scheduler.isActive()) {
-            String message = event.getMessage().getContent();
-            if (message.contains("all")) {
+            List<String> message = CommandParser.parseGeneric(event.getMessage().getContent());
+            logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
+            if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();
-                event.getMessage().getChannel().block().createMessage("Skipping all tracks in the queue").block();
+                manager.sendText("Skipping all tracks in the queue");
             } else {
-                event.getMessage().getChannel().block().createMessage("Skipping the currently playing track").block();
+                manager.sendText("Skipping the currently playing track");
             }
             player.stopTrack();
-            ActionWriter.writeAction("Skipping one or more tracks in a voice channel");
+            logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
+        } else {
+            logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
+            manager.sendText("No tracks are currently playing");
         }
+
+        logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean needsDispatcher() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<String> getAliases() {
+        return List.of("skip");
     }
 
     /**
@@ -49,6 +78,7 @@ public class SkipMusicCommand implements Command {
      */
     public String help() {
         return "Command: !play, !skip & !queue" +
+        "\nAliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
         "\n\t!skip to skip the current track" +
