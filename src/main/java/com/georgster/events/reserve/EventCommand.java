@@ -115,7 +115,8 @@ public class EventCommand implements Command {
             }
         } catch (Exception e) {
             logger.append("The user did not provide valid arguments, showing the help message\n", LogDestination.NONAPI);
-            manager.sendText(help());
+            String[] output = SoapUtility.splitFirst(help());
+            manager.sendText(output[1], output[0]);
         }
         logger.sendAll();
     }
