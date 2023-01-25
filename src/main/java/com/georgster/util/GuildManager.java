@@ -125,7 +125,7 @@ public class GuildManager {
     public Message sendText(String text) throws IllegalStateException {
         if (activeChannel != null) {
             try {
-                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title("test").build();
+                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
                 MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
                 return ((TextChannel) activeChannel).createMessage(spec).block();
             } catch (NullPointerException e) {
@@ -143,7 +143,7 @@ public class GuildManager {
      */
     public static Message sendText(String text, TextChannel channel) {
         if (channel != null) {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title("test").build();
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
             MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
             return channel.createMessage(spec).block();
         }
