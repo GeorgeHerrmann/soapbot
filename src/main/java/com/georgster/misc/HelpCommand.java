@@ -52,7 +52,11 @@ public class HelpCommand implements Command {
                 response = new StringBuilder(command.help());
                 break;
             } else {
-                response.append(command.getAliases().get(0) + " ");
+                if (!command.getAliases().isEmpty()) {
+                    response.append(command.getAliases().get(0) + " ");
+                } else {
+                    response.append("No Aliases");
+                }
             }
         }
         logger.append("Responding to a !help command request", LogDestination.API);

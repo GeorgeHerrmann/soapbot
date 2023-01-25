@@ -14,6 +14,9 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.rest.util.Color;
 
 /**
  * A GuildManager holds and manipulates data about a Guild.
@@ -122,8 +125,10 @@ public class GuildManager {
     public Message sendText(String text) throws IllegalStateException {
         if (activeChannel != null) {
             try {
-                return ((TextChannel) activeChannel).createMessage(text).block();
-            } catch (Exception e) {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title("test").build();
+                MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                return ((TextChannel) activeChannel).createMessage(spec).block();
+            } catch (NullPointerException e) {
                 throw new IllegalStateException("There was an issue sending the message to the active channel.");
             }
         }
@@ -138,7 +143,9 @@ public class GuildManager {
      */
     public static Message sendText(String text, TextChannel channel) {
         if (channel != null) {
-            return channel.createMessage(text).block();
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title("test").build();
+            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+            return channel.createMessage(spec).block();
         }
         return null;
     }
