@@ -38,8 +38,8 @@ public class SoapCommand implements Command {
                 }
             }
             myReader.close();
-            manager.sendText("Soap Bot Version: " + version +
-            "\nView my repository and source code at: https://github.com/GeorgeHerrmann/soapbot");
+            manager.sendText("Version: " + version +
+            "\nView my repository and source code at: https://github.com/GeorgeHerrmann/soapbot", "SOAP Bot");
         } catch (FileNotFoundException e) { //Should only be thrown if there is an issue with the pom.xml file
             logger.append("\tCouldn't find the version file", LogDestination.NONAPI);
             manager.sendText("Couldn't find version file");

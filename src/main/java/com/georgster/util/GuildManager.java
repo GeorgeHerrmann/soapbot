@@ -6,6 +6,7 @@ import com.georgster.control.SoapEventManager;
 import com.georgster.profile.ProfileHandler;
 
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -108,7 +109,7 @@ public class GuildManager {
     }
 
     /**
-     * Returns the active channel for this manager.
+     * Returns the active channel for this manager with basic embed formatting.
      * 
      * @return the channel that is currently active
      */
@@ -117,7 +118,7 @@ public class GuildManager {
     }
 
     /**
-     * Sends a text message to the active channel.
+     * Sends a text message to the active channel with basic embed formatting.
      * 
      * @param text the message to send
      * @throws IllegalStateException if the active channel is not a text channel
@@ -136,7 +137,48 @@ public class GuildManager {
     }
 
     /**
-     * Sends a text message to the given text channel.
+     * Sends a text message to the active channel with basic embed formatting and a title.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @throws IllegalStateException if the active channel is not a text channel
+     */
+    public Message sendText(String text, String title) throws IllegalStateException {
+        if (activeChannel != null) {
+            try {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+                MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                return ((TextChannel) activeChannel).createMessage(spec).block();
+            } catch (NullPointerException e) {
+                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the active channel with basic embed formatting, a title, and a component.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @param component the component to add to the message
+     * @throws IllegalStateException if the active channel is not a text channel
+     */
+    public Message sendText(String text, String title, LayoutComponent component) throws IllegalStateException {
+        if (activeChannel != null) {
+            try {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+                MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(component);
+                return ((TextChannel) activeChannel).createMessage(spec).block();
+            } catch (NullPointerException e) {
+                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the given text channel with basic embed formatting.
      * 
      * @param text the message to send
      * @param channel the channel to send the message to
@@ -145,6 +187,39 @@ public class GuildManager {
         if (channel != null) {
             EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
             MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+            return channel.createMessage(spec).block();
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the given text channel with basic embed formatting and a title.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @param channel the channel to send the message to
+     */
+    public static Message sendText(String text, String title, TextChannel channel) {
+        if (channel != null) {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+            return channel.createMessage(spec).block();
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the given text channel with basic embed formatting, a title, and a component.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @param component the component to add to the message
+     * @param channel the channel to send the message to
+     */
+    public static Message sendText(String text, String title, LayoutComponent component, TextChannel channel) {
+        if (channel != null) {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(component);
             return channel.createMessage(spec).block();
         }
         return null;

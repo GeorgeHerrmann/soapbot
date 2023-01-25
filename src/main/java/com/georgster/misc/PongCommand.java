@@ -44,7 +44,7 @@ public class PongCommand implements Command {
             counter++;
         }
         logger.append("\tResponding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
-        manager.sendText(fullMessage.toString().trim());
+        manager.sendText(fullMessage.toString().trim(), "You said ping " + counter + " times");
 
         logger.sendAll();
     }

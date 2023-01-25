@@ -7,6 +7,7 @@ import com.georgster.Command;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
@@ -38,7 +39,8 @@ public class MessageCommand implements Command {
         } else {
             logger.append("\n\tNo users found, sending help message",
             LogDestination.NONAPI);
-            message.getChannel().block().createMessage(help()).block();
+            String[] output = SoapUtility.splitFirst(help());
+            manager.sendText(output[1], output[0]);
         }
         logger.sendAll();
     }

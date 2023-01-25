@@ -78,6 +78,20 @@ public class SoapUtility {
     }
 
     /**
+     * Split a string into two parts at the first occurrence of the new line character.
+     * 
+     * @param line the string to split
+     * @return an array of two strings, the first string is the part before the new line character,
+     *        the second string is the part after the new line character
+     */
+    public static String[] splitFirst(String line) {
+        String[] split = new String[2];
+        split[0] = line.substring(0, line.indexOf("\n"));
+        split[1] = line.substring(line.indexOf("\n") + 1);
+        return split;
+    }
+
+    /**
      * Creates and immediately starts a new daemon thread that executes
      * {@code target.run()}. This method, which may be called from any thread,
      * will return immediately its the caller.

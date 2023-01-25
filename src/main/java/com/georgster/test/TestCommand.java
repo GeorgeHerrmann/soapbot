@@ -20,7 +20,7 @@ public class TestCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
-        CommandWizard wizard = new CommandWizard(manager, "end", event.getMessage().getAuthorAsMember().block());
+        /*CommandWizard wizard = new CommandWizard(manager, "end", event.getMessage().getAuthorAsMember().block());
         manager.sendText("Beginning a wizard for three inputs");
         if (!wizard.ended()) {
             Message message = wizard.step("Input 1:");
@@ -46,7 +46,7 @@ public class TestCommand implements Command {
                 manager.sendText("Listener found: " + message.getContent());
             }
         }
-        manager.sendText("This listener has ended");
+        manager.sendText("This listener has ended");*/
     }
 
     /**

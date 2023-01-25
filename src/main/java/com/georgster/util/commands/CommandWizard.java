@@ -58,8 +58,8 @@ public class CommandWizard {
      * @param step The prompt to send to the user
      * @return The user's response or null if the wizard was ended
      */
-    public Message step(String step) {
-        message = manager.sendText(step);
+    public Message step(String step, String title) {
+        message = manager.sendText(step, title);
         message.addReaction(ReactionEmoji.unicode("❌")).block();
 
         EventDispatcher dispatcher = manager.getEventDispatcher();

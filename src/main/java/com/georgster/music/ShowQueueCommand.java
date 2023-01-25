@@ -7,6 +7,7 @@ import com.georgster.Command;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -46,7 +47,8 @@ public class ShowQueueCommand implements Command {
             if (response.length() >= 1800) {
                 logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
 
-                manager.sendText(response.toString());
+                String[] output = SoapUtility.splitFirst(response.toString());
+                manager.sendText(output[1], output[0]);
                 response = new StringBuilder();
             }
             x++;

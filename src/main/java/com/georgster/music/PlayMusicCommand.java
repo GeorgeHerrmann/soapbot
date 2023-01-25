@@ -7,6 +7,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -84,11 +85,13 @@ public class PlayMusicCommand implements Command {
                     }
                 }
             }
-
-            logger.sendAll();
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            manager.sendText(help());
+            logger.append("\tSending the help message", LogDestination.NONAPI);
+            String[] output = SoapUtility.splitFirst(help());
+            manager.sendText(output[1], output[0]);
+            manager.sendText(output[1], output[2]);
         }
+        logger.sendAll();
     }
 
     /**

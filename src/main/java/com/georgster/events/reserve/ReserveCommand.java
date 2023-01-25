@@ -47,7 +47,8 @@ public class ReserveCommand implements Command {
             if (message.isEmpty()) {
                 logger.append("\tNo arguments found, sending help message", LogDestination.NONAPI);
                 logger.sendAll();
-                manager.sendText(help());
+                String[] output = SoapUtility.splitFirst(help());
+                manager.sendText(output[1], output[0]);
                 return;
             }
 
@@ -64,8 +65,8 @@ public class ReserveCommand implements Command {
                             logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
                             eventManager.updateEvent(reserve);
-                            manager.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier() + 
-                            "\n\t" + reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
+                            manager.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
+                            reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
                         }
                     });
                 } else {
@@ -86,7 +87,8 @@ public class ReserveCommand implements Command {
                     logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
-                manager.sendText(messageString);
+                String[] output = SoapUtility.splitFirst(messageString);
+                manager.sendText(output[1], output[0]);
             }
         } catch (IllegalArgumentException e) {
             logger.append("\tSending an error message", LogDestination.NONAPI);

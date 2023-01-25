@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.georgster.api.ActionWriter;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 
 /**
  * Logs information to {@code LogDestinations} about SOAP Bot's systems.
@@ -124,7 +125,8 @@ public class MultiLogger<T> {
      */
     public void logDiscord(String discord) {
         if (canLog() && !discord.isEmpty()) {
-            GuildManager.sendText(discord, manager.getTextChannel("bot-logs"));
+            String[] output = SoapUtility.splitFirst(discord);
+            GuildManager.sendText(output[1], output[0], manager.getTextChannel("bot-logs"));
         }
     }
 

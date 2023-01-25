@@ -78,7 +78,7 @@ public class PermissionsCommand implements Command {
 
         while (valid) {
             Message response = wizard.step("Which Role would you like to manage? Valid roles are:\n"
-            + permissionsManager.getGroupNames().toString());
+            + permissionsManager.getGroupNames().toString(), "Permission wizard");
             if (response == null) {
                 valid = false;
             } else {
@@ -101,7 +101,7 @@ public class PermissionsCommand implements Command {
             + "add - add a permission to the group\n"
             + "remove - remove a permission from the group\n"
             + "list - list all permissions for the group\n"
-            + "back - go back to the previous menu");
+            + "back - go back to the previous menu", "Permission wizard");
             if (response == null) {
                 valid = false;
             } else {
@@ -126,7 +126,7 @@ public class PermissionsCommand implements Command {
         boolean valid = true;
         while (valid) {
             Message response = wizard.step("What permission would you like to add? Valid permissions are:\n"
-            +   Arrays.toString(PermissibleAction.values()) + "\n or type back to go back");
+            +   Arrays.toString(PermissibleAction.values()) + "\n or type back to go back", "Permission wizard");
             if (response == null) {
                 valid = false;
             } else if (response.getContent().equalsIgnoreCase("back")) {
@@ -150,7 +150,7 @@ public class PermissionsCommand implements Command {
         boolean valid = true;
         while (valid) {
             Message response = wizard.step("What permission would you like to remove? This group's permissions are:\n"
-            +   group.getActions().toString() + "\n or type back to go back");
+            +   group.getActions().toString() + "\n or type back to go back", "Permission wizard");
             if (response == null) {
                 valid = false;
             } else if (response.getContent().equalsIgnoreCase("back")) {

@@ -64,7 +64,8 @@ public class EventCommand implements Command {
                         }
                     }
                     response.append("Type !events [NAME] for more information about a specific event");
-                    manager.sendText(response.toString());
+                    String[] output = SoapUtility.splitFirst(response.toString());
+                    manager.sendText(output[1], output[0]);
                 } else {
                     logger.append("\tThere are no events currently active\n", LogDestination.NONAPI);
                     manager.sendText("There are no events currently active");
@@ -106,7 +107,8 @@ public class EventCommand implements Command {
                     }
                     response.append("\nReserved users:\n");
                     reserve.getReservedUsers().forEach(user -> response.append("\t- " + manager.getMember(user).getUsername() + "\n"));
-                    manager.sendText(response.toString());
+                    String[] output = SoapUtility.splitFirst(response.toString());
+                    manager.sendText(output[1], output[0]);
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }

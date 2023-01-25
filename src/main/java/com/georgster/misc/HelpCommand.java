@@ -9,6 +9,7 @@ import com.georgster.control.CommandRegistry;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 
 /**
@@ -54,13 +55,12 @@ public class HelpCommand implements Command {
             } else {
                 if (!command.getAliases().isEmpty()) {
                     response.append(command.getAliases().get(0) + " ");
-                } else {
-                    response.append("No Aliases");
                 }
             }
         }
         logger.append("Responding to a !help command request", LogDestination.API);
-        manager.sendText(response.toString());
+        String[] output = SoapUtility.splitFirst(response.toString());
+        manager.sendText(output[1], output[0]);
 
         logger.sendAll();
     }
