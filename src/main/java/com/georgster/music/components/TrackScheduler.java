@@ -2,6 +2,7 @@ package com.georgster.music.components;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -12,6 +13,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.voice.VoiceConnection;
 
 /**
@@ -178,6 +180,6 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      * @param message the message to send
      */
     private void sendMessageInChannel(String message) {
-        channel.createMessage(message).block();
+        GuildManager.sendText(message, "Music", (TextChannel) channel);
     }
 }
