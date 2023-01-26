@@ -68,15 +68,9 @@ public final class SoapClientManager {
      * </ul>
      */
     public void listenToEvents() {
-        /*
-         * The manager's distributeClient method will handle this event.
-         */
         dispatcher.on(GuildCreateEvent.class)
         .subscribe(this::distributeClient); //Executes onGuildCreate when a GuildCreateEvent is fired
-        /* 
-         * A MessageCreateEvent is fired each time a message is sent in a server and channel SOAP Bot has access to.
-         * We will distribute the event to the associated client.
-         */
+
         dispatcher.on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
         .filter(message -> message.getMessage().getContent().startsWith("!"))

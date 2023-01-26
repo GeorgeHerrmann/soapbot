@@ -178,7 +178,9 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      * This method is used to allow the scheduler to send messages to Discord's API on a separate thread.
      * 
      * @param message the message to send
+     * @deprecated use {@link GuildManager#sendText(String, String, TextChannel)}
      */
+    @Deprecated
     private void sendMessageInChannel(String message) {
         GuildManager.sendText(message, "Music", (TextChannel) channel);
     }
