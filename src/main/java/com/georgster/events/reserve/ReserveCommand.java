@@ -87,8 +87,7 @@ public class ReserveCommand implements Command {
                     logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
-                String[] output = SoapUtility.splitFirst(messageString);
-                manager.sendText(output[1], output[0]);
+                manager.sendText(messageString, reserve.getIdentifier() + " event created");
             }
         } catch (IllegalArgumentException e) {
             logger.append("\tSending an error message", LogDestination.NONAPI);
