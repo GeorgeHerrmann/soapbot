@@ -40,9 +40,14 @@ public class SoapUtility {
                     hour = Integer.parseInt(time.substring(0, time.indexOf("PM")));
                     hour = Integer.parseInt(time.substring(0, time.indexOf("PM"))) == 12 ? hour : hour + 12;
                     minute = 0;
-                } else if (time.contains("AM") && Integer.parseInt(time.substring(0, time.indexOf("AM"))) == 12) {
-                    hour = 0;
-                    minute = 0;
+                } else if (time.contains("AM")) {
+                    if (Integer.parseInt(time.substring(0, time.indexOf("AM"))) == 12) {
+                        hour = 0;
+                        minute = 0;
+                    } else {
+                        hour = Integer.parseInt(time.substring(0, time.indexOf("AM")));
+                        minute = 0;
+                    }
                 } else {
                     throw new IllegalArgumentException("Does not specify AM/PM time");
                 }
