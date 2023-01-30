@@ -23,6 +23,8 @@ import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissionsCommand;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * The CommandRegistry is responsible for handling all of SOAP Bot's commands.
@@ -77,6 +79,20 @@ public class CommandRegistry {
                 manager.setActiveChannel(event.getMessage().getChannel().block());
                 SoapUtility.runDaemon(() -> command.execute(event, manager));
             }
+        });
+    }
+
+    public void registerGlobalCommands() {
+        long appId = pipeline.getRestClient().getApplicationId().block();
+        long guildId = pipeline.getGuild().getId().asLong();
+
+        commands.forEach(command -> {
+            ApplicationCommandRequest cmd = ApplicationCommandRequest.builder()
+                .name(command.getAliases().get(0))
+                .description(SoapUtility.splitFirst(command.help())[0])
+                .build();
+
+            pipeline.getRestClient().getApplicationService().createGuildApplicationCommand(appId, guildId, cmd).block();
         });
     }
 
