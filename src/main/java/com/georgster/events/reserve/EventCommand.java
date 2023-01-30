@@ -38,8 +38,7 @@ public class EventCommand implements Command {
      */
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<EventCommand> logger = new MultiLogger<>(manager, EventCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n",
-        LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping").withRules("X I").build();
         try { //Checks to see the command if valid
@@ -79,7 +78,7 @@ public class EventCommand implements Command {
 
                     StringBuilder response = new StringBuilder();
                     reserve.getReservedUsers().forEach(user -> response.append(manager.getMember(user).getMention() + " "));
-                    manager.sendText(response.toString());
+                    manager.sendPlainText(response.toString()); //If sendText is used, the embed will prevent users from being mentioned
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }

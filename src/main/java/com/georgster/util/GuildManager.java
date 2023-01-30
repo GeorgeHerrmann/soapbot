@@ -118,6 +118,24 @@ public class GuildManager {
     }
 
     /**
+     * Sends a text message with only content to the active channel.
+     * 
+     * @param text the message to send
+     * @return the message that was sent
+     * @throws IllegalStateException if the active channel is not a text channel
+     */
+    public Message sendPlainText(String text) throws IllegalStateException {
+        if (activeChannel != null) {
+            try {
+                return ((TextChannel) activeChannel).createMessage(text).block();
+            } catch (NullPointerException e) {
+                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sends a text message to the active channel with basic embed formatting.
      * 
      * @param text the message to send
@@ -173,6 +191,20 @@ public class GuildManager {
             } catch (NullPointerException e) {
                 throw new IllegalStateException("There was an issue sending the message to the active channel.");
             }
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the provided text channel with only content.
+     * 
+     * @param text the message to send
+     * @param channel the channel to send the message to
+     * @return the message that was sent
+     */
+    public static Message sendPlainText(String text, TextChannel channel) {
+        if (channel != null) {
+            return channel.createMessage(text).block();
         }
         return null;
     }
