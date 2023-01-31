@@ -10,10 +10,15 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class MessageCommand implements Command {
+
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
 
     public void execute(MessageCreateEvent event, GuildManager manager) {
         MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
@@ -43,6 +48,24 @@ public class MessageCommand implements Command {
             manager.sendText(output[1], output[0]);
         }
         logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+            .name(getAliases().get(0))
+            .description("Sends a private message to a user")
+            .addOption(ApplicationCommandOptionData.builder()
+                .name("user")
+                .description("The user to send the message to")
+                .type(ApplicationCommandOption.Type.USER.getValue())
+                .required(true)
+                .build())
+            .build();
     }
 
     /**

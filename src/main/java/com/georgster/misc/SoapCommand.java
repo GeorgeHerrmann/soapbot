@@ -11,11 +11,13 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A SoapCommand is represents the actions following a "!soapbot" command.
  */
 public class SoapCommand implements Command {
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * {@inheritDoc}
@@ -62,6 +64,15 @@ public class SoapCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("soapbot", "version", "info", "about", "bot");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Show information about SOAP Bot")
+                .build();
     }
 
     /**

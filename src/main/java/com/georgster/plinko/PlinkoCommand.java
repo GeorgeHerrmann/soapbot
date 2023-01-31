@@ -9,6 +9,7 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the actions following the execution of a "!plinko" command.
@@ -28,6 +29,7 @@ public class PlinkoCommand implements Command {
      * 
      * Note: If you are reading this the full Plinko features are mid development.
      */
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     private static final String PATTERN = "1|R 1|O";
 
     /**
@@ -72,6 +74,16 @@ public class PlinkoCommand implements Command {
     public List<String> getAliases() {
         return List.of("plinko");
     }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Description test")
+                .build();
+    }
+
     /**
      * {@inheritDoc}
      */

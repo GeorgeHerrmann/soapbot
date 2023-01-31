@@ -14,6 +14,10 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the command for managing events.
@@ -22,6 +26,7 @@ public class EventCommand implements Command {
     private static final String PATTERN = "V|R 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -132,6 +137,31 @@ public class EventCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("events", "event");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Shows information about events")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("event")
+                        .description("The event to show information about")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                            .name("Mention")
+                            .value("Mention all users that have reserved to an event")
+                            .build())
+                        .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("list")
+                        .description("Show a list of all events")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
+                .build();
     }
 
     /**

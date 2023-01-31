@@ -10,6 +10,7 @@ import com.georgster.util.GuildManager;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.TextChannel;
 
@@ -39,6 +40,7 @@ public final class SoapClient {
         pipeline.setEventManager(eventManager);
         pipeline.setPermissionsManager(permissionsManager);
         registry = new CommandRegistry(pipeline);
+        registry.registerGlobalCommands();
     }
 
     /**
@@ -88,6 +90,10 @@ public final class SoapClient {
     protected void onMessageCreate(MessageCreateEvent event) {
         final String content = event.getMessage().getContent();
         if (content.equals(content.toUpperCase())) GuildManager.sendText("Please stop yelling at me :(", ((TextChannel) event.getMessage().getChannel().block()));
+        registry.getAndExecute(event);
+    }
+
+    protected void onChatInputInteraction(ChatInputInteractionEvent event) {
         registry.getAndExecute(event);
     }
 

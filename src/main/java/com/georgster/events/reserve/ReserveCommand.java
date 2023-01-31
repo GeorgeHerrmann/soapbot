@@ -13,7 +13,10 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the command for reserving to and creating events.
@@ -22,6 +25,7 @@ public class ReserveCommand implements Command {
     private static final String PATTERN = "V|R 1|O 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -161,6 +165,21 @@ public class ReserveCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("reserve", "res", "r");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Reserve to or create a new reserve event")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("event")
+                        .description("The name of the event")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
+                .build();
     }
 
     /**

@@ -9,6 +9,7 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A PongCommand simply will return all instances of a user's message of "ping"
@@ -17,7 +18,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  * @implements {@code Command} the general definiton for a SoapBot command.
  */
 public class PongCommand implements Command {
-
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     String msg;
 
     /**
@@ -61,6 +62,15 @@ public class PongCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("ping");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Responds with pong! for each 'ping' in your message")
+                .build();
     }
 
     /**

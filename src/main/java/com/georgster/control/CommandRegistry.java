@@ -22,8 +22,8 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissionsCommand;
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -82,17 +82,32 @@ public class CommandRegistry {
         });
     }
 
+    public void getAndExecute(ChatInputInteractionEvent event) {
+        String attemptedCommand = event.getCommandName().toLowerCase();
+        commands.forEach(command -> {
+            if (command.getAliases().contains(attemptedCommand)) {
+                GuildManager manager;
+                if (command.needsDispatcher()) {
+                    manager = new GuildManager(pipeline.getGuild(), pipeline.getDispatcher());
+                } else {
+                    manager = new GuildManager(pipeline.getGuild());
+                }
+                manager.setActiveChannel(event.getInteraction().getChannel().block());
+                event.reply("Registry recieved commmand").block();
+            }
+        });
+    }
+
     public void registerGlobalCommands() {
         long appId = pipeline.getRestClient().getApplicationId().block();
         long guildId = pipeline.getGuild().getId().asLong();
 
         commands.forEach(command -> {
-            ApplicationCommandRequest cmd = ApplicationCommandRequest.builder()
-                .name(command.getAliases().get(0))
-                .description(SoapUtility.splitFirst(command.help())[0])
-                .build();
+            ApplicationCommandRequest cmd = command.getCommandApplicationInformation();
 
-            pipeline.getRestClient().getApplicationService().createGuildApplicationCommand(appId, guildId, cmd).block();
+            if (cmd != null) {
+                pipeline.getRestClient().getApplicationService().createGuildApplicationCommand(appId, guildId, cmd).block();
+            }
         });
     }
 

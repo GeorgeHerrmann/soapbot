@@ -15,6 +15,7 @@ import com.georgster.util.commands.ParseBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 //!permissions list - list of all groups
 //!permissions [group] - list of all permissions for a group
@@ -22,6 +23,7 @@ import discord4j.core.object.entity.Message;
 public class PermissionsCommand implements Command {
     private static final String PATTERN = "V|R";
 
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     private final PermissionsManager permissionsManager;
 
     public PermissionsCommand(PermissionsManager permissionsManager) {
@@ -176,6 +178,15 @@ public class PermissionsCommand implements Command {
 
     public List<String> getAliases() {
         return List.of("permissions", "perms");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Description test")
+                .build();
     }
 
     public String help() {

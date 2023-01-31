@@ -11,12 +11,13 @@ import com.georgster.util.SoapUtility;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the bot's actions following the !queue command.
  */
 public class ShowQueueCommand implements Command {
-
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     private final LinkedBlockingQueue<AudioTrack> queue;
 
     /**
@@ -70,6 +71,15 @@ public class ShowQueueCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("queue", "q", "songs");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Description test")
+                .build();
     }
 
     /**

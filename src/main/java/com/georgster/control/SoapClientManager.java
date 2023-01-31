@@ -11,6 +11,7 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
@@ -74,7 +75,10 @@ public final class SoapClientManager {
         dispatcher.on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
         .filter(message -> message.getMessage().getContent().startsWith("!"))
-        .subscribe(event -> clients.get(event.getGuildId().get()).onMessageCreate(event)); //Executes onMessageCreate when a MessageCreateEvent is fired
+        .subscribe(event -> clients.get(event.getGuild().block().getId()).onMessageCreate(event)); //Executes onMessageCreate when a MessageCreateEvent is fired
+
+        dispatcher.on(ChatInputInteractionEvent.class)
+        .subscribe(event -> clients.get(event.getInteraction().getGuildId().get()).onChatInputInteraction(event));
     }
 
     /**

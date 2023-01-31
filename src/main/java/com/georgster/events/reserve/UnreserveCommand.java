@@ -11,6 +11,9 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the command for unreserving to a {@code ReserveEvent}.
@@ -19,6 +22,7 @@ public class UnreserveCommand implements Command {
     private static final String PATTERN = "V|R";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -77,6 +81,21 @@ public class UnreserveCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("unreserve", "ur", "unres");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Unreserve from an event you have reserved to")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("event")
+                        .description("The name of the event")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
+                .build();
     }
 
     /**

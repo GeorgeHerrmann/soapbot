@@ -14,8 +14,11 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
 
@@ -29,6 +32,8 @@ public class PlayMusicCommand implements Command {
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
     private static final String PATTERN = "1|R";
+
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * Plays music in a discord channel.
@@ -121,6 +126,21 @@ public class PlayMusicCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("play");
+    }
+
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Play music in a discord channel")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("url")
+                        .description("The url of the audio to play")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
+                .build();
     }
 
     /**

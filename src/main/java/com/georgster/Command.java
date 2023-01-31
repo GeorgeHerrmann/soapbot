@@ -5,6 +5,7 @@ import java.util.List;
 import com.georgster.util.GuildManager;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A SoapBot Command will be executed on any firing of a 
@@ -29,6 +30,14 @@ public interface Command {
      * @return A list of all aliases for a {@code Command}.
      */
     public List<String> getAliases();
+
+    /**
+     * Returns the {@code ApplicationCommandRequest} for a {@code Command}, which is used to
+     * register the command with Discord.
+     * 
+     * @return The {@code ApplicationCommandRequest} for a {@code Command}.
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation();
 
     /**
      * Returns whether or not a {@code Command} needs the {@code SoapClientManager's}
