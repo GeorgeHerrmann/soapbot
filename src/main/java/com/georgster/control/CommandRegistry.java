@@ -87,13 +87,12 @@ public class CommandRegistry {
 
     public void registerGlobalCommands() {
         long appId = pipeline.getRestClient().getApplicationId().block();
-        long guildId = pipeline.getGuild().getId().asLong();
 
         commands.forEach(command -> {
             ApplicationCommandRequest cmd = command.getCommandApplicationInformation();
 
             if (cmd != null) {
-                pipeline.getRestClient().getApplicationService().createGuildApplicationCommand(appId, guildId, cmd).block();
+                pipeline.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, cmd).block();
             }
         });
     }

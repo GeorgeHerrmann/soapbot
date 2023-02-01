@@ -18,7 +18,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class SkipMusicCommand implements Command {
 
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
 
@@ -80,7 +80,7 @@ public class SkipMusicCommand implements Command {
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
-                .description("Description test")
+                .description("skip the currently playing track or all tracks in the queue")
                 .build();
     }
 
