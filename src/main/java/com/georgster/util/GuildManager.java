@@ -6,6 +6,7 @@ import com.georgster.control.SoapEventManager;
 import com.georgster.profile.ProfileHandler;
 
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -16,6 +17,7 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 
@@ -30,6 +32,7 @@ public class GuildManager {
     private Channel activeChannel; //The channel that is currently active
     private SoapEventManager eventManager; //The event manager for this guild
     private EventDispatcher dispatcher; //The event dispatcher for this guild
+    private ChatInputInteractionEvent activeInteraction; //The active interaction
 
     /**
      * Creates a new GuildManager for the given guild.
@@ -109,6 +112,15 @@ public class GuildManager {
     }
 
     /**
+     * Sets the interaction event that this manager is actively performing actions for.
+     * 
+     * @param interaction the new active interaction event
+     */
+    public void setActiveInteraction(ChatInputInteractionEvent interaction) {
+        activeInteraction = interaction;
+    }
+
+    /**
      * Returns the active channel for this manager with basic embed formatting.
      * 
      * @return the channel that is currently active
@@ -118,18 +130,46 @@ public class GuildManager {
     }
 
     /**
+     * Returns the active interaction event for this manager.
+     * 
+     * @return the interaction that is currently active
+     */
+    public ChatInputInteractionEvent getActiveInteraction() {
+        return activeInteraction;
+    }
+
+    /**
+     * Kills the active interaction event for this manager, setting it to null.
+     */
+    public void killActiveInteraction() {
+        activeInteraction = null;
+    }
+
+    /**
      * Sends a text message with only content to the active channel.
+     * 
      * 
      * @param text the message to send
      * @return the message that was sent
      * @throws IllegalStateException if the active channel is not a text channel
      */
     public Message sendPlainText(String text) throws IllegalStateException {
-        if (activeChannel != null) {
+        if (activeInteraction != null) {
             try {
-                return ((TextChannel) activeChannel).createMessage(text).block();
-            } catch (NullPointerException e) {
-                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                activeInteraction.reply(text).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    return ((TextChannel) activeChannel).createMessage(text).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
             }
         }
         return null;
@@ -142,13 +182,26 @@ public class GuildManager {
      * @throws IllegalStateException if the active channel is not a text channel
      */
     public Message sendText(String text) throws IllegalStateException {
-        if (activeChannel != null) {
+        if (activeInteraction != null) {
             try {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
-                MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
-                return ((TextChannel) activeChannel).createMessage(spec).block();
-            } catch (NullPointerException e) {
-                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                activeInteraction.reply(spec).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                    return ((TextChannel) activeChannel).createMessage(spec).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
             }
         }
         return null;
@@ -162,13 +215,26 @@ public class GuildManager {
      * @throws IllegalStateException if the active channel is not a text channel
      */
     public Message sendText(String text, String title) throws IllegalStateException {
-        if (activeChannel != null) {
+        if (activeInteraction != null) {
             try {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-                MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
-                return ((TextChannel) activeChannel).createMessage(spec).block();
-            } catch (NullPointerException e) {
-                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                activeInteraction.reply(spec).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                    return ((TextChannel) activeChannel).createMessage(spec).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
             }
         }
         return null;
@@ -183,13 +249,26 @@ public class GuildManager {
      * @throws IllegalStateException if the active channel is not a text channel
      */
     public Message sendText(String text, String title, LayoutComponent component) throws IllegalStateException {
-        if (activeChannel != null) {
+        if (activeInteraction != null) {
             try {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-                MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(component);
-                return ((TextChannel) activeChannel).createMessage(spec).block();
-            } catch (NullPointerException e) {
-                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addComponent(component).build();
+                activeInteraction.reply(spec).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                    return ((TextChannel) activeChannel).createMessage(spec).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
             }
         }
         return null;

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
@@ -22,8 +23,8 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissionsCommand;
 
+import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -66,34 +67,20 @@ public class CommandRegistry {
      * 
      * @param event the MessageCreateEvent that prompted this call.
      */
-    public void getAndExecute(MessageCreateEvent event) {
-        String attemptedCommand = event.getMessage().getContent().split(" ")[0].substring(1).toLowerCase();
+    public void getAndExecute(Event event) {
+        CommandPipeline commandPipeline = new CommandPipeline(event); //Will be used to transport and extract data from the event.
+        String attemptedCommand = commandPipeline.getCommandName().toLowerCase();
         commands.forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
                 GuildManager manager;
                 if (command.needsDispatcher()) {
-                    manager = new GuildManager(event.getGuild().block(), pipeline.getDispatcher());
+                    manager = new GuildManager(commandPipeline.getGuild(), pipeline.getDispatcher());
                 } else {
-                    manager = new GuildManager(event.getGuild().block());
+                    manager = new GuildManager(commandPipeline.getGuild());
                 }
-                manager.setActiveChannel(event.getMessage().getChannel().block());
-                SoapUtility.runDaemon(() -> command.execute(event, manager));
-            }
-        });
-    }
-
-    public void getAndExecute(ChatInputInteractionEvent event) {
-        String attemptedCommand = event.getCommandName().toLowerCase();
-        commands.forEach(command -> {
-            if (command.getAliases().contains(attemptedCommand)) {
-                GuildManager manager;
-                if (command.needsDispatcher()) {
-                    manager = new GuildManager(pipeline.getGuild(), pipeline.getDispatcher());
-                } else {
-                    manager = new GuildManager(pipeline.getGuild());
-                }
-                manager.setActiveChannel(event.getInteraction().getChannel().block());
-                event.reply("Registry recieved commmand").block();
+                manager.setActiveChannel(commandPipeline.getChannel());
+                manager.setActiveInteraction((ChatInputInteractionEvent)event);
+                SoapUtility.runDaemon(() -> command.execute(commandPipeline, manager));
             }
         });
     }

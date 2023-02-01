@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.SoapEventManager;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
@@ -13,9 +14,7 @@ import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -26,7 +25,7 @@ public class EventCommand implements Command {
     private static final String PATTERN = "V|R 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -41,13 +40,13 @@ public class EventCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<EventCommand> logger = new MultiLogger<>(manager, EventCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping").withRules("X I").build();
         try { //Checks to see the command if valid
-            parser.parse(event.getMessage().getContent().toLowerCase());
+            parser.parse(pipeline.getFormattedMessage().toLowerCase());
             logger.append("\tArguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
 
             if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
@@ -148,16 +147,6 @@ public class EventCommand implements Command {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("event")
                         .description("The event to show information about")
-                        .type(ApplicationCommandOption.Type.STRING.getValue())
-                        .required(false)
-                        .addChoice(ApplicationCommandOptionChoiceData.builder()
-                            .name("Mention")
-                            .value("Mention all users that have reserved to an event")
-                            .build())
-                        .build())
-                .addOption(ApplicationCommandOptionData.builder()
-                        .name("list")
-                        .description("Show a list of all events")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false)
                         .build())

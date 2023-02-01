@@ -1,6 +1,5 @@
 package com.georgster.misc;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -11,6 +10,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.CommandRegistry;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
@@ -24,7 +24,7 @@ public class HelpCommand implements Command {
 
     private static final String PATTERN = "1|R"; //A regex pattern to parse the contents of a !help command request
 
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private CommandRegistry register; //SoapBot's Command Registry
 
     /**
@@ -39,14 +39,14 @@ public class HelpCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<HelpCommand> logger = new MultiLogger<>(manager, HelpCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new CommandParser(PATTERN);
         String arg;
         try {
-            parser.parse(event.getMessage().getContent());
+            parser.parse(pipeline.getFormattedMessage().toLowerCase());
             logger.append("\tArguments found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
             arg = parser.get(0).toLowerCase();
         } catch (Exception e) {
@@ -105,12 +105,12 @@ public class HelpCommand implements Command {
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false);
 
-        register.getCommands().forEach(command -> {
+        register.getCommands().forEach(command -> 
             temp.addChoice(ApplicationCommandOptionChoiceData.builder()
                     .name(command.getAliases().get(0))
                     .value(command.getAliases().get(0))
-                    .build());
-        });
+                    .build())
+        );
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))

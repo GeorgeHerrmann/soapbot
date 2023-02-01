@@ -6,23 +6,23 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A SoapCommand is represents the actions following a "!soapbot" command.
  */
 public class SoapCommand implements Command {
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<SoapCommand> logger = new MultiLogger<>(manager, SoapCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 

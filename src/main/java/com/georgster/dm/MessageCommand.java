@@ -4,38 +4,36 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class MessageCommand implements Command {
 
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**",
         LogDestination.NONAPI, LogDestination.API);
 
-        Message message = event.getMessage();
-        List<String> contents = Arrays.asList(message.getContent().split(" "));
+        List<String> contents = Arrays.asList(pipeline.getFormattedMessage());
 
         StringBuilder response = new StringBuilder();
         for (String i : contents) {
-            if (!i.equals("!dm") && !i.contains(("@"))) {
+            if (!i.contains("dm") && !i.contains(("@"))) {
                 response.append(i + " ");
             }
         }
-        if (!message.getUserMentions().isEmpty()) {
-            for (User user : message.getUserMentions()) {
+        if (!pipeline.getPresentUsers().isEmpty()) {
+            for (User user : pipeline.getPresentUsers()) {
                 logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
                 LogDestination.NONAPI);
 
@@ -63,6 +61,12 @@ public class MessageCommand implements Command {
                 .name("user")
                 .description("The user to send the message to")
                 .type(ApplicationCommandOption.Type.USER.getValue())
+                .required(true)
+                .build())
+            .addOption(ApplicationCommandOptionData.builder()
+                .name("message")
+                .description("The message to send")
+                .type(ApplicationCommandOption.Type.STRING.getValue())
                 .required(true)
                 .build())
             .build();

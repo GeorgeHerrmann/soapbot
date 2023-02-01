@@ -1,5 +1,4 @@
-2.013:
-  - Fixed an issue preventing the time converter from recognizing times in the AM format after 12am
-
-2.014:
-  - Fixed an issue preventing users from being properly mentioned on !event [name] mention
+2.100
+  - Registered all commands with Discord, allowing the use of slash commands
+    SOAP Bot commands support command inputs with !command or with /command
+    if using the /command format, command options will appear

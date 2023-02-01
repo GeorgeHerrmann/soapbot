@@ -2,9 +2,9 @@ package com.georgster;
 
 import java.util.List;
 
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.util.GuildManager;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -21,7 +21,7 @@ public interface Command {
      * information about the guild the command was executed in.
      * @param event The event of the message a user typed to active a {@code Command}.
      */
-    void execute(MessageCreateEvent event, GuildManager manager);
+    void execute(CommandPipeline pipeline, GuildManager manager);
 
     /**
      * Returns a list of all aliases for a {@code Command}. The first alias in the list is the

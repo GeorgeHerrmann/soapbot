@@ -3,10 +3,10 @@ package com.georgster.test;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandWizard;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -15,13 +15,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements Command {
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private static final boolean ACTIVE = true;
 
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         /*CommandWizard wizard = new CommandWizard(manager, "end", event.getMessage().getAuthorAsMember().block());
         manager.sendText("Beginning a wizard for three inputs");
         if (!wizard.ended()) {

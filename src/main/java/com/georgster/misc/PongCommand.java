@@ -3,12 +3,12 @@ package com.georgster.misc;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -18,7 +18,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * @implements {@code Command} the general definiton for a SoapBot command.
  */
 public class PongCommand implements Command {
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     String msg;
 
     /**
@@ -32,11 +32,11 @@ public class PongCommand implements Command {
      * {@inheritDoc}
      */
     @Override
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
-        List<String> args = CommandParser.parseGeneric(event.getMessage().getContent());
+        List<String> args = CommandParser.parseGeneric(pipeline.getFormattedMessage().toLowerCase());
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
         while(args.contains(msg)) {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.PermissionsManager;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
@@ -12,7 +13,6 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.CommandWizard;
 import com.georgster.util.commands.ParseBuilder;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -23,21 +23,21 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class PermissionsCommand implements Command {
     private static final String PATTERN = "V|R";
 
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private final PermissionsManager permissionsManager;
 
     public PermissionsCommand(PermissionsManager permissionsManager) {
         this.permissionsManager = permissionsManager;
     }
 
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<PermissionsCommand> logger = new MultiLogger<>(manager, PermissionsCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "manage").build();
 
         try {
-            parser.parse(event.getMessage().getContent().toLowerCase());
+            parser.parse(pipeline.getFormattedMessage());
             logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
             if (parser.get(0).equals("list")) {
@@ -46,7 +46,7 @@ public class PermissionsCommand implements Command {
                 response.append("Use !permissions [group] to see the permissions for a group");
                 manager.sendText(response.toString());
             } else if (parser.get(0).equals("manage")) {
-                Member member = event.getMessage().getAuthorAsMember().block();
+                Member member = pipeline.getAuthorAsMember();
                 if (permissionsManager.hasPermission(member, PermissibleAction.MANAGEPERMISSIONS)) {
                     managePermissions(member, manager);
                 } else {
@@ -185,7 +185,7 @@ public class PermissionsCommand implements Command {
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
-                .description("Description test")
+                .description("Control the permissions for SOAP Bot")
                 .build();
     }
 
