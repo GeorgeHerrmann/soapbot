@@ -1,5 +1,6 @@
 package com.georgster.misc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.Command;
@@ -7,8 +8,9 @@ import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
-import com.georgster.util.commands.CommandParser;
 
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -18,7 +20,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * @implements {@code Command} the general definiton for a SoapBot command.
  */
 public class PongCommand implements Command {
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
     String msg;
 
     /**
@@ -36,7 +38,7 @@ public class PongCommand implements Command {
         MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
-        List<String> args = CommandParser.parseGeneric(pipeline.getFormattedMessage().toLowerCase());
+        List<String> args = new ArrayList<>(List.of(pipeline.getFormattedMessage().toLowerCase().split(" ")));
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
         while(args.contains(msg)) {
@@ -70,6 +72,12 @@ public class PongCommand implements Command {
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Responds with pong! for each 'ping' in your message")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("pings")
+                        .description("Additional pings to respond to")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
                 .build();
     }
 
