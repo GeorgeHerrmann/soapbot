@@ -177,7 +177,8 @@ public class CommandPipeline {
         if (event instanceof MessageCreateEvent) {
             return ((MessageCreateEvent) event).getMessage().getAuthorAsMember().block();
         } else if (event instanceof ChatInputInteractionEvent) {
-            return ((ChatInputInteractionEvent) event).getInteraction().getMember().get();
+            User temp = ((ChatInputInteractionEvent) event).getInteraction().getUser();
+            return (Member) temp;
         } else {
             return null;
         }
