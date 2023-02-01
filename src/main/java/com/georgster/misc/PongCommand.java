@@ -20,7 +20,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * @implements {@code Command} the general definiton for a SoapBot command.
  */
 public class PongCommand implements Command {
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     String msg;
 
     /**
@@ -38,7 +38,8 @@ public class PongCommand implements Command {
         MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
-        List<String> args = new ArrayList<>(List.of(pipeline.getFormattedMessage().toLowerCase().split(" ")));
+        List<String> args = new ArrayList<>(List.of(pipeline.getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
+        System.out.println(args.toString());
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
         while(args.contains(msg)) {

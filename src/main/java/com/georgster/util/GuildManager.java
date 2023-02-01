@@ -229,7 +229,7 @@ public class GuildManager {
         } else {
             if (activeChannel != null) {
                 try {
-                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
                     MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
                     return ((TextChannel) activeChannel).createMessage(spec).block();
                 } catch (NullPointerException e) {
@@ -263,8 +263,8 @@ public class GuildManager {
         } else {
             if (activeChannel != null) {
                 try {
-                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
-                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(component);
                     return ((TextChannel) activeChannel).createMessage(spec).block();
                 } catch (NullPointerException e) {
                     throw new IllegalStateException("There was an issue sending the message to the active channel.");
