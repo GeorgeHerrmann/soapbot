@@ -44,7 +44,6 @@ public class PlinkoCommand implements Command {
 
         CommandParser parser = new CommandParser(PATTERN);
         try {
-            System.out.println(pipeline.getFormattedMessage());
             parser.parse(pipeline.getFormattedMessage().toLowerCase());
 
             logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
