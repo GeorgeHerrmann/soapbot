@@ -77,7 +77,7 @@ public class CommandPipeline {
         if (event instanceof ChatInputInteractionEvent) {
             return ((ChatInputInteractionEvent) event).getCommandName();
         } else if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getContent().split(" ")[0];
+            return ((MessageCreateEvent) event).getMessage().getContent().split(" ")[0].replace("!", "");
         } else {
             return null;
         }
@@ -181,6 +181,15 @@ public class CommandPipeline {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returns whether this pipeline's event is a {@code ChatInteractionEvent}.
+     * 
+     * @return whether this pipeline's event is a {@code ChatInteractionEvent}
+     */
+    public boolean isChatInteraction() {
+        return event instanceof ChatInputInteractionEvent;
     }
 
 }

@@ -79,7 +79,9 @@ public class CommandRegistry {
                     manager = new GuildManager(commandPipeline.getGuild());
                 }
                 manager.setActiveChannel(commandPipeline.getChannel());
-                manager.setActiveInteraction((ChatInputInteractionEvent)event);
+                if (commandPipeline.isChatInteraction()) {
+                    manager.setActiveInteraction((ChatInputInteractionEvent)event);
+                }
                 SoapUtility.runDaemon(() -> command.execute(commandPipeline, manager));
             }
         });
