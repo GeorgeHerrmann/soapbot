@@ -18,7 +18,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class SkipMusicCommand implements Command {
 
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
 

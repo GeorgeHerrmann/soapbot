@@ -33,7 +33,7 @@ public class PlayMusicCommand implements Command {
     private final TrackScheduler scheduler;
     private static final String PATTERN = "1|R";
 
-    private boolean needsNewRegistration = true; // Set to true only if the command registry should send a new command definition to Discord
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * Plays music in a discord channel.
