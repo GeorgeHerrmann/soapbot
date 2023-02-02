@@ -24,6 +24,7 @@ import discord4j.core.object.entity.channel.Channel;
 public class CommandPipeline {
     
     private final Event event; // The event that triggered the creation of this pipeline
+    private Member member; // The member that triggered the event
 
     /**
      * Creates a new CommandPipeline with the given {@code Event}.
@@ -177,8 +178,8 @@ public class CommandPipeline {
         if (event instanceof MessageCreateEvent) {
             return ((MessageCreateEvent) event).getMessage().getAuthorAsMember().block();
         } else if (event instanceof ChatInputInteractionEvent) {
-            User temp = ((ChatInputInteractionEvent) event).getInteraction().getUser();
-            return (Member) temp;
+            ((ChatInputInteractionEvent) event).getInteraction().getMember().ifPresent(mem -> member = mem);
+            return member;
         } else {
             return null;
         }
