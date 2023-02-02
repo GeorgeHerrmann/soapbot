@@ -164,6 +164,12 @@ public class CommandPipeline {
         }
     }
 
+    /**
+     * Attempts to get the author of the event as an {@code Optional}.
+     * 
+     * @return an {@code Optional} containing the author of the event,
+     *        or an empty {@code Optional} if the event does not have an author.
+     */
     public Optional<User> getAuthorOptionally() {
         if (event instanceof MessageCreateEvent) {
             return ((MessageCreateEvent) event).getMessage().getAuthor();
@@ -174,6 +180,12 @@ public class CommandPipeline {
         }
     }
 
+    /**
+     * Attempts to get the author of the event as a {@code Member}.
+     * 
+     * @return the author of the event as a {@code Member},
+     *        or {@code null} if the event does not have an author.
+     */
     public Member getAuthorAsMember() {
         if (event instanceof MessageCreateEvent) {
             return ((MessageCreateEvent) event).getMessage().getAuthorAsMember().block();

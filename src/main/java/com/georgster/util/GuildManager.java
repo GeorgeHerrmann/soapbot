@@ -113,6 +113,8 @@ public class GuildManager {
 
     /**
      * Sets the interaction event that this manager is actively performing actions for.
+     * If there is an interaction active, the manager will reply to the interaction instead
+     * of sending a message to the active channel on {@link #sendText(String)}.
      * 
      * @param interaction the new active interaction event
      */

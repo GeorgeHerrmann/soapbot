@@ -87,13 +87,18 @@ public class CommandRegistry {
         });
     }
 
+    /**
+     * Registers all of SOAP Bot's pre-defined commands as global commands to Discord
+     * if the command has a valid ApplicationCommandRequest, which they will if
+     * the command states it needs a new registration.
+     */
     public void registerGlobalCommands() {
         long appId = pipeline.getRestClient().getApplicationId().block();
 
         commands.forEach(command -> {
             ApplicationCommandRequest cmd = command.getCommandApplicationInformation();
 
-            if (cmd != null) {
+            if (cmd != null) { //If the command doesn't want to be registered to discord, it will return null.
                 pipeline.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, cmd).block();
             }
         });
