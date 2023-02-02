@@ -14,7 +14,7 @@ import reactor.core.Disposable;
  * A wizard that allows for SOAP Bot to ask a user for a series of inputs.
  */
 public class CommandWizard {
-    private static final int TIMEOUT_TIME = 200; // will wait 20s for a response
+    private static final int TIMEOUT_TIME = 300; // will wait 30s for a response
 
     private Message message; // The most recent message sent by the user in the wizard
     private Member caller; // The user who called the wizard
@@ -27,7 +27,7 @@ public class CommandWizard {
      * ends when the given string is sent. The guild manager must have an
      * {@link GuildManager#getEventDispatcher() event dispatcher} attached
      * to it by the {@code SoapClient}. Therefore, any calling command must
-     * declare it has a wizard feature with {@link com.georgster.Command#hasWizard()}.
+     * declare it needs the EventDispatcher with {@link com.georgster.Command#needsDispatcher()}.
      * 
      * @param manager The manager managing the guild from the original command
      * @param end    The string that ends the wizard
@@ -58,8 +58,8 @@ public class CommandWizard {
      * @param step The prompt to send to the user
      * @return The user's response or null if the wizard was ended
      */
-    public Message step(String step) {
-        message = manager.sendText(step);
+    public Message step(String step, String title) {
+        message = manager.sendText(step, title);
         message.addReaction(ReactionEmoji.unicode("❌")).block();
 
         EventDispatcher dispatcher = manager.getEventDispatcher();

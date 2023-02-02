@@ -1,14 +1,14 @@
 package com.georgster.plinko;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.Message;
 
 import java.time.Duration;
 import java.util.Random;
 
 import com.georgster.api.ActionWriter;
+import com.georgster.control.util.CommandPipeline;
+import com.georgster.util.GuildManager;
 
 /**
  * A PlinkoGame represents a game of plinko that is created on a "!plinko play:" command.
@@ -22,6 +22,7 @@ public class PlinkoGame {
     private String guild; //The ID of the guild the game was played in
     private Channel channel; //The channel where the game existed
     private Random rand; //Keeps track of the random elements of the game
+    private final GuildManager manager;
     /*
      * A 2D array representation of the Plinko board. PlinkoGame
      * uses this array to quickly determine the next location of the chip,
@@ -47,10 +48,11 @@ public class PlinkoGame {
      * 
      * @param event The {@code MessageCreateEvent} that prompted the creation of this {@code PlinkoGame}.
      */
-    PlinkoGame(MessageCreateEvent event) {
-        event.getGuildId().ifPresent(flake -> guild = flake.asString()); //Translates the guild ID from a Snowflake to a string
-        channel = event.getMessage().getChannel().block();
+    PlinkoGame(CommandPipeline pipeline, GuildManager manager) {
+        guild = pipeline.getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
+        channel = pipeline.getChannel();
         rand = new Random();
+        this.manager = manager;
     }
 
     /**
@@ -69,7 +71,7 @@ public class PlinkoGame {
             sBoard.append("\n");
         }
         sBoard.setCharAt(spot, '0'); //Places the chip
-        Message message = ((MessageChannel) channel).createMessage(sBoard.toString()).block(); //Creates the initial message of the board state
+        Message message = manager.sendPlainText(sBoard.toString()); //Creates the initial message of the board state
         /* The handling of the creation of the plinko game is different than updating it, therefore we do these updates outside the loop */
         sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
 
@@ -93,7 +95,6 @@ public class PlinkoGame {
                 sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " "); //Easy way to find where the chip is in sBoard
             } else {
                 ActionWriter.writeAction("Determining the reward for a Plinko Game");
-                getReward(spot);
             }
         }
 
@@ -134,10 +135,6 @@ public class PlinkoGame {
         return nextIndex + first;
     }
 
-    protected int getReward(int spot) {
-        return 0;
-    }
-
     /* Shows a blank version of the Plinko Board. */
     protected void showBoard() {
         StringBuilder sBoard = new StringBuilder();
@@ -148,7 +145,7 @@ public class PlinkoGame {
             sBoard.append("\n");
         }
 
-        ((MessageChannel) getChannel()).createMessage(sBoard.toString()).block();
+        manager.sendPlainText(sBoard.toString());
     }
 
     /**

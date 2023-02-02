@@ -6,21 +6,23 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A SoapCommand is represents the actions following a "!soapbot" command.
  */
 public class SoapCommand implements Command {
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<SoapCommand> logger = new MultiLogger<>(manager, SoapCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
@@ -38,8 +40,8 @@ public class SoapCommand implements Command {
                 }
             }
             myReader.close();
-            manager.sendText("Soap Bot Version: " + version +
-            "\nView my repository and source code at: https://github.com/GeorgeHerrmann/soapbot");
+            manager.sendText("Version: " + version +
+            "\nView my repository and source code at: https://github.com/GeorgeHerrmann/soapbot", "SOAP Bot");
         } catch (FileNotFoundException e) { //Should only be thrown if there is an issue with the pom.xml file
             logger.append("\tCouldn't find the version file", LogDestination.NONAPI);
             manager.sendText("Couldn't find version file");
@@ -62,6 +64,18 @@ public class SoapCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("soapbot", "version", "info", "about", "bot");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Show information about SOAP Bot")
+                .build();
     }
 
     /**

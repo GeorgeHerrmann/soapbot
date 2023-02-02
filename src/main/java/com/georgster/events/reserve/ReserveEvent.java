@@ -2,6 +2,7 @@ package com.georgster.events.reserve;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,7 +105,11 @@ public class ReserveEvent implements SoapEvent {
      * {@inheritDoc}
      */
     public boolean fulfilled() {
-        return isTimeless() ? numReserved >= numPeople : LocalTime.now(ZoneId.of("-05:00")).isAfter(LocalTime.parse(time));
+        long until = LocalTime.now(ZoneId.of("-05:00")).until(LocalTime.parse(time), ChronoUnit.SECONDS);
+        if (until < 0 && Math.abs(until) > 60) {
+            until = Math.abs(until);
+        }
+        return isTimeless() ? numReserved >= numPeople : until <= 0;
     }
 
     /**

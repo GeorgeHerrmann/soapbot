@@ -1,10 +1,12 @@
 package com.georgster.control.util;
 
+import com.georgster.control.PermissionsManager;
 import com.georgster.control.SoapEventManager;
 import com.georgster.music.components.AudioInterface;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.entity.Guild;
+import discord4j.rest.RestClient;
 
 /**
  * A Pipeline that carries active data from the {@code SoapClientManager} to its
@@ -15,6 +17,8 @@ public class ClientPipeline {
     private final Guild guild;
     private AudioInterface audioInterface;
     private SoapEventManager eventManager;
+    private PermissionsManager permissionsManager;
+    private RestClient restClient;
 
     /**
      * Creates a new ClientPipeline with the given {@code EventDispatcher} and
@@ -26,6 +30,12 @@ public class ClientPipeline {
     public ClientPipeline(EventDispatcher dispatcher, Guild guild) {
         this.dispatcher = dispatcher;
         this.guild = guild;
+    }
+
+    public ClientPipeline(EventDispatcher dispatcher, Guild guild, RestClient restClient) {
+        this.dispatcher = dispatcher;
+        this.guild = guild;
+        this.restClient = restClient;
     }
 
     /**
@@ -65,6 +75,15 @@ public class ClientPipeline {
     }
 
     /**
+     * Returns the permissions manager.
+     * 
+     * @return the permissions manager
+     */
+    public PermissionsManager getPermissionsManager() {
+        return permissionsManager;
+    }
+
+    /**
      * Sets the audio interface.
      * 
      * @param audioInterface the audio interface
@@ -80,5 +99,23 @@ public class ClientPipeline {
      */
     public void setEventManager(SoapEventManager eventManager) {
         this.eventManager = eventManager;
+    }
+
+    /**
+     * Sets the permissions manager.
+     * 
+     * @param permissionsManager the permissions manager
+     */
+    public void setPermissionsManager(PermissionsManager permissionsManager) {
+        this.permissionsManager = permissionsManager;
+    }
+
+    /**
+     * Returns the rest client.
+     * 
+     * @return the rest client
+     */
+    public RestClient getRestClient() {
+        return restClient;
     }
 }

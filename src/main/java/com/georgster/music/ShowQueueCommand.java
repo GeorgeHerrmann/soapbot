@@ -4,18 +4,21 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
+
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the bot's actions following the !queue command.
  */
 public class ShowQueueCommand implements Command {
-
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private final LinkedBlockingQueue<AudioTrack> queue;
 
     /**
@@ -32,7 +35,7 @@ public class ShowQueueCommand implements Command {
      * 
      * @param execute the event that triggered the command
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<ShowQueueCommand> logger = new MultiLogger<>(manager, ShowQueueCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
@@ -46,7 +49,8 @@ public class ShowQueueCommand implements Command {
             if (response.length() >= 1800) {
                 logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
 
-                manager.sendText(response.toString());
+                String[] output = SoapUtility.splitFirst(response.toString());
+                manager.sendText(output[1], output[0]);
                 response = new StringBuilder();
             }
             x++;
@@ -68,6 +72,18 @@ public class ShowQueueCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("queue", "q", "songs");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Show the current audio queue")
+                .build();
     }
 
     /**

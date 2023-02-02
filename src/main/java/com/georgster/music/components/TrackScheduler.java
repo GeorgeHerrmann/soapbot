@@ -2,6 +2,7 @@ package com.georgster.music.components;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -11,7 +12,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.voice.VoiceConnection;
 
 /**
@@ -21,7 +21,7 @@ import discord4j.voice.VoiceConnection;
 public final class TrackScheduler extends AudioEventAdapter implements AudioLoadResultHandler {
 
     private final AudioPlayer player;
-    private MessageChannel channel;
+    private GuildManager manager;
     private LinkedBlockingQueue<AudioTrack> queue;
     private VoiceConnection connection;
 
@@ -32,7 +32,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     public TrackScheduler(final AudioPlayer player) {
         this.player = player;
-        channel = null;
+        manager = null;
         connection = null;
         queue = new LinkedBlockingQueue<>();
     }
@@ -50,7 +50,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
             if (queue.size() == 1) {
                 player.playTrack(track); //If it is the only track in the queue we will play it here as well.
             } else {
-                SoapUtility.runDaemon(() -> sendMessageInChannel("Queued up track: " + track.getInfo().title)); //All actions sent to Discord's API must be done on a separate thread.
+                SoapUtility.runDaemon(() -> manager.sendText("Queued up track: " + track.getInfo().title)); //All actions sent to Discord's API must be done on a separate thread.
             }
         } catch (InterruptedException e) { //There is something wrong with the queue, so we will stop the player.
             e.printStackTrace();
@@ -66,7 +66,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void playlistLoaded(final AudioPlaylist playlist) {
         boolean first = (queue.isEmpty()); //If the queue is empty, we will play the first track in the playlist.
-        SoapUtility.runDaemon(() -> sendMessageInChannel("Queued up playlist: " + playlist.getName()));
+        SoapUtility.runDaemon(() -> manager.sendText("Queued up playlist: " + playlist.getName()));
         for (AudioTrack i : playlist.getTracks()) { //Add all tracks in the playlist to the queue.
             try {
                 queue.put(i);
@@ -111,7 +111,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
-        SoapUtility.runDaemon(() -> sendMessageInChannel("Now Playing: " + track.getInfo().title)); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
+        SoapUtility.runDaemon(() -> manager.sendText("Now Playing: " + track.getInfo().title)); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
     }
 
     /**
@@ -120,7 +120,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void noMatches() {
         SoapUtility.runDaemon(() -> {
-            sendMessageInChannel("Failed to grab audio from the provided arguments");
+            manager.sendText("Failed to grab audio from the provided arguments");
             if (!isActive()) {
                 connection.disconnect().block(); //If the queue is empty, we will disconnect from the voice channel.
             }
@@ -132,7 +132,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     @Override
     public void loadFailed(final FriendlyException exception) {
-        SoapUtility.runDaemon(() -> sendMessageInChannel("An error occurred: " + exception.getMessage()));
+        SoapUtility.runDaemon(() -> manager.sendText("An error occurred: " + exception.getMessage()));
     }
 
     /**
@@ -166,18 +166,8 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      * @param channel the channel to send messages to
      * @param connection the connection to disconnect from
      */
-    public void setChannelData(MessageChannel channel, VoiceConnection connection) {
-        this.channel = channel;
+    public void setChannelData(GuildManager manager, VoiceConnection connection) {
+        this.manager = manager;
         this.connection = connection;
-    }
-
-    /**
-     * Sends a message to the active channel.
-     * This method is used to allow the scheduler to send messages to Discord's API on a separate thread.
-     * 
-     * @param message the message to send
-     */
-    private void sendMessageInChannel(String message) {
-        channel.createMessage(message).block();
     }
 }

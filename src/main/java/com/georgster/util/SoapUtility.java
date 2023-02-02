@@ -40,9 +40,14 @@ public class SoapUtility {
                     hour = Integer.parseInt(time.substring(0, time.indexOf("PM")));
                     hour = Integer.parseInt(time.substring(0, time.indexOf("PM"))) == 12 ? hour : hour + 12;
                     minute = 0;
-                } else if (time.contains("AM") && Integer.parseInt(time.substring(0, time.indexOf("AM"))) == 12) {
-                    hour = 0;
-                    minute = 0;
+                } else if (time.contains("AM")) {
+                    if (Integer.parseInt(time.substring(0, time.indexOf("AM"))) == 12) {
+                        hour = 0;
+                        minute = 0;
+                    } else {
+                        hour = Integer.parseInt(time.substring(0, time.indexOf("AM")));
+                        minute = 0;
+                    }
                 } else {
                     throw new IllegalArgumentException("Does not specify AM/PM time");
                 }
@@ -75,6 +80,20 @@ public class SoapUtility {
             hour = 12;
         }
         return String.format("%02d:%02d%s", hour, minute, amPm);
+    }
+
+    /**
+     * Split a string into two parts at the first occurrence of the new line character.
+     * 
+     * @param line the string to split
+     * @return an array of two strings, the first string is the part before the new line character,
+     *        the second string is the part after the new line character
+     */
+    public static String[] splitFirst(String line) {
+        String[] split = new String[2];
+        split[0] = line.substring(0, line.indexOf("\n"));
+        split[1] = line.substring(line.indexOf("\n") + 1);
+        return split;
     }
 
     /**

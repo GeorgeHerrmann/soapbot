@@ -3,18 +3,22 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
 
@@ -28,6 +32,8 @@ public class PlayMusicCommand implements Command {
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
     private static final String PATTERN = "1|R";
+
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * Plays music in a discord channel.
@@ -50,16 +56,16 @@ public class PlayMusicCommand implements Command {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<PlayMusicCommand> logger = new MultiLogger<>(manager, PlayMusicCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         try {
             CommandParser parser = new CommandParser(PATTERN);
-            parser.parse(event.getMessage().getContent());
+            parser.parse(pipeline.getFormattedMessage());
             logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
-            final Member member = event.getMember().orElse(null); //Makes sure the member is valid
+            final Member member = pipeline.getAuthorAsMember(); //Makes sure the member is valid
             if (member != null) {
                 final VoiceState voiceState = member.getVoiceState().block();
                 if (voiceState != null) { //They must be in a voice channel
@@ -68,7 +74,7 @@ public class PlayMusicCommand implements Command {
                         logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
                         LogDestination.NONAPI);
                         VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
-                        scheduler.setChannelData(event.getMessage().getChannel().block(), connection);
+                        scheduler.setChannelData(manager, connection);
 
                         int retryAttempts = 0;
                         while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {
@@ -84,11 +90,13 @@ public class PlayMusicCommand implements Command {
                     }
                 }
             }
-
-            logger.sendAll();
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            manager.sendText(help());
+            logger.append("\tSending the help message", LogDestination.NONAPI);
+            String[] output = SoapUtility.splitFirst(help());
+            manager.sendText(output[1], output[0]);
+            manager.sendText(output[1], output[2]);
         }
+        logger.sendAll();
     }
 
     /**
@@ -118,6 +126,24 @@ public class PlayMusicCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("play");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Play music in a discord channel")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("url")
+                        .description("The url of the audio to play")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
+                .build();
     }
 
     /**

@@ -6,6 +6,8 @@ import com.georgster.control.SoapEventManager;
 import com.georgster.profile.ProfileHandler;
 
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -14,6 +16,10 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.rest.util.Color;
 
 /**
  * A GuildManager holds and manipulates data about a Guild.
@@ -26,6 +32,7 @@ public class GuildManager {
     private Channel activeChannel; //The channel that is currently active
     private SoapEventManager eventManager; //The event manager for this guild
     private EventDispatcher dispatcher; //The event dispatcher for this guild
+    private ChatInputInteractionEvent activeInteraction; //The active interaction
 
     /**
      * Creates a new GuildManager for the given guild.
@@ -105,7 +112,18 @@ public class GuildManager {
     }
 
     /**
-     * Returns the active channel for this manager.
+     * Sets the interaction event that this manager is actively performing actions for.
+     * If there is an interaction active, the manager will reply to the interaction instead
+     * of sending a message to the active channel on {@link #sendText(String)}.
+     * 
+     * @param interaction the new active interaction event
+     */
+    public void setActiveInteraction(ChatInputInteractionEvent interaction) {
+        activeInteraction = interaction;
+    }
+
+    /**
+     * Returns the active channel for this manager with basic embed formatting.
      * 
      * @return the channel that is currently active
      */
@@ -114,31 +132,208 @@ public class GuildManager {
     }
 
     /**
-     * Sends a text message to the active channel.
+     * Returns the active interaction event for this manager.
+     * 
+     * @return the interaction that is currently active
+     */
+    public ChatInputInteractionEvent getActiveInteraction() {
+        return activeInteraction;
+    }
+
+    /**
+     * Kills the active interaction event for this manager, setting it to null.
+     */
+    public void killActiveInteraction() {
+        activeInteraction = null;
+    }
+
+    /**
+     * Sends a text message with only content to the active channel.
+     * 
      * 
      * @param text the message to send
+     * @return the message that was sent
      * @throws IllegalStateException if the active channel is not a text channel
      */
-    public Message sendText(String text) throws IllegalStateException {
-        if (activeChannel != null) {
+    public Message sendPlainText(String text) throws IllegalStateException {
+        if (activeInteraction != null) {
             try {
-                return ((TextChannel) activeChannel).createMessage(text).block();
+                activeInteraction.reply(text).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
             } catch (Exception e) {
-                throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    return ((TextChannel) activeChannel).createMessage(text).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
             }
         }
         return null;
     }
 
     /**
-     * Sends a text message to the given text channel.
+     * Sends a text message to the active channel with basic embed formatting.
+     * 
+     * @param text the message to send
+     * @throws IllegalStateException if the active channel is not a text channel
+     */
+    public Message sendText(String text) throws IllegalStateException {
+        if (activeInteraction != null) {
+            try {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                activeInteraction.reply(spec).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                    return ((TextChannel) activeChannel).createMessage(spec).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the active channel with basic embed formatting and a title.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @throws IllegalStateException if the active channel is not a text channel
+     */
+    public Message sendText(String text, String title) throws IllegalStateException {
+        if (activeInteraction != null) {
+            try {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                activeInteraction.reply(spec).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                    return ((TextChannel) activeChannel).createMessage(spec).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the active channel with basic embed formatting, a title, and a component.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @param component the component to add to the message
+     * @throws IllegalStateException if the active channel is not a text channel
+     */
+    public Message sendText(String text, String title, LayoutComponent component) throws IllegalStateException {
+        if (activeInteraction != null) {
+            try {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addComponent(component).build();
+                activeInteraction.reply(spec).block();
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(component);
+                    return ((TextChannel) activeChannel).createMessage(spec).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the provided text channel with only content.
+     * 
+     * @param text the message to send
+     * @param channel the channel to send the message to
+     * @return the message that was sent
+     */
+    public static Message sendPlainText(String text, TextChannel channel) {
+        if (channel != null) {
+            return channel.createMessage(text).block();
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the given text channel with basic embed formatting.
      * 
      * @param text the message to send
      * @param channel the channel to send the message to
      */
     public static Message sendText(String text, TextChannel channel) {
         if (channel != null) {
-            return channel.createMessage(text).block();
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+            return channel.createMessage(spec).block();
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the given text channel with basic embed formatting and a title.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @param channel the channel to send the message to
+     */
+    public static Message sendText(String text, String title, TextChannel channel) {
+        if (channel != null) {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+            return channel.createMessage(spec).block();
+        }
+        return null;
+    }
+
+    /**
+     * Sends a text message to the given text channel with basic embed formatting, a title, and a component.
+     * 
+     * @param text the message to send
+     * @param title the title of the message
+     * @param component the component to add to the message
+     * @param channel the channel to send the message to
+     */
+    public static Message sendText(String text, String title, LayoutComponent component, TextChannel channel) {
+        if (channel != null) {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(component);
+            return channel.createMessage(spec).block();
         }
         return null;
     }
@@ -200,7 +395,7 @@ public class GuildManager {
     /**
      * Returns the {@code Member} in this {@code Guild} that has the given tag.
      * 
-     * @param memberTag The tag of the member to get or null if no member with that tag exists
+     * @param memberTag The tag of the member to get
      * @return the {@code Member} in this {@code Guild} that has the given tag
      */
     public Member getMember(String memberTag) {
@@ -214,7 +409,7 @@ public class GuildManager {
     /**
      * Returns the {@code TextChannel} in this {@code Guild} that has the given name.
      * 
-     * @param channelName The name of the channel to get or null if no channel with that name exists
+     * @param channelName The name of the channel to get
      * @return the {@code TextChannel} in this {@code Guild} that has the given name
      */
     public TextChannel getTextChannel(String channelName) {
@@ -228,7 +423,7 @@ public class GuildManager {
     /**
      * Returns the {@code Role} in this {@code Guild} that has the given name.
      * 
-     * @param roleName The name of the role to get or null if no role with that name exists
+     * @param roleName The name of the role to get
      * @return the {@code Role} in this {@code Guild} that has the given name
      */
     public Role getRole(String roleName) {

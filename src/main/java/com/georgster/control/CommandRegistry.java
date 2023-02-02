@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
@@ -20,8 +21,11 @@ import com.georgster.plinko.PlinkoCommand;
 import com.georgster.test.TestCommand;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.permissions.PermissionsCommand;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * The CommandRegistry is responsible for handling all of SOAP Bot's commands.
@@ -53,6 +57,7 @@ public class CommandRegistry {
         commands.add(new PlayMusicCommand(clientsInterface.getProvider(), clientsInterface.getPlayerManager(), clientsInterface.getPlayer(), clientsInterface.getScheduler()));
         commands.add(new ShowQueueCommand(clientsInterface.getScheduler().getQueue()));
         commands.add(new SkipMusicCommand(clientsInterface.getPlayer(), clientsInterface.getScheduler()));
+        commands.add(new PermissionsCommand(pipeline.getPermissionsManager()));
         commands.add(new TestCommand());
     }
 
@@ -62,18 +67,39 @@ public class CommandRegistry {
      * 
      * @param event the MessageCreateEvent that prompted this call.
      */
-    public void getAndExecute(MessageCreateEvent event) {
-        String attemptedCommand = event.getMessage().getContent().split(" ")[0].substring(1).toLowerCase();
+    public void getAndExecute(Event event) {
+        CommandPipeline commandPipeline = new CommandPipeline(event); //Will be used to transport and extract data from the event.
+        String attemptedCommand = commandPipeline.getCommandName().toLowerCase();
         commands.forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
                 GuildManager manager;
                 if (command.needsDispatcher()) {
-                    manager = new GuildManager(event.getGuild().block(), pipeline.getDispatcher());
+                    manager = new GuildManager(commandPipeline.getGuild(), pipeline.getDispatcher());
                 } else {
-                    manager = new GuildManager(event.getGuild().block());
+                    manager = new GuildManager(commandPipeline.getGuild());
                 }
-                manager.setActiveChannel(event.getMessage().getChannel().block());
-                SoapUtility.runDaemon(() -> command.execute(event, manager));
+                manager.setActiveChannel(commandPipeline.getChannel());
+                if (commandPipeline.isChatInteraction()) {
+                    manager.setActiveInteraction((ChatInputInteractionEvent)event);
+                }
+                SoapUtility.runDaemon(() -> command.execute(commandPipeline, manager));
+            }
+        });
+    }
+
+    /**
+     * Registers all of SOAP Bot's pre-defined commands as global commands to Discord
+     * if the command has a valid ApplicationCommandRequest, which they will if
+     * the command states it needs a new registration.
+     */
+    public void registerGlobalCommands() {
+        long appId = pipeline.getRestClient().getApplicationId().block();
+
+        commands.forEach(command -> {
+            ApplicationCommandRequest cmd = command.getCommandApplicationInformation();
+
+            if (cmd != null) { //If the command doesn't want to be registered to discord, it will return null.
+                pipeline.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, cmd).block();
             }
         });
     }

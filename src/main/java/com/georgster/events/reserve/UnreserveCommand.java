@@ -4,13 +4,16 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.SoapEventManager;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the command for unreserving to a {@code ReserveEvent}.
@@ -19,6 +22,7 @@ public class UnreserveCommand implements Command {
     private static final String PATTERN = "V|R";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -33,23 +37,23 @@ public class UnreserveCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<UnreserveCommand> logger = new MultiLogger<>(manager, UnreserveCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new CommandParser(PATTERN);
 
         try {
-            parser.parse(event.getMessage().getContent());
+            parser.parse(pipeline.getFormattedMessage());
 
             logger.append("\tArguments found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
             if (eventManager.eventExists(parser.get(0), TYPE)) {
                 ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
-                if (reserve.alreadyReserved(event.getMessage().getAuthorAsMember().block().getTag())) {
+                if (reserve.alreadyReserved(pipeline.getAuthorAsMember().getTag())) {
 
-                    logger.append("\tRemoving " + event.getMessage().getAuthorAsMember().block().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
-                    reserve.removeReserved(event.getMessage().getAuthorAsMember().block().getTag());
+                    logger.append("\tRemoving " + pipeline.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
+                    reserve.removeReserved(pipeline.getAuthorAsMember().getTag());
                     if (reserve.getReserved() <= 0) {
                         eventManager.removeEvent(reserve);
                         logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
@@ -77,6 +81,24 @@ public class UnreserveCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("unreserve", "ur", "unres");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Unreserve from an event you have reserved to")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("event")
+                        .description("The name of the event")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
+                .build();
     }
 
     /**

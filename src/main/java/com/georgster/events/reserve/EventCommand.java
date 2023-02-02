@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.SoapEventManager;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
@@ -13,7 +14,9 @@ import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the command for managing events.
@@ -22,6 +25,7 @@ public class EventCommand implements Command {
     private static final String PATTERN = "V|R 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -36,14 +40,13 @@ public class EventCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<EventCommand> logger = new MultiLogger<>(manager, EventCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n",
-        LogDestination.DISCORD, LogDestination.SYSTEM, LogDestination.FILE);
+        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         CommandParser parser = new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping").withRules("X I").build();
         try { //Checks to see the command if valid
-            parser.parse(event.getMessage().getContent().toLowerCase());
+            parser.parse(pipeline.getFormattedMessage().toLowerCase());
             logger.append("\tArguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
 
             if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
@@ -64,7 +67,8 @@ public class EventCommand implements Command {
                         }
                     }
                     response.append("Type !events [NAME] for more information about a specific event");
-                    manager.sendText(response.toString());
+                    String[] output = SoapUtility.splitFirst(response.toString());
+                    manager.sendText(output[1], output[0]);
                 } else {
                     logger.append("\tThere are no events currently active\n", LogDestination.NONAPI);
                     manager.sendText("There are no events currently active");
@@ -77,10 +81,8 @@ public class EventCommand implements Command {
                     logger.append("\tMentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                     StringBuilder response = new StringBuilder();
-                    reserve.getReservedUsers().forEach(user -> {
-                        response.append(manager.getMember(user).getMention() + " ");
-                    });
-                    manager.sendText(response.toString());
+                    reserve.getReservedUsers().forEach(user -> response.append(manager.getMember(user).getMention() + " "));
+                    manager.sendPlainText(response.toString()); //If sendText is used, the embed will prevent users from being mentioned
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }
@@ -107,17 +109,17 @@ public class EventCommand implements Command {
                         response.append("This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                     }
                     response.append("\nReserved users:\n");
-                    reserve.getReservedUsers().forEach(user -> {
-                        response.append("\t- " + manager.getMember(user).getUsername() + "\n");
-                    });
-                    manager.sendText(response.toString());
+                    reserve.getReservedUsers().forEach(user -> response.append("\t- " + manager.getMember(user).getUsername() + "\n"));
+                    String[] output = SoapUtility.splitFirst(response.toString());
+                    manager.sendText(output[1], output[0]);
                 } else {
                     manager.sendText("This event does not exist, type !events list for a list of all active events");
                 }
             }
         } catch (Exception e) {
             logger.append("The user did not provide valid arguments, showing the help message\n", LogDestination.NONAPI);
-            manager.sendText(help());
+            String[] output = SoapUtility.splitFirst(help());
+            manager.sendText(output[1], output[0]);
         }
         logger.sendAll();
     }
@@ -134,6 +136,24 @@ public class EventCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("events", "event");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Shows information about events")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("event")
+                        .description("The event to show information about")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
+                .build();
     }
 
     /**

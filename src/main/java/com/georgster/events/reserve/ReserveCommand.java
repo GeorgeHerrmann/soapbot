@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.SoapEventManager;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -12,8 +13,10 @@ import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the command for reserving to and creating events.
@@ -22,6 +25,7 @@ public class ReserveCommand implements Command {
     private static final String PATTERN = "V|R 1|O 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -36,18 +40,19 @@ public class ReserveCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<ReserveCommand> logger = new MultiLogger<>(manager, ReserveCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         try {
             CommandParser parser = new ParseBuilder(PATTERN).withRules("X N|T N|T").build();
-            List<String> message = parser.parse(event.getMessage().getContent().toLowerCase());
+            List<String> message = parser.parse(pipeline.getFormattedMessage().toLowerCase());
 
             if (message.isEmpty()) {
                 logger.append("\tNo arguments found, sending help message", LogDestination.NONAPI);
                 logger.sendAll();
-                manager.sendText(help());
+                String[] output = SoapUtility.splitFirst(help());
+                manager.sendText(output[1], output[0]);
                 return;
             }
 
@@ -57,15 +62,15 @@ public class ReserveCommand implements Command {
 
             if (eventManager.eventExists(reserve.getIdentifier(), TYPE)) {
                 if (!reserve.isFull()) {
-                    event.getMessage().getAuthor().ifPresent(user -> {
+                    pipeline.getAuthorOptionally().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
                             manager.sendText("You have already reserved for this event, type !event " + reserve.getIdentifier() + " unreserve to unreserve");
                         } else {
                             logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
                             eventManager.updateEvent(reserve);
-                            manager.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier() + 
-                            "\n\t" + reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
+                            manager.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
+                            reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
                         }
                     });
                 } else {
@@ -73,7 +78,7 @@ public class ReserveCommand implements Command {
                 }
             } else {
                 logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
-                event.getMessage().getAuthor().ifPresent(user -> reserve.addReserved(user.getTag()));
+                pipeline.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
                 eventManager.addEvent(reserve);
                 String messageString = "";
                 if (reserve.isTimeless()) {
@@ -86,7 +91,7 @@ public class ReserveCommand implements Command {
                     logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
-                manager.sendText(messageString);
+                manager.sendText(messageString, reserve.getIdentifier() + " event created");
             }
         } catch (IllegalArgumentException e) {
             logger.append("\tSending an error message", LogDestination.NONAPI);
@@ -160,6 +165,37 @@ public class ReserveCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("reserve", "res", "r");
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Reserve to or create a new reserve event")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("event")
+                        .description("The name of the event")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("playercount")
+                        .description("The number of people needed to reserve to the event")
+                        .type(ApplicationCommandOption.Type.INTEGER.getValue())
+                        .required(false)
+                        .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("time")
+                        .description("The time the event will pop")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
+                .build();
     }
 
     /**

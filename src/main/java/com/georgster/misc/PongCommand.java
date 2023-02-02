@@ -1,14 +1,17 @@
 package com.georgster.misc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
-import com.georgster.util.commands.CommandParser;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A PongCommand simply will return all instances of a user's message of "ping"
@@ -17,7 +20,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  * @implements {@code Command} the general definiton for a SoapBot command.
  */
 public class PongCommand implements Command {
-
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     String msg;
 
     /**
@@ -31,11 +34,11 @@ public class PongCommand implements Command {
      * {@inheritDoc}
      */
     @Override
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
-        List<String> args = CommandParser.parseGeneric(event.getMessage().getContent());
+        List<String> args = new ArrayList<>(List.of(pipeline.getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
         while(args.contains(msg)) {
@@ -44,7 +47,7 @@ public class PongCommand implements Command {
             counter++;
         }
         logger.append("\tResponding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
-        manager.sendText(fullMessage.toString().trim());
+        manager.sendText(fullMessage.toString().trim(), "You said ping " + counter + " times");
 
         logger.sendAll();
     }
@@ -61,6 +64,24 @@ public class PongCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("ping");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Responds with pong! for each 'ping' in your message")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("pings")
+                        .description("Additional pings to respond to")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
+                .build();
     }
 
     /**

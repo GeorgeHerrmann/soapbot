@@ -3,6 +3,7 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
@@ -10,13 +11,14 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Represents the bot's actions following the !skip command.
  */
 public class SkipMusicCommand implements Command {
 
+    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
 
@@ -36,12 +38,12 @@ public class SkipMusicCommand implements Command {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(MessageCreateEvent event, GuildManager manager) {
+    public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<SkipMusicCommand> logger = new MultiLogger<>(manager, SkipMusicCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         if (scheduler.isActive()) {
-            List<String> message = CommandParser.parseGeneric(event.getMessage().getContent());
+            List<String> message = CommandParser.parseGeneric(pipeline.getFormattedMessage());
             logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
             if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();
@@ -71,6 +73,18 @@ public class SkipMusicCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("skip");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("skip the currently playing track or all tracks in the queue")
+                .build();
     }
 
     /**
