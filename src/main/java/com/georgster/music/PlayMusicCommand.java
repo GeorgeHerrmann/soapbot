@@ -128,6 +128,9 @@ public class PlayMusicCommand implements Command {
         return List.of("play");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

@@ -66,6 +66,9 @@ public class PongCommand implements Command {
         return List.of("ping");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

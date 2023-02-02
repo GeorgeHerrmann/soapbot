@@ -74,6 +74,9 @@ public class ShowQueueCommand implements Command {
         return List.of("queue", "q", "songs");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

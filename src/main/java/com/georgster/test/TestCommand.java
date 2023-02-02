@@ -69,6 +69,9 @@ public class TestCommand implements Command {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

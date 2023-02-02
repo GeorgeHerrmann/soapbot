@@ -86,6 +86,9 @@ public class HelpCommand implements Command {
         return List.of("help");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

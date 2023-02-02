@@ -78,6 +78,9 @@ public class PlinkoCommand implements Command {
         return List.of("plinko");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

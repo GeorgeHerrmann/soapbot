@@ -167,6 +167,10 @@ public class ReserveCommand implements Command {
         return List.of("reserve", "res", "r");
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

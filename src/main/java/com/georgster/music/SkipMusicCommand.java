@@ -75,6 +75,9 @@ public class SkipMusicCommand implements Command {
         return List.of("skip");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

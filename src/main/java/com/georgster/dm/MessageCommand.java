@@ -15,10 +15,16 @@ import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
+/**
+ * A MessageCommand is represents the actions following a "!dm" command.
+ */
 public class MessageCommand implements Command {
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**",
@@ -86,6 +92,9 @@ public class MessageCommand implements Command {
         return List.of("dm", "message", "msg");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Command: !message" +
         "\nAliases: " + getAliases().toString() +

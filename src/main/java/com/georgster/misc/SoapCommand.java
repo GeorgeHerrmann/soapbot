@@ -66,6 +66,9 @@ public class SoapCommand implements Command {
         return List.of("soapbot", "version", "info", "about", "bot");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

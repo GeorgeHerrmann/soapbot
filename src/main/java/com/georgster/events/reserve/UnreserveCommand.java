@@ -83,6 +83,9 @@ public class UnreserveCommand implements Command {
         return List.of("unreserve", "ur", "unres");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

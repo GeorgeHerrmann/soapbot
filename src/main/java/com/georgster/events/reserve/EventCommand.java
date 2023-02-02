@@ -138,6 +138,9 @@ public class EventCommand implements Command {
         return List.of("events", "event");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 
