@@ -1,5 +1,6 @@
 package com.georgster.dm;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -30,11 +32,12 @@ public class MessageCommand implements Command {
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**",
         LogDestination.NONAPI, LogDestination.API);
 
-        List<String> contents = Arrays.asList(pipeline.getFormattedMessage());
+        List<String> contents = new ArrayList<>(Arrays.asList(pipeline.getFormattedMessage().split(" ")));
+        contents.remove(0);
 
         StringBuilder response = new StringBuilder();
         for (String i : contents) {
-            if (!i.contains("dm") && !i.contains(("@"))) {
+            if (!i.contains(("@"))) {
                 response.append(i + " ");
             }
         }
@@ -44,6 +47,9 @@ public class MessageCommand implements Command {
                 LogDestination.NONAPI);
 
                 user.getPrivateChannel().block().createMessage(response.toString()).block();
+                if (pipeline.isChatInteraction()) {
+                    ((ChatInputInteractionEvent) pipeline.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
+                }
             }
         } else {
             logger.append("\n\tNo users found, sending help message",
