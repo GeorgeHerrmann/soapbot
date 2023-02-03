@@ -1,16 +1,21 @@
 # soapbot
 
-A simple Discord Bot. You may notice in very early commits that an API key is visible, that is for the old Bot registration and doesn't do anything anymore.
-Currently the key is hidden and read from an external location by the program.
+SOAP Bot is a highly efficient and capable Discord bot written in Java using the Discord4J wrapper. At a high level, a ClientManager controls all SOAPClient's in a shard, which corresponds to each Guild/server SOAP Bot is in. This system of systems design allows SOAP Bot to have highly complex systems for each server it is in, while maintaining a high level of speed and low memory usage. The systems are only active once the ClientManager distributes Discord's events to the Client. All of SOAP Bot runs in a 1 vcore 1GB RAM server. To read more about how SOAP Bot works, visit http://georgster.com. SOAP Bot's codebase is open-source and highly organized and commented. The master branch remains in production, so to see on-going feature development check the other branches.
+
 SOAP Bot has a basic API via the SOAP API (https://github.com/GeorgeHerrmann/soapapi)
 
 Current features:
-  - Simulating a game of Plinko in a text channel
-    - Features a basic reward system
-  - Playing audio tracks (via YouTube, Soundcloud, etc.) in a voice channel
-    - Features a queue system allowing queueing of one track at a time or a whole playlist at once
-    - Features the option to show the queue and skip tracks in the queue (or skip all tracks)
-  - Creating to and reserving for events with a full save system
-    - Allows the flexibility of multiple types of events
-  - Basic text-based responses to commands in text-channels
-  - Saves and loads data via "profiles" for SOAP Bot to keep track of basic user information even when the bot goes offline or is reloaded
+  - Simulating games in text-channels (ex: plinko)
+  - Playing audio (via Youtube, Soundcloud, etc.) in voice-channels
+    - Features a queue and skip system, allows for complete autonomy between servers
+  - A complex and functional event system, allowing users to schedule various types of events
+    - Events are saved and scheduled, even if the bot happens to go offline.
+    - Features a high level of flexibility, allowing for various types of events with times, player counts, etc.
+    - Allows users to manage events and features utility for events
+  - A fully-featured permissions system that integrates with Discord's role system.
+  - A back and forth dynamic conversational system
+    - Allows for users to input data via "wizards" or have basic conversations with SOAP Bot
+  - and more!
+
+
+Ongoing features are in development
