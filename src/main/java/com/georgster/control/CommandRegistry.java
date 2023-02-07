@@ -11,6 +11,7 @@ import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.misc.HelpCommand;
+import com.georgster.misc.InfoCommand;
 import com.georgster.misc.PongCommand;
 import com.georgster.misc.SoapCommand;
 import com.georgster.music.PlayMusicCommand;
@@ -58,6 +59,7 @@ public class CommandRegistry {
         commands.add(new ShowQueueCommand(clientsInterface.getScheduler().getQueue()));
         commands.add(new SkipMusicCommand(clientsInterface.getPlayer(), clientsInterface.getScheduler()));
         commands.add(new PermissionsCommand(pipeline.getPermissionsManager()));
+        commands.add(new InfoCommand());
         commands.add(new TestCommand());
     }
 
