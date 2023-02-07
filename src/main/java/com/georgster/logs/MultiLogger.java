@@ -165,6 +165,7 @@ public class MultiLogger<T> {
      */
     public void logApi(String api) {
         if (!api.isEmpty()) {
+            api = api.replace("\t", "").replace("\n", "");
             ActionWriter.writeAction(api);
         }
     }
