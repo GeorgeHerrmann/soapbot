@@ -1,6 +1,7 @@
 package com.georgster.misc;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -12,9 +13,10 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class InfoCommand implements Command {
     public void execute(CommandPipeline pipeline, GuildManager manager) {
-        LocalDateTime dropDate = LocalDateTime.of(2023, 2, 28, 12, 0).plusHours(5);
+        LocalDateTime dropDate = LocalDateTime.of(2023, 2, 28, 12, 0);
+        dropDate = dropDate.atZone(ZoneId.of("America/New_York")).toLocalDateTime();
         //Get the current LocalDateTime in EST
-        LocalDateTime now = LocalDateTime.now().plusHours(5);
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("America/New_York"));
         long daysUntil = ChronoUnit.DAYS.between(now, dropDate);
         //hoursUntil is the remainder of the daysUntil calculation
         long hoursUntil = ChronoUnit.HOURS.between(now.plusDays(daysUntil), dropDate);
