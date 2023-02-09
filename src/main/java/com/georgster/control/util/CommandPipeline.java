@@ -152,12 +152,12 @@ public class CommandPipeline {
             return ((MessageCreateEvent) event).getMessage().getUserMentions();
         } else if (event instanceof ChatInputInteractionEvent) {
             List<User> users = new ArrayList<>();
-            ((ChatInputInteractionEvent) event).getInteraction().getCommandInteraction().ifPresent(commandInteraction -> {
+            ((ChatInputInteractionEvent) event).getInteraction().getCommandInteraction().ifPresent(commandInteraction -> 
                 users.addAll(commandInteraction.getOptions().stream()
                 .filter(option -> option.getType().equals(ApplicationCommandOption.Type.USER))
                 .map(option -> option.getValue().get().asUser().block())
-                .collect(Collectors.toList()));
-            });
+                .collect(Collectors.toList()))
+            );
             return users;
         } else {
             return Collections.emptyList();

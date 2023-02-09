@@ -118,7 +118,9 @@ public class PermissionsManager {
         }
     }
 
-
+    public int getGroupCount() {
+        return groups.size();
+    }
 
     public static PermissibleAction getAction(String name) {
         return PermissibleAction.valueOf(name);
