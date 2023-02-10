@@ -11,5 +11,7 @@ public enum PermissibleAction {
     PLAYMUSIC,
     SKIPMUSIC,
     SHOWQUEUE,
-    MESSAGECOMMAND
+    MESSAGECOMMAND,
+    PLINKOGAME,
+    PERMISSIONSCOMMAND
 }
