@@ -21,7 +21,7 @@ import reactor.core.Disposable;
 public class CommandWizard {
     private static final int TIMEOUT_TIME = 300; // will wait 30s for a response
 
-    private Message message; // The most recent message sent by someone in the wizard
+    private Message initial; // The initial message sent by the wizard
     private Member caller; // The user who called the wizard
     private final GuildManager manager; // The manager managing the guild from the original command
     private boolean ended; // Whether or not the wizard has ended
@@ -43,8 +43,8 @@ public class CommandWizard {
         this.caller = caller;
         this.ended = false;
         this.end = end;
+        initial = null;
         this.manager = manager;
-        message = null;
         this.title = title;
     }
 
@@ -75,8 +75,12 @@ public class CommandWizard {
         SelectMenu menu = SelectMenu.of(title, menuOptions);
 
         step += "\nYour options are: " + String.join(", ", options);
-        message = manager.sendText(step, title, ActionRow.of(menu));
-        message.addReaction(ReactionEmoji.unicode("❌")).block();
+        if (initial == null) {
+            initial = manager.sendText(step, title, ActionRow.of(menu));
+            initial.addReaction(ReactionEmoji.unicode("❌")).block();
+        } else {
+            manager.editMessageContent(initial, step, title, ActionRow.of(menu));
+        }
 
         EventDispatcher dispatcher = manager.getEventDispatcher();
         StringBuilder output = new StringBuilder();
@@ -84,14 +88,13 @@ public class CommandWizard {
         // Create a listener that listens for the user's next message
         Disposable canceller = dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(caller.getId().asString()))
-            .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
+            .filter(event -> event.getMessage().getChannelId().equals(initial.getChannelId()))
             .filter(event -> List.of(options).contains(event.getMessage().getContent().toLowerCase()))
             .subscribe(event -> {
                 if (event.getMessage().getContent().equals(end)) {
                     ended = true;
                 } else {
-                    message = event.getMessage();
-                    output.append(message.getContent());
+                    output.append(event.getMessage().getContent());
                 }
             });
 
@@ -103,11 +106,14 @@ public class CommandWizard {
 
         Disposable canceller3 = dispatcher.on(SelectMenuInteractionEvent.class)
             .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(caller.getId().asString()))
-            .filter(event -> event.getMessage().get().getId().asString().equals(message.getId().asString()))
-            .subscribe(event -> {output.append(event.getValues().get(0)); System.out.println("Selected " + event.getValues().get(0));});
+            .filter(event -> event.getMessage().get().getId().asString().equals(initial.getId().asString()))
+            .subscribe(event -> {
+                output.append(event.getValues().get(0));
+                manager.setActiveSelectMenuInteraction(event);
+            });
 
         int timeout = 0;
-        while (getMessageContents(message).equals(step)) { // Wait for the user to send a message
+        while (output.isEmpty()) { // Wait for the user to send a message
             try {
                 if (ended || timeout > TIMEOUT_TIME) {
                     canceller.dispose();
@@ -127,21 +133,6 @@ public class CommandWizard {
         canceller2.dispose();
         canceller3.dispose();
         return output.toString();
-    }
-
-    /**
-     * Returns the message contents of the given message. If the message has
-     * embeds, the description of the first embed is returned. Otherwise, the
-     * message's content is returned.
-     * 
-     * @param message The message to get the contents of
-     * @return The message contents
-     */
-    private String getMessageContents(Message message) {
-        StringBuilder contents = new StringBuilder();
-        message.getEmbeds().get(0).getDescription().ifPresent(contents::append);
-        contents.append(message.getContent());
-        return contents.toString();
     }
 
 

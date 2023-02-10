@@ -23,6 +23,11 @@ public class PermissionGroup {
         this.actions = actions;
     }
 
+    /**
+     * Constructs a {@code PermissionGroup} with the given name and no actions.
+     * 
+     * @param name the name of the group
+     */
     public PermissionGroup(String name) {
         this.name = name;
         this.actions = new ArrayList<>();
@@ -53,6 +58,7 @@ public class PermissionGroup {
      * @return whether or not the group has permission to perform the given action
      */
     public boolean hasPermission(PermissibleAction action) {
+        if (actions.contains(PermissibleAction.ADMIN)) return true;
         return actions.contains(action);
     }
 

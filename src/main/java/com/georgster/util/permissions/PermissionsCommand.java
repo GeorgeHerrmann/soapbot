@@ -12,7 +12,9 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.CommandWizard;
 import com.georgster.util.commands.ParseBuilder;
 
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 //!permissions list - list of all groups
@@ -92,6 +94,14 @@ public class PermissionsCommand implements Command {
         manager.sendText("Wizard closed");
     }
 
+    /**
+     * The options for a group in the wizard.
+     * 
+     * @param wizard The wizard to use
+     * @param manager The guild manager to use
+     * @param group The group to manage
+     * @return True if the wizard should continue, false if it should exit
+     */
     private boolean groupOptions(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
@@ -113,6 +123,14 @@ public class PermissionsCommand implements Command {
         return false;
     }
 
+    /**
+     * The "add permisson" option in the wizard.
+     * 
+     * @param wizard The wizard to use
+     * @param manager The guild manager to use
+     * @param group the group to add permissions to
+     * @return True if the wizard should continue, false if it should exit
+     */
     private boolean addPermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
@@ -136,12 +154,20 @@ public class PermissionsCommand implements Command {
         return false;
     }
 
+    /**
+     * The "remove permissions" option in the wizard.
+     * 
+     * @param wizard The wizard to use
+     * @param manager The guild manager to use
+     * @param group The group to remove permissions from
+     * @return True if the wizard should continue, false if it should exit
+     */
     private boolean removePermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
             String[] perms = new String[group.getActions().size() + 1];
-            for (PermissibleAction action : group.getActions()) {
-                perms[action.ordinal()] = action.toString();
+            for (int i = 0; i < group.getActions().size(); i++) {
+                perms[i] = group.getActions().get(i).toString();
             }
             perms[group.getActions().size()] = "back";
             String response = wizard.step("What permission would you like to remove?", perms);
@@ -163,23 +189,41 @@ public class PermissionsCommand implements Command {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("permissions", "perms");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Control the permissions for SOAP Bot")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("action")
+                        .description("A group name, list, or manage")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
                 .build();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Manage permissions for the bot.";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean needsDispatcher() {
         return true;
     }
