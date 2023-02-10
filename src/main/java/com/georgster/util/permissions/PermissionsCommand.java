@@ -17,19 +17,27 @@ import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-//!permissions list - list of all groups
-//!permissions [group] - list of all permissions for a group
-//!permissions manage - manage permissions for a group
+/**
+ * Represents the bot's actions following the !permissions command.
+ */
 public class PermissionsCommand implements Command {
     private static final String PATTERN = "V|R";
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private final PermissionsManager permissionsManager;
 
+    /**
+     * Creates a new PermissionsCommand.
+     * 
+     * @param permissionsManager the permissions manager
+     */
     public PermissionsCommand(PermissionsManager permissionsManager) {
         this.permissionsManager = permissionsManager;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<PermissionsCommand> logger = new MultiLogger<>(manager, PermissionsCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
@@ -68,9 +76,12 @@ public class PermissionsCommand implements Command {
         logger.sendAll();
     }
 
-    //list all the groups
-    //access a group - will list all information for that group
-    //manage that group - will allow you to add/remove permissions
+    /**
+     * Begins the permissions wizard for a user.
+     * 
+     * @param member The member to manage permissions for
+     * @param manager The guild manager to use
+     */
     private void managePermissions(Member member, GuildManager manager) {
         CommandWizard wizard = new CommandWizard(manager, "stop", "Permission Wizard", member);
         manager.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
@@ -218,7 +229,12 @@ public class PermissionsCommand implements Command {
      * {@inheritDoc}
      */
     public String help() {
-        return "Manage permissions for the bot.";
+        return "Command: !permissions" +
+        "\nAliases: " + getAliases().toString() +
+        "\nUsage:" +
+        "\n\t!permissions list - List all the groups" +
+        "\n\t!permissions [group] - List all the permissions for a group" +
+        "\n\t!permissions manage - Manage all SOAP Bot permissions for roles in this server";
     }
 
     /**
