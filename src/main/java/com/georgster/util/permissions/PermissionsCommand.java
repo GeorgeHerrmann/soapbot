@@ -116,7 +116,7 @@ public class PermissionsCommand implements Command {
     private boolean groupOptions(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
-            String response = wizard.step("What would you like to do?", "add", "remove", "list", "back");
+            String response = wizard.step("What would you like to do for " + group.getName() + "?", "add", "remove", "list", "back");
             if (response == null) {
                 valid = false;
             } else {

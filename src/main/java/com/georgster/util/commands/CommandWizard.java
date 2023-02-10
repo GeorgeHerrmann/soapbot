@@ -37,6 +37,7 @@ public class CommandWizard {
      * 
      * @param manager The manager managing the guild from the original command
      * @param end    The string that ends the wizard
+     * @param title  The title of messages sent by this wizard
      * @param caller The user who called the wizard
      */
     public CommandWizard(GuildManager manager, String end, String title, Member caller) {
@@ -61,8 +62,10 @@ public class CommandWizard {
      * Prompts the caller for a message and returns their response. If the user
      * ended the wizard during this "step" or if no response was given within
      * the wizard's timeout duration, null is returned and the wizard is ended.
+     * The user's reponse must be one of the given options, or the end string.
      * 
      * @param step The prompt to send to the user
+     * @param options The options the user can choose from
      * @return The user's response or null if the wizard was ended
      */
     public String step(String step, String... options) {
@@ -104,6 +107,7 @@ public class CommandWizard {
             .filter(event -> event.getEmoji().equals(ReactionEmoji.unicode("❌")))
             .subscribe(event -> ended = true);
 
+            // Create a listener that listens for the user to select an option
         Disposable canceller3 = dispatcher.on(SelectMenuInteractionEvent.class)
             .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(caller.getId().asString()))
             .filter(event -> event.getMessage().get().getId().asString().equals(initial.getId().asString()))
