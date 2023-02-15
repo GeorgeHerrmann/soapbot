@@ -304,7 +304,8 @@ public class GuildManager {
     }
 
     /**
-     * Edits a text message with basic embed formatting
+     * Edits a text message with basic embed formatting.
+     * If this manager has an active select menu interaction, it will edit that instead.
      * 
      * @param message the message to send
      * @param text the message to send
@@ -313,16 +314,17 @@ public class GuildManager {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
         if (message != null) {
             if (activeSelectMenuInteraction != null) {
-                activeSelectMenuInteraction.reply("Updated").block();
-                activeSelectMenuInteraction.deleteReply().block();
+                activeSelectMenuInteraction.edit().withEmbeds(embed).block();
                 killActiveSelectMenuInteraction();
+            } else {
+                message.edit().withEmbeds(embed).block();
             }
-            message.edit().withEmbeds(embed).block();
         }
     }
 
     /**
-     * Edits a text message with basic embed formatting and a title
+     * Edits a text message with basic embed formatting and a title.
+     * If this manager has an active select menu interaction, it will edit that instead.
      * 
      * @param message the message to send
      * @param text the message to send
@@ -332,16 +334,17 @@ public class GuildManager {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
         if (message != null) {
             if (activeSelectMenuInteraction != null) {
-                activeSelectMenuInteraction.reply("Updated").block();
-                activeSelectMenuInteraction.deleteReply().block();
+                activeSelectMenuInteraction.edit().withEmbeds(embed).block();
                 killActiveSelectMenuInteraction();
+            } else {
+                message.edit().withEmbeds(embed).block();
             }
-            message.edit().withEmbeds(embed).block();
         }
     }
 
     /**
-     * Edits a text message with basic embed formatting, a title, and a component
+     * Edits a text message with basic embed formatting, a title, and a component.
+     * If this manager has an active select menu interaction, it will edit that instead.
      * 
      * @param message the message to send
      * @param text the message to send
@@ -352,11 +355,11 @@ public class GuildManager {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
         if (message != null) {
             if (activeSelectMenuInteraction != null) {
-                activeSelectMenuInteraction.reply("Updated").block();
-                activeSelectMenuInteraction.deleteReply().block();
+                activeSelectMenuInteraction.edit().withEmbeds(embed).withComponents(component).block();
                 killActiveSelectMenuInteraction();
+            } else {
+                message.edit().withEmbeds(embed).withComponents(component).block();
             }
-            message.edit().withEmbeds(embed).withComponents(component).block();
         }
     }
 

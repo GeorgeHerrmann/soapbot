@@ -1,4 +1,2 @@
-2.100
-  - Registered all commands with Discord, allowing the use of slash commands
-    SOAP Bot commands support command inputs with !command or with /command
-    if using the /command format, command options will appear
+2.107
+  - Fixed an issue with CommandWizards editing their messages improperly
