@@ -204,7 +204,7 @@ public class PermissionsCommand implements Command {
      * {@inheritDoc}
      */
     public List<String> getAliases() {
-        return List.of("permissions", "perms");
+        return List.of("permissions", "perms", "perm");
     }
 
     /**

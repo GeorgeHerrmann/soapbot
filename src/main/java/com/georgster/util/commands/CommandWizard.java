@@ -86,6 +86,7 @@ public class CommandWizard {
         }
 
         EventDispatcher dispatcher = manager.getEventDispatcher();
+        
         StringBuilder output = new StringBuilder();
 
         // Create a listener that listens for the user's next message
