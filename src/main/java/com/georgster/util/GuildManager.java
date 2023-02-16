@@ -7,6 +7,7 @@ import com.georgster.profile.ProfileHandler;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -33,6 +34,7 @@ public class GuildManager {
     private SoapEventManager eventManager; //The event manager for this guild
     private EventDispatcher dispatcher; //The event dispatcher for this guild
     private ChatInputInteractionEvent activeInteraction; //The active interaction
+    private SelectMenuInteractionEvent activeSelectMenuInteraction; //The active select menu interaction
 
     /**
      * Creates a new GuildManager for the given guild.
@@ -123,6 +125,15 @@ public class GuildManager {
     }
 
     /**
+     * Sets the select menu interaction event that this manager is actively performing actions for.
+     * 
+     * @param interaction the new active select menu interaction event
+     */
+    public void setActiveSelectMenuInteraction(SelectMenuInteractionEvent interaction) {
+        activeSelectMenuInteraction = interaction;
+    }
+
+    /**
      * Returns the active channel for this manager with basic embed formatting.
      * 
      * @return the channel that is currently active
@@ -141,10 +152,26 @@ public class GuildManager {
     }
 
     /**
+     * Returns the active select menu interaction event for this manager.
+     * 
+     * @return the select menu interaction that is currently active
+     */
+    public SelectMenuInteractionEvent getActiveSelectMenuInteraction() {
+        return activeSelectMenuInteraction;
+    }
+
+    /**
      * Kills the active interaction event for this manager, setting it to null.
      */
     public void killActiveInteraction() {
         activeInteraction = null;
+    }
+
+    /**
+     * Kills the active select menu interaction event for this manager, setting it to null.
+     */
+    public void killActiveSelectMenuInteraction() {
+        activeSelectMenuInteraction = null;
     }
 
     /**
@@ -274,6 +301,66 @@ public class GuildManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Edits a text message with basic embed formatting.
+     * If this manager has an active select menu interaction, it will edit that instead.
+     * 
+     * @param message the message to send
+     * @param text the message to send
+     */
+    public void editMessageContent(Message message, String text) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+        if (message != null) {
+            if (activeSelectMenuInteraction != null) {
+                activeSelectMenuInteraction.edit().withEmbeds(embed).block();
+                killActiveSelectMenuInteraction();
+            } else {
+                message.edit().withEmbeds(embed).block();
+            }
+        }
+    }
+
+    /**
+     * Edits a text message with basic embed formatting and a title.
+     * If this manager has an active select menu interaction, it will edit that instead.
+     * 
+     * @param message the message to send
+     * @param text the message to send
+     * @param title the title of the message
+     */
+    public void editMessageContent(Message message, String text, String title) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+        if (message != null) {
+            if (activeSelectMenuInteraction != null) {
+                activeSelectMenuInteraction.edit().withEmbeds(embed).block();
+                killActiveSelectMenuInteraction();
+            } else {
+                message.edit().withEmbeds(embed).block();
+            }
+        }
+    }
+
+    /**
+     * Edits a text message with basic embed formatting, a title, and a component.
+     * If this manager has an active select menu interaction, it will edit that instead.
+     * 
+     * @param message the message to send
+     * @param text the message to send
+     * @param title the title of the message
+     * @param component the component to add to the message
+     */
+    public void editMessageContent(Message message, String text, String title, LayoutComponent component) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+        if (message != null) {
+            if (activeSelectMenuInteraction != null) {
+                activeSelectMenuInteraction.edit().withEmbeds(embed).withComponents(component).block();
+                killActiveSelectMenuInteraction();
+            } else {
+                message.edit().withEmbeds(embed).withComponents(component).block();
+            }
+        }
     }
 
     /**

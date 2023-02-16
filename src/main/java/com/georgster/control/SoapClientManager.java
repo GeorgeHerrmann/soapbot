@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.georgster.control.util.ClientPipeline;
 import com.georgster.logs.MultiLogger;
+import com.georgster.profile.ProfileHandler;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClientBuilder;
@@ -57,6 +58,7 @@ public final class SoapClientManager {
      */
     public void start() {
         MultiLogger.wipeFileLogs(); //Temporary
+        ProfileHandler.createProfilesDirectory();
         discordClient.onDisconnect().block();
     }
 

@@ -43,7 +43,14 @@ public class PermissionsManager {
                     if (role.getPermissions().contains(Permission.ADMINISTRATOR)) {
                         group.addPermission(PermissibleAction.ADMIN);
                     } else {
-                        group.addPermission(PermissibleAction.DEFAULT);
+                        group.addPermission(PermissibleAction.HELPCOMMAND);
+                        group.addPermission(PermissibleAction.PLAYMUSIC);
+                        group.addPermission(PermissibleAction.SKIPMUSIC);
+                        group.addPermission(PermissibleAction.SHOWQUEUE);
+                        group.addPermission(PermissibleAction.MESSAGECOMMAND);
+                        group.addPermission(PermissibleAction.CREATEEVENT);
+                        group.addPermission(PermissibleAction.RESERVEEVENT);
+                        group.addPermission(PermissibleAction.PONGCOMMAND);
                     }
                     addGroup(group);
                 }
@@ -118,7 +125,9 @@ public class PermissionsManager {
         }
     }
 
-
+    public int getGroupCount() {
+        return groups.size();
+    }
 
     public static PermissibleAction getAction(String name) {
         return PermissibleAction.valueOf(name);

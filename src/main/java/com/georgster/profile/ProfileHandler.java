@@ -71,6 +71,14 @@ public class ProfileHandler {
     }
 
     /**
+     * Creates the "profiles" directory if it does not already exist.
+     */
+    public static void createProfilesDirectory() {
+        File profile = new File(PROFILELOCATION);
+        profile.mkdir();
+    }
+
+    /**
      * Updates a user's profile with any new data help inside their {@code Profile} object.
      * Uses Gson to translate the {@code Profile} object to JSON format to be saved.
      * 

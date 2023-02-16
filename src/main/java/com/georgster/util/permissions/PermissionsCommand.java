@@ -1,6 +1,5 @@
 package com.georgster.util.permissions;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
@@ -13,23 +12,32 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.CommandWizard;
 import com.georgster.util.commands.ParseBuilder;
 
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-//!permissions list - list of all groups
-//!permissions [group] - list of all permissions for a group
-//!permissions manage - manage permissions for a group
+/**
+ * Represents the bot's actions following the !permissions command.
+ */
 public class PermissionsCommand implements Command {
     private static final String PATTERN = "V|R";
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private final PermissionsManager permissionsManager;
 
+    /**
+     * Creates a new PermissionsCommand.
+     * 
+     * @param permissionsManager the permissions manager
+     */
     public PermissionsCommand(PermissionsManager permissionsManager) {
         this.permissionsManager = permissionsManager;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandPipeline pipeline, GuildManager manager) {
         MultiLogger<PermissionsCommand> logger = new MultiLogger<>(manager, PermissionsCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
@@ -61,138 +69,177 @@ public class PermissionsCommand implements Command {
                     manager.sendText("That is not a valid group. Please try again");
                 }
             }
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.append("The user did not provide valid arguments, showing the help message\n", LogDestination.NONAPI);
             manager.sendText(help());
         }
         logger.sendAll();
     }
 
-    //list all the groups
-    //access a group - will list all information for that group
-    //manage that group - will allow you to add/remove permissions
+    /**
+     * Begins the permissions wizard for a user.
+     * 
+     * @param member The member to manage permissions for
+     * @param manager The guild manager to use
+     */
     private void managePermissions(Member member, GuildManager manager) {
-        CommandWizard wizard = new CommandWizard(manager, "stop", member);
+        CommandWizard wizard = new CommandWizard(manager, "stop", "Permission Wizard", member);
         manager.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
 
         boolean valid = true;
         PermissionGroup group = null;
 
         while (valid) {
-            Message response = wizard.step("Which Role would you like to manage? Valid roles are:\n"
-            + permissionsManager.getGroupNames().toString(), "Permission wizard");
+            String[] groups = new String[permissionsManager.getGroupCount()];
+            for (int i = 0; i < groups.length; i++) {
+                groups[i] = permissionsManager.getGroups().get(i).getName();
+            }
+            String response = wizard.step("Which Role would you like to manage?", groups);
             if (response == null) {
                 valid = false;
             } else {
-                String role = response.getContent().toLowerCase();
-                if (permissionsManager.groupExists(role)) {
-                    group = permissionsManager.getGroup(role);
-                    valid = groupOptions(wizard, manager, group);
-                } else {
-                    manager.sendText("That is not a valid role. Please try again");
-                }
+                group = permissionsManager.getGroup(response);
+                valid = groupOptions(wizard, manager, group);
             }
         }
         manager.sendText("Wizard closed");
     }
 
+    /**
+     * The options for a group in the wizard.
+     * 
+     * @param wizard The wizard to use
+     * @param manager The guild manager to use
+     * @param group The group to manage
+     * @return True if the wizard should continue, false if it should exit
+     */
     private boolean groupOptions(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
-            Message response = wizard.step("What would you like to do? Valid options are:\n"
-            + "add - add a permission to the group\n"
-            + "remove - remove a permission from the group\n"
-            + "list - list all permissions for the group\n"
-            + "back - go back to the previous menu", "Permission wizard");
+            String response = wizard.step("What would you like to do for " + group.getName() + "?", "add", "remove", "list", "back");
             if (response == null) {
                 valid = false;
             } else {
-                String option = response.getContent().toLowerCase();
-                if (option.equals("add")) {
+                if (response.equals("add")) {
                     valid = addPermission(wizard, manager, group);
-                } else if (option.equals("remove")) {
+                } else if (response.equals("remove")) {
                     valid = removePermission(wizard, manager, group);
-                } else if (option.equals("list")) {
+                } else if (response.equals("list")) {
                     manager.sendText("Permissions for " + group.getName() + ":\n" + group.getActions().toString());
-                } else if (option.equals("back")) {
+                } else if (response.equals("back")) {
                     return true;
-                } else {
-                    manager.sendText("That is not a valid option. Please try again");
                 }
             }
         }
         return false;
     }
 
+    /**
+     * The "add permisson" option in the wizard.
+     * 
+     * @param wizard The wizard to use
+     * @param manager The guild manager to use
+     * @param group the group to add permissions to
+     * @return True if the wizard should continue, false if it should exit
+     */
     private boolean addPermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
-            Message response = wizard.step("What permission would you like to add? Valid permissions are:\n"
-            +   Arrays.toString(PermissibleAction.values()) + "\n or type back to go back", "Permission wizard");
+            String[] perms = new String[PermissibleAction.values().length + 1];
+            for (PermissibleAction action : PermissibleAction.values()) {
+                perms[action.ordinal()] = action.toString();
+            }
+            perms[PermissibleAction.values().length] = "back";
+            String response = wizard.step("What permission would you like to add?", perms);
             if (response == null) {
                 valid = false;
-            } else if (response.getContent().equalsIgnoreCase("back")) {
+            } else if (response.equalsIgnoreCase("back")) {
                     return true;
             } else {
-                String permission = response.getContent().toLowerCase();
-                try {
-                    PermissibleAction action = PermissibleAction.valueOf(permission.toUpperCase());
-                    group.addPermission(action);
-                    permissionsManager.updateGroup(group);
-                    manager.sendText("Added " + action.toString() + " to " + group.getName());
-                } catch (IllegalArgumentException e) {
-                    manager.sendText("That is not a valid permission. Please try again");
-                }
+                PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
+                group.addPermission(action);
+                permissionsManager.updateGroup(group);
+                manager.sendText("Added " + action.toString() + " to " + group.getName());
             }
         }
         return false;
     }
 
+    /**
+     * The "remove permissions" option in the wizard.
+     * 
+     * @param wizard The wizard to use
+     * @param manager The guild manager to use
+     * @param group The group to remove permissions from
+     * @return True if the wizard should continue, false if it should exit
+     */
     private boolean removePermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
-            Message response = wizard.step("What permission would you like to remove? This group's permissions are:\n"
-            +   group.getActions().toString() + "\n or type back to go back", "Permission wizard");
+            String[] perms = new String[group.getActions().size() + 1];
+            for (int i = 0; i < group.getActions().size(); i++) {
+                perms[i] = group.getActions().get(i).toString();
+            }
+            perms[group.getActions().size()] = "back";
+            String response = wizard.step("What permission would you like to remove?", perms);
             if (response == null) {
                 valid = false;
-            } else if (response.getContent().equalsIgnoreCase("back")) {
+            } else if (response.equalsIgnoreCase("back")) {
                 return true;
             } else {
-                String permission = response.getContent().toLowerCase();
-                try {
-                    PermissibleAction action = PermissibleAction.valueOf(permission.toUpperCase());
-                    if (group.getActions().contains(action)) {
-                        group.removePermission(action);
-                        permissionsManager.updateGroup(group);
-                        manager.sendText("Removed " + action.toString() + " from " + group.getName());
-                    } else {
-                        manager.sendText("That permission is not in the group. Please try again");
-                    }
-                } catch (IllegalArgumentException e) {
-                    manager.sendText("That is not a valid permission. Please try again");
+                PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
+                if (group.getActions().contains(action)) {
+                    group.removePermission(action);
+                    permissionsManager.updateGroup(group);
+                    manager.sendText("Removed " + action.toString() + " from " + group.getName());
+                } else {
+                    manager.sendText("That permission is not in the group. Please try again");
                 }
             }
         }
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
-        return List.of("permissions", "perms");
+        return List.of("permissions", "perms", "perm");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Control the permissions for SOAP Bot")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("action")
+                        .description("A group name, list, or manage")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(true)
+                        .build())
                 .build();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
-        return "Manage permissions for the bot.";
+        return "Command: !permissions" +
+        "\nAliases: " + getAliases().toString() +
+        "\nUsage:" +
+        "\n\t!permissions list - List all the groups" +
+        "\n\t!permissions [group] - List all the permissions for a group" +
+        "\n\t!permissions manage - Manage all SOAP Bot permissions for roles in this server";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean needsDispatcher() {
         return true;
     }
