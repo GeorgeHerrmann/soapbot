@@ -68,6 +68,7 @@ public final class SoapClientManager {
      * <ul>
      * <li>GuildCreateEvent</li>
      * <li>MessageCreateEvent</li>
+     * <li>ChatInputInteractionEvent</li>
      * </ul>
      */
     public void listenToEvents() {

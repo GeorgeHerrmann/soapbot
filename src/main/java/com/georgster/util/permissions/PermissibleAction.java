@@ -13,5 +13,6 @@ public enum PermissibleAction {
     SHOWQUEUE,
     MESSAGECOMMAND,
     PLINKOGAME,
-    PERMISSIONSCOMMAND
+    PERMISSIONSCOMMAND,
+    DEFAULT
 }

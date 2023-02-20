@@ -93,7 +93,7 @@ public class CommandWizard {
         Disposable canceller = dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(caller.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(initial.getChannelId()))
-            .filter(event -> List.of(options).contains(event.getMessage().getContent().toLowerCase()))
+            .filter(event -> List.of(options).contains(event.getMessage().getContent().toLowerCase()) || event.getMessage().getContent().toLowerCase().equals(end))
             .subscribe(event -> {
                 if (event.getMessage().getContent().equals(end)) {
                     ended = true;
