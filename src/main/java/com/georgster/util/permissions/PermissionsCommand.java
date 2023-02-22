@@ -203,6 +203,18 @@ public class PermissionsCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        if (args.contains("manage")) {
+            return PermissibleAction.MANAGEPERMISSIONS;
+        } else {
+            return PermissibleAction.PERMISSIONSCOMMAND;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("permissions", "perms", "perm");
     }

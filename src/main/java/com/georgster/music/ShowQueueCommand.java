@@ -9,7 +9,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
-
+import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -58,6 +58,14 @@ public class ShowQueueCommand implements Command {
         logger.sendAll();
 
         manager.sendText(response.toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.SHOWQUEUE;
     }
 
     /**

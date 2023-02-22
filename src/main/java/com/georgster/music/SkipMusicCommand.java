@@ -9,6 +9,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -59,6 +60,14 @@ public class SkipMusicCommand implements Command {
         }
 
         logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.SKIPMUSIC;
     }
 
     /**

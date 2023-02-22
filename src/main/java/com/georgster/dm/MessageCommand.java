@@ -10,6 +10,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -41,23 +42,40 @@ public class MessageCommand implements Command {
                 response.append(i + " ");
             }
         }
-        if (!pipeline.getPresentUsers().isEmpty()) {
-            for (User user : pipeline.getPresentUsers()) {
-                logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
-                LogDestination.NONAPI);
-
-                user.getPrivateChannel().block().createMessage(response.toString()).block();
-                if (pipeline.isChatInteraction()) {
-                    ((ChatInputInteractionEvent) pipeline.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
+        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(contents), pipeline.getAuthorAsMember())) {
+            if (!pipeline.getPresentUsers().isEmpty()) {
+                for (User user : pipeline.getPresentUsers()) {
+                    logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
+                    LogDestination.NONAPI);
+    
+                    user.getPrivateChannel().block().createMessage(response.toString()).block();
+                    if (pipeline.isChatInteraction()) {
+                        ((ChatInputInteractionEvent) pipeline.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
+                    }
                 }
+            } else {
+                logger.append("\n\tNo users found, sending help message",
+                LogDestination.NONAPI);
+                String[] output = SoapUtility.splitFirst(help());
+                manager.sendText(output[1], output[0]);
             }
         } else {
-            logger.append("\n\tNo users found, sending help message",
-            LogDestination.NONAPI);
-            String[] output = SoapUtility.splitFirst(help());
-            manager.sendText(output[1], output[0]);
+            logger.append("\n\tUser does not have permission to use this command", LogDestination.NONAPI);
+            manager.sendText("You do not have permission to use this command", "Permission Denied");
         }
         logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        if (!args.isEmpty()) {
+            return PermissibleAction.MESSAGECOMMAND;
+        } else {
+            return PermissibleAction.DEFAULT;
+        }
     }
 
     /**

@@ -84,6 +84,7 @@ public class CommandRegistry {
                 if (commandPipeline.isChatInteraction()) {
                     manager.setActiveInteraction((ChatInputInteractionEvent)event);
                 }
+                commandPipeline.setPermissionsManager(pipeline.getPermissionsManager());
                 SoapUtility.runDaemon(() -> command.execute(commandPipeline, manager));
             }
         });

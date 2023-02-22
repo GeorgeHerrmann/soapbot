@@ -16,6 +16,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.permissions.PermissibleAction;
 
 /**
  * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
@@ -84,6 +85,14 @@ public class HelpCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("help");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.HELPCOMMAND;
     }
 
     /**

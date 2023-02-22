@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.georgster.control.PermissionsManager;
+
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -25,6 +27,7 @@ public class CommandPipeline {
     
     private final Event event; // The event that triggered the creation of this pipeline
     private Member member; // The member that triggered the event
+    private PermissionsManager permissionsManager; // The permissions manager for the guild that the event was triggered in
 
     /**
      * Creates a new CommandPipeline with the given {@code Event}.
@@ -204,6 +207,33 @@ public class CommandPipeline {
      */
     public boolean isChatInteraction() {
         return event instanceof ChatInputInteractionEvent;
+    }
+
+    /**
+     * Returns whether this pipeline's event is a {@code MessageCreateEvent}.
+     * 
+     * @return whether this pipeline's event is a {@code MessageCreateEvent}
+     */
+    public boolean isMessageCreate() {
+        return event instanceof MessageCreateEvent;
+    }
+
+    /**
+     * Sets the {@code PermissionsManager} for this pipeline.
+     * 
+     * @param permissionsManager the {@code PermissionsManager} to be sent to the {@code Command}.
+     */
+    public void setPermissionsManager(PermissionsManager permissionsManager) {
+        this.permissionsManager = permissionsManager;
+    }
+
+    /**
+     * Returns the {@code PermissionsManager} for this pipeline.
+     * 
+     * @return the {@code PermissionsManager} for this pipeline
+     */
+    public PermissionsManager getPermissionsManager() {
+        return permissionsManager;
     }
 
 }

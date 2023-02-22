@@ -12,6 +12,7 @@ import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -158,6 +159,20 @@ public class ReserveCommand implements Command {
             }
         }
         throw new IllegalArgumentException("Incorrect Reserve Event Format or this event already exists, simply type !reserve [EVENTNAME] if you want to reserve to an event that exists.");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        if (args.size() > 1) {
+            return PermissibleAction.CREATEEVENT;
+        } else if (args.size() == 1) {
+            return PermissibleAction.RESERVEEVENT;
+        } else {
+            return PermissibleAction.DEFAULT;
+        }
     }
 
     /**

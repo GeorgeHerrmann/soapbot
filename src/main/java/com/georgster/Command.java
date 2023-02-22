@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.util.GuildManager;
+import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -41,6 +42,16 @@ public interface Command {
     public ApplicationCommandRequest getCommandApplicationInformation();
 
     /**
+     * Returns the {@code PermissibleAction} required to execute an action within {@code Command}.
+     * 
+     * @param args The parsed arguments passed to the {@code Command}.
+     * @return The {@code PermissibleAction} required to execute an action within {@code Command}.
+     */
+    default PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.DEFAULT;
+    }
+
+    /**
      * Returns whether or not a {@code Command} needs the {@code SoapClientManager's}
      * {@code EventDispatcher} upon execution.
      * 
@@ -53,5 +64,5 @@ public interface Command {
      * 
      * @return A string containing information on how to use this {@code Command}.
      */
-    String help();
+    public String help();
 }

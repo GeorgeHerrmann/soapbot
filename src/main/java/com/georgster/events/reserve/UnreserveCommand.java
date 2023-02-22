@@ -10,6 +10,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -74,6 +75,18 @@ public class UnreserveCommand implements Command {
             manager.sendText(help());
         }
         logger.sendAll();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        if (args.size() == 1) {
+            return PermissibleAction.RESERVEEVENT;
+        } else {
+            return PermissibleAction.DEFAULT;
+        }
     }
 
     /**
