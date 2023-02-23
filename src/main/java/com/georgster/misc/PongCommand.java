@@ -39,26 +39,19 @@ public class PongCommand implements Command {
         MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
-        List<String> args = new ArrayList<>(List.of(pipeline.getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
-        StringBuilder fullMessage = new StringBuilder();
-        int counter = 0;
-        while(args.contains(msg)) {
-            args.remove(msg);
-            fullMessage.append("pong! ");
-            counter++;
+        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.PONGCOMMAND, pipeline.getAuthorAsMember())) {
+            List<String> args = new ArrayList<>(List.of(pipeline.getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
+            StringBuilder fullMessage = new StringBuilder();
+            int counter = 0;
+            while(args.contains(msg)) {
+                args.remove(msg);
+                fullMessage.append("pong! ");
+                counter++;
+            }
+            logger.append("\tResponding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
+            manager.sendText(fullMessage.toString().trim(), "You said ping " + counter + " times");
         }
-        logger.append("\tResponding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
-        manager.sendText(fullMessage.toString().trim(), "You said ping " + counter + " times");
-
         logger.sendAll();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PermissibleAction getRequiredPermission(List<String> args) {
-        return PermissibleAction.PONGCOMMAND;
     }
 
     /**

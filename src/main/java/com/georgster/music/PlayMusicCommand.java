@@ -10,6 +10,7 @@ import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
@@ -63,30 +64,32 @@ public class PlayMusicCommand implements Command {
         try {
             CommandParser parser = new CommandParser(PATTERN);
             parser.parse(pipeline.getFormattedMessage());
-            logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+            if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(parser.getArguments()), pipeline.getAuthorAsMember())) {
+                logger.append("\tArguments Found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
-            final Member member = pipeline.getAuthorAsMember(); //Makes sure the member is valid
-            if (member != null) {
-                final VoiceState voiceState = member.getVoiceState().block();
-                if (voiceState != null) { //They must be in a voice channel
-                    final VoiceChannel channel = voiceState.getChannel().block();
-                    if (channel != null) { //And that channel must exist
-                        logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
-                        LogDestination.NONAPI);
-                        VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
-                        scheduler.setChannelData(manager, connection);
+                final Member member = pipeline.getAuthorAsMember(); //Makes sure the member is valid
+                if (member != null) {
+                    final VoiceState voiceState = member.getVoiceState().block();
+                    if (voiceState != null) { //They must be in a voice channel
+                        final VoiceChannel channel = voiceState.getChannel().block();
+                        if (channel != null) { //And that channel must exist
+                            logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
+                            LogDestination.NONAPI);
+                            VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
+                            scheduler.setChannelData(manager, connection);
 
-                        int retryAttempts = 0;
-                        while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {
-                            logger.append("\tFailed to play audio, retrying...\n", LogDestination.NONAPI);
-                            retryAttempts++;
+                            int retryAttempts = 0;
+                            while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {
+                                logger.append("\tFailed to play audio, retrying...\n", LogDestination.NONAPI);
+                                retryAttempts++;
+                            }
+                            if (retryAttempts >= 3) {
+                                logger.append("\tFailed to play audio, retry limit reached\n", LogDestination.NONAPI);
+                            } else {
+                                logger.append("\tSuccessfully start audio\n", LogDestination.NONAPI);
+                            }
+                            logger.append("Playing audio in a discord channel", LogDestination.API);
                         }
-                        if (retryAttempts >= 3) {
-                            logger.append("\tFailed to play audio, retry limit reached\n", LogDestination.NONAPI);
-                        } else {
-                            logger.append("\tSuccessfully start audio\n", LogDestination.NONAPI);
-                        }
-                        logger.append("Playing audio in a discord channel", LogDestination.API);
                     }
                 }
             }
@@ -111,6 +114,18 @@ public class PlayMusicCommand implements Command {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        if (!args.isEmpty()) {
+            return PermissibleAction.PLAYMUSIC;
+        } else {
+            return PermissibleAction.DEFAULT;
         }
     }
 

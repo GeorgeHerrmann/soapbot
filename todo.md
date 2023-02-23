@@ -1,0 +1,5 @@
+- Finish up Permissions system
+- Clean up wizards, add more utility
+- Create Event Wizard
+- Create PollEvent
+- Custom Commands

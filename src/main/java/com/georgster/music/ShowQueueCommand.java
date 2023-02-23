@@ -39,33 +39,26 @@ public class ShowQueueCommand implements Command {
         MultiLogger<ShowQueueCommand> logger = new MultiLogger<>(manager, ShowQueueCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
-        StringBuilder response = new StringBuilder("Current Queue:\n");
-        int x = 1;
+        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.SHOWQUEUE, pipeline.getAuthorAsMember())) {
+            StringBuilder response = new StringBuilder("Current Queue:\n");
+            int x = 1;
 
-        logger.append("\tShowing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
+            logger.append("\tShowing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
 
-        for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
-            response.append("\t" + x + ") " + i.getInfo().title + "\n");
-            if (response.length() >= 1800) {
-                logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
+            for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
+                response.append("\t" + x + ") " + i.getInfo().title + "\n");
+                if (response.length() >= 1800) {
+                    logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
 
-                String[] output = SoapUtility.splitFirst(response.toString());
-                manager.sendText(output[1], output[0]);
-                response = new StringBuilder();
+                    String[] output = SoapUtility.splitFirst(response.toString());
+                    manager.sendText(output[1], output[0]);
+                    response = new StringBuilder();
+                }
+                x++;
             }
-            x++;
+            manager.sendText(response.toString());
         }
         logger.sendAll();
-
-        manager.sendText(response.toString());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PermissibleAction getRequiredPermission(List<String> args) {
-        return PermissibleAction.SHOWQUEUE;
     }
 
     /**

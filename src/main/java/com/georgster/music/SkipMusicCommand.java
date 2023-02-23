@@ -43,31 +43,24 @@ public class SkipMusicCommand implements Command {
         MultiLogger<SkipMusicCommand> logger = new MultiLogger<>(manager, SkipMusicCommand.class);
         logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
-        if (scheduler.isActive()) {
-            List<String> message = CommandParser.parseGeneric(pipeline.getFormattedMessage());
-            logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
-            if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
-                scheduler.clearQueue();
-                manager.sendText("Skipping all tracks in the queue");
+        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.SKIPMUSIC, pipeline.getAuthorAsMember())) {
+            if (scheduler.isActive()) {
+                List<String> message = CommandParser.parseGeneric(pipeline.getFormattedMessage());
+                logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
+                if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
+                    scheduler.clearQueue();
+                    manager.sendText("Skipping all tracks in the queue");
+                } else {
+                    manager.sendText("Skipping the currently playing track");
+                }
+                player.stopTrack();
+                logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
             } else {
-                manager.sendText("Skipping the currently playing track");
+                logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
+                manager.sendText("No tracks are currently playing");
             }
-            player.stopTrack();
-            logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
-        } else {
-            logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
-            manager.sendText("No tracks are currently playing");
         }
-
         logger.sendAll();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PermissibleAction getRequiredPermission(List<String> args) {
-        return PermissibleAction.SKIPMUSIC;
     }
 
     /**

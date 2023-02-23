@@ -47,28 +47,30 @@ public class UnreserveCommand implements Command {
         try {
             parser.parse(pipeline.getFormattedMessage());
 
-            logger.append("\tArguments found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+            if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(parser.getArguments()), pipeline.getAuthorAsMember())) {
+                logger.append("\tArguments found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
-            if (eventManager.eventExists(parser.get(0), TYPE)) {
-                ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
-                if (reserve.alreadyReserved(pipeline.getAuthorAsMember().getTag())) {
+                if (eventManager.eventExists(parser.get(0), TYPE)) {
+                    ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
+                    if (reserve.alreadyReserved(pipeline.getAuthorAsMember().getTag())) {
 
-                    logger.append("\tRemoving " + pipeline.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
-                    reserve.removeReserved(pipeline.getAuthorAsMember().getTag());
-                    if (reserve.getReserved() <= 0) {
-                        eventManager.removeEvent(reserve);
-                        logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
-                        manager.sendText("There are no more people reserved to this event, this event has been removed");
+                        logger.append("\tRemoving " + pipeline.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
+                        reserve.removeReserved(pipeline.getAuthorAsMember().getTag());
+                        if (reserve.getReserved() <= 0) {
+                            eventManager.removeEvent(reserve);
+                            logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
+                            manager.sendText("There are no more people reserved to this event, this event has been removed");
+                        } else {
+                            eventManager.updateEvent(reserve);
+                            manager.sendText("You have unreserved from " + reserve.getIdentifier());
+                        }
                     } else {
-                        eventManager.updateEvent(reserve);
-                        manager.sendText("You have unreserved from " + reserve.getIdentifier());
+                        manager.sendText("You are not reserved to " + reserve.getIdentifier());
                     }
                 } else {
-                    manager.sendText("You are not reserved to " + reserve.getIdentifier());
+                    logger.append("\tEvent does not exist", LogDestination.NONAPI);
+                    manager.sendText("Event " + parser.get(0) + " does not exist, type !events list to see all events");
                 }
-            } else {
-                logger.append("\tEvent does not exist", LogDestination.NONAPI);
-                manager.sendText("Event " + parser.get(0) + " does not exist, type !events list to see all events");
             }
         } catch (Exception e) {
             logger.append("\tSending an error message", LogDestination.NONAPI);

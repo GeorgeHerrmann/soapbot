@@ -141,7 +141,7 @@ public class PermissionsManager {
 
     public boolean hasPermissionSendError(GuildManager manager, MultiLogger<?> logger, PermissibleAction action, Member member) {
         boolean hasPermission = hasPermission(member, action);
-        if (hasPermission) {
+        if (!hasPermission) {
             manager.sendText("You need the " + action.name() + " permission to use this command.", "Missing Permission");
             logger.append("User is missing the " + action.name() + " permission", LogDestination.NONAPI);
         }

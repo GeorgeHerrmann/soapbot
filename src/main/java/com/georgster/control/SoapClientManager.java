@@ -31,6 +31,7 @@ public final class SoapClientManager {
     private final Map<Snowflake, SoapClient> clients;
     private final GatewayDiscordClient discordClient; //Maintains the connection to Discord
     private final EventDispatcher dispatcher;
+    private boolean testMode;
 
     /**
      * Creates a new SoapClientManager to manage all SoapClients for each Guild SOAP Bot is in
@@ -49,6 +50,7 @@ public final class SoapClientManager {
         .login().block();
 
         this.dispatcher = discordClient.getEventDispatcher();
+        this.testMode = false;
     }
 
     /**
@@ -77,7 +79,8 @@ public final class SoapClientManager {
 
         dispatcher.on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
-        .filter(message -> message.getMessage().getContent().startsWith("!"))
+        .filter(message -> (testMode && message.getMessage().getContent().startsWith("!!")) || !testMode) //If test mode is enabled, commands must start with "!!"
+        .filter(message -> message.getMessage().getContent().startsWith("!")) //If test mode is disabled, commands must start with "!"
         .subscribe(event -> clients.get(event.getGuild().block().getId()).onMessageCreate(event)); //Executes onMessageCreate when a MessageCreateEvent is fired
 
         dispatcher.on(ChatInputInteractionEvent.class)
@@ -98,5 +101,13 @@ public final class SoapClientManager {
         Snowflake flake = event.getGuild().getId();
         clients.computeIfAbsent(flake, client -> new SoapClient(new ClientPipeline(dispatcher, event.getGuild(), discordClient.getRestClient()))); //Creates a new SoapClient if one does not already exist for the Guild
         clients.get(flake).onGuildCreate(event); //Distributes the event to the client
+    }
+
+    /**
+     * Enables test mode for all SoapClients. If test mode is enabled, all SoapClients will
+     * only respond to commands via a {@code MessageCreateEvent} if they begin with an additional {@code !}.
+     */
+    public void enableTestMode() {
+        this.testMode = true;
     }
 }

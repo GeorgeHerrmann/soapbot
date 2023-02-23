@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.util.CommandPipeline;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
-import com.georgster.util.commands.CommandWizard;
+import com.georgster.util.permissions.PermissibleAction;
 
-import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -22,33 +23,15 @@ public class TestCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(CommandPipeline pipeline, GuildManager manager) {
-        /*CommandWizard wizard = new CommandWizard(manager, "end", event.getMessage().getAuthorAsMember().block());
-        manager.sendText("Beginning a wizard for three inputs");
-        if (!wizard.ended()) {
-            Message message = wizard.step("Input 1:");
-            if (message == null) {
-                manager.sendText("This listener has ended");
-            } else {
-                manager.sendText("Listener found: " + message.getContent());
-            }
+        if (!ACTIVE) return;
+
+        MultiLogger<TestCommand> logger = new MultiLogger<>(manager, TestCommand.class);
+
+        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.ADMIN, pipeline.getAuthorAsMember())) {
+            logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
         }
-        if (!wizard.ended()) {
-            Message message = wizard.step("Input 2:");
-            if (message == null) {
-                manager.sendText("This listener has ended");
-            } else {
-                manager.sendText("Listener found: " + message.getContent());
-            }
-        }
-        if (!wizard.ended()) {
-            Message message = wizard.step("Input 3:");
-            if (message == null) {
-                manager.sendText("This listener has ended");
-            } else {
-                manager.sendText("Listener found: " + message.getContent());
-            }
-        }
-        manager.sendText("This listener has ended");*/
+
+        logger.sendAll();
     }
 
     /**

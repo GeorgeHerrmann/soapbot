@@ -10,7 +10,6 @@ import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
-import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -51,18 +50,6 @@ public class SoapCommand implements Command {
         logger.append("Showing information about SOAP Bot in a text channel", LogDestination.API);
 
         logger.sendAll();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PermissibleAction getRequiredPermission(List<String> args) {
-        if (!args.isEmpty()) {
-            return PermissibleAction.PLAYMUSIC;
-        } else {
-            return PermissibleAction.DEFAULT;
-        }
     }
 
     /**

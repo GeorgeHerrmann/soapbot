@@ -14,5 +14,6 @@ public enum PermissibleAction {
     MESSAGECOMMAND,
     PLINKOGAME,
     PERMISSIONSCOMMAND,
+    MENTIONEVENT,
     DEFAULT
 }

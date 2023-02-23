@@ -46,30 +46,29 @@ public class PermissionsCommand implements Command {
 
         try {
             parser.parse(pipeline.getFormattedMessage());
-            logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
-            if (parser.get(0).equals("list")) {
-                StringBuilder response = new StringBuilder("Permission Groups:\n");
-                permissionsManager.getGroups().forEach(group -> response.append("\t" + group.getName() + "\n"));
-                response.append("Use !permissions [group] to see the permissions for a group");
-                manager.sendText(response.toString());
-            } else if (parser.get(0).equals("manage")) {
-                Member member = pipeline.getAuthorAsMember();
-                if (permissionsManager.hasPermission(member, PermissibleAction.MANAGEPERMISSIONS)) {
+            if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(parser.getArguments()), pipeline.getAuthorAsMember())) {
+                logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+
+                if (parser.get(0).equals("list")) {
+                    StringBuilder response = new StringBuilder("Permission Groups:\n");
+                    permissionsManager.getGroups().forEach(group -> response.append("\t" + group.getName() + "\n"));
+                    response.append("Use !permissions [group] to see the permissions for a group");
+                    manager.sendText(response.toString());
+                } else if (parser.get(0).equals("manage")) {
+                    Member member = pipeline.getAuthorAsMember();
                     managePermissions(member, manager);
                 } else {
-                    manager.sendText("You must be in a group that has access to " + PermissibleAction.MANAGEPERMISSIONS.toString() + " to use this command");
-                }
-            } else {
-                String group = parser.get(0);
-                if (permissionsManager.groupExists(group)) {
-                    PermissionGroup permissionGroup = permissionsManager.getGroup(group);
-                    manager.sendText("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
-                } else {
-                    manager.sendText("That is not a valid group. Please try again");
+                    String group = parser.get(0);
+                    if (permissionsManager.groupExists(group)) {
+                        PermissionGroup permissionGroup = permissionsManager.getGroup(group);
+                        manager.sendText("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
+                    } else {
+                        manager.sendText("That is not a valid group. Please try again");
+                    }
                 }
             }
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             logger.append("The user did not provide valid arguments, showing the help message\n", LogDestination.NONAPI);
             manager.sendText(help());
         }
