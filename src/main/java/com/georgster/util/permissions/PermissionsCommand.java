@@ -68,7 +68,7 @@ public class PermissionsCommand implements Command {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.append("The user did not provide valid arguments, showing the help message\n", LogDestination.NONAPI);
             manager.sendText(help());
         }
@@ -124,7 +124,7 @@ public class PermissionsCommand implements Command {
                 } else if (response.equals("remove")) {
                     valid = removePermission(wizard, manager, group);
                 } else if (response.equals("list")) {
-                    manager.sendText("Permissions for " + group.getName() + ":\n" + group.getActions().toString());
+                    wizard.swapEditedMessage("Permissions for " + group.getName() + ":\n" + group.getActions().toString());
                 } else if (response.equals("back")) {
                     return true;
                 }
@@ -144,6 +144,7 @@ public class PermissionsCommand implements Command {
     private boolean addPermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
+            group = permissionsManager.getGroup(group.getName());
             String[] perms = new String[PermissibleAction.values().length + 1];
             for (PermissibleAction action : PermissibleAction.values()) {
                 perms[action.ordinal()] = action.toString();
@@ -158,7 +159,7 @@ public class PermissionsCommand implements Command {
                 PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
                 group.addPermission(action);
                 permissionsManager.updateGroup(group);
-                manager.sendText("Added " + action.toString() + " to " + group.getName());
+                wizard.swapEditedMessage("Added " + action.toString() + " to " + group.getName());
             }
         }
         return false;
@@ -175,6 +176,7 @@ public class PermissionsCommand implements Command {
     private boolean removePermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
+            group = permissionsManager.getGroup(group.getName());
             String[] perms = new String[group.getActions().size() + 1];
             for (int i = 0; i < group.getActions().size(); i++) {
                 perms[i] = group.getActions().get(i).toString();
@@ -190,9 +192,9 @@ public class PermissionsCommand implements Command {
                 if (group.getActions().contains(action)) {
                     group.removePermission(action);
                     permissionsManager.updateGroup(group);
-                    manager.sendText("Removed " + action.toString() + " from " + group.getName());
+                    wizard.swapEditedMessage("Removed " + action.toString() + " from " + group.getName());
                 } else {
-                    manager.sendText("That permission is not in the group. Please try again");
+                    wizard.swapEditedMessage("That permission is not in the group. Please try again");
                 }
             }
         }
