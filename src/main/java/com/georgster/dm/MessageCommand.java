@@ -42,7 +42,7 @@ public class MessageCommand implements Command {
                 response.append(i + " ");
             }
         }
-        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(contents), pipeline.getAuthorAsMember())) {
+        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(), pipeline.getAuthorAsMember())) {
             if (!pipeline.getPresentUsers().isEmpty()) {
                 for (User user : pipeline.getPresentUsers()) {
                     logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
@@ -70,17 +70,14 @@ public class MessageCommand implements Command {
      * {@inheritDoc}
      */
     @Override
-    public PermissibleAction getRequiredPermission(List<String> args) {
-        if (!args.isEmpty()) {
-            return PermissibleAction.MESSAGECOMMAND;
-        } else {
-            return PermissibleAction.DEFAULT;
-        }
+    public PermissibleAction getRequiredPermission() {
+        return PermissibleAction.MESSAGECOMMAND;
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 
@@ -100,13 +97,6 @@ public class MessageCommand implements Command {
                 .required(true)
                 .build())
             .build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean needsDispatcher() {
-        return false;
     }
 
     /**

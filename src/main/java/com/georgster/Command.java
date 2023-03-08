@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.util.GuildManager;
+import com.georgster.util.commands.CommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -39,7 +40,9 @@ public interface Command {
      * 
      * @return The {@code ApplicationCommandRequest} for a {@code Command}.
      */
-    public ApplicationCommandRequest getCommandApplicationInformation();
+    default ApplicationCommandRequest getCommandApplicationInformation() {
+        return null;
+    }
 
     /**
      * Returns the {@code PermissibleAction} required to execute an action within {@code Command}.
@@ -47,8 +50,17 @@ public interface Command {
      * @param args The parsed arguments passed to the {@code Command}.
      * @return The {@code PermissibleAction} required to execute an action within {@code Command}.
      */
-    default PermissibleAction getRequiredPermission(List<String> args) {
+    default PermissibleAction getRequiredPermission() {
         return PermissibleAction.DEFAULT;
+    }
+
+    /**
+     * Returns a {@code CommandParser} built to parse the arguments for a {@code Command}.
+     * 
+     * @return The {@code CommandParser} for a {@code Command}.
+     */
+    default CommandParser getCommandParser() {
+        return null;
     }
 
     /**
@@ -57,7 +69,9 @@ public interface Command {
      * 
      * @return {@code true} if the {@code Command} needs the {@code EventDispatcher}, {@code false} otherwise.
      */
-    public boolean needsDispatcher();
+    default boolean needsDispatcher() {
+        return false;
+    }
 
     /**
      * Provides information about usage for a {@code Command}.

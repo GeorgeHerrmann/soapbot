@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.georgster.Command;
 import com.georgster.control.PermissionsManager;
 
 import discord4j.core.event.domain.Event;
@@ -216,6 +217,10 @@ public class CommandPipeline {
      */
     public boolean isMessageCreate() {
         return event instanceof MessageCreateEvent;
+    }
+
+    public boolean hasPermission(Command command) {
+        
     }
 
     /**
