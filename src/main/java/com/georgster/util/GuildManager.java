@@ -310,16 +310,18 @@ public class GuildManager {
      * @param message the message to send
      * @param text the message to send
      */
-    public void editMessageContent(Message message, String text) {
+    public Message editMessageContent(Message message, String text) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
         if (message != null) {
             if (activeSelectMenuInteraction != null) {
-                activeSelectMenuInteraction.edit().withEmbeds(embed).block();
+                Message returns = activeSelectMenuInteraction.getReply().block();
                 killActiveSelectMenuInteraction();
+                return returns;
             } else {
-                message.edit().withEmbeds(embed).block();
+                return message.edit().withEmbeds(embed).block();
             }
         }
+        return null;
     }
 
     /**
@@ -330,16 +332,19 @@ public class GuildManager {
      * @param text the message to send
      * @param title the title of the message
      */
-    public void editMessageContent(Message message, String text, String title) {
+    public Message editMessageContent(Message message, String text, String title) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
         if (message != null) {
             if (activeSelectMenuInteraction != null) {
                 activeSelectMenuInteraction.edit().withEmbeds(embed).block();
+                Message returns = activeSelectMenuInteraction.getReply().block();
                 killActiveSelectMenuInteraction();
+                return returns;
             } else {
-                message.edit().withEmbeds(embed).block();
+                return message.edit().withEmbeds(embed).block();
             }
         }
+        return null;
     }
 
     /**
@@ -351,16 +356,19 @@ public class GuildManager {
      * @param title the title of the message
      * @param component the component to add to the message
      */
-    public void editMessageContent(Message message, String text, String title, LayoutComponent component) {
+    public Message editMessageContent(Message message, String text, String title, LayoutComponent component) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
         if (message != null) {
             if (activeSelectMenuInteraction != null) {
                 activeSelectMenuInteraction.edit().withEmbeds(embed).withComponents(component).block();
+                Message returns = activeSelectMenuInteraction.getReply().block();
                 killActiveSelectMenuInteraction();
+                return returns;
             } else {
-                message.edit().withEmbeds(embed).withComponents(component).block();
+                return message.edit().withEmbeds(embed).withComponents(component).block();
             }
         }
+        return null;
     }
 
     /**

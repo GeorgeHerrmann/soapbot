@@ -3,12 +3,15 @@ package com.georgster.util.commands;
 import java.util.List;
 
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
+import discord4j.core.object.Embed;
 import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -82,7 +85,11 @@ public class CommandWizard {
             initial = manager.sendText(step, title, ActionRow.of(menu));
             initial.addReaction(ReactionEmoji.unicode("❌")).block();
         } else {
-            manager.editMessageContent(initial, step, title, ActionRow.of(menu));
+            try {
+                initial = manager.editMessageContent(initial, step, title, ActionRow.of(menu));
+            } catch (Exception e) {
+                System.out.println("here");
+            }
         }
 
         EventDispatcher dispatcher = manager.getEventDispatcher();
@@ -140,5 +147,13 @@ public class CommandWizard {
         return output.toString();
     }
 
+    public void swapEditedMessage(String message) {
+        Embed embed = initial.getEmbeds().get(0);
+        LayoutComponent component = initial.getComponents().get(0);
+        initial.delete().block();
+        manager.sendText(message);
+        initial = manager.sendText(embed.getDescription().get(), embed.getTitle().get(), component);
+        initial.addReaction(ReactionEmoji.unicode("❌")).block();
+    }
 
 }
