@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.util.GuildManager;
-import com.georgster.util.commands.CommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -50,17 +49,8 @@ public interface Command {
      * @param args The parsed arguments passed to the {@code Command}.
      * @return The {@code PermissibleAction} required to execute an action within {@code Command}.
      */
-    default PermissibleAction getRequiredPermission() {
+    default PermissibleAction getRequiredPermission(List<String> args) {
         return PermissibleAction.DEFAULT;
-    }
-
-    /**
-     * Returns a {@code CommandParser} built to parse the arguments for a {@code Command}.
-     * 
-     * @return The {@code CommandParser} for a {@code Command}.
-     */
-    default CommandParser getCommandParser() {
-        return null;
     }
 
     /**

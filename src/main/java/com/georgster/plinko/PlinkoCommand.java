@@ -2,7 +2,7 @@ package com.georgster.plinko;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -18,7 +18,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 /**
  * Represents the actions following the execution of a "!plinko" command.
  */
-public class PlinkoCommand implements Command {
+public class PlinkoCommand implements ParseableCommand {
     
     /*
      * PlinkoCommand general idea:
@@ -81,8 +81,9 @@ public class PlinkoCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
+    @Override
+    public CommandParser getCommandParser() {
+        return new CommandParser(PATTERN);
     }
 
     /**
@@ -95,6 +96,7 @@ public class PlinkoCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

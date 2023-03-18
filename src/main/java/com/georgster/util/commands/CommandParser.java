@@ -154,6 +154,7 @@ public class CommandParser {
         String[] split = input.substring(1).split(" ");
         return new ArrayList<>(Arrays.asList(split));
     }
+    
     /**
      * Parses the given input and returns a list of arguments that match the pattern of
      * this CommandParser. If the input does not match the pattern, an IllegalArgumentException

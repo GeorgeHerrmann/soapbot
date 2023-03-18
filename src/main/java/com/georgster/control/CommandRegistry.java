@@ -11,7 +11,6 @@ import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.misc.HelpCommand;
-import com.georgster.misc.InfoCommand;
 import com.georgster.misc.PongCommand;
 import com.georgster.misc.SoapCommand;
 import com.georgster.music.PlayMusicCommand;
@@ -20,12 +19,10 @@ import com.georgster.music.SkipMusicCommand;
 import com.georgster.music.components.AudioInterface;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.test.TestCommand;
-import com.georgster.util.GuildManager;
-import com.georgster.util.SoapUtility;
+import com.georgster.util.EventTransformer;
 import com.georgster.util.permissions.PermissionsCommand;
 
 import discord4j.core.event.domain.Event;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -59,7 +56,6 @@ public class CommandRegistry {
         commands.add(new ShowQueueCommand(clientsInterface.getScheduler().getQueue()));
         commands.add(new SkipMusicCommand(clientsInterface.getPlayer(), clientsInterface.getScheduler()));
         commands.add(new PermissionsCommand(pipeline.getPermissionsManager()));
-        commands.add(new InfoCommand());
         commands.add(new TestCommand());
     }
 
@@ -69,23 +65,13 @@ public class CommandRegistry {
      * 
      * @param event the MessageCreateEvent that prompted this call.
      */
-    public void getAndExecute(Event event) {
-        CommandPipeline commandPipeline = new CommandPipeline(event); //Will be used to transport and extract data from the event.
-        String attemptedCommand = commandPipeline.getCommandName().toLowerCase();
+    public void getAndExecute(Event event, SoapClient client) {
+        EventTransformer transformer = new EventTransformer(event);
+        String attemptedCommand = transformer.getCommandName().toLowerCase();
         commands.forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
-                GuildManager manager;
-                if (command.needsDispatcher()) {
-                    manager = new GuildManager(commandPipeline.getGuild(), pipeline.getDispatcher());
-                } else {
-                    manager = new GuildManager(commandPipeline.getGuild());
-                }
-                manager.setActiveChannel(commandPipeline.getChannel());
-                if (commandPipeline.isChatInteraction()) {
-                    manager.setActiveInteraction((ChatInputInteractionEvent)event);
-                }
-                commandPipeline.setPermissionsManager(pipeline.getPermissionsManager());
-                SoapUtility.runDaemon(() -> command.execute(commandPipeline, manager));
+                CommandPipeline commandPipeline = new CommandPipeline(transformer, client, pipeline.getDispatcher(), command);
+                commandPipeline.executeCommand();
             }
         });
     }

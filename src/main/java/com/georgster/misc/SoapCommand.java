@@ -55,13 +55,6 @@ public class SoapCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getAliases() {
         return List.of("soapbot", "version", "info", "about", "bot");
     }
@@ -69,6 +62,7 @@ public class SoapCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

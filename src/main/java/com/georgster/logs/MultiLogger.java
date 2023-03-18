@@ -18,12 +18,12 @@ import com.georgster.util.SoapUtility;
 /**
  * Logs information to {@code LogDestinations} about SOAP Bot's systems.
  */
-public class MultiLogger<T> {
+public class MultiLogger {
     private static final String LOGFILELOCATION = Paths.get(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "logs", "data").toString();
 
     private final EnumMap<LogDestination, String> logs; //Each log message is mapped to its destination
     private final GuildManager manager; //The manager for the Guild
-    private final Class<T> source;
+    private final Class<?> source;
 
     /**
      * Creates a MultiLogger for the associated {@code Guild} in the {@code GuildManager}
@@ -32,7 +32,7 @@ public class MultiLogger<T> {
      * @param manager The manager of the {@code Guild} for logs to be sent to.
      * @param source The class of the object that is logging.
      */
-    public MultiLogger(GuildManager manager, Class<T> source) {
+    public MultiLogger(GuildManager manager, Class<?> source) {
         logs = new EnumMap<>(LogDestination.class);
         this.manager = manager;
         this.source = source;

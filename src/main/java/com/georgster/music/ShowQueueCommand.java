@@ -64,13 +64,6 @@ public class ShowQueueCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getAliases() {
         return List.of("queue", "q", "songs");
     }
@@ -78,6 +71,7 @@ public class ShowQueueCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

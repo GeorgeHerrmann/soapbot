@@ -2,7 +2,7 @@ package com.georgster.events.reserve;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.SoapEventManager;
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.events.SoapEventType;
@@ -22,7 +22,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 /**
  * Represents the command for reserving to and creating events.
  */
-public class ReserveCommand implements Command {
+public class ReserveCommand implements ParseableCommand {
     private static final String PATTERN = "V|R 1|O 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
@@ -107,8 +107,9 @@ public class ReserveCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
+    @Override
+    public CommandParser getCommandParser() {
+        return new ParseBuilder(PATTERN).withRules("X N|T N|T").build();
     }
 
 
@@ -188,6 +189,7 @@ public class ReserveCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

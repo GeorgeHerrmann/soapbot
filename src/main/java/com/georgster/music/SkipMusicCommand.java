@@ -66,13 +66,6 @@ public class SkipMusicCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getAliases() {
         return List.of("skip");
     }
@@ -80,6 +73,7 @@ public class SkipMusicCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

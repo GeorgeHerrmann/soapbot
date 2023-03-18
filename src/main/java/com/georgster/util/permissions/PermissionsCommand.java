@@ -2,7 +2,7 @@ package com.georgster.util.permissions;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.PermissionsManager;
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
@@ -20,7 +20,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 /**
  * Represents the bot's actions following the !permissions command.
  */
-public class PermissionsCommand implements Command {
+public class PermissionsCommand implements ParseableCommand {
     private static final String PATTERN = "V|R";
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
@@ -205,6 +205,14 @@ public class PermissionsCommand implements Command {
      * {@inheritDoc}
      */
     @Override
+    public CommandParser getCommandParser() {
+        return new ParseBuilder(PATTERN).withIdentifiers("list", "manage").build();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public PermissibleAction getRequiredPermission(List<String> args) {
         if (args.contains("manage")) {
             return PermissibleAction.MANAGEPERMISSIONS;
@@ -223,6 +231,7 @@ public class PermissionsCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 
@@ -253,6 +262,7 @@ public class PermissionsCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean needsDispatcher() {
         return true;
     }

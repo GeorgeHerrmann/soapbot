@@ -54,7 +54,7 @@ public final class SoapClient {
         to ensure it has up to date Guild information, so it makes more sense to just make a new one with the Guild in the event */
         GuildManager manager = new GuildManager(event.getGuild());
     
-        MultiLogger<SoapClient> logger = new MultiLogger<>(manager, SoapClient.class);
+        MultiLogger logger = new MultiLogger(manager, getClass());
         logger.append("Logging in to server: " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
         ProfileHandler handler = manager.getProfileHandler();
 
@@ -87,7 +87,7 @@ public final class SoapClient {
      * @param event The MessageCreateEvent that was fired.
      */
     protected void onMessageCreate(MessageCreateEvent event) {
-        registry.getAndExecute(event);
+        registry.getAndExecute(event, this);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class SoapClient {
      * @param event The ChatInputInteractionEvent that was fired.
      */
     protected void onChatInputInteraction(ChatInputInteractionEvent event) {
-        registry.getAndExecute(event);
+        registry.getAndExecute(event, this);
     }
 
     /**
@@ -123,8 +123,18 @@ public final class SoapClient {
      * 
      * @return The SoapEventManager for this SoapClient.
      */
-    protected SoapEventManager getEventManager() {
+    public SoapEventManager getEventManager() {
         return eventManager;
+    }
+
+    /**
+     * Gets the {@code PermissionsManager} that is managing the permissions for this
+     * {@code SoapClient}.
+     * 
+     * @return The PermissionsManager for this SoapClient.
+     */
+    public PermissionsManager getPermissionsManager() {
+        return permissionsManager;
     }
 
     /**
@@ -132,7 +142,7 @@ public final class SoapClient {
      * 
      * @return The CommandRegistry for this SoapClient.
      */
-    protected CommandRegistry getRegistry() {
+    public CommandRegistry getRegistry() {
         return registry;
     }
 }

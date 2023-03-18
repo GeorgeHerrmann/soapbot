@@ -57,13 +57,6 @@ public class PongCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getAliases() {
         return List.of("ping");
     }
@@ -71,6 +64,7 @@ public class PongCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

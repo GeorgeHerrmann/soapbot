@@ -1,244 +1,114 @@
 package com.georgster.control.util;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.georgster.Command;
+import com.georgster.ParseableCommand;
+import com.georgster.control.CommandRegistry;
 import com.georgster.control.PermissionsManager;
+import com.georgster.control.SoapClient;
+import com.georgster.control.SoapEventManager;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
+import com.georgster.music.components.AudioInterface;
+import com.georgster.util.EventTransformer;
+import com.georgster.util.GuildManager;
+import com.georgster.util.commands.CommandParser;
 
-import discord4j.core.event.domain.Event;
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.command.ApplicationCommandInteractionOption;
-import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Channel;
 
 /**
- * A Pipeline that carries information about a Discord {@code Event} to a {@code Command}.
- * If event-specific data is requested from the pipeline, the pipeline will attempt to
- * retrieve the data from the event, returning some default value if not present.
+ * This class is pure chaos at the moment but will be really cool once its done.
  */
 public class CommandPipeline {
     
-    private final Event event; // The event that triggered the creation of this pipeline
-    private Member member; // The member that triggered the event
-    private PermissionsManager permissionsManager; // The permissions manager for the guild that the event was triggered in
+    private MultiLogger logger; // A MultiLogger for the Command that is being executed in this Pipeline
+    private Command command; // The Command that is being executed in this Pipeline
+    private EventTransformer transformer; // The EventTransformer for the Event that triggered the creation of this Pipeline
+    private SoapClient client; // The SoapClient for the Guild the Event was fired in
+    private EventDispatcher dispatcher; // The EventDispatcher for the SoapClientManager that fired the Event in the Pipeline
+    private GuildManager manager; // The GuildManager for the Guild the Event was fired in
+    private CommandParser parser;
 
     /**
      * Creates a new CommandPipeline with the given {@code Event}.
      * 
      * @param event the event
      */
-    public CommandPipeline(Event event) {
-        this.event = event;
-    }
+    public CommandPipeline(EventTransformer transformer, SoapClient client, EventDispatcher dispatcher, Command command) {
+        this.transformer = transformer;
+        this.client = client;
+        this.dispatcher = dispatcher;
+        this.command = command;
+        this.manager = new GuildManager(transformer.getGuild());
+        manager.setActiveChannel(transformer.getChannel());
+        if (transformer.isChatInteraction()) {
+            manager.setActiveInteraction((ChatInputInteractionEvent) transformer.getEvent());
+        }
 
-    /**
-     * Returns the event that this pipeline is carrying.
-     * 
-     * @return the event that this pipeline is carrying
-     */
-    public Event getEvent() {
-        return event;
-    }
+        this.logger = new MultiLogger(manager, command.getClass());
 
-    /**
-     * Returns the guild that the event was triggered in.
-     * Compatiable with the following Discord {@code Events}:
-     * <ul>
-     * <li>{@code MessageCreateEvent}</li>
-     * <li>{@code ChatInputInteractionEvent}</li>
-     * </ul>
-     * 
-     * @return the guild that the event was triggered in
-     */
-    public Guild getGuild() {
-        if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getGuild().block();
-        } else if (event instanceof ChatInputInteractionEvent) {
-            return ((ChatInputInteractionEvent) event).getInteraction().getGuild().block();
-        } else {
-            return null;
+        if (command instanceof ParseableCommand) {
+            parser = ((ParseableCommand) command).getCommandParser();
         }
     }
 
-    /**
-     * Returns the name of the command that triggered the event in this pipeline.
-     * Compatiable with the following Discord {@code Events}:
-     * <ul>
-     * <li>{@code MessageCreateEvent}</li>
-     * <li>{@code ChatInputInteractionEvent}</li>
-     * </ul>
-     * 
-     * @return the name of the command that triggered the event in this pipeline
-     */
-    public String getCommandName() {
-        if (event instanceof ChatInputInteractionEvent) {
-            return ((ChatInputInteractionEvent) event).getCommandName();
-        } else if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getContent().split(" ")[0].replace("!", "");
+    public void executeCommand() {
+        logger.append("**Executing: " + command.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+
+        List<String> args = null;
+        if (command instanceof ParseableCommand) {
+            try {
+                args = parser.parse(transformer.getFormattedMessage());
+                logger.append("\tArguments found: " + args.toString() + "\n",LogDestination.NONAPI);
+            } catch (IllegalArgumentException e) {
+                manager.sendText(command.help());
+            }
         } else {
-            return null;
+            args = Collections.emptyList();
+        }
+
+        if (hasPermission(args)) {
+            command.execute(this, manager);
+        } else {
+            manager.sendText("You need " + command.getRequiredPermission(args) + " to use this command.");
+            logger.append("User is missing permission: " + command.getRequiredPermission(args) + " to use this command.", LogDestination.NONAPI);
         }
     }
+    
+    public boolean hasPermission(List<String> args) {
+        return getPermissionsManager().hasPermission(transformer.getAuthorAsMember(), command.getRequiredPermission(args));
+    }
 
-    /**
-     * Returns a String representing the main content of the event.
-     * The behavior for each supported {@code Event} is as follows:
-     * <ul>
-     * <li>{@code MessageCreateEvent}: the content of the {@code Message}</li>
-     * <li>{@code ChatInputInteractionEvent}: The command name followed by each present option in the order the user inputted</li>
-     * </ul>
-     * 
-     * @return a String representing the main content of the event
-     */
-    public String getFormattedMessage() {
-        if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getContent();
-        } else if (event instanceof ChatInputInteractionEvent) {
-            StringBuilder response = new StringBuilder();
-            ((ChatInputInteractionEvent) event).getInteraction().getCommandInteraction().ifPresent(
-                commandInteraction -> {
-                    response.append(commandInteraction.getName().get() + " ");
-                    for (ApplicationCommandInteractionOption option : commandInteraction.getOptions()) {
-                        try {
-                            response.append(option.getValue().get().asString() + " ");
-                        } catch (IllegalArgumentException e) {
-                            try {
-                                response.append(option.getValue().get().asLong() + " ");
-                            } catch (IllegalArgumentException e2) {
-                                response.append(option.getValue().get().asUser().block().getMention() + " ");
-                            }
-                        }
-                    }
-                });
-            ((ChatInputInteractionEvent) event).getInteraction().getMessage().ifPresent(message -> response.append(message.getContent()));
-
-            return response.toString().trim();
-        } else {
-            return null;
-        }
+    public EventTransformer getEventTransformer() {
+        return transformer;
     }
 
     /**
-     * Returns the channel that the event was triggered in.
-     * Compatiable with the following Discord {@code Events}:
-     * <ul>
-     * <li>{@code MessageCreateEvent}</li>
-     * <li>{@code ChatInputInteractionEvent}</li>
-     * </ul>
+     * Returns the {@code PermissionsManager} for the SoapClient in this Pipeline.
      * 
-     * @return the channel that the event was triggered in
-     */
-    public Channel getChannel() {
-        if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getChannel().block();
-        } else if (event instanceof ChatInputInteractionEvent) {
-            return ((ChatInputInteractionEvent) event).getInteraction().getChannel().block();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Attempts to pull any mentions or noted users from the event.
-     * 
-     * @return a list of users mentioned in the event
-     */
-    public List<User> getPresentUsers() {
-        if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getUserMentions();
-        } else if (event instanceof ChatInputInteractionEvent) {
-            List<User> users = new ArrayList<>();
-            ((ChatInputInteractionEvent) event).getInteraction().getCommandInteraction().ifPresent(commandInteraction -> 
-                users.addAll(commandInteraction.getOptions().stream()
-                .filter(option -> option.getType().equals(ApplicationCommandOption.Type.USER))
-                .map(option -> option.getValue().get().asUser().block())
-                .collect(Collectors.toList()))
-            );
-            return users;
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Attempts to get the author of the event as an {@code Optional}.
-     * 
-     * @return an {@code Optional} containing the author of the event,
-     *        or an empty {@code Optional} if the event does not have an author.
-     */
-    public Optional<User> getAuthorOptionally() {
-        if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getAuthor();
-        } else if (event instanceof ChatInputInteractionEvent) {
-            return Optional.of(((ChatInputInteractionEvent) event).getInteraction().getUser());
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Attempts to get the author of the event as a {@code Member}.
-     * 
-     * @return the author of the event as a {@code Member},
-     *        or {@code null} if the event does not have an author.
-     */
-    public Member getAuthorAsMember() {
-        if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getAuthorAsMember().block();
-        } else if (event instanceof ChatInputInteractionEvent) {
-            ((ChatInputInteractionEvent) event).getInteraction().getMember().ifPresent(mem -> member = mem);
-            return member;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns whether this pipeline's event is a {@code ChatInteractionEvent}.
-     * 
-     * @return whether this pipeline's event is a {@code ChatInteractionEvent}
-     */
-    public boolean isChatInteraction() {
-        return event instanceof ChatInputInteractionEvent;
-    }
-
-    /**
-     * Returns whether this pipeline's event is a {@code MessageCreateEvent}.
-     * 
-     * @return whether this pipeline's event is a {@code MessageCreateEvent}
-     */
-    public boolean isMessageCreate() {
-        return event instanceof MessageCreateEvent;
-    }
-
-    public boolean hasPermission(Command command) {
-        
-    }
-
-    /**
-     * Sets the {@code PermissionsManager} for this pipeline.
-     * 
-     * @param permissionsManager the {@code PermissionsManager} to be sent to the {@code Command}.
-     */
-    public void setPermissionsManager(PermissionsManager permissionsManager) {
-        this.permissionsManager = permissionsManager;
-    }
-
-    /**
-     * Returns the {@code PermissionsManager} for this pipeline.
-     * 
-     * @return the {@code PermissionsManager} for this pipeline
+     * @return the {@code PermissionsManager} for the SoapClient in this Pipeline.
      */
     public PermissionsManager getPermissionsManager() {
-        return permissionsManager;
+        return client.getPermissionsManager();
+    }
+
+    public SoapEventManager getEventManager() {
+        return client.getEventManager();
+    }
+
+    public CommandRegistry getCommandRegistry() {
+        return client.getRegistry();
+    }
+
+    public AudioInterface getAudioInterface() {
+        return client.getAudioInterface();
+    }
+
+    public EventDispatcher getEventDispatcher() {
+        return dispatcher;
     }
 
 }

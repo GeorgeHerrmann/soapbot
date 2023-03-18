@@ -70,8 +70,12 @@ public class MessageCommand implements Command {
      * {@inheritDoc}
      */
     @Override
-    public PermissibleAction getRequiredPermission() {
-        return PermissibleAction.MESSAGECOMMAND;
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        if (!args.isEmpty()) {
+            return PermissibleAction.MESSAGECOMMAND;
+        } else {
+            return PermissibleAction.DEFAULT;
+        }
     }
 
     /**

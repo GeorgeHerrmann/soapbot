@@ -2,7 +2,7 @@ package com.georgster.events.reserve;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.SoapEventManager;
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.events.SoapEventType;
@@ -19,7 +19,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 /**
  * Represents the command for unreserving to a {@code ReserveEvent}.
  */
-public class UnreserveCommand implements Command {
+public class UnreserveCommand implements ParseableCommand {
     private static final String PATTERN = "V|R";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
@@ -101,6 +101,7 @@ public class UnreserveCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 
@@ -133,7 +134,8 @@ public class UnreserveCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
+    @Override
+    public CommandParser getCommandParser() {
+        return new CommandParser(PATTERN);
     }
 }

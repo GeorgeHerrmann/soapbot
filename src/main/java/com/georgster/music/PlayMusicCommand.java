@@ -2,7 +2,7 @@ package com.georgster.music;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -26,7 +26,7 @@ import discord4j.voice.VoiceConnection;
 /**
  * Represents the bot's actions following the !play command.
  */
-public class PlayMusicCommand implements Command {
+public class PlayMusicCommand implements ParseableCommand {
 
     private final AudioProvider provider;
     private final AudioPlayerManager playerManager;
@@ -121,19 +121,20 @@ public class PlayMusicCommand implements Command {
      * {@inheritDoc}
      */
     @Override
+    public CommandParser getCommandParser() {
+        return new CommandParser(PATTERN);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public PermissibleAction getRequiredPermission(List<String> args) {
         if (!args.isEmpty()) {
             return PermissibleAction.PLAYMUSIC;
         } else {
             return PermissibleAction.DEFAULT;
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean needsDispatcher() {
-        return false;
     }
 
     /**
@@ -146,6 +147,7 @@ public class PlayMusicCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

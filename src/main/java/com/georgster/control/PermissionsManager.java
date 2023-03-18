@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.ClientPipeline;
-import com.georgster.logs.LogDestination;
-import com.georgster.logs.MultiLogger;
 import com.georgster.profile.ProfileHandler;
 import com.georgster.profile.ProfileType;
 import com.georgster.util.GuildManager;
@@ -137,14 +135,5 @@ public class PermissionsManager {
 
     public Guild getGuild() {
         return manager.getGuild();
-    }
-
-    public boolean hasPermissionSendError(GuildManager manager, MultiLogger<?> logger, PermissibleAction action, Member member) {
-        boolean hasPermission = hasPermission(member, action);
-        if (!hasPermission) {
-            manager.sendText("You need the " + action.name() + " permission to use this command.", "Missing Permission");
-            logger.append("User is missing the " + action.name() + " permission", LogDestination.NONAPI);
-        }
-        return hasPermission;
     }
 }

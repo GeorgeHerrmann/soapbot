@@ -9,6 +9,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
@@ -21,7 +22,7 @@ import com.georgster.util.permissions.PermissibleAction;
 /**
  * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
  */
-public class HelpCommand implements Command {
+public class HelpCommand implements ParseableCommand {
 
     private static final String PATTERN = "1|R"; //A regex pattern to parse the contents of a !help command request
 
@@ -77,8 +78,9 @@ public class HelpCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public boolean needsDispatcher() {
-        return false;
+    @Override
+    public CommandParser getCommandParser() {
+        return new CommandParser(PATTERN);
     }
 
     /**
@@ -91,6 +93,7 @@ public class HelpCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 
