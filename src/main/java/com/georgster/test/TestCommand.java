@@ -4,10 +4,6 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.util.CommandPipeline;
-import com.georgster.logs.LogDestination;
-import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildManager;
-import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -17,28 +13,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class TestCommand implements Command {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-    private static final boolean ACTIVE = true;
+    private static final boolean ACTIVE = false;
 
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        if (!ACTIVE) return;
-
-        MultiLogger<TestCommand> logger = new MultiLogger<>(manager, TestCommand.class);
-
-        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.ADMIN, pipeline.getAuthorAsMember())) {
-            logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
-        }
-
-        logger.sendAll();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean needsDispatcher() {
-        return true;
+    public void execute(CommandPipeline pipeline) {
+        throw new UnsupportedOperationException(); // This command is not active
     }
 
     /**
@@ -55,6 +36,7 @@ public class TestCommand implements Command {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
         if (!needsNewRegistration) return null;
 

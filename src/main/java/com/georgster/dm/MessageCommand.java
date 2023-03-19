@@ -8,6 +8,7 @@ import com.georgster.Command;
 import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
+import com.georgster.util.EventTransformer;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissibleAction;
@@ -28,12 +29,12 @@ public class MessageCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<MessageCommand> logger = new MultiLogger<>(manager, MessageCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**",
-        LogDestination.NONAPI, LogDestination.API);
+    public void execute(CommandPipeline pipeline) {
+        MultiLogger logger = pipeline.getLogger();
+        EventTransformer transformer = pipeline.getEventTransformer();
+        GuildManager manager = pipeline.getGuildManager();
 
-        List<String> contents = new ArrayList<>(Arrays.asList(pipeline.getFormattedMessage().split(" ")));
+        List<String> contents = new ArrayList<>(Arrays.asList(transformer.getFormattedMessage().split(" ")));
         contents.remove(0);
 
         StringBuilder response = new StringBuilder();
@@ -42,28 +43,22 @@ public class MessageCommand implements Command {
                 response.append(i + " ");
             }
         }
-        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(), pipeline.getAuthorAsMember())) {
-            if (!pipeline.getPresentUsers().isEmpty()) {
-                for (User user : pipeline.getPresentUsers()) {
-                    logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
-                    LogDestination.NONAPI);
-    
-                    user.getPrivateChannel().block().createMessage(response.toString()).block();
-                    if (pipeline.isChatInteraction()) {
-                        ((ChatInputInteractionEvent) pipeline.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
-                    }
-                }
-            } else {
-                logger.append("\n\tNo users found, sending help message",
+        if (!transformer.getPresentUsers().isEmpty()) {
+            for (User user : transformer.getPresentUsers()) {
+                logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
                 LogDestination.NONAPI);
-                String[] output = SoapUtility.splitFirst(help());
-                manager.sendText(output[1], output[0]);
+
+                user.getPrivateChannel().block().createMessage(response.toString()).block();
+                if (transformer.isChatInteraction()) {
+                    ((ChatInputInteractionEvent) transformer.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
+                }
             }
         } else {
-            logger.append("\n\tUser does not have permission to use this command", LogDestination.NONAPI);
-            manager.sendText("You do not have permission to use this command", "Permission Denied");
+            logger.append("\n\tNo users found, sending help message",
+            LogDestination.NONAPI);
+            String[] output = SoapUtility.splitFirst(help());
+            manager.sendText(output[1], output[0]);
         }
-        logger.sendAll();
     }
 
     /**

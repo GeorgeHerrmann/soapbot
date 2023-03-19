@@ -9,7 +9,6 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
-import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -39,28 +38,25 @@ public class SkipMusicCommand implements Command {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<SkipMusicCommand> logger = new MultiLogger<>(manager, SkipMusicCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+    public void execute(CommandPipeline pipeline) {
+        MultiLogger logger = pipeline.getLogger();
+        GuildManager manager = pipeline.getGuildManager();
 
-        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.SKIPMUSIC, pipeline.getAuthorAsMember())) {
-            if (scheduler.isActive()) {
-                List<String> message = CommandParser.parseGeneric(pipeline.getFormattedMessage());
-                logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
-                if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
-                    scheduler.clearQueue();
-                    manager.sendText("Skipping all tracks in the queue");
-                } else {
-                    manager.sendText("Skipping the currently playing track");
-                }
-                player.stopTrack();
-                logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
+        if (scheduler.isActive()) {
+            List<String> message = CommandParser.parseGeneric(pipeline.getEventTransformer().getFormattedMessage());
+            logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
+            if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
+                scheduler.clearQueue();
+                manager.sendText("Skipping all tracks in the queue");
             } else {
-                logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
-                manager.sendText("No tracks are currently playing");
+                manager.sendText("Skipping the currently playing track");
             }
+            player.stopTrack();
+            logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
+        } else {
+            logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
+            manager.sendText("No tracks are currently playing");
         }
-        logger.sendAll();
     }
 
     /**

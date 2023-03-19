@@ -49,8 +49,8 @@ public class PlinkoGame {
      * @param event The {@code MessageCreateEvent} that prompted the creation of this {@code PlinkoGame}.
      */
     PlinkoGame(CommandPipeline pipeline, GuildManager manager) {
-        guild = pipeline.getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
-        channel = pipeline.getChannel();
+        guild = pipeline.getEventTransformer().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
+        channel = pipeline.getEventTransformer().getChannel();
         rand = new Random();
         this.manager = manager;
     }

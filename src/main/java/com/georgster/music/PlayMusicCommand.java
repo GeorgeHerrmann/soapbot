@@ -8,7 +8,6 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
-import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -57,49 +56,36 @@ public class PlayMusicCommand implements ParseableCommand {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<PlayMusicCommand> logger = new MultiLogger<>(manager, PlayMusicCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+    public void execute(CommandPipeline pipeline) {
+        final GuildManager manager = pipeline.getGuildManager();
+        final MultiLogger logger = pipeline.getLogger();
+        final CommandParser parser = getCommandParser();
+        final Member member = pipeline.getEventTransformer().getAuthorAsMember(); //Makes sure the member is valid
 
-        try {
-            CommandParser parser = new CommandParser(PATTERN);
-            parser.parse(pipeline.getFormattedMessage());
-            if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(parser.getArguments()), pipeline.getAuthorAsMember())) {
-                logger.append("\tArguments Found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+        if (member != null) {
+            final VoiceState voiceState = member.getVoiceState().block();
+            if (voiceState != null) { //They must be in a voice channel
+                final VoiceChannel channel = voiceState.getChannel().block();
+                if (channel != null) { //And that channel must exist
+                    logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
+                    LogDestination.NONAPI);
+                    VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
+                    scheduler.setChannelData(manager, connection);
 
-                final Member member = pipeline.getAuthorAsMember(); //Makes sure the member is valid
-                if (member != null) {
-                    final VoiceState voiceState = member.getVoiceState().block();
-                    if (voiceState != null) { //They must be in a voice channel
-                        final VoiceChannel channel = voiceState.getChannel().block();
-                        if (channel != null) { //And that channel must exist
-                            logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
-                            LogDestination.NONAPI);
-                            VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
-                            scheduler.setChannelData(manager, connection);
-
-                            int retryAttempts = 0;
-                            while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {
-                                logger.append("\tFailed to play audio, retrying...\n", LogDestination.NONAPI);
-                                retryAttempts++;
-                            }
-                            if (retryAttempts >= 3) {
-                                logger.append("\tFailed to play audio, retry limit reached\n", LogDestination.NONAPI);
-                            } else {
-                                logger.append("\tSuccessfully start audio\n", LogDestination.NONAPI);
-                            }
-                            logger.append("Playing audio in a discord channel", LogDestination.API);
-                        }
+                    int retryAttempts = 0;
+                    while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {
+                        logger.append("\tFailed to play audio, retrying...\n", LogDestination.NONAPI);
+                        retryAttempts++;
                     }
+                    if (retryAttempts >= 3) {
+                        logger.append("\tFailed to play audio, retry limit reached\n", LogDestination.NONAPI);
+                    } else {
+                        logger.append("\tSuccessfully start audio\n", LogDestination.NONAPI);
+                    }
+                    logger.append("Playing audio in a discord channel", LogDestination.API);
                 }
             }
-        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-            logger.append("\tSending the help message", LogDestination.NONAPI);
-            String[] output = SoapUtility.splitFirst(help());
-            manager.sendText(output[1], output[0]);
-            manager.sendText(output[1], output[2]);
         }
-        logger.sendAll();
     }
 
     /**

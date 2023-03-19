@@ -39,31 +39,19 @@ public class PlinkoCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<PlinkoCommand> logger = new MultiLogger<>(manager, PlinkoCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+    public void execute(CommandPipeline pipeline) {
+        final GuildManager manager = pipeline.getGuildManager();
+        final MultiLogger logger = pipeline.getLogger();
+        final CommandParser parser = pipeline.getCommandParser();
 
-        CommandParser parser = new CommandParser(PATTERN);
-        try {
-            parser.parse(pipeline.getFormattedMessage().toLowerCase());
-            if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, getRequiredPermission(parser.getArguments()), pipeline.getAuthorAsMember())) {
-                logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
-
-                PlinkoGame game = new PlinkoGame(pipeline, manager); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
-                if (parser.get(0).equals("play")) {
-                    logger.append("\tBeginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
-                    game.play();
-                } else if (parser.get(0).equals("board")) {
-                    logger.append("\tShowing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
-                    game.showBoard();
-                }
-            }
-        } catch (Exception e) {
-            logger.append("\tInvalid command format", LogDestination.NONAPI);
-            manager.sendText(help());
+        PlinkoGame game = new PlinkoGame(pipeline, manager); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
+        if (parser.get(0).equals("play")) {
+            logger.append("\tBeginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
+            game.play();
+        } else if (parser.get(0).equals("board")) {
+            logger.append("\tShowing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
+            game.showBoard();
         }
-
-        logger.sendAll();
     }
 
     /**

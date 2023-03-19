@@ -17,7 +17,6 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
-import com.georgster.util.permissions.PermissibleAction;
 
 /**
  * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
@@ -41,38 +40,28 @@ public class HelpCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<HelpCommand> logger = new MultiLogger<>(manager, HelpCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+    public void execute(CommandPipeline pipeline) {
+        MultiLogger logger = pipeline.getLogger();
+        CommandParser parser = pipeline.getCommandParser();
+        GuildManager manager = pipeline.getGuildManager();
 
-        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.HELPCOMMAND, pipeline.getAuthorAsMember())) {
-            CommandParser parser = new CommandParser(PATTERN);
-            String arg;
-            try {
-                parser.parse(pipeline.getFormattedMessage().toLowerCase());
-                logger.append("\tArguments found: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
-                arg = parser.get(0).toLowerCase();
-            } catch (Exception e) {
-                logger.append("\tNo arguments found\n", LogDestination.NONAPI);
-                arg = "";
-            }
-            StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
-            for (Command command : register.getCommands()) {
-                if (command.getAliases().contains(arg)) {
-                    logger.append("\tCommand found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
-                    response = new StringBuilder(command.help());
-                    break;
-                } else {
-                    if (!command.getAliases().isEmpty()) {
-                        response.append(command.getAliases().get(0) + " ");
-                    }
+        String arg = parser.get(0).toLowerCase();
+
+        StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
+        for (Command command : register.getCommands()) {
+            if (command.getAliases().contains(arg)) {
+                logger.append("\tCommand found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+                response = new StringBuilder(command.help());
+                break;
+            } else {
+                if (!command.getAliases().isEmpty()) {
+                    response.append(command.getAliases().get(0) + " ");
                 }
             }
-            logger.append("Responding to a !help command request", LogDestination.API);
-            String[] output = SoapUtility.splitFirst(response.toString());
-            manager.sendText(output[1], output[0]);
         }
-        logger.sendAll();
+        logger.append("Responding to a !help command request", LogDestination.API);
+        String[] output = SoapUtility.splitFirst(response.toString());
+        manager.sendText(output[1], output[0]);
     }
 
     /**

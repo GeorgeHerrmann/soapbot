@@ -3,7 +3,6 @@ package com.georgster.util.commands;
 import java.util.List;
 
 import com.georgster.util.GuildManager;
-import com.georgster.util.SoapUtility;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;

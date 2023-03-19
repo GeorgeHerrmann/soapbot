@@ -8,7 +8,6 @@ import com.georgster.control.util.CommandPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
-import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -35,23 +34,20 @@ public class PongCommand implements Command {
      * {@inheritDoc}
      */
     @Override
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<PongCommand> logger = new MultiLogger<>(manager, PongCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+    public void execute(CommandPipeline pipeline) {
+        MultiLogger logger = pipeline.getLogger();
+        GuildManager manager = pipeline.getGuildManager();
 
-        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.PONGCOMMAND, pipeline.getAuthorAsMember())) {
-            List<String> args = new ArrayList<>(List.of(pipeline.getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
-            StringBuilder fullMessage = new StringBuilder();
-            int counter = 0;
-            while(args.contains(msg)) {
-                args.remove(msg);
-                fullMessage.append("pong! ");
-                counter++;
-            }
-            logger.append("\tResponding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
-            manager.sendText(fullMessage.toString().trim(), "You said ping " + counter + " times");
+        List<String> args = new ArrayList<>(List.of(pipeline.getEventTransformer().getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
+        StringBuilder fullMessage = new StringBuilder();
+        int counter = 0;
+        while(args.contains(msg)) {
+            args.remove(msg);
+            fullMessage.append("pong! ");
+            counter++;
         }
-        logger.sendAll();
+        logger.append("\tResponding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
+        manager.sendText(fullMessage.toString().trim(), "You said ping " + counter + " times");
     }
 
     /**

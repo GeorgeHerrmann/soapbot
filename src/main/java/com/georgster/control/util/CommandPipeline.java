@@ -63,15 +63,22 @@ public class CommandPipeline {
             try {
                 args = parser.parse(transformer.getFormattedMessage());
                 logger.append("\tArguments found: " + args.toString() + "\n",LogDestination.NONAPI);
-            } catch (IllegalArgumentException e) {
+                executeIfPermission(args);
+            } catch (Exception e) {
+                logger.append("\tInvalid arguments, sending a help message\n", LogDestination.NONAPI);
                 manager.sendText(command.help());
             }
         } else {
             args = Collections.emptyList();
+            executeIfPermission(args);
         }
 
+        logger.sendAll();
+    }
+
+    private void executeIfPermission(List<String> args) {
         if (hasPermission(args)) {
-            command.execute(this, manager);
+            command.execute(this);
         } else {
             manager.sendText("You need " + command.getRequiredPermission(args) + " to use this command.");
             logger.append("User is missing permission: " + command.getRequiredPermission(args) + " to use this command.", LogDestination.NONAPI);
@@ -109,6 +116,24 @@ public class CommandPipeline {
 
     public EventDispatcher getEventDispatcher() {
         return dispatcher;
+    }
+
+    public MultiLogger getLogger() {
+        return logger;
+    }
+
+    public GuildManager getGuildManager() {
+        return manager;
+    }
+
+    /**
+     * Returns the {@code CommandParser} for the Command in this Pipeline if
+     * the Command is a {@code ParseableCommand}.
+     * 
+     * @return the {@code CommandParser} for the Command in this Pipeline.
+     */
+    public CommandParser getCommandParser() {
+        return parser;
     }
 
 }

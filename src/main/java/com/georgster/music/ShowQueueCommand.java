@@ -9,7 +9,6 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -35,30 +34,27 @@ public class ShowQueueCommand implements Command {
      * 
      * @param execute the event that triggered the command
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<ShowQueueCommand> logger = new MultiLogger<>(manager, ShowQueueCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+    public void execute(CommandPipeline pipeline) {
+        MultiLogger logger = pipeline.getLogger();
+        GuildManager manager = pipeline.getGuildManager();
 
-        if (pipeline.getPermissionsManager().hasPermissionSendError(manager, logger, PermissibleAction.SHOWQUEUE, pipeline.getAuthorAsMember())) {
-            StringBuilder response = new StringBuilder("Current Queue:\n");
-            int x = 1;
+        StringBuilder response = new StringBuilder("Current Queue:\n");
+        int x = 1;
 
-            logger.append("\tShowing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
+        logger.append("\tShowing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
 
-            for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
-                response.append("\t" + x + ") " + i.getInfo().title + "\n");
-                if (response.length() >= 1800) {
-                    logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
+        for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
+            response.append("\t" + x + ") " + i.getInfo().title + "\n");
+            if (response.length() >= 1800) {
+                logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
 
-                    String[] output = SoapUtility.splitFirst(response.toString());
-                    manager.sendText(output[1], output[0]);
-                    response = new StringBuilder();
-                }
-                x++;
+                String[] output = SoapUtility.splitFirst(response.toString());
+                manager.sendText(output[1], output[0]);
+                response = new StringBuilder();
             }
-            manager.sendText(response.toString());
+            x++;
         }
-        logger.sendAll();
+        manager.sendText(response.toString());
     }
 
     /**

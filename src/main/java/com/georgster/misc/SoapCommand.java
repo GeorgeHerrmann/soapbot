@@ -22,9 +22,9 @@ public class SoapCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline, GuildManager manager) {
-        MultiLogger<SoapCommand> logger = new MultiLogger<>(manager, SoapCommand.class);
-        logger.append("**Executing: " + this.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+    public void execute(CommandPipeline pipeline) {
+        MultiLogger logger = pipeline.getLogger();
+        GuildManager manager = pipeline.getGuildManager();
 
         String version = "";
         File myObj = new File("pom.xml"); //Reads the version number from the pom.xml file
