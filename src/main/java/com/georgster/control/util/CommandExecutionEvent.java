@@ -20,13 +20,14 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
 /**
- * This class is pure chaos at the moment but will be really cool once its done.
+ * An Event fired upon the execution of a SOAPBot {@code Command}. This Event packages
+ * the data from the Discord Event, as well as various objects a command might need.
  */
-public class CommandPipeline {
+public class CommandExecutionEvent {
     
-    private MultiLogger logger; // A MultiLogger for the Command that is being executed in this Pipeline
-    private Command command; // The Command that is being executed in this Pipeline
-    private EventTransformer transformer; // The EventTransformer for the Event that triggered the creation of this Pipeline
+    private MultiLogger logger; // Used to log messages about the Event.
+    private Command command; // The Command that is being executed
+    private EventTransformer transformer; // A transformer used to extract data from the Discord Event that created this Event
     private SoapClient client; // The SoapClient for the Guild the Event was fired in
     private EventDispatcher dispatcher; // The EventDispatcher for the SoapClientManager that fired the Event in the Pipeline
     private GuildManager manager; // The GuildManager for the Guild the Event was fired in
@@ -37,7 +38,7 @@ public class CommandPipeline {
      * 
      * @param event the event
      */
-    public CommandPipeline(EventTransformer transformer, SoapClient client, EventDispatcher dispatcher, Command command) {
+    public CommandExecutionEvent(EventTransformer transformer, SoapClient client, EventDispatcher dispatcher, Command command) {
         this.transformer = transformer;
         this.client = client;
         this.dispatcher = dispatcher;
@@ -66,7 +67,7 @@ public class CommandPipeline {
                 executeIfPermission(args);
             } catch (Exception e) {
                 logger.append("\tInvalid arguments, sending a help message\n", LogDestination.NONAPI);
-                manager.sendText(command.help());
+                manager.sendText(command.help(), command.getClass().getSimpleName());
             }
         } else {
             args = Collections.emptyList();

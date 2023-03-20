@@ -3,7 +3,7 @@ package com.georgster.test;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -18,7 +18,7 @@ public class TestCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
+    public void execute(CommandExecutionEvent event) {
         throw new UnsupportedOperationException(); // This command is not active
     }
 

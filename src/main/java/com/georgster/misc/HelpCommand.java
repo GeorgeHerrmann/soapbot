@@ -11,7 +11,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
@@ -40,10 +40,10 @@ public class HelpCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        CommandParser parser = pipeline.getCommandParser();
-        GuildManager manager = pipeline.getGuildManager();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        CommandParser parser = event.getCommandParser();
+        GuildManager manager = event.getGuildManager();
 
         String arg = parser.get(0).toLowerCase();
 

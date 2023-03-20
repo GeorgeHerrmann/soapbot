@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.Random;
 
 import com.georgster.api.ActionWriter;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.GuildManager;
 
 /**
@@ -48,11 +48,11 @@ public class PlinkoGame {
      * 
      * @param event The {@code MessageCreateEvent} that prompted the creation of this {@code PlinkoGame}.
      */
-    PlinkoGame(CommandPipeline pipeline, GuildManager manager) {
-        guild = pipeline.getEventTransformer().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
-        channel = pipeline.getEventTransformer().getChannel();
+    PlinkoGame(CommandExecutionEvent event) {
+        guild = event.getEventTransformer().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
+        channel = event.getEventTransformer().getChannel();
         rand = new Random();
-        this.manager = manager;
+        this.manager = event.getGuildManager();
     }
 
     /**

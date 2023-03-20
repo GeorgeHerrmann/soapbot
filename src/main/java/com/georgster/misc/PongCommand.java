@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
@@ -34,11 +34,11 @@ public class PongCommand implements Command {
      * {@inheritDoc}
      */
     @Override
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        GuildManager manager = pipeline.getGuildManager();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        GuildManager manager = event.getGuildManager();
 
-        List<String> args = new ArrayList<>(List.of(pipeline.getEventTransformer().getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
+        List<String> args = new ArrayList<>(List.of(event.getEventTransformer().getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
         while(args.contains(msg)) {

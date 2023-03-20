@@ -3,7 +3,7 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
@@ -56,11 +56,11 @@ public class PlayMusicCommand implements ParseableCommand {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(CommandPipeline pipeline) {
-        final GuildManager manager = pipeline.getGuildManager();
-        final MultiLogger logger = pipeline.getLogger();
+    public void execute(CommandExecutionEvent event) {
+        final GuildManager manager = event.getGuildManager();
+        final MultiLogger logger = event.getLogger();
         final CommandParser parser = getCommandParser();
-        final Member member = pipeline.getEventTransformer().getAuthorAsMember(); //Makes sure the member is valid
+        final Member member = event.getEventTransformer().getAuthorAsMember(); //Makes sure the member is valid
 
         if (member != null) {
             final VoiceState voiceState = member.getVoiceState().block();

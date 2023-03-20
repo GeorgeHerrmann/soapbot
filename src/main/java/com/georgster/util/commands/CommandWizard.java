@@ -2,15 +2,14 @@ package com.georgster.util.commands;
 
 import java.util.List;
 
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.GuildManager;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
-import discord4j.core.object.Embed;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -25,7 +24,8 @@ public class CommandWizard {
 
     private Message initial; // The initial message sent by the wizard
     private Member caller; // The user who called the wizard
-    private final GuildManager manager; // The manager managing the guild from the original command
+    private final CommandExecutionEvent pipeline; // The manager managing the guild from the original command
+    private final GuildManager manager;
     private boolean ended; // Whether or not the wizard has ended
     private String end; // The string that ends the wizard
     private String title; // The title of messages sent by this wizard
@@ -42,12 +42,13 @@ public class CommandWizard {
      * @param title  The title of messages sent by this wizard
      * @param caller The user who called the wizard
      */
-    public CommandWizard(GuildManager manager, String end, String title, Member caller) {
-        this.caller = caller;
+    public CommandWizard(CommandExecutionEvent pipeline, String end, String title) {
+        this.caller = pipeline.getEventTransformer().getAuthorAsMember();
         this.ended = false;
         this.end = end;
         initial = null;
-        this.manager = manager;
+        this.pipeline = pipeline;
+        this.manager = pipeline.getGuildManager();
         this.title = title;
     }
 
@@ -91,7 +92,7 @@ public class CommandWizard {
             }
         }
 
-        EventDispatcher dispatcher = manager.getEventDispatcher();
+        EventDispatcher dispatcher = pipeline.getEventDispatcher();
         
         StringBuilder output = new StringBuilder();
 
@@ -146,13 +147,14 @@ public class CommandWizard {
         return output.toString();
     }
 
-    public void swapEditedMessage(String message) {
-        Embed embed = initial.getEmbeds().get(0);
-        LayoutComponent component = initial.getComponents().get(0);
-        initial.delete().block();
-        manager.sendText(message);
-        initial = manager.sendText(embed.getDescription().get(), embed.getTitle().get(), component);
-        initial.addReaction(ReactionEmoji.unicode("❌")).block();
+    /**
+     * Sends a private message to the user of this Wizard.
+     * Generally used to keep a log of all actions done with the Wizard.
+     * 
+     * @param message The message to send to the user.
+     */
+    public void sendPrivateMessage(String message) {
+        caller.getPrivateChannel().block().createMessage(message).block();
     }
 
 }

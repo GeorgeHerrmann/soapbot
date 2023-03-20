@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.EventTransformer;
@@ -29,10 +29,10 @@ public class MessageCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        EventTransformer transformer = pipeline.getEventTransformer();
-        GuildManager manager = pipeline.getGuildManager();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        EventTransformer transformer = event.getEventTransformer();
+        GuildManager manager = event.getGuildManager();
 
         List<String> contents = new ArrayList<>(Arrays.asList(transformer.getFormattedMessage().split(" ")));
         contents.remove(0);

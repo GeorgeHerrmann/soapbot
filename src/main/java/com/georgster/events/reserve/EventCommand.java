@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.SoapEventManager;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
@@ -41,10 +41,10 @@ public class EventCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        GuildManager manager = pipeline.getGuildManager();
-        CommandParser parser = pipeline.getCommandParser();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        GuildManager manager = event.getGuildManager();
+        CommandParser parser = event.getCommandParser();
 
         if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
             logger.append("Showing all events in a text channel", LogDestination.API);

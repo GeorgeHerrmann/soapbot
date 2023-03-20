@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
@@ -34,9 +34,9 @@ public class ShowQueueCommand implements Command {
      * 
      * @param execute the event that triggered the command
      */
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        GuildManager manager = pipeline.getGuildManager();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        GuildManager manager = event.getGuildManager();
 
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;

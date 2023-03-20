@@ -3,10 +3,9 @@ package com.georgster.plinko;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
@@ -39,12 +38,11 @@ public class PlinkoCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
-        final GuildManager manager = pipeline.getGuildManager();
-        final MultiLogger logger = pipeline.getLogger();
-        final CommandParser parser = pipeline.getCommandParser();
+    public void execute(CommandExecutionEvent event) {
+        final MultiLogger logger = event.getLogger();
+        final CommandParser parser = event.getCommandParser();
 
-        PlinkoGame game = new PlinkoGame(pipeline, manager); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
+        PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (parser.get(0).equals("play")) {
             logger.append("\tBeginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
             game.play();

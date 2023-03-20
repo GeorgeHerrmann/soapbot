@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.SoapEventManager;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -42,13 +42,12 @@ public class ReserveCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        GuildManager manager = pipeline.getGuildManager();
-        EventTransformer transformer = pipeline.getEventTransformer();
-        CommandParser parser = pipeline.getCommandParser();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        GuildManager manager = event.getGuildManager();
+        EventTransformer transformer = event.getEventTransformer();
 
-        ReserveEvent reserve = assignCorrectEvent(manager, parser);
+        ReserveEvent reserve = assignCorrectEvent(event);
 
         if (eventManager.eventExists(reserve.getIdentifier(), TYPE)) {
             if (!reserve.isFull()) {
@@ -103,7 +102,9 @@ public class ReserveCommand implements ParseableCommand {
      * @return The ReserveEvent that the user wants to create or reserve to
      * @throws IllegalArgumentException If the user's command message is in the wrong format
      */
-    private ReserveEvent assignCorrectEvent(GuildManager manager, CommandParser parser) throws IllegalArgumentException {
+    private ReserveEvent assignCorrectEvent(CommandExecutionEvent event) throws IllegalArgumentException {
+        GuildManager manager = event.getGuildManager();
+        CommandParser parser = event.getCommandParser();
 
         List<String> message = parser.getArguments();
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();

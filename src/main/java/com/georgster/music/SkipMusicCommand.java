@@ -3,7 +3,7 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
@@ -38,12 +38,12 @@ public class SkipMusicCommand implements Command {
      * 
      * @param event the event that triggered the command
      */
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        GuildManager manager = pipeline.getGuildManager();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        GuildManager manager = event.getGuildManager();
 
         if (scheduler.isActive()) {
-            List<String> message = CommandParser.parseGeneric(pipeline.getEventTransformer().getFormattedMessage());
+            List<String> message = CommandParser.parseGeneric(event.getEventTransformer().getFormattedMessage());
             logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
             if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();

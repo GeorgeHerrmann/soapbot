@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.PermissionsManager;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
@@ -13,7 +13,6 @@ import com.georgster.util.commands.CommandWizard;
 import com.georgster.util.commands.ParseBuilder;
 
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -38,10 +37,10 @@ public class PermissionsCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
-        final GuildManager manager = pipeline.getGuildManager();
-        final CommandParser parser = pipeline.getCommandParser();
-        final MultiLogger logger = pipeline.getLogger();
+    public void execute(CommandExecutionEvent event) {
+        final GuildManager manager = event.getGuildManager();
+        final CommandParser parser = event.getCommandParser();
+        final MultiLogger logger = event.getLogger();
 
         logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
@@ -51,8 +50,7 @@ public class PermissionsCommand implements ParseableCommand {
             response.append("Use !permissions [group] to see the permissions for a group");
             manager.sendText(response.toString());
         } else if (parser.get(0).equals("manage")) {
-            Member member = pipeline.getEventTransformer().getAuthorAsMember();
-            managePermissions(member, manager);
+            managePermissions(event);
         } else {
             String group = parser.get(0);
             if (permissionsManager.groupExists(group)) {
@@ -70,8 +68,10 @@ public class PermissionsCommand implements ParseableCommand {
      * @param member The member to manage permissions for
      * @param manager The guild manager to use
      */
-    private void managePermissions(Member member, GuildManager manager) {
-        CommandWizard wizard = new CommandWizard(manager, "stop", "Permission Wizard", member);
+    private void managePermissions(CommandExecutionEvent event) {
+        CommandWizard wizard = new CommandWizard(event, "stop", "Permission Wizard");
+        GuildManager manager = event.getGuildManager();
+
         manager.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
 
         boolean valid = true;
@@ -87,7 +87,7 @@ public class PermissionsCommand implements ParseableCommand {
                 valid = false;
             } else {
                 group = permissionsManager.getGroup(response);
-                valid = groupOptions(wizard, manager, group);
+                valid = groupOptions(wizard, group);
             }
         }
         manager.sendText("Wizard closed");
@@ -101,7 +101,7 @@ public class PermissionsCommand implements ParseableCommand {
      * @param group The group to manage
      * @return True if the wizard should continue, false if it should exit
      */
-    private boolean groupOptions(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
+    private boolean groupOptions(CommandWizard wizard, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
             String response = wizard.step("What would you like to do for " + group.getName() + "?", "add", "remove", "list", "back");
@@ -109,11 +109,11 @@ public class PermissionsCommand implements ParseableCommand {
                 valid = false;
             } else {
                 if (response.equals("add")) {
-                    valid = addPermission(wizard, manager, group);
+                    valid = addPermission(wizard, group);
                 } else if (response.equals("remove")) {
-                    valid = removePermission(wizard, manager, group);
+                    valid = removePermission(wizard, group);
                 } else if (response.equals("list")) {
-                    wizard.swapEditedMessage("Permissions for " + group.getName() + ":\n" + group.getActions().toString());
+                    wizard.sendPrivateMessage("Permissions for " + group.getName() + ":\n" + group.getActions().toString());
                 } else if (response.equals("back")) {
                     return true;
                 }
@@ -130,7 +130,7 @@ public class PermissionsCommand implements ParseableCommand {
      * @param group the group to add permissions to
      * @return True if the wizard should continue, false if it should exit
      */
-    private boolean addPermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
+    private boolean addPermission(CommandWizard wizard, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
             group = permissionsManager.getGroup(group.getName());
@@ -148,7 +148,7 @@ public class PermissionsCommand implements ParseableCommand {
                 PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
                 group.addPermission(action);
                 permissionsManager.updateGroup(group);
-                wizard.swapEditedMessage("Added " + action.toString() + " to " + group.getName());
+                wizard.sendPrivateMessage("Added " + action.toString() + " to " + group.getName());
             }
         }
         return false;
@@ -162,7 +162,7 @@ public class PermissionsCommand implements ParseableCommand {
      * @param group The group to remove permissions from
      * @return True if the wizard should continue, false if it should exit
      */
-    private boolean removePermission(CommandWizard wizard, GuildManager manager, PermissionGroup group) {
+    private boolean removePermission(CommandWizard wizard, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
             group = permissionsManager.getGroup(group.getName());
@@ -181,9 +181,9 @@ public class PermissionsCommand implements ParseableCommand {
                 if (group.getActions().contains(action)) {
                     group.removePermission(action);
                     permissionsManager.updateGroup(group);
-                    wizard.swapEditedMessage("Removed " + action.toString() + " from " + group.getName());
+                    wizard.sendPrivateMessage("Removed " + action.toString() + " from " + group.getName());
                 } else {
-                    wizard.swapEditedMessage("That permission is not in the group. Please try again");
+                    wizard.sendPrivateMessage("That permission is not in the group. Please try again");
                 }
             }
         }
@@ -246,13 +246,5 @@ public class PermissionsCommand implements ParseableCommand {
         "\n\t!permissions list - List all the groups" +
         "\n\t!permissions [group] - List all the permissions for a group" +
         "\n\t!permissions manage - Manage all SOAP Bot permissions for roles in this server";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean needsDispatcher() {
-        return true;
     }
 }

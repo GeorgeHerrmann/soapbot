@@ -2,7 +2,7 @@ package com.georgster;
 
 import java.util.List;
 
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -22,7 +22,7 @@ public interface Command {
      * information about the guild the command was executed in.
      * @param pipeline The {@code CommandPipeline} containing data from the {@code Event}.
      */
-    void execute(CommandPipeline pipeline);
+    public void execute(CommandExecutionEvent event);
 
     /**
      * Returns a list of all aliases for a {@code Command}. The first alias in the list is the
@@ -50,18 +50,6 @@ public interface Command {
      */
     default PermissibleAction getRequiredPermission(List<String> args) {
         return PermissibleAction.DEFAULT;
-    }
-
-    /**
-     * Returns whether or not a {@code Command} needs the {@code SoapClientManager's}
-     * {@code EventDispatcher} upon execution.
-     * 
-     * @return {@code true} if the {@code Command} needs the {@code EventDispatcher}, {@code false} otherwise.
-     * @deprecated The EventDispatcher is now always sent through the {@code CommandPipeline}.
-     */
-    @Deprecated
-    default boolean needsDispatcher() {
-        return false;
     }
 
     /**

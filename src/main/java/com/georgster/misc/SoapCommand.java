@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.georgster.Command;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildManager;
@@ -22,9 +22,9 @@ public class SoapCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public void execute(CommandPipeline pipeline) {
-        MultiLogger logger = pipeline.getLogger();
-        GuildManager manager = pipeline.getGuildManager();
+    public void execute(CommandExecutionEvent event) {
+        MultiLogger logger = event.getLogger();
+        GuildManager manager = event.getGuildManager();
 
         String version = "";
         File myObj = new File("pom.xml"); //Reads the version number from the pom.xml file

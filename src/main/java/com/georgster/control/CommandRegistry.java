@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.util.ClientPipeline;
-import com.georgster.control.util.CommandPipeline;
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
@@ -70,7 +70,7 @@ public class CommandRegistry {
         String attemptedCommand = transformer.getCommandName().toLowerCase();
         commands.forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
-                CommandPipeline commandPipeline = new CommandPipeline(transformer, client, pipeline.getDispatcher(), command);
+                CommandExecutionEvent commandPipeline = new CommandExecutionEvent(transformer, client, pipeline.getDispatcher(), command);
                 commandPipeline.executeCommand();
             }
         });
