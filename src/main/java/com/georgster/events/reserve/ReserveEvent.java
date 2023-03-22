@@ -106,7 +106,7 @@ public class ReserveEvent implements SoapEvent {
      */
     public boolean fulfilled() {
         if (!isTimeless()) {
-            long until = LocalTime.now(ZoneId.of("-05:00")).until(LocalTime.parse(time), ChronoUnit.SECONDS);
+            long until = (LocalTime.now(ZoneId.of("-05:00")).until(LocalTime.parse(time), ChronoUnit.SECONDS)) - 3600;
             if (until < 0 && Math.abs(until) > 60) {
                 until = Math.abs(until);
             }
