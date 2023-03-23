@@ -49,7 +49,7 @@ public class PlayMusicCommand implements ParseableCommand {
 
         final GuildManager manager = event.getGuildManager();
         final MultiLogger logger = event.getLogger();
-        final CommandParser parser = getCommandParser();
+        final CommandParser parser = event.getCommandParser();
         final Member member = event.getEventTransformer().getAuthorAsMember(); //Makes sure the member is valid
 
         if (member != null) {

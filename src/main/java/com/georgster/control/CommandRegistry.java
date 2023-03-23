@@ -19,6 +19,7 @@ import com.georgster.music.SkipMusicCommand;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.test.TestCommand;
 import com.georgster.util.EventTransformer;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissionsCommand;
 
 import discord4j.core.event.domain.Event;
@@ -71,8 +72,8 @@ public class CommandRegistry {
         String attemptedCommand = transformer.getCommandName().toLowerCase();
         getCommands().forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
-                CommandExecutionEvent commandPipeline = new CommandExecutionEvent(transformer, client, pipeline.getDispatcher(), command);
-                commandPipeline.executeCommand();
+                CommandExecutionEvent executionEvent = new CommandExecutionEvent(transformer, client, pipeline.getDispatcher(), command);
+                SoapUtility.runDaemon(executionEvent::executeCommand);
             }
         });
     }

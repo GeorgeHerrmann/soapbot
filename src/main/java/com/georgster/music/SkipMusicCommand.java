@@ -36,7 +36,6 @@ public class SkipMusicCommand implements Command {
 
         if (scheduler.isActive()) {
             List<String> message = CommandParser.parseGeneric(event.getEventTransformer().getFormattedMessage());
-            logger.append("\tParsed: " + message.toString() + "\n", LogDestination.NONAPI);
             if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();
                 manager.sendText("Skipping all tracks in the queue");
