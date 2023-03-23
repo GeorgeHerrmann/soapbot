@@ -76,8 +76,7 @@ public class SoapCommand implements Command {
      * {@inheritDoc}
      */
     public String help() {
-        return "Command: !soapbot " +
-        "\nAliases: " + getAliases().toString() +
+        return "Aliases: " + getAliases().toString() +
         "\nGives information about SOAP Bot";
     }
 

@@ -81,8 +81,7 @@ public class ShowQueueCommand implements Command {
      * {@inheritDoc}
      */
     public String help() {
-        return "Command: !play, !skip & !queue" +
-        "\nAliases: " + getAliases().toString() +
+        return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
         "\n\t!skip to skip the current track" +

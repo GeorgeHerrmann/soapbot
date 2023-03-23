@@ -23,7 +23,7 @@ import com.georgster.util.commands.CommandParser;
  */
 public class HelpCommand implements ParseableCommand {
 
-    private static final String PATTERN = "1|R"; //A regex pattern to parse the contents of a !help command request
+    private static final String PATTERN = "1|O"; //A regex pattern to parse the contents of a !help command request
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private CommandRegistry register; //SoapBot's Command Registry
@@ -45,7 +45,12 @@ public class HelpCommand implements ParseableCommand {
         CommandParser parser = event.getCommandParser();
         GuildManager manager = event.getGuildManager();
 
-        String arg = parser.get(0).toLowerCase();
+        String arg = "";
+        try {
+            arg = parser.get(0).toLowerCase();
+        } catch (NullPointerException e) {
+            arg = "";
+        }
 
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
         for (Command command : register.getCommands()) {
@@ -120,8 +125,7 @@ public class HelpCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public String help() {
-        return "Command: !help" +
-        "\nAliases: " + getAliases().toString() +
+        return "Aliases: " + getAliases().toString() +
         "\n!help for a list of all commands" +
         "\n!help [COMMAND] for help regarding a specific command";
     }

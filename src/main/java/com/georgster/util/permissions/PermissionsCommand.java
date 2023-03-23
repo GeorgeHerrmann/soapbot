@@ -240,8 +240,7 @@ public class PermissionsCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public String help() {
-        return "Command: !permissions" +
-        "\nAliases: " + getAliases().toString() +
+        return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t!permissions list - List all the groups" +
         "\n\t!permissions [group] - List all the permissions for a group" +

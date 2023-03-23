@@ -109,8 +109,7 @@ public class MessageCommand implements Command {
      * {@inheritDoc}
      */
     public String help() {
-        return "Command: !message" +
-        "\nAliases: " + getAliases().toString() +
+        return "Aliases: " + getAliases().toString() +
         "\n\t - !message @[USERS] [MESSAGE]" +
         "\n\t\t Ex: !message @georgster#8086 hello" + 
         "\n\t\t Or: !message @georgster#8086 @Milkmqn#9457 hello";

@@ -111,8 +111,7 @@ public class UnreserveCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public String help() {
-        return "Command: !events & !unreserve" +
-        "\nAliases: " + getAliases().toString() +
+        return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t- !events list to list all events" +
         "\n\t- !events [NAME] for information about a specific event" +

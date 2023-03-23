@@ -80,8 +80,7 @@ public class PongCommand implements Command {
      * {@inheritDoc}
      */
     public String help() {
-      return "Command: !ping" +
-      "\nAliases: " + getAliases().toString() +
+      return "Aliases: " + getAliases().toString() +
       "\n!ping to have SOAP Bot respond with pong! for each 'ping' in your message";
     }
 }
