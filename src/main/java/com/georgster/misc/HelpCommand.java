@@ -48,7 +48,7 @@ public class HelpCommand implements ParseableCommand {
         String arg = "";
         try {
             arg = parser.get(0).toLowerCase();
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             arg = "";
         }
 
