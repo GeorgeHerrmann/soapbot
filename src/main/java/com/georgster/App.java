@@ -24,7 +24,6 @@ public class App {
         /* Creates a manager that will control the SoapClient for each Guild */
         SoapClientManager soapManager = new SoapClientManager(token);
         soapManager.listenToEvents(); //Subscribes the manager to Discord's event stream
-        soapManager.enableTestMode();
         soapManager.start(); //Starts the manager, finalizing the connection to Discord's API
     }
 
