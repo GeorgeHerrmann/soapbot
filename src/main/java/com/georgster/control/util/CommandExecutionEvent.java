@@ -14,6 +14,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioInterface;
 import com.georgster.util.EventTransformer;
 import com.georgster.util.GuildManager;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.core.event.EventDispatcher;
@@ -79,7 +80,7 @@ public class CommandExecutionEvent {
 
     private void executeIfPermission(List<String> args) {
         if (hasPermission(args)) {
-            command.execute(this);
+            SoapUtility.runDaemon(() -> command.execute(this));
         } else {
             manager.sendText("You need " + command.getRequiredPermission(args) + " to use this command.");
             logger.append("User is missing permission: " + command.getRequiredPermission(args) + " to use this command.", LogDestination.NONAPI);

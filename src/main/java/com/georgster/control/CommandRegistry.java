@@ -16,7 +16,6 @@ import com.georgster.misc.SoapCommand;
 import com.georgster.music.PlayMusicCommand;
 import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
-import com.georgster.music.components.AudioInterface;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.test.TestCommand;
 import com.georgster.util.EventTransformer;
@@ -31,7 +30,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class CommandRegistry {
     
     private final ClientPipeline pipeline;
-    private final List<Command> commands = new ArrayList<>();
+    private final List<Class<? extends Command>> commands;
 
     /**
      * Creates a Command Register for the associated SoapClient, 
@@ -41,22 +40,24 @@ public class CommandRegistry {
      * 
      * @param pipeline the ClientPipeline feeding this regitry's commands.
      */
-    public CommandRegistry(ClientPipeline pipeline) {
+    public CommandRegistry(ClientPipeline pipeline) { //HelpCommand will be unique
         this.pipeline = pipeline;
-        AudioInterface clientsInterface = pipeline.getAudioInterface();
-        commands.add(new PongCommand());
-        commands.add(new SoapCommand());
-        commands.add(new HelpCommand(this));
-        commands.add(new ReserveCommand(pipeline.getEventManager()));
-        commands.add(new EventCommand(pipeline.getEventManager()));
-        commands.add(new UnreserveCommand(pipeline.getEventManager()));
-        commands.add(new MessageCommand());
-        commands.add(new PlinkoCommand());
-        commands.add(new PlayMusicCommand(clientsInterface.getProvider(), clientsInterface.getPlayerManager(), clientsInterface.getPlayer(), clientsInterface.getScheduler()));
-        commands.add(new ShowQueueCommand(clientsInterface.getScheduler().getQueue()));
-        commands.add(new SkipMusicCommand(clientsInterface.getPlayer(), clientsInterface.getScheduler()));
-        commands.add(new PermissionsCommand(pipeline.getPermissionsManager()));
-        commands.add(new TestCommand());
+        
+        commands = new ArrayList<>(List.of(
+            PongCommand.class,
+            SoapCommand.class,
+            HelpCommand.class,
+            ReserveCommand.class,
+            EventCommand.class,
+            UnreserveCommand.class,
+            MessageCommand.class,
+            PlinkoCommand.class,
+            PlayMusicCommand.class,
+            ShowQueueCommand.class,
+            SkipMusicCommand.class,
+            PermissionsCommand.class,
+            TestCommand.class
+        ));
     }
 
     /**
@@ -68,7 +69,7 @@ public class CommandRegistry {
     public void getAndExecute(Event event, SoapClient client) {
         EventTransformer transformer = new EventTransformer(event);
         String attemptedCommand = transformer.getCommandName().toLowerCase();
-        commands.forEach(command -> {
+        getCommands().forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
                 CommandExecutionEvent commandPipeline = new CommandExecutionEvent(transformer, client, pipeline.getDispatcher(), command);
                 commandPipeline.executeCommand();
@@ -84,7 +85,7 @@ public class CommandRegistry {
     public void registerGlobalCommands() {
         long appId = pipeline.getRestClient().getApplicationId().block();
 
-        commands.forEach(command -> {
+        getCommands().forEach(command -> {
             ApplicationCommandRequest cmd = command.getCommandApplicationInformation();
 
             if (cmd != null) { //If the command doesn't want to be registered to discord, it will return null.
@@ -99,6 +100,18 @@ public class CommandRegistry {
      * @return a list of all of SOAP Bot's pre-defined commands.
      */
     public List<Command> getCommands() {
-        return commands;
+        List<Command> commandList = new ArrayList<>();
+        commands.forEach(command -> {
+            try {
+                if (command == HelpCommand.class) {
+                    commandList.add(new HelpCommand(this));
+                } else {
+                    commandList.add(command.getDeclaredConstructor().newInstance());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        return commandList;
     }
 }

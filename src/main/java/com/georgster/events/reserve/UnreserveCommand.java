@@ -28,18 +28,10 @@ public class UnreserveCommand implements ParseableCommand {
     private SoapEventManager eventManager;
 
     /**
-     * Creates a new UnreserveCommand with the associated {@code SoapEventManager}.
-     * 
-     * @param eventManager the event manager managing the events
-     */
-    public UnreserveCommand(SoapEventManager eventManager) {
-        this.eventManager = eventManager;
-    }
-
-    /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
+        eventManager = event.getEventManager();
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
         CommandParser parser = event.getCommandParser();

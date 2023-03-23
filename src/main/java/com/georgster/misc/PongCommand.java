@@ -14,21 +14,10 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
- * A PongCommand simply will return all instances of a user's message of "ping"
- * with the same number of "pong"s given the message began with the "!ping" command.
- * 
- * @implements {@code Command} the general definiton for a SoapBot command.
+ * Represents the actions following a "!ping" command.
  */
 public class PongCommand implements Command {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-    String msg;
-
-    /**
-     * Creates a PongCommand object.
-     */
-    public PongCommand() {
-        msg = "ping";
-    }
 
     /**
      * {@inheritDoc}
@@ -41,8 +30,8 @@ public class PongCommand implements Command {
         List<String> args = new ArrayList<>(List.of(event.getEventTransformer().getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
-        while(args.contains(msg)) {
-            args.remove(msg);
+        while(args.contains("ping")) {
+            args.remove("ping");
             fullMessage.append("pong! ");
             counter++;
         }

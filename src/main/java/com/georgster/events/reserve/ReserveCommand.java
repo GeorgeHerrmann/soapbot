@@ -31,18 +31,10 @@ public class ReserveCommand implements ParseableCommand {
     private SoapEventManager eventManager;
 
     /**
-     * Creates a new ReserveCommand with the associated {@code SoapEventManager}.
-     * 
-     * @param manager the event manager managing the events
-     */
-    public ReserveCommand(SoapEventManager manager) {
-        eventManager = manager;
-    }
-
-    /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
+        eventManager = event.getEventManager();
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
         EventTransformer transformer = event.getEventTransformer();

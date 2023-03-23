@@ -18,16 +18,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class ShowQueueCommand implements Command {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-    private final LinkedBlockingQueue<AudioTrack> queue;
-
-    /**
-     * Will show the current queue of audio tracks.
-     * 
-     * @param queue the quque held in the TrackScheduler
-     */
-    public ShowQueueCommand(LinkedBlockingQueue<AudioTrack> queue) {
-        this.queue = queue;
-    }
+    private LinkedBlockingQueue<AudioTrack> queue;
 
     /**
      * Will show the current queue of audio tracks.
@@ -35,6 +26,8 @@ public class ShowQueueCommand implements Command {
      * @param execute the event that triggered the command
      */
     public void execute(CommandExecutionEvent event) {
+        queue = event.getAudioInterface().getScheduler().getQueue();
+        
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
 

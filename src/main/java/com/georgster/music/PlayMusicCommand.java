@@ -27,10 +27,10 @@ import discord4j.voice.VoiceConnection;
  */
 public class PlayMusicCommand implements ParseableCommand {
 
-    private final AudioProvider provider;
-    private final AudioPlayerManager playerManager;
-    private final AudioPlayer player;
-    private final TrackScheduler scheduler;
+    private AudioProvider provider;
+    private AudioPlayerManager playerManager;
+    private AudioPlayer player;
+    private TrackScheduler scheduler;
     private static final String PATTERN = "1|R";
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
@@ -38,25 +38,15 @@ public class PlayMusicCommand implements ParseableCommand {
     /**
      * Plays music in a discord channel.
      * 
-     * @param voiceProvider the audio provider
-     * @param manager the audio player manager
-     * @param musicPlayer the audio player
-     * @param scheduler the track scheduler
-     */
-    public PlayMusicCommand(AudioProvider voiceProvider, AudioPlayerManager manager, AudioPlayer musicPlayer, TrackScheduler scheduler) {
-      provider = voiceProvider;
-      playerManager = manager;
-      player = musicPlayer;
-      this.scheduler = scheduler;
-      player.addListener(scheduler);
-    }
-
-    /**
-     * Plays music in a discord channel.
-     * 
      * @param event the event that triggered the command
      */
     public void execute(CommandExecutionEvent event) {
+        provider = event.getAudioInterface().getProvider();
+        playerManager = event.getAudioInterface().getPlayerManager();
+        player = event.getAudioInterface().getPlayer();
+        scheduler = event.getAudioInterface().getScheduler();
+        player.addListener(scheduler);
+
         final GuildManager manager = event.getGuildManager();
         final MultiLogger logger = event.getLogger();
         final CommandParser parser = getCommandParser();

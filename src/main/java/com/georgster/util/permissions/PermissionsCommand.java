@@ -23,21 +23,14 @@ public class PermissionsCommand implements ParseableCommand {
     private static final String PATTERN = "V|R";
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-    private final PermissionsManager permissionsManager;
-
-    /**
-     * Creates a new PermissionsCommand.
-     * 
-     * @param permissionsManager the permissions manager
-     */
-    public PermissionsCommand(PermissionsManager permissionsManager) {
-        this.permissionsManager = permissionsManager;
-    }
+    private PermissionsManager permissionsManager;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
+        permissionsManager = event.getPermissionsManager();
+
         final GuildManager manager = event.getGuildManager();
         final CommandParser parser = event.getCommandParser();
         final MultiLogger logger = event.getLogger();

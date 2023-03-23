@@ -19,7 +19,7 @@ import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 
 /**
- * HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
+ * The HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
  */
 public class HelpCommand implements ParseableCommand {
 

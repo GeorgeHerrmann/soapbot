@@ -84,6 +84,7 @@ public final class SoapClientManager {
         .subscribe(event -> clients.get(event.getGuild().block().getId()).onMessageCreate(event)); //Executes onMessageCreate when a MessageCreateEvent is fired
 
         dispatcher.on(ChatInputInteractionEvent.class)
+        .filter(message -> !testMode) //If test mode is enabled, commands must be sent with the !! notation, slash commands are not supported
         .subscribe(event -> clients.get(event.getInteraction().getGuildId().get()).onChatInputInteraction(event));
     }
 

@@ -19,19 +19,8 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class SkipMusicCommand implements Command {
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-    private final AudioPlayer player;
-    private final TrackScheduler scheduler;
-
-    /**
-     * Will skip the currently playing track or all tracks in the queue.
-     * 
-     * @param player
-     * @param scheduler
-     */
-    public SkipMusicCommand(AudioPlayer player, TrackScheduler scheduler) {
-        this.player = player;
-        this.scheduler = scheduler;
-    }
+    private AudioPlayer player;
+    private TrackScheduler scheduler;
 
     /**
      * Will skip the currently playing track or all tracks in the queue.
@@ -39,6 +28,9 @@ public class SkipMusicCommand implements Command {
      * @param event the event that triggered the command
      */
     public void execute(CommandExecutionEvent event) {
+        player = event.getAudioInterface().getPlayer();
+        scheduler = event.getAudioInterface().getScheduler();
+
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
 
