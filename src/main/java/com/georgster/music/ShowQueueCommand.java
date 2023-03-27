@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -20,14 +21,16 @@ public class ShowQueueCommand implements Command {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private LinkedBlockingQueue<AudioTrack> queue;
 
+    public ShowQueueCommand(ClientPipeline pipeline) {
+        this.queue = pipeline.getAudioInterface().getScheduler().getQueue();
+    }
+
     /**
      * Will show the current queue of audio tracks.
      * 
      * @param execute the event that triggered the command
      */
     public void execute(CommandExecutionEvent event) {
-        queue = event.getAudioInterface().getScheduler().getQueue();
-        
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
 

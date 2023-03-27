@@ -11,6 +11,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -33,8 +34,8 @@ public class HelpCommand implements ParseableCommand {
      * 
      * @param command a Map of all of SOAP Bot's commands.
      */
-    public HelpCommand(CommandRegistry register) {
-        this.register = register;
+    public HelpCommand(ClientPipeline pipeline) {
+        register = pipeline.getCommandRegistry();
     }
 
     /**

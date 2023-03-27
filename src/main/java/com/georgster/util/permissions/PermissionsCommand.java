@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.PermissionsManager;
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -25,12 +26,14 @@ public class PermissionsCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private PermissionsManager permissionsManager;
 
+    public PermissionsCommand(ClientPipeline pipeline) {
+        this.permissionsManager = pipeline.getPermissionsManager();
+    }
+
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        permissionsManager = event.getPermissionsManager();
-
         final GuildManager manager = event.getGuildManager();
         final CommandParser parser = event.getCommandParser();
         final MultiLogger logger = event.getLogger();

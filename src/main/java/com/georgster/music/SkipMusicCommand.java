@@ -3,6 +3,7 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -22,15 +23,17 @@ public class SkipMusicCommand implements Command {
     private AudioPlayer player;
     private TrackScheduler scheduler;
 
+    public SkipMusicCommand(ClientPipeline pipeline) {
+        this.player = pipeline.getAudioInterface().getPlayer();
+        this.scheduler = pipeline.getAudioInterface().getScheduler();
+    }
+
     /**
      * Will skip the currently playing track or all tracks in the queue.
      * 
      * @param event the event that triggered the command
      */
     public void execute(CommandExecutionEvent event) {
-        player = event.getAudioInterface().getPlayer();
-        scheduler = event.getAudioInterface().getScheduler();
-
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
 
