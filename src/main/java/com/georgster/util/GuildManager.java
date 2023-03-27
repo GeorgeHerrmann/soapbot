@@ -22,9 +22,6 @@ import discord4j.rest.util.Color;
 
 /**
  * A GuildManager holds and manipulates data about a Guild.
- * Each Guild SOAP Bot is in has its own GuildManager, any
- * time a Guild is updated, the GuildManager should be updated
- * with the updateGuild() method.
  */
 public class GuildManager {
     private Guild guild; //The guild that this GuildManager is managing

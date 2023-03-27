@@ -26,9 +26,7 @@ public class ShowQueueCommand implements Command {
     }
 
     /**
-     * Will show the current queue of audio tracks.
-     * 
-     * @param execute the event that triggered the command
+     * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();

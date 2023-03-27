@@ -30,9 +30,9 @@ public class HelpCommand implements ParseableCommand {
     private CommandRegistry register; //SoapBot's Command Registry
 
     /**
-     * Creates a HelpCommand which contains a register of all of SoapBot's commands.
+     * Creates a new {@code HelpCommand} with the given {@code ClientPipeline}.
      * 
-     * @param command a Map of all of SOAP Bot's commands.
+     * @param pipeline The pipeline to get the {@code CommandRegistry} from
      */
     public HelpCommand(ClientPipeline pipeline) {
         register = pipeline.getCommandRegistry();

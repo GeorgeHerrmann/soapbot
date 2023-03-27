@@ -27,7 +27,7 @@ public class PongCommand implements Command {
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
 
-        List<String> args = new ArrayList<>(List.of(event.getEventTransformer().getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
+        List<String> args = new ArrayList<>(List.of(event.getDiscordEvent().getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
         while(args.contains("ping")) {

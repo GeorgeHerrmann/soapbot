@@ -16,24 +16,28 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 
-public class EventTransformer {
+/**
+ * A wrapper class for Discord {@code Events} that provides methods for extracting
+ * data from the event.
+ */
+public class DiscordEvent {
 
-    private final Event event; // The event that triggered the creation of this pipeline
-    private Member member; // The member that triggered the event
+    private final Event event; // The Discord4J event
+    private Member member; // The member that triggered the event (if applicable)
 
     /**
-     * Creates a new CommandPipeline with the given {@code Event}.
+     * Creates a new DiscordEvent with the given Discord4J event fired by Discord.
      * 
-     * @param event the event
+     * @param event the Discord4J event
      */
-    public EventTransformer(Event event) {
+    public DiscordEvent(Event event) {
         this.event = event;
     }
 
     /**
-     * Returns the event that this pipeline is carrying.
+     * Returns the Discord4J event
      * 
-     * @return the event that this pipeline is carrying
+     * @return the Discord4J event
      */
     public Event getEvent() {
         return event;
@@ -139,6 +143,11 @@ public class EventTransformer {
 
     /**
      * Attempts to pull any mentions or noted users from the event.
+     * Compatiable with the following Discord {@code Events}:
+     * <ul>
+     * <li>{@code MessageCreateEvent}</li>
+     * <li>{@code ChatInputInteractionEvent}</li>
+     * </ul>
      * 
      * @return a list of users mentioned in the event
      */
@@ -161,6 +170,11 @@ public class EventTransformer {
 
     /**
      * Attempts to get the author of the event as an {@code Optional}.
+     * Compatiable with the following Discord {@code Events}:
+     * <ul>
+     * <li>{@code MessageCreateEvent}</li>
+     * <li>{@code ChatInputInteractionEvent}</li>
+     * </ul>
      * 
      * @return an {@code Optional} containing the author of the event,
      *        or an empty {@code Optional} if the event does not have an author.
@@ -177,6 +191,11 @@ public class EventTransformer {
 
     /**
      * Attempts to get the author of the event as a {@code Member}.
+     * Compatiable with the following Discord {@code Events}:
+     * <ul>
+     * <li>{@code MessageCreateEvent}</li>
+     * <li>{@code ChatInputInteractionEvent}</li>
+     * </ul>
      * 
      * @return the author of the event as a {@code Member},
      *        or {@code null} if the event does not have an author.
@@ -193,9 +212,9 @@ public class EventTransformer {
     }
 
     /**
-     * Returns whether this pipeline's event is a {@code ChatInteractionEvent}.
+     * Returns whether this class's event is a {@code ChatInteractionEvent}.
      * 
-     * @return whether this pipeline's event is a {@code ChatInteractionEvent}
+     * @return whether this class's event is a {@code ChatInteractionEvent}
      */
     public boolean isChatInteraction() {
         return event instanceof ChatInputInteractionEvent;

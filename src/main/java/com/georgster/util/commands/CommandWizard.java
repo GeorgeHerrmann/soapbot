@@ -43,7 +43,7 @@ public class CommandWizard {
      * @param caller The user who called the wizard
      */
     public CommandWizard(CommandExecutionEvent pipeline, String end, String title) {
-        this.caller = pipeline.getEventTransformer().getAuthorAsMember();
+        this.caller = pipeline.getDiscordEvent().getAuthorAsMember();
         this.ended = false;
         this.end = end;
         initial = null;

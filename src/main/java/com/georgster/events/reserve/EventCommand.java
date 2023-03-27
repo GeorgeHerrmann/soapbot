@@ -30,6 +30,11 @@ public class EventCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
+    /**
+     * Creates a new {@code EventCommand} with the given {@code ClientPipeline}.
+     * 
+     * @param pipeline The pipeline to get the {@code EventManager} from
+     */
     public EventCommand(ClientPipeline pipeline) {
         this.eventManager = pipeline.getEventManager();
     }

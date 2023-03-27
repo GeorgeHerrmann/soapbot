@@ -9,7 +9,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.EventTransformer;
+import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.permissions.PermissibleAction;
@@ -28,6 +28,11 @@ public class UnreserveCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
+    /**
+     * Creates a new {@code UnreserveCommand} with the given {@code ClientPipeline}.
+     * 
+     * @param pipeline The pipeline to get the {@code EventManager} from
+     */
     public UnreserveCommand(ClientPipeline pipeline) {
         this.eventManager = pipeline.getEventManager();
     }
@@ -39,14 +44,14 @@ public class UnreserveCommand implements ParseableCommand {
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
         CommandParser parser = event.getCommandParser();
-        EventTransformer transformer = event.getEventTransformer();
+        DiscordEvent discordEvent = event.getDiscordEvent();
 
         if (eventManager.eventExists(parser.get(0), TYPE)) {
             ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
-            if (reserve.alreadyReserved(transformer.getAuthorAsMember().getTag())) {
+            if (reserve.alreadyReserved(discordEvent.getAuthorAsMember().getTag())) {
 
-                logger.append("\tRemoving " + transformer.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
-                reserve.removeReserved(transformer.getAuthorAsMember().getTag());
+                logger.append("\tRemoving " + discordEvent.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
+                reserve.removeReserved(discordEvent.getAuthorAsMember().getTag());
                 if (reserve.getReserved() <= 0) {
                     eventManager.removeEvent(reserve);
                     logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);

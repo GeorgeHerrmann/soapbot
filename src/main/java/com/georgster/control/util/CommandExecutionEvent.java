@@ -12,7 +12,7 @@ import com.georgster.control.SoapEventManager;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioInterface;
-import com.georgster.util.EventTransformer;
+import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
 
@@ -27,42 +27,52 @@ public class CommandExecutionEvent {
     
     private MultiLogger logger; // Used to log messages about the Event.
     private Command command; // The Command that is being executed
-    private EventTransformer transformer; // A transformer used to extract data from the Discord Event that created this Event
+    private DiscordEvent discordEvent; // A transformer used to extract data from the Discord Event that created this Event
     private SoapClient client; // The SoapClient for the Guild the Event was fired in
     private EventDispatcher dispatcher; // The EventDispatcher for the SoapClientManager that fired the Event in the Pipeline
     private GuildManager manager; // The GuildManager for the Guild the Event was fired in
     private CommandParser parser;
 
     /**
-     * Creates a new CommandPipeline with the given {@code Event}.
+     * Creates a new CommandExecutionEvent.
      * 
-     * @param event the event
+     * @param event the Discord Event that triggered the firing of this Event
+     * @param client the SoapClient for the Guild the Event was fired in
+     * @param dispatcher the EventDispatcher for the SoapClientManager that fired the Event
+     * @param command the Command that is being executed
      */
-    public CommandExecutionEvent(EventTransformer transformer, SoapClient client, EventDispatcher dispatcher, Command command) {
-        this.transformer = transformer;
+    public CommandExecutionEvent(DiscordEvent event, SoapClient client, EventDispatcher dispatcher, Command command) {
+        this.discordEvent = event;
         this.client = client;
         this.dispatcher = dispatcher;
         this.command = command;
-        this.manager = new GuildManager(transformer.getGuild());
-        manager.setActiveChannel(transformer.getChannel());
-        if (transformer.isChatInteraction()) {
-            manager.setActiveInteraction((ChatInputInteractionEvent) transformer.getEvent());
+        this.manager = new GuildManager(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
+        manager.setActiveChannel(discordEvent.getChannel());
+        if (discordEvent.isChatInteraction()) { // If the Event was fired from a slash command
+            manager.setActiveInteraction((ChatInputInteractionEvent) discordEvent.getEvent());
         }
 
-        this.logger = new MultiLogger(manager, command.getClass());
+        this.logger = new MultiLogger(manager, command.getClass()); // Used to log messages about the Event
 
-        if (command instanceof ParseableCommand) {
+        if (command instanceof ParseableCommand) { // If the Command is parseable, it gets a CommandParser
             parser = ((ParseableCommand) command).getCommandParser();
         }
     }
 
+    /**
+     * Executes the {@code Command} in this Event on the calling thread.
+     * Prior to execution, the Command is checked for permission, and if the Command
+     * is a {@code ParseableCommand}, it is parsed for arguments.
+     * Messages are logged to the event's {@code MultiLogger}, and Guild interactions
+     * are handled by the event's {@code GuildManager}.
+     */
     public void executeCommand() {
         logger.append("**Executing: " + command.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
 
         List<String> args = null;
         if (command instanceof ParseableCommand) {
             try {
-                args = parser.parse(transformer.getFormattedMessage());
+                args = parser.parse(discordEvent.getFormattedMessage());
                 logger.append("\tArguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
                 executeIfPermission(args);
             } catch (Exception e) {
@@ -77,6 +87,11 @@ public class CommandExecutionEvent {
         logger.sendAll();
     }
 
+   /**
+    * Executes the {@code Command} in this Event if the user has permission to do so.
+    *
+    * @param args the arguments for the Command
+    */ 
     private void executeIfPermission(List<String> args) {
         if (hasPermission(args)) {
             command.execute(this);
@@ -86,52 +101,93 @@ public class CommandExecutionEvent {
         }
     }
     
-    public boolean hasPermission(List<String> args) {
-        return getPermissionsManager().hasPermission(transformer.getAuthorAsMember(), command.getRequiredPermission(args));
-    }
-
-    public EventTransformer getEventTransformer() {
-        return transformer;
+    /**
+     * Checks if the user has permission to execute the Command in this Event.
+     * 
+     * @param args the arguments for the Command
+     * @return true if the user has permission to execute the Command, false otherwise
+     */
+    private boolean hasPermission(List<String> args) {
+        return getPermissionsManager().hasPermission(discordEvent.getAuthorAsMember(), command.getRequiredPermission(args));
     }
 
     /**
-     * Returns the {@code PermissionsManager} for the SoapClient in this Pipeline.
+     * Returns the {@code DiscordEvent} that triggered the firing of this Event.
      * 
-     * @return the {@code PermissionsManager} for the SoapClient in this Pipeline.
+     * @return the {@code DiscordEvent} that triggered the firing of this Event.
+     */
+    public DiscordEvent getDiscordEvent() {
+        return discordEvent;
+    }
+
+    /**
+     * Returns the {@code PermissionsManager} for the SoapClient in this Event.
+     * 
+     * @return the {@code PermissionsManager} for the SoapClient in this Event.
      */
     public PermissionsManager getPermissionsManager() {
         return client.getPermissionsManager();
     }
 
+    /**
+     * Returns the {@code SoapEventManager} for the SoapClient in this Event.
+     * 
+     * @return the {@code SoapEventManager} for the SoapClient in this Event.
+     */
     public SoapEventManager getEventManager() {
         return client.getEventManager();
     }
 
+    /**
+     * Returns the {@code CommandRegistry} for the SoapClient in this Event.
+     * 
+     * @return the {@code CommandRegistry} for the SoapClient in this Event.
+     */
     public CommandRegistry getCommandRegistry() {
         return client.getRegistry();
     }
 
+    /**
+     * Returns the {@code AudioInterface} for the SoapClient in this Event.
+     * 
+     * @return the {@code AudioInterface} for the SoapClient in this Event.
+     */
     public AudioInterface getAudioInterface() {
         return client.getAudioInterface();
     }
 
+    /**
+     * Returns the {@code EventDispatcher} that fired the Event in the Pipeline.
+     * 
+     * @return the {@code EventDispatcher} that fired the Event in the Pipeline.
+     */
     public EventDispatcher getEventDispatcher() {
         return dispatcher;
     }
 
+    /**
+     * Returns the {@code MultiLogger} that is used to log messages about the Event.
+     * 
+     * @return the {@code MultiLogger} that is used to log messages about the Event.
+     */
     public MultiLogger getLogger() {
         return logger;
     }
 
+    /**
+     * Returns the {@code GuildManager} that handles the Command's interaction with the Guild.
+     * 
+     * @return the {@code GuildManager} that handles the Command's interaction with the Guild.
+     */
     public GuildManager getGuildManager() {
         return manager;
     }
 
     /**
-     * Returns the {@code CommandParser} for the Command in this Pipeline if
+     * Returns the {@code CommandParser} for the Command in this Event if
      * the Command is a {@code ParseableCommand}.
      * 
-     * @return the {@code CommandParser} for the Command in this Pipeline.
+     * @return the {@code CommandParser} for the Command in this Event.
      */
     public CommandParser getCommandParser() {
         return parser;

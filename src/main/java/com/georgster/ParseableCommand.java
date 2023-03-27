@@ -2,6 +2,9 @@ package com.georgster;
 
 import com.georgster.util.commands.CommandParser;
 
+/**
+ * A Command that can be parsed by a {@code CommandParser}.
+ */
 public interface ParseableCommand extends Command {
 
     /**

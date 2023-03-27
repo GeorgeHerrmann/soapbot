@@ -12,15 +12,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * MessageCreateEvent (a user typing a message in a channel the bot can see) or
  * a ChatInputInteractionEvent (a user using a slash command in a channel the bot can see),
  * given a defined command in the CommandRegistry was used.
- * All commands have an associated execute function, which defines what SoapBot should do after the command was given.
+ * All commands have an associated execute function, which is the primary entry point for a command's logic.
  */
 public interface Command {
     /**
-     * Executes the associated command after a {@code Event} was fired.
-     * Each implementation of a Command must implement this method in order to define the bot's
-     * actions following a command input, and gets a {@code GuildManager} to manage
-     * information about the guild the command was executed in.
-     * @param pipeline The {@code CommandPipeline} containing data from the {@code Event}.
+     * Executes the command from the given {@code CommandExecutionEvent}.
+     * 
+     * @param event The {@code CommandExecutionEvent} that triggered the command's execution.
      */
     public void execute(CommandExecutionEvent event);
 

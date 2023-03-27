@@ -49,8 +49,8 @@ public class PlinkoGame {
      * @param event The {@code MessageCreateEvent} that prompted the creation of this {@code PlinkoGame}.
      */
     PlinkoGame(CommandExecutionEvent event) {
-        guild = event.getEventTransformer().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
-        channel = event.getEventTransformer().getChannel();
+        guild = event.getDiscordEvent().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
+        channel = event.getDiscordEvent().getChannel();
         rand = new Random();
         this.manager = event.getGuildManager();
     }

@@ -45,15 +45,13 @@ public class PlayMusicCommand implements ParseableCommand {
     }
 
     /**
-     * Plays music in a discord channel.
-     * 
-     * @param event the event that triggered the command
+     * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
         final GuildManager manager = event.getGuildManager();
         final MultiLogger logger = event.getLogger();
         final CommandParser parser = event.getCommandParser();
-        final Member member = event.getEventTransformer().getAuthorAsMember(); //Makes sure the member is valid
+        final Member member = event.getDiscordEvent().getAuthorAsMember(); //Makes sure the member is valid
 
         if (member != null) {
             final VoiceState voiceState = member.getVoiceState().block();

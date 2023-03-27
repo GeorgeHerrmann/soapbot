@@ -26,6 +26,11 @@ public class PermissionsCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private PermissionsManager permissionsManager;
 
+    /**
+     * Creates a new PermissionsCommand with the given {@code ClientPipeline}.
+     * 
+     * @param pipeline The pipeline to get the {@code PermissionsManager} from
+     */
     public PermissionsCommand(ClientPipeline pipeline) {
         this.permissionsManager = pipeline.getPermissionsManager();
     }

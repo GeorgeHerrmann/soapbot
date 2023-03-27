@@ -8,7 +8,7 @@ import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.EventTransformer;
+import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissibleAction;
@@ -31,10 +31,10 @@ public class MessageCommand implements Command {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        EventTransformer transformer = event.getEventTransformer();
+        DiscordEvent discordEvent = event.getDiscordEvent();
         GuildManager manager = event.getGuildManager();
 
-        List<String> contents = new ArrayList<>(Arrays.asList(transformer.getFormattedMessage().split(" ")));
+        List<String> contents = new ArrayList<>(Arrays.asList(discordEvent.getFormattedMessage().split(" ")));
         contents.remove(0);
 
         StringBuilder response = new StringBuilder();
@@ -43,14 +43,14 @@ public class MessageCommand implements Command {
                 response.append(i + " ");
             }
         }
-        if (!transformer.getPresentUsers().isEmpty()) {
-            for (User user : transformer.getPresentUsers()) {
+        if (!discordEvent.getPresentUsers().isEmpty()) {
+            for (User user : discordEvent.getPresentUsers()) {
                 logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
                 LogDestination.NONAPI);
 
                 user.getPrivateChannel().block().createMessage(response.toString()).block();
-                if (transformer.isChatInteraction()) {
-                    ((ChatInputInteractionEvent) transformer.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
+                if (discordEvent.isChatInteraction()) {
+                    ((ChatInputInteractionEvent) discordEvent.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
                 }
             }
         } else {

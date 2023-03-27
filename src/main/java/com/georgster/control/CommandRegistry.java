@@ -19,7 +19,7 @@ import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.test.TestCommand;
-import com.georgster.util.EventTransformer;
+import com.georgster.util.DiscordEvent;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissionsCommand;
 
@@ -40,7 +40,7 @@ public class CommandRegistry {
      * Any command that requires the SoapClient's objects (such as the AudioProvider, AudioPlayer, etc.)
      * can access it through the client parameter.
      * 
-     * @param pipeline the ClientPipeline feeding this regitry's commands.
+     * @param pipeline the ClientPipeline feeding this registry's commands.
      */
     public CommandRegistry(ClientPipeline pipeline) { //HelpCommand will be unique
         this.pipeline = pipeline;
@@ -64,18 +64,19 @@ public class CommandRegistry {
     }
 
     /**
-     * Attempts to execute a command based on the contents of a MessageCreateEvent.
-     * If a valid command is not found, nothing happens.
+     * Attempts to execute a command based on the contents of a Discord {@code Event}.
+     * The event will be wrapped in a {@code DiscordEvent} object, therefore only events
+     * supported by the DiscordEvent class will be able to be executed.
      * 
-     * @param event the MessageCreateEvent that prompted this call.
+     * @param event the Event that prompted this call.
      */
     public void getAndExecute(Event event, SoapClient client) {
-        EventTransformer transformer = new EventTransformer(event);
+        DiscordEvent transformer = new DiscordEvent(event);
         String attemptedCommand = transformer.getCommandName().toLowerCase();
         getCommands().forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
                 CommandExecutionEvent executionEvent = new CommandExecutionEvent(transformer, client, pipeline.getDispatcher(), command);
-                SoapUtility.runDaemon(executionEvent::executeCommand);
+                SoapUtility.runDaemon(executionEvent::executeCommand); // executeCommand runs on the calling thread, so we need to run it on a daemon thread.
             }
         });
     }
@@ -98,7 +99,7 @@ public class CommandRegistry {
     }
 
     /**
-     * Returns a list of all of SOAP Bot's pre-defined commands.
+     * Instantiates and returns a list of all of SOAP Bot's pre-defined commands.
      * 
      * @return a list of all of SOAP Bot's pre-defined commands.
      */

@@ -9,7 +9,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.EventTransformer;
+import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
@@ -31,6 +31,11 @@ public class ReserveCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
+    /**
+     * Creates a new {@code ReserveCommand} with the given {@code ClientPipeline}.
+     * 
+     * @param pipeline The pipeline to get the {@code EventManager} from
+     */
     public ReserveCommand(ClientPipeline pipeline) {
         this.eventManager = pipeline.getEventManager();
     }
@@ -41,13 +46,13 @@ public class ReserveCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
-        EventTransformer transformer = event.getEventTransformer();
+        DiscordEvent discordEvent = event.getDiscordEvent();
         try {
             ReserveEvent reserve = assignCorrectEvent(event);
         
             if (eventManager.eventExists(reserve.getIdentifier(), TYPE)) {
                 if (!reserve.isFull()) {
-                    transformer.getAuthorOptionally().ifPresent(user -> {
+                    discordEvent.getAuthorOptionally().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
                             manager.sendText("You have already reserved for this event, type !event " + reserve.getIdentifier() + " unreserve to unreserve");
                         } else {
@@ -63,7 +68,7 @@ public class ReserveCommand implements ParseableCommand {
                 }
             } else {
                 logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
-                transformer.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
+                discordEvent.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
                 eventManager.addEvent(reserve);
                 String messageString = "";
                 if (reserve.isTimeless()) {
