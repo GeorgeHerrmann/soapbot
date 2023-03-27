@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.SoapEventManager;
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
@@ -29,11 +30,14 @@ public class EventCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
+    public EventCommand(ClientPipeline pipeline) {
+        this.eventManager = pipeline.getEventManager();
+    }
+
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        eventManager = event.getEventManager();
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
         CommandParser parser = event.getCommandParser();

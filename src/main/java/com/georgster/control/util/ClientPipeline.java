@@ -1,5 +1,6 @@
 package com.georgster.control.util;
 
+import com.georgster.control.CommandRegistry;
 import com.georgster.control.PermissionsManager;
 import com.georgster.control.SoapEventManager;
 import com.georgster.music.components.AudioInterface;
@@ -18,6 +19,7 @@ public class ClientPipeline {
     private AudioInterface audioInterface;
     private SoapEventManager eventManager;
     private PermissionsManager permissionsManager;
+    private CommandRegistry commandRegistry;
     private RestClient restClient;
 
     /**
@@ -117,5 +119,23 @@ public class ClientPipeline {
      */
     public RestClient getRestClient() {
         return restClient;
+    }
+
+    /**
+     * Sets the command registry.
+     * 
+     * @param commandRegistry the command registry
+     */
+    public void setCommandRegistry(CommandRegistry commandRegistry) {
+        this.commandRegistry = commandRegistry;
+    }
+
+    /**
+     * Returns the command registry.
+     * 
+     * @return the command registry
+     */
+    public CommandRegistry getCommandRegistry() {
+         return commandRegistry;
     }
 }

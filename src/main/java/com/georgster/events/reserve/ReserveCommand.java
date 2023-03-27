@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.SoapEventManager;
+import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
@@ -30,49 +31,55 @@ public class ReserveCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
+    public ReserveCommand(ClientPipeline pipeline) {
+        this.eventManager = pipeline.getEventManager();
+    }
+
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        eventManager = event.getEventManager();
         MultiLogger logger = event.getLogger();
         GuildManager manager = event.getGuildManager();
         EventTransformer transformer = event.getEventTransformer();
-
-        ReserveEvent reserve = assignCorrectEvent(event);
-
-        if (eventManager.eventExists(reserve.getIdentifier(), TYPE)) {
-            if (!reserve.isFull()) {
-                transformer.getAuthorOptionally().ifPresent(user -> {
-                    if (reserve.alreadyReserved(user.getTag())) {
-                        manager.sendText("You have already reserved for this event, type !event " + reserve.getIdentifier() + " unreserve to unreserve");
-                    } else {
-                        logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
-                        reserve.addReserved(user.getTag());
-                        eventManager.updateEvent(reserve);
-                        manager.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
-                        reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
-                    }
-                });
+        try {
+            ReserveEvent reserve = assignCorrectEvent(event);
+        
+            if (eventManager.eventExists(reserve.getIdentifier(), TYPE)) {
+                if (!reserve.isFull()) {
+                    transformer.getAuthorOptionally().ifPresent(user -> {
+                        if (reserve.alreadyReserved(user.getTag())) {
+                            manager.sendText("You have already reserved for this event, type !event " + reserve.getIdentifier() + " unreserve to unreserve");
+                        } else {
+                            logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
+                            reserve.addReserved(user.getTag());
+                            eventManager.updateEvent(reserve);
+                            manager.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
+                            reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
+                        }
+                    });
+                } else {
+                    manager.sendText("Event " + reserve.getIdentifier() + " is full");
+                }
             } else {
-                manager.sendText("Event " + reserve.getIdentifier() + " is full");
+                logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
+                transformer.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
+                eventManager.addEvent(reserve);
+                String messageString = "";
+                if (reserve.isTimeless()) {
+                    logger.append("\tThis event is timeless\n", LogDestination.NONAPI);
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                } else if (reserve.isUnlimited()) {
+                    logger.append("\tThis event is unlimited\n", LogDestination.NONAPI);
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                } else {
+                    logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                }
+                manager.sendText(messageString, reserve.getIdentifier() + " event created");
             }
-        } else {
-            logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
-            transformer.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
-            eventManager.addEvent(reserve);
-            String messageString = "";
-            if (reserve.isTimeless()) {
-                logger.append("\tThis event is timeless\n", LogDestination.NONAPI);
-                messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
-            } else if (reserve.isUnlimited()) {
-                logger.append("\tThis event is unlimited\n", LogDestination.NONAPI);
-                messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
-            } else {
-                logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
-                messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
-            }
-            manager.sendText(messageString, reserve.getIdentifier() + " event created");
+        } catch (IllegalArgumentException e) { // assignCorrectEvent will send custom error messages, all other exceptions are handled by the CommandExecutionEvent
+            manager.sendText(e.getMessage());
         }
 
     }

@@ -1,5 +1,6 @@
 package com.georgster.control;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class CommandRegistry {
      */
     public CommandRegistry(ClientPipeline pipeline) { //HelpCommand will be unique
         this.pipeline = pipeline;
+        pipeline.setCommandRegistry(this);
         
         commands = new ArrayList<>(List.of(
             PongCommand.class,
@@ -103,14 +105,14 @@ public class CommandRegistry {
     public List<Command> getCommands() {
         List<Command> commandList = new ArrayList<>();
         commands.forEach(command -> {
-            try {
-                if (command == HelpCommand.class) {
-                    commandList.add(new HelpCommand(this));
-                } else {
+            try { // Commands that need access to high level objects (such as the AudioInterface, EventManager, etc.)
+                commandList.add(command.getDeclaredConstructor(ClientPipeline.class).newInstance(pipeline));
+            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                try { // Commands that don't need access to high level objects
                     commandList.add(command.getDeclaredConstructor().newInstance());
+                } catch (Exception e1) { //If Exception is still thrown, the command is invalid.
+                    e1.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         });
         return commandList;
