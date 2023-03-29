@@ -29,6 +29,10 @@ public class ReserveEvent implements SoapEvent {
     private String channel;
     private List<String> reservedUsers;
     private SoapEventType type = SoapEventType.RESERVE;
+
+    public ReserveEvent() {
+        
+    }
     
     /**
      * Constructs a ReserveEvent object with an identifier, number of people, number of people

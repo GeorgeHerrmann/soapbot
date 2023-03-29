@@ -6,6 +6,7 @@ package com.georgster.profile;
  * For example, a server's events.json profile is represented by the enum EVENTS.
  */
 public enum ProfileType {
+    PROFILES,
     /**
      * Represents a server's events.json profile.
      */

@@ -4,7 +4,8 @@ import com.georgster.control.util.ClientPipeline;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioInterface;
-import com.georgster.profile.ProfileHandler;
+import com.georgster.profile.DatabaseService;
+import com.georgster.profile.ProfileType;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildManager;
 
@@ -56,7 +57,8 @@ public final class SoapClient {
     
         MultiLogger logger = new MultiLogger(manager, getClass());
         logger.append("Logging in to server: " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
-        ProfileHandler handler = manager.getProfileHandler();
+
+        DatabaseService<UserProfile> service = new DatabaseService<>(manager.getId(), ProfileType.PROFILES, UserProfile.class);
 
         eventManager.restartEvents();
 
@@ -64,16 +66,13 @@ public final class SoapClient {
 
         logger.append("\n\t Restarted " + eventManager.getEventCount() + " events for " + manager.getGuild().getName() + "\n", LogDestination.NONAPI);
 
-        if (!handler.serverProfileExists()) { //If the guild this event was fired from does not have a profile scheme, or has an out of date profile scheme, we create one
-          logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(), LogDestination.NONAPI);
-          handler.createServerProfile();
-        }
+        logger.append("\n\t Updating Server Profile for " + manager.getGuild().getName(), LogDestination.NONAPI);
+
         manager.getAllMembers().forEach(member -> {
           String id = member.getId().asString();
-          if (!handler.userProfileExists(id)) {
-            handler.createUserProfile(id);
-          }
-          handler.updateUserProfile(new UserProfile(manager.getId(), id, member.getUsername())); //We will always update the user's profile to make sure it is up to date
+          /*service.addObjectIfNotExists(new UserProfile(manager.getId(), id, member.getUsername()), "memberId", id);
+          service.updateObjectIfExists(new UserProfile(manager.getId(), id, member.getUsername()), "memberId", id);*/
+          System.out.println(service.getObject("memberId", id).getMemberId());
         });
         logger.append("\n\t Updated " + manager.getAllMembers().size() + " User Profiles for " + manager.getGuild().getName(), LogDestination.NONAPI);
         logger.sendAll();

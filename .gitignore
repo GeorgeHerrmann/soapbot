@@ -8,3 +8,5 @@ target/maven-archiver/*
 target/soapbot-1.214.jar
 src/main/java/com/georgster/logs/data/log.txt
 target/classes/com/georgster/logs/data/log.txt
+src/main/java/com/georgster/profile/dbconnection.txt
+target/classes/com/georgster/profile/dbconnection.txt

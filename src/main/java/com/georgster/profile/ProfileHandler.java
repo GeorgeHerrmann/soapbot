@@ -27,7 +27,10 @@ import java.io.FileWriter;
  * Intended to handle Server and User "profiles" inside of SOAP Bot.
  * A "Server Profile" exists inside a folder dedicated to that {@code Guild} based on its {@code Snowflake} ID.
  * A "User Profile" exists solely inside a JSON file inside of a "Server Profile" directory.
+ * 
+ * @deprecated The {@code DatabaseService} class is now used to handle all database operations.
  */
+@Deprecated
 public class ProfileHandler {
 
     /* Holds the location of the profiles directory */

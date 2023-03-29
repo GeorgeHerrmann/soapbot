@@ -6,7 +6,7 @@ import java.util.List;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventHandler;
 import com.georgster.events.SoapEventType;
-import com.georgster.profile.ProfileHandler;
+import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
@@ -22,7 +22,7 @@ import discord4j.core.object.entity.Guild;
 public class SoapEventManager {
     private final List<SoapEvent> events;//The List of events this manager is observing
     private final GuildManager manager; //The GuildManager for the guild this manager is managing events for
-    private final ProfileHandler profileHandler; //The ProfileHandler for the guild this manager is managing events for
+    private final DatabaseService<SoapEvent> dbService;
 
     /**
      * Constructs a {@code SoapEventManager} for the given {@code Guild}
@@ -32,20 +32,19 @@ public class SoapEventManager {
      */
     public SoapEventManager(Guild guild) {
         this.manager = new GuildManager(guild);
-        this.profileHandler = manager.getProfileHandler();
         this.events = new ArrayList<>();
+
+        this.dbService = new DatabaseService<>(manager.getId(), ProfileType.EVENTS, SoapEvent.class);
     }
 
     /**
      * Restarts all previously scheduled events this manager was oberserving.
      */
     public void restartEvents() {
-        if (handlerHasEvents()) {
-            profileHandler.getEvents().forEach(event -> {
-                events.add(event);
-                SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
-            });
-        }
+        dbService.getAllObjects().forEach(event -> {
+            events.add(event);
+            SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
+        });
     }
 
     /**
@@ -57,7 +56,7 @@ public class SoapEventManager {
     public void addEvent(SoapEvent event) {
         if (!eventExists(event)) {
             events.add(event);
-            if (!profileHandler.eventExists(event.getIdentifier())) profileHandler.addObject(event, ProfileType.EVENTS);
+            dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier());
             SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
         }
     }
@@ -70,7 +69,7 @@ public class SoapEventManager {
      */
     public void removeEvent(SoapEvent event) {
         events.remove(event);
-        profileHandler.removeObject(profileHandler.pullEvent(event.getIdentifier()), ProfileType.EVENTS);
+        dbService.removeObjectIfExists("identifier", event.getIdentifier());
     }
 
     /**
@@ -79,8 +78,7 @@ public class SoapEventManager {
      * If no events are active, nothing happens.
      */
     public void removeAllEvents() {
-        events.forEach(event -> profileHandler.removeObject(event, ProfileType.EVENTS));
-        events.clear();
+        events.forEach(this::removeEvent);
     }
 
     /**
@@ -91,9 +89,8 @@ public class SoapEventManager {
     public void updateEvent(SoapEvent event) {
         events.forEach(examiner -> {
             if (examiner.getIdentifier().equals(event.getIdentifier())) {
-                profileHandler.removeObject(profileHandler.pullEvent(event.getIdentifier()), ProfileType.EVENTS);
                 events.set(events.indexOf(examiner), event); //Replace the old event with the new one
-                profileHandler.addObject(event, ProfileType.EVENTS);
+                dbService.updateObjectIfExists(event, "identifier", event.getIdentifier());
                 return;
             }
         });
@@ -137,15 +134,6 @@ public class SoapEventManager {
      */
     public boolean eventExists(String identifier, SoapEventType type)  {
         return events.stream().anyMatch(event -> event.getIdentifier().equals(identifier) && event.getType().equals(type));
-    }
-
-    /**
-     * Returns whether or not the {@code ProfileHandler} has any events saved.
-     * 
-     * @return true if the {@code ProfileHandler} has any events, false otherwise
-     */
-    private boolean handlerHasEvents() {
-        return profileHandler.areEvents();
     }
 
     /**
@@ -197,23 +185,6 @@ public class SoapEventManager {
             }
         }
         return false;
-    }
-
-    /**
-     * Checks if the events in this manager match the events in the server profile.
-     * 
-     * @return true if each event in this manager is in and matches exactly the event in the server profile, false otherwise.
-     */
-    public boolean matchesServerProfile() {
-        List<SoapEvent> profileEvents = profileHandler.getEvents();
-        int totalEvents = 0;
-        for (SoapEvent event : events) {
-            if (!profileEvents.contains(event)) {
-                return false;
-            }
-            totalEvents++;
-        }
-        return totalEvents == profileEvents.size();
     }
 
     /**

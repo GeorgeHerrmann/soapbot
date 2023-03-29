@@ -1,5 +1,8 @@
 package com.georgster.profile;
 
+import org.bson.codecs.pojo.annotations.BsonCreator;
+import org.bson.codecs.pojo.annotations.BsonProperty;
+
 /**
  * A Profile holds data regarding a user's inside a specific Discord server.
  */
@@ -8,6 +11,10 @@ public class UserProfile {
     private String guildId; //Snowflake Guild ID associated with this user's profile in a guild
     private String memberId; //Snowflake member ID
     private String username; //User's discord username
+
+    public UserProfile() {
+        
+    }
 
     /**
      * Constructs a {@code Profile} for a specific {@code Member} inside of a {@code Guild}.

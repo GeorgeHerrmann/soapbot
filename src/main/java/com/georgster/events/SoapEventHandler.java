@@ -27,7 +27,7 @@ public class SoapEventHandler {
      */
     public static void scheduleEvent(SoapEvent event, SoapEventManager eventManager) {
         GuildManager manager = new GuildManager(eventManager.getGuild());
-        if (manager.getProfileHandler().eventExists(event.getIdentifier())) {
+        if (eventManager.eventExists(event.getIdentifier())) {
             if (event.getType() == SoapEventType.RESERVE) {
                 manager.setActiveChannel(manager.getTextChannel(((ReserveEvent) event).getChannel()));
             }
