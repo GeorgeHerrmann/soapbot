@@ -70,9 +70,8 @@ public final class SoapClient {
 
         manager.getAllMembers().forEach(member -> {
           String id = member.getId().asString();
-          /*service.addObjectIfNotExists(new UserProfile(manager.getId(), id, member.getUsername()), "memberId", id);
-          service.updateObjectIfExists(new UserProfile(manager.getId(), id, member.getUsername()), "memberId", id);*/
-          System.out.println(service.getObject("memberId", id).getMemberId());
+          service.addObjectIfNotExists(new UserProfile(manager.getId(), id, member.getUsername()), "memberId", id);
+          service.updateObjectIfExists(new UserProfile(manager.getId(), id, member.getUsername()), "memberId", id);
         });
         logger.append("\n\t Updated " + manager.getAllMembers().size() + " User Profiles for " + manager.getGuild().getName(), LogDestination.NONAPI);
         logger.sendAll();

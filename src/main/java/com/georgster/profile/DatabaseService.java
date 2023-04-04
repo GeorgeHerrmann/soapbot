@@ -7,11 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
+import com.georgster.util.SoapUtility;
+import com.google.gson.Gson;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -45,9 +48,11 @@ public class DatabaseService<T> {
     }
 
     private void withDatabase(Consumer<MongoDatabase> consumer) {
-        try (MongoClient mongoClient = MongoClients.create(uri)) {
-            consumer.accept(mongoClient.getDatabase(id).withCodecRegistry(pojoCodecRegistry));
-        }
+        SoapUtility.runDaemon(() -> {
+            try (MongoClient mongoClient = MongoClients.create(uri)) {
+                consumer.accept(mongoClient.getDatabase(id).withCodecRegistry(pojoCodecRegistry));
+            }
+        });
     }
 
     public void addObject(T object) {
@@ -87,10 +92,13 @@ public class DatabaseService<T> {
     public T getObject(String identifierName, String identifierValue) {
         DBObject<T> object = new DBObject<>();
         withDatabase(database -> {
-            MongoCollection<T> collection = database.getCollection(type.toString().toLowerCase(), classType);
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson query = eq(identifierName, identifierValue);
             Bson projection = Projections.fields(Projections.excludeId(), Projections.include(identifierName));
-            object.setObject(collection.find(query).projection(projection).first());
+            Gson gson = new Gson();
+            System.out.println(collection.find(query).projection(projection).first().toJson());
+            object.setObject(gson.fromJson(collection.find(query).projection(projection).first().toJson(), classType));
+            //object.setObject(collection.find(query).projection(projection).first());
         });
         
         return object.getObject();
@@ -99,9 +107,14 @@ public class DatabaseService<T> {
     public List<T> getAllObjects() {
         DBObject<List<T>> objects = new DBObject<>();
         withDatabase(database -> {
-            MongoCollection<T> collection = database.getCollection(type.toString().toLowerCase(), classType);
-            Bson projection = Projections.fields(Projections.excludeId());
-            objects.setObject(collection.find().projection(projection).into(new ArrayList<>()));
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
+            List<T> list = new ArrayList<>();
+            Gson gson = new Gson();
+            collection.find().forEach((Consumer<Document>) document -> {
+                list.add(gson.fromJson(document.toJson(), classType));
+                System.out.println(document.toJson());
+            });
+            objects.setObject(list);
         });
         
         return objects.getObject();
