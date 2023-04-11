@@ -13,8 +13,10 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
+import com.georgster.profile.adapter.DatabaseObjectDeserializer;
 import com.georgster.util.SoapUtility;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -38,7 +40,6 @@ public class DatabaseService<T> {
     public DatabaseService(String guildId, ProfileType type, Class<T> classType) {
         this.classType = classType;
         this.type = type;
-
         try {
             this.uri = Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "profile", "dbconnection.txt"));
             this.id = guildId;
@@ -79,14 +80,11 @@ public class DatabaseService<T> {
     }
 
     public boolean objectExists(String identifierName, String identifierValue) {
-        DBObject<T> object = new DBObject<>();
-        withDatabase(database -> {
-            MongoCollection<T> collection = database.getCollection(type.toString().toLowerCase(), classType);
-            Bson query = eq(identifierName, identifierValue);
-            object.setObject(collection.find(query).first());
-        });
-        
-        return object.getObject() != null;
+        return getObject(identifierName, identifierValue) != null;
+    }
+
+    public boolean objectExists(String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+        return getObject(identifierName, identifierValue, deserializer) != null;
     }
 
     public T getObject(String identifierName, String identifierValue) {
@@ -95,10 +93,25 @@ public class DatabaseService<T> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson query = eq(identifierName, identifierValue);
             Bson projection = Projections.fields(Projections.excludeId(), Projections.include(identifierName));
+            
             Gson gson = new Gson();
-            System.out.println(collection.find(query).projection(projection).first().toJson());
+
             object.setObject(gson.fromJson(collection.find(query).projection(projection).first().toJson(), classType));
-            //object.setObject(collection.find(query).projection(projection).first());
+        });
+        
+        return object.getObject();
+    }
+
+    public T getObject(String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+        DBObject<T> object = new DBObject<>();
+        withDatabase(database -> {
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
+            Bson query = eq(identifierName, identifierValue);
+            Bson projection = Projections.fields(Projections.excludeId(), Projections.include(identifierName));
+            
+            Gson gson = new GsonBuilder().registerTypeAdapter(classType, deserializer).create();
+
+            object.setObject(gson.fromJson(collection.find(query).projection(projection).first().toJson(), classType));
         });
         
         return object.getObject();
@@ -120,8 +133,31 @@ public class DatabaseService<T> {
         return objects.getObject();
     }
 
+    public List<T> getAllObjects(DatabaseObjectDeserializer<T> deserializer) {
+        DBObject<List<T>> objects = new DBObject<>();
+        withDatabase(database -> {
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
+            List<T> list = new ArrayList<>();
+            collection.find().forEach((Consumer<Document>) document -> {
+                
+                Gson gson = new GsonBuilder().registerTypeAdapter(classType, deserializer).create();
+                list.add(gson.fromJson(document.toJson(), classType));
+                System.out.println(document.toJson());
+            });
+            objects.setObject(list);
+        });
+        
+        return objects.getObject();
+    }
+
     public void removeObjectIfExists(String identifierName, String identifierValue) {
         if (objectExists(identifierName, identifierValue)) {
+            removeObject(identifierName, identifierValue);
+        }
+    }
+
+    public void removeObjectIfExists(String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+        if (objectExists(identifierName, identifierValue, deserializer)) {
             removeObject(identifierName, identifierValue);
         }
     }
@@ -132,8 +168,20 @@ public class DatabaseService<T> {
         }
     }
 
+    public void addObjectIfNotExists(T object, String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+        if (!objectExists(identifierName, identifierValue, deserializer)) {
+            addObject(object);
+        }
+    }
+
     public void updateObjectIfExists(T object, String identifierName, String identifierValue) {
         if (objectExists(identifierName, identifierValue)) {
+            updateObject(identifierName, identifierValue, object);
+        }
+    }
+
+    public void updateObjectIfExists(T object, String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+        if (objectExists(identifierName, identifierValue, deserializer)) {
             updateObject(identifierName, identifierValue, object);
         }
     }

@@ -8,6 +8,8 @@ import com.georgster.events.SoapEventHandler;
 import com.georgster.events.SoapEventType;
 import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
+import com.georgster.profile.adapter.DatabaseObjectDeserializer;
+import com.georgster.profile.adapter.SoapEventDeserializer;
 import com.georgster.util.GuildManager;
 import com.georgster.util.SoapUtility;
 
@@ -41,7 +43,7 @@ public class SoapEventManager {
      * Restarts all previously scheduled events this manager was oberserving.
      */
     public void restartEvents() {
-        dbService.getAllObjects().forEach(event -> {
+        dbService.getAllObjects(getEventDeserializer()).forEach(event -> {
             events.add(event);
             SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
         });
@@ -56,7 +58,7 @@ public class SoapEventManager {
     public void addEvent(SoapEvent event) {
         if (!eventExists(event)) {
             events.add(event);
-            dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier());
+            dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier(), getEventDeserializer(event));
             SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
         }
     }
@@ -69,7 +71,7 @@ public class SoapEventManager {
      */
     public void removeEvent(SoapEvent event) {
         events.remove(event);
-        dbService.removeObjectIfExists("identifier", event.getIdentifier());
+        dbService.removeObjectIfExists("identifier", event.getIdentifier(), getEventDeserializer(event));
     }
 
     /**
@@ -90,7 +92,7 @@ public class SoapEventManager {
         events.forEach(examiner -> {
             if (examiner.getIdentifier().equals(event.getIdentifier())) {
                 events.set(events.indexOf(examiner), event); //Replace the old event with the new one
-                dbService.updateObjectIfExists(event, "identifier", event.getIdentifier());
+                dbService.updateObjectIfExists(event, "identifier", event.getIdentifier(), getEventDeserializer(event));
                 return;
             }
         });
@@ -219,5 +221,13 @@ public class SoapEventManager {
      */
     public Guild getGuild() {
         return manager.getGuild();
+    }
+
+    private DatabaseObjectDeserializer<SoapEvent> getEventDeserializer(SoapEvent event) {
+        return new SoapEventDeserializer(event);
+    }
+
+    private DatabaseObjectDeserializer<SoapEvent> getEventDeserializer() {
+        return new SoapEventDeserializer("numReserved");
     }
 }
