@@ -1,29 +1,21 @@
 package com.georgster.profile.adapter;
 
-import java.lang.reflect.Type;
-
 import com.georgster.events.SoapEvent;
 import com.georgster.events.reserve.ReserveEvent;
+import com.google.gson.JsonParseException;
 
 public class SoapEventDeserializer extends DatabaseObjectDeserializer<SoapEvent> {
 
-    private SoapEvent object;
-    
-    public SoapEventDeserializer(SoapEvent object) {
-        super(object);
-    }
-
-    public SoapEventDeserializer(String... uniqueIdentifiers) {
-        super(uniqueIdentifiers);
+    public SoapEventDeserializer() {
+        super("reserved");
     }
     
     @Override
-    public Type getType() {
-        if (object instanceof ReserveEvent) {
+    public Class<? extends SoapEvent> getType(String keyword) throws JsonParseException {
+        if (keyword.equals("reserved")) {
             return ReserveEvent.class;
-        } else {
-            return SoapEvent.class;
         }
+        throw new JsonParseException("Could not find a matching type for the given json");
     }
     
 }

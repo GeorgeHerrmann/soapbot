@@ -1,7 +1,5 @@
 package com.georgster.profile;
 
-import org.bson.codecs.pojo.annotations.BsonCreator;
-import org.bson.codecs.pojo.annotations.BsonProperty;
 
 /**
  * A Profile holds data regarding a user's inside a specific Discord server.

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -13,10 +14,11 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
+import com.georgster.events.SoapEvent;
 import com.georgster.profile.adapter.DatabaseObjectDeserializer;
 import com.georgster.util.SoapUtility;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -32,28 +34,31 @@ public class DatabaseService<T> {
 
     private static final CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
     private static final CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+    private static MongoClient mongoClient;
     private final Class<T> classType;
     private final ProfileType type;
     private String id;
-    private String uri;
 
     public DatabaseService(String guildId, ProfileType type, Class<T> classType) {
         this.classType = classType;
         this.type = type;
-        try {
-            this.uri = Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "profile", "dbconnection.txt"));
-            this.id = guildId;
-        } catch (IOException e) {
-            e.printStackTrace();
+        createClient();
+
+        this.id = guildId;
+    }
+
+    private static void createClient() {
+        if (mongoClient == null) {
+            try {
+                mongoClient = MongoClients.create(Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "profile", "dbconnection.txt")));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void withDatabase(Consumer<MongoDatabase> consumer) {
-        SoapUtility.runDaemon(() -> {
-            try (MongoClient mongoClient = MongoClients.create(uri)) {
-                consumer.accept(mongoClient.getDatabase(id).withCodecRegistry(pojoCodecRegistry));
-            }
-        });
+        consumer.accept(mongoClient.getDatabase(id).withCodecRegistry(pojoCodecRegistry));
     }
 
     public void addObject(T object) {
@@ -92,7 +97,7 @@ public class DatabaseService<T> {
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson query = eq(identifierName, identifierValue);
-            Bson projection = Projections.fields(Projections.excludeId(), Projections.include(identifierName));
+            Bson projection = Projections.fields(Projections.excludeId());
             
             Gson gson = new Gson();
 
@@ -107,17 +112,25 @@ public class DatabaseService<T> {
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson query = eq(identifierName, identifierValue);
-            Bson projection = Projections.fields(Projections.excludeId(), Projections.include(identifierName));
+            Bson projection = Projections.fields(Projections.excludeId());
             
-            Gson gson = new GsonBuilder().registerTypeAdapter(classType, deserializer).create();
+            Gson gson = new Gson();
 
-            object.setObject(gson.fromJson(collection.find(query).projection(projection).first().toJson(), classType));
+            try {
+                String json = collection.find(query).projection(projection).first().toJson();
+                System.out.println("Json: " + json);
+                object.setObject(gson.fromJson(json, deserializer.getClass(json)));
+            } catch (Exception e) {
+                e.printStackTrace();
+                object.setObject(null);
+            }
         });
         
         return object.getObject();
     }
 
     public List<T> getAllObjects() {
+        if (classType == SoapEvent.class) throw new JsonParseException("Cannot use this method for SoapEvent");
         DBObject<List<T>> objects = new DBObject<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
@@ -125,11 +138,11 @@ public class DatabaseService<T> {
             Gson gson = new Gson();
             collection.find().forEach((Consumer<Document>) document -> {
                 list.add(gson.fromJson(document.toJson(), classType));
-                System.out.println(document.toJson());
+                //System.out.println(document.toJson());
             });
             objects.setObject(list);
         });
-        
+        if (objects.getObject() == null) return Collections.emptyList();
         return objects.getObject();
     }
 
@@ -140,13 +153,19 @@ public class DatabaseService<T> {
             List<T> list = new ArrayList<>();
             collection.find().forEach((Consumer<Document>) document -> {
                 
-                Gson gson = new GsonBuilder().registerTypeAdapter(classType, deserializer).create();
-                list.add(gson.fromJson(document.toJson(), classType));
-                System.out.println(document.toJson());
+                Gson gson = new Gson();
+                String json = document.toJson();
+                try {
+                    list.add(gson.fromJson(json, deserializer.getClass(json)));
+                    System.out.println(json);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("No output");
+                }
             });
             objects.setObject(list);
         });
-        
+        if (objects.getObject() == null) return Collections.emptyList();
         return objects.getObject();
     }
 
@@ -184,5 +203,9 @@ public class DatabaseService<T> {
         if (objectExists(identifierName, identifierValue, deserializer)) {
             updateObject(identifierName, identifierValue, object);
         }
+    }
+
+    public static void close() {
+        mongoClient.close();
     }
 }

@@ -22,6 +22,7 @@ import discord4j.core.object.entity.Guild;
  * through the {@code SoapEventHandler}.
  */
 public class SoapEventManager {
+    private static final DatabaseObjectDeserializer<SoapEvent> eventDeserializer = new SoapEventDeserializer();
     private final List<SoapEvent> events;//The List of events this manager is observing
     private final GuildManager manager; //The GuildManager for the guild this manager is managing events for
     private final DatabaseService<SoapEvent> dbService;
@@ -43,7 +44,7 @@ public class SoapEventManager {
      * Restarts all previously scheduled events this manager was oberserving.
      */
     public void restartEvents() {
-        dbService.getAllObjects(getEventDeserializer()).forEach(event -> {
+        dbService.getAllObjects(eventDeserializer).forEach(event -> {
             events.add(event);
             SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
         });
@@ -58,7 +59,7 @@ public class SoapEventManager {
     public void addEvent(SoapEvent event) {
         if (!eventExists(event)) {
             events.add(event);
-            dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier(), getEventDeserializer(event));
+            dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier(), eventDeserializer);
             SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
         }
     }
@@ -71,7 +72,7 @@ public class SoapEventManager {
      */
     public void removeEvent(SoapEvent event) {
         events.remove(event);
-        dbService.removeObjectIfExists("identifier", event.getIdentifier(), getEventDeserializer(event));
+        dbService.removeObjectIfExists("identifier", event.getIdentifier(), eventDeserializer);
     }
 
     /**
@@ -92,7 +93,7 @@ public class SoapEventManager {
         events.forEach(examiner -> {
             if (examiner.getIdentifier().equals(event.getIdentifier())) {
                 events.set(events.indexOf(examiner), event); //Replace the old event with the new one
-                dbService.updateObjectIfExists(event, "identifier", event.getIdentifier(), getEventDeserializer(event));
+                dbService.updateObjectIfExists(event, "identifier", event.getIdentifier(), eventDeserializer);
                 return;
             }
         });
@@ -221,13 +222,5 @@ public class SoapEventManager {
      */
     public Guild getGuild() {
         return manager.getGuild();
-    }
-
-    private DatabaseObjectDeserializer<SoapEvent> getEventDeserializer(SoapEvent event) {
-        return new SoapEventDeserializer(event);
-    }
-
-    private DatabaseObjectDeserializer<SoapEvent> getEventDeserializer() {
-        return new SoapEventDeserializer("numReserved");
     }
 }
