@@ -246,7 +246,6 @@ public class DatabaseService<T> {
                 String json = document.toJson();
                 if (!json.isEmpty()) {
                     list.add(gson.fromJson(json, deserializer.getClass(json)));
-                    System.out.println(json);
                 }
             });
             objects.setObject(list);
