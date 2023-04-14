@@ -2,8 +2,6 @@ package com.georgster.util;
 
 import java.util.List;
 
-import com.georgster.profile.ProfileHandler;
-
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
@@ -485,14 +483,5 @@ public class GuildManager {
                 return role;
         }
         return null;
-    }
-
-    /**
-     * Returns a {@code ProfileHandler} to manage this guild's profiles.
-     * 
-     * @return a {@code ProfileHandler} to manage this guild's profiles
-     */
-    public ProfileHandler getProfileHandler() {
-        return new ProfileHandler(guild.getId().asString());
     }
 }

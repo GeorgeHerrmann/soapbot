@@ -154,7 +154,7 @@ public class CommandWizard {
      * @param message The message to send to the user.
      */
     public void sendPrivateMessage(String message) {
-        caller.getPrivateChannel().block().createMessage(message).block();
+        manager.sendText(message);
     }
 
 }

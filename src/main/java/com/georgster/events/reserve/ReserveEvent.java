@@ -24,7 +24,7 @@ import com.georgster.util.GuildManager;
 public class ReserveEvent implements SoapEvent {
     private String identifier;
     private int numPeople;
-    private int numReserved;
+    private int reserved;
     private String time;
     private String channel;
     private List<String> reservedUsers;
@@ -41,15 +41,15 @@ public class ReserveEvent implements SoapEvent {
      * 
      * @param identifier the name of the event
      * @param numPeople the number of people needed to start the event
-     * @param numReserved the number of people that have reserved for the event
+     * @param reserved the number of people that have reserved for the event
      * @param time the time the event will start
      * @param channel the name of the channel the event was reserved in
      * @param reservedUsers a list of users that have reserved for the event
      */
-    public ReserveEvent(String identifier, int numPeople, int numReserved, String time, String channel, List<String> reservedUsers) {
+    public ReserveEvent(String identifier, int numPeople, int reserved, String time, String channel, List<String> reservedUsers) {
         this.identifier = identifier;
         this.numPeople = numPeople;
-        this.numReserved = numReserved;
+        this.reserved = reserved;
         this.time = time;
         this.channel = channel;
         this.reservedUsers = reservedUsers;
@@ -67,7 +67,7 @@ public class ReserveEvent implements SoapEvent {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.time = time;
-        this.numReserved = 0; //We will always start with one person reserved
+        this.reserved = 0; //We will always start with one person reserved
         this.channel = channel;
         reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
     }
@@ -82,7 +82,7 @@ public class ReserveEvent implements SoapEvent {
     public ReserveEvent(String identifier, int numPeople, String channel) {
         this.identifier = identifier;
         this.numPeople = numPeople;
-        this.numReserved = 0;
+        this.reserved = 0;
         this.time = "99:99"; //A Timeless event will always be at 99:99
         this.channel = channel;
         reservedUsers = new ArrayList<>();
@@ -100,7 +100,7 @@ public class ReserveEvent implements SoapEvent {
         this.identifier = identifier;
         this.time = time;
         this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start
-        this.numReserved = 0;
+        this.reserved = 0;
         this.channel = channel;
         reservedUsers = new ArrayList<>();
     }
@@ -116,7 +116,7 @@ public class ReserveEvent implements SoapEvent {
             }
             return until <= 0;
         } else {
-            return numReserved >= numPeople;
+            return reserved >= numPeople;
         }
     }
 
@@ -126,7 +126,7 @@ public class ReserveEvent implements SoapEvent {
     public void onFulfill(GuildManager manager) {
         ActionWriter.writeAction("Starting event " + identifier);
         StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
-        "\t- " + numReserved + "/" + numPeople + " reserved with the following people:");
+        "\t- " + reserved + "/" + numPeople + " reserved with the following people:");
         for (String name : reservedUsers) { //We add the names of the people who reserved to the event
             response.append("\n\t\t- " + manager.getMember(name).getMention());
         }
@@ -146,7 +146,7 @@ public class ReserveEvent implements SoapEvent {
      * Adds a person to the number of people that have reserved for the event.
      */
     public void addReserved(String user) {
-        numReserved++;
+        reserved++;
         reservedUsers.add(user);
     }
 
@@ -154,7 +154,7 @@ public class ReserveEvent implements SoapEvent {
      * Removes a person from the number of people that have reserved for the event.
      */
     public void removeReserved(String user) {
-        numReserved--;
+        reserved--;
         reservedUsers.remove(user);
     }
 
@@ -164,7 +164,7 @@ public class ReserveEvent implements SoapEvent {
      * @return the number of people that have reserved for the event
      */
     public int getReserved() {
-        return numReserved;
+        return reserved;
     }
 
     /**
@@ -182,7 +182,7 @@ public class ReserveEvent implements SoapEvent {
      * @return the number of people that are available to reserve for the event
      */
     public int getAvailable() {
-        return numPeople - numReserved;
+        return numPeople - reserved;
     }
 
     /**
@@ -227,7 +227,7 @@ public class ReserveEvent implements SoapEvent {
      * @return true if the event is full, false otherwise
      */
     public boolean isFull() {
-        return numReserved >= numPeople;
+        return reserved >= numPeople;
     }
 
     /**
@@ -271,7 +271,7 @@ public class ReserveEvent implements SoapEvent {
         && time.equals(event.getTime())
         && channel.equals(event.getChannel())
         && numPeople == event.getNumPeople()
-        && numReserved == event.getReserved()
+        && reserved == event.getReserved()
         && reservedUsers.equals(event.getReservedUsers())
         && type == event.getType();
     }
