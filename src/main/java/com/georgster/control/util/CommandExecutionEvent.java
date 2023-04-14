@@ -76,7 +76,7 @@ public class CommandExecutionEvent {
                 logger.append("\tArguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
                 executeIfPermission(args);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.append("Caught error: " + e.getMessage() + "\n", LogDestination.SYSTEM, LogDestination.FILE);
                 logger.append("\tInvalid arguments, sending a help message\n", LogDestination.NONAPI);
                 manager.sendText(command.help(), command.getClass().getSimpleName());
             }
