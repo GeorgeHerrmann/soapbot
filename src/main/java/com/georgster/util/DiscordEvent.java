@@ -95,7 +95,7 @@ public class DiscordEvent {
      */
     public String getFormattedMessage() {
         if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getContent();
+            return ((MessageCreateEvent) event).getMessage().getContent().toLowerCase();
         } else if (event instanceof ChatInputInteractionEvent) {
             StringBuilder response = new StringBuilder();
             ((ChatInputInteractionEvent) event).getInteraction().getCommandInteraction().ifPresent(
@@ -115,7 +115,7 @@ public class DiscordEvent {
                 });
             ((ChatInputInteractionEvent) event).getInteraction().getMessage().ifPresent(message -> response.append(message.getContent()));
 
-            return response.toString().trim();
+            return response.toString().toLowerCase().trim();
         } else {
             return null;
         }
