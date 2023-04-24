@@ -38,6 +38,16 @@ public class ParseBuilder {
     }
 
     /**
+     * Disables the CommandParser's default auto-formatting.
+     * 
+     * @return The active ParseBuilder
+     */
+    public ParseBuilder withoutAutoFormatting() {
+        parser.disableAutoFormatting();
+        return this;
+    }
+
+    /**
      * Builds the CommandParser.
      * 
      * @return The built CommandParser

@@ -102,7 +102,9 @@ public class SoapUtility {
      * will return immediately its the caller.
      * @param target the object whose {@code run} method is invoked when this
      *               thread is started
+     * @deprecated use {@link com.georgster.util.thread.ThreadPoolFactory} to use multithreading
      */
+    @Deprecated
     public static void runDaemon(Runnable target) {
         Thread t = new Thread(target);
         t.setDaemon(true); //Daemon threads will not prevent the program from exiting

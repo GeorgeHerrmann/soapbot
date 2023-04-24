@@ -42,6 +42,7 @@ import com.georgster.util.SoapUtility;
  * @author George Herrmann
  */
 public class CommandParser {
+    private boolean autoFormat; //Whether or not the parser should automatically format the arguments
     private String pattern; //A string that defines the arguments of a command
     private List<String> rulesList; //A list of the rules split by spaces
     private List<String> patternList; //A list of the pattern split by spaces
@@ -63,11 +64,20 @@ public class CommandParser {
         identifiers = new ArrayList<>();
         rulesList = new ArrayList<>();
         arguments = new ArrayList<>();
+        autoFormat = true;
         try {
             this.patternList = new ArrayList<>(List.of(pattern.split(" ")));
         } catch (Exception e) {
             throw new IllegalArgumentException("Pattern must be in the format <num1>|<req> <num2>|<req> ... <numn>|<req> where num is the number of arguments that arg takes and req is whether or not the argument is required.");
         }
+    }
+
+    /**
+     * Disables auto-formatting of the arguments. If auto-formatting is disabled,
+     * the arguments will be parsed exactly as they were input.
+     */
+    public void disableAutoFormatting() {
+        autoFormat = false;
     }
 
     /**
@@ -169,6 +179,7 @@ public class CommandParser {
      * @throws IllegalArgumentException If the input does not match the pattern and rules of this CommandParser.
      */
     public List<String> parse(String input) throws IllegalArgumentException {
+        if (autoFormat) input = input.toLowerCase();
         List<String> command = new ArrayList<>(Arrays.asList(input.split(" "))); //Get each argument of the command
         List<String> args = new ArrayList<>();
 

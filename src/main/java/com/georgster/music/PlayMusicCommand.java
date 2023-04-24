@@ -10,6 +10,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildManager;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -99,7 +100,7 @@ public class PlayMusicCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new CommandParser(PATTERN);
+        return new ParseBuilder(PATTERN).withoutAutoFormatting().build();
     }
 
     /**

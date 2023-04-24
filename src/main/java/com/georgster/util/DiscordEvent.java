@@ -85,6 +85,7 @@ public class DiscordEvent {
 
     /**
      * Returns a String representing the main content of the event.
+     * The returned String is formatted to be lowercase and trimmed.
      * The behavior for each supported {@code Event} is as follows:
      * <ul>
      * <li>{@code MessageCreateEvent}: the content of the {@code Message}</li>
@@ -95,7 +96,7 @@ public class DiscordEvent {
      */
     public String getFormattedMessage() {
         if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getContent().toLowerCase();
+            return ((MessageCreateEvent) event).getMessage().getContent();
         } else if (event instanceof ChatInputInteractionEvent) {
             StringBuilder response = new StringBuilder();
             ((ChatInputInteractionEvent) event).getInteraction().getCommandInteraction().ifPresent(
@@ -115,7 +116,7 @@ public class DiscordEvent {
                 });
             ((ChatInputInteractionEvent) event).getInteraction().getMessage().ifPresent(message -> response.append(message.getContent()));
 
-            return response.toString().toLowerCase().trim();
+            return response.toString().trim();
         } else {
             return null;
         }

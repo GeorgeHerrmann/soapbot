@@ -20,8 +20,8 @@ import com.georgster.music.SkipMusicCommand;
 import com.georgster.plinko.PlinkoCommand;
 import com.georgster.test.TestCommand;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissionsCommand;
+import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.core.event.domain.Event;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -76,7 +76,7 @@ public class CommandRegistry {
         getCommands().forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
                 CommandExecutionEvent executionEvent = new CommandExecutionEvent(transformer, client, pipeline.getDispatcher(), command);
-                SoapUtility.runDaemon(executionEvent::executeCommand); // executeCommand runs on the calling thread, so we need to run it on a daemon thread.
+                ThreadPoolFactory.scheduleCommandTask(client.getSnowflake().asString(), executionEvent::executeCommand);
             }
         });
     }

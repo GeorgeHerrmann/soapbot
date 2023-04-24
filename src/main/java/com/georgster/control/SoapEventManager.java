@@ -11,7 +11,7 @@ import com.georgster.profile.ProfileType;
 import com.georgster.profile.adapter.DatabaseObjectDeserializer;
 import com.georgster.profile.adapter.SoapEventDeserializer;
 import com.georgster.util.GuildManager;
-import com.georgster.util.SoapUtility;
+import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.core.object.entity.Guild;
 
@@ -46,7 +46,7 @@ public class SoapEventManager {
     public void restartEvents() {
         dbService.getAllObjects(eventDeserializer).forEach(event -> {
             events.add(event);
-            SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
+            ThreadPoolFactory.scheduleEventTask(manager.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
         });
     }
 
@@ -60,7 +60,7 @@ public class SoapEventManager {
         if (!eventExists(event)) {
             events.add(event);
             dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier(), eventDeserializer);
-            SoapUtility.runDaemon(() -> SoapEventHandler.scheduleEvent(event, this));
+            ThreadPoolFactory.scheduleEventTask(manager.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
         }
     }
 
