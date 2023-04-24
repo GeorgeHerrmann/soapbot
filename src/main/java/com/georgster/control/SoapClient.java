@@ -8,6 +8,7 @@ import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildManager;
+import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
@@ -51,6 +52,8 @@ public final class SoapClient {
      * @param event The GuildCreateEvent that was fired.
      */
     protected void onGuildCreate(GuildCreateEvent event) {
+        ThreadPoolFactory.createThreadPoolManager(event.getGuild().getId().asString());
+
         /* Though we could have the client itself distribute GuildManagers, we would still have to update it on each event fire
         to ensure it has up to date Guild information, so it makes more sense to just make a new one with the Guild in the event */
         GuildManager manager = new GuildManager(event.getGuild());
