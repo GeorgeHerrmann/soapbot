@@ -96,19 +96,4 @@ public class SoapUtility {
         return split;
     }
 
-    /**
-     * Creates and immediately starts a new daemon thread that executes
-     * {@code target.run()}. This method, which may be called from any thread,
-     * will return immediately its the caller.
-     * @param target the object whose {@code run} method is invoked when this
-     *               thread is started
-     * @deprecated use {@link com.georgster.util.thread.ThreadPoolFactory} to use multithreading
-     */
-    @Deprecated
-    public static void runDaemon(Runnable target) {
-        Thread t = new Thread(target);
-        t.setDaemon(true); //Daemon threads will not prevent the program from exiting
-        t.start();
-    }
-
 }

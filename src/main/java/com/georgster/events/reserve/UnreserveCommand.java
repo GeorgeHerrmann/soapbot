@@ -10,7 +10,7 @@ import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
@@ -42,7 +42,7 @@ public class UnreserveCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        GuildManager manager = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildManager();
         CommandParser parser = event.getCommandParser();
         DiscordEvent discordEvent = event.getDiscordEvent();
 
@@ -55,17 +55,17 @@ public class UnreserveCommand implements ParseableCommand {
                 if (reserve.getReserved() <= 0) {
                     eventManager.removeEvent(reserve);
                     logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
-                    manager.sendText("There are no more people reserved to this event, this event has been removed");
+                    handler.sendText("There are no more people reserved to this event, this event has been removed");
                 } else {
                     eventManager.updateEvent(reserve);
-                    manager.sendText("You have unreserved from " + reserve.getIdentifier());
+                    handler.sendText("You have unreserved from " + reserve.getIdentifier());
                 }
             } else {
-                manager.sendText("You are not reserved to " + reserve.getIdentifier());
+                handler.sendText("You are not reserved to " + reserve.getIdentifier());
             }
         } else {
             logger.append("\tEvent does not exist", LogDestination.NONAPI);
-            manager.sendText("Event " + parser.get(0) + " does not exist, type !events list to see all events");
+            handler.sendText("Event " + parser.get(0) + " does not exist, type !events list to see all events");
         }
 
     }

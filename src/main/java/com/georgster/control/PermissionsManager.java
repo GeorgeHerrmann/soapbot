@@ -6,7 +6,7 @@ import java.util.List;
 import com.georgster.control.util.ClientPipeline;
 import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.permissions.PermissibleAction;
 import com.georgster.util.permissions.PermissionGroup;
 
@@ -19,7 +19,7 @@ import discord4j.rest.util.Permission;
  */
 public class PermissionsManager {
 
-    private final GuildManager manager;
+    private final GuildInteractionHandler handler;
     private final List<PermissionGroup> groups;
     private final DatabaseService<PermissionGroup> dbService;
 
@@ -29,9 +29,9 @@ public class PermissionsManager {
      * @param pipeline the pipeline carrying the {@code Guild} to manage permissions for
      */
     public PermissionsManager(ClientPipeline pipeline) {
-        this.manager = new GuildManager(pipeline.getGuild());
+        this.handler = new GuildInteractionHandler(pipeline.getGuild());
         this.groups = new ArrayList<>();
-        this.dbService = new DatabaseService<>(manager.getId(), ProfileType.PERMISSIONS, PermissionGroup.class);
+        this.dbService = new DatabaseService<>(handler.getId(), ProfileType.PERMISSIONS, PermissionGroup.class);
     }
 
     /**
@@ -48,7 +48,7 @@ public class PermissionsManager {
      * if it does not already have a configuration and loads the groups that do into this manager.
      */
     public void setupBasic() {
-        manager.getAllRoles().forEach(role -> {
+        handler.getAllRoles().forEach(role -> {
             if (!role.getName().equalsIgnoreCase("@everyone")) {
                 PermissionGroup dbgroup = dbService.getObject("name", role.getName());
                 if (dbgroup != null) {
@@ -217,6 +217,6 @@ public class PermissionsManager {
      * @return the {@code Guild} this manager is managing permissions for
      */
     public Guild getGuild() {
-        return manager.getGuild();
+        return handler.getGuild();
     }
 }

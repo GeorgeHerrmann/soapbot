@@ -19,19 +19,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class PlinkoCommand implements ParseableCommand {
     
-    /*
-     * PlinkoCommand general idea:
-     * - !plinko will list all available commands
-     * - !plinko play will start a PlinkoGame with the current rewards
-     * - !plinko rewards will show the currently saved rewards
-     * - !plinko rewards set [NUM] will change a specific reward
-     * 
-     * A "profile" for a server will be created in a text file to save rewards per server
-     * A generic PlinkoReward object will be used to store each reward
-     * The initial rewards will only be String messages, but will evolve over time
-     * 
-     * Note: If you are reading this the full Plinko features are mid development.
-     */
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private static final String PATTERN = "1|R 1|O";
 

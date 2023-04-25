@@ -1,6 +1,6 @@
 package com.georgster.events;
 
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 
 /**
  * A SOAPEvent is an object that holds information that will be used
@@ -43,6 +43,8 @@ public interface SoapEvent {
 
     /**
      * Represents the actions that will be taken when the event is fulfilled.
+     * 
+     * @param handler the GuildInteractionHandler that will be used to fulfill the event
      */
-    public void onFulfill(GuildManager manager);
+    public void onFulfill(GuildInteractionHandler handler);
 }

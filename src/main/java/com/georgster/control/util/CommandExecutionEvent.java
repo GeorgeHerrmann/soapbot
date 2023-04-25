@@ -13,7 +13,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioInterface;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.core.event.EventDispatcher;
@@ -30,7 +30,7 @@ public class CommandExecutionEvent {
     private DiscordEvent discordEvent; // A transformer used to extract data from the Discord Event that created this Event
     private SoapClient client; // The SoapClient for the Guild the Event was fired in
     private EventDispatcher dispatcher; // The EventDispatcher for the SoapClientManager that fired the Event in the Pipeline
-    private GuildManager manager; // The GuildManager for the Guild the Event was fired in
+    private GuildInteractionHandler handler;
     private CommandParser parser;
 
     /**
@@ -46,7 +46,7 @@ public class CommandExecutionEvent {
         this.client = client;
         this.dispatcher = dispatcher;
         this.command = command;
-        this.manager = new GuildManager(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
+        this.manager = new GuildInteractionHandler(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
         manager.setActiveChannel(discordEvent.getChannel());
         if (discordEvent.isChatInteraction()) { // If the Event was fired from a slash command
             manager.setActiveInteraction((ChatInputInteractionEvent) discordEvent.getEvent());
@@ -176,12 +176,12 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Returns the {@code GuildManager} that handles the Command's interaction with the Guild.
+     * Returns the {@code GuildInteractionHandler} that handles the Command's interaction with the Guild.
      * 
-     * @return the {@code GuildManager} that handles the Command's interaction with the Guild.
+     * @return the {@code GuildInteractionHandler} that handles the Command's interaction with the Guild.
      */
-    public GuildManager getGuildManager() {
-        return manager;
+    public GuildInteractionHandler getGuildInteractionHandler() {
+        return handler;
     }
 
     /**

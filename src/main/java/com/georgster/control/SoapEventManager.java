@@ -10,7 +10,7 @@ import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
 import com.georgster.profile.adapter.DatabaseObjectDeserializer;
 import com.georgster.profile.adapter.SoapEventDeserializer;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.core.object.entity.Guild;
@@ -24,7 +24,7 @@ import discord4j.core.object.entity.Guild;
 public class SoapEventManager {
     private static final DatabaseObjectDeserializer<SoapEvent> eventDeserializer = new SoapEventDeserializer();
     private final List<SoapEvent> events;//The List of events this manager is observing
-    private final GuildManager manager; //The GuildManager for the guild this manager is managing events for
+    private final GuildInteractionHandler handler;
     private final DatabaseService<SoapEvent> dbService;
 
     /**
@@ -34,10 +34,10 @@ public class SoapEventManager {
      * @param guild the guild to manage events for
      */
     public SoapEventManager(Guild guild) {
-        this.manager = new GuildManager(guild);
+        this.handler = new GuildInteractionHandler(guild);
         this.events = new ArrayList<>();
 
-        this.dbService = new DatabaseService<>(manager.getId(), ProfileType.EVENTS, SoapEvent.class);
+        this.dbService = new DatabaseService<>(handler.getId(), ProfileType.EVENTS, SoapEvent.class);
     }
 
     /**
@@ -46,7 +46,7 @@ public class SoapEventManager {
     public void restartEvents() {
         dbService.getAllObjects(eventDeserializer).forEach(event -> {
             events.add(event);
-            ThreadPoolFactory.scheduleEventTask(manager.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
+            ThreadPoolFactory.scheduleEventTask(handler.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
         });
     }
 
@@ -60,7 +60,7 @@ public class SoapEventManager {
         if (!eventExists(event)) {
             events.add(event);
             dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier(), eventDeserializer);
-            ThreadPoolFactory.scheduleEventTask(manager.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
+            ThreadPoolFactory.scheduleEventTask(handler.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
         }
     }
 
@@ -221,6 +221,6 @@ public class SoapEventManager {
      * @return the guild this manager is managing events for
      */
     public Guild getGuild() {
-        return manager.getGuild();
+        return handler.getGuild();
     }
 }

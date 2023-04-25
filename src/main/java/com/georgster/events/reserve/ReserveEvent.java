@@ -9,7 +9,7 @@ import java.util.List;
 import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 
 /**
  * A ReserveEvent object is created when a user uses the !reserve command
@@ -123,14 +123,14 @@ public class ReserveEvent implements SoapEvent {
     /**
      * {@inheritDoc}
      */
-    public void onFulfill(GuildManager manager) {
+    public void onFulfill(GuildInteractionHandler handler) {
         ActionWriter.writeAction("Starting event " + identifier);
         StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
         "\t- " + reserved + "/" + numPeople + " reserved with the following people:");
         for (String name : reservedUsers) { //We add the names of the people who reserved to the event
-            response.append("\n\t\t- " + manager.getMember(name).getMention());
+            response.append("\n\t\t- " + handler.getMember(name).getMention());
         }
-        manager.sendText(response.toString());
+        handler.sendText(response.toString());
     }
 
     /**

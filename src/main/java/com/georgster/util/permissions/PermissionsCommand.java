@@ -8,7 +8,7 @@ import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.CommandWizard;
 import com.georgster.util.commands.ParseBuilder;
@@ -39,7 +39,7 @@ public class PermissionsCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        final GuildManager manager = event.getGuildManager();
+        final GuildInteractionHandler manager = event.getGuildInteractionHandler();
         final CommandParser parser = event.getCommandParser();
         final MultiLogger logger = event.getLogger();
 
@@ -71,9 +71,9 @@ public class PermissionsCommand implements ParseableCommand {
      */
     private void managePermissions(CommandExecutionEvent event) {
         CommandWizard wizard = new CommandWizard(event, "stop", "Permission Wizard");
-        GuildManager manager = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
-        manager.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
+        handler.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
 
         boolean valid = true;
         PermissionGroup group = null;
@@ -91,7 +91,7 @@ public class PermissionsCommand implements ParseableCommand {
                 valid = groupOptions(wizard, group);
             }
         }
-        manager.sendText("Wizard closed");
+        handler.sendText("Wizard closed");
     }
 
     /**
