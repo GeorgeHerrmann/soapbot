@@ -26,10 +26,10 @@ public class MultiLogger {
     private final Class<?> source;
 
     /**
-     * Creates a MultiLogger for the associated {@code Guild} in the {@code GuildManager}
+     * Creates a MultiLogger for the associated {@code Guild} in the {@code GuildInteractionHandler}
      * from the source of the specified class.
      * 
-     * @param manager The manager of the {@code Guild} for logs to be sent to.
+     * @param manager The handler of the {@code Guild} for logs to be sent to.
      * @param source The class of the object that is logging.
      */
     public MultiLogger(GuildInteractionHandler handler, Class<?> source) {
