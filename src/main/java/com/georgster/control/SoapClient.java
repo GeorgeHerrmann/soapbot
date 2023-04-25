@@ -54,8 +54,6 @@ public final class SoapClient {
     protected void onGuildCreate(GuildCreateEvent event) {
         ThreadPoolFactory.createThreadPoolManager(event.getGuild().getId().asString());
 
-        /* Though we could have the client itself distribute GuildManagers, we would still have to update it on each event fire
-        to ensure it has up to date Guild information, so it makes more sense to just make a new one with the Guild in the event */
         GuildInteractionHandler handler = new GuildInteractionHandler(event.getGuild());
     
         MultiLogger logger = new MultiLogger(handler, getClass());

@@ -2,7 +2,7 @@ package com.georgster.music.components;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -21,7 +21,7 @@ import discord4j.voice.VoiceConnection;
 public final class TrackScheduler extends AudioEventAdapter implements AudioLoadResultHandler {
 
     private final AudioPlayer player;
-    private GuildManager manager;
+    private GuildInteractionHandler handler;
     private LinkedBlockingQueue<AudioTrack> queue;
     private VoiceConnection connection;
 
@@ -32,7 +32,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     public TrackScheduler(final AudioPlayer player) {
         this.player = player;
-        manager = null;
+        handler = null;
         connection = null;
         queue = new LinkedBlockingQueue<>();
     }
@@ -50,7 +50,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
             if (queue.size() == 1) {
                 player.playTrack(track); //If it is the only track in the queue we will play it here as well.
             } else {
-                ThreadPoolFactory.scheduleVoiceTask(manager.getId(), () -> manager.sendText("Queued up track: " + track.getInfo().title));
+                ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendText("Queued up track: " + track.getInfo().title));
             }
         } catch (InterruptedException e) { //There is something wrong with the queue, so we will stop the player.
             e.printStackTrace();
@@ -66,7 +66,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void playlistLoaded(final AudioPlaylist playlist) {
         boolean first = (queue.isEmpty()); //If the queue is empty, we will play the first track in the playlist.
-        ThreadPoolFactory.scheduleVoiceTask(manager.getId(), () -> manager.sendText("Queued up track: " + manager.sendText("Queued up playlist: " + playlist.getName())));
+        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendText("Queued up track: " + handler.sendText("Queued up playlist: " + playlist.getName())));
         for (AudioTrack i : playlist.getTracks()) { //Add all tracks in the playlist to the queue.
             try {
                 queue.put(i);
@@ -95,7 +95,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
                 player.playTrack(queue.peek());
             } else {
                 /* The actions of the bot in Discord and LavaPlayer must be kept on separate threads to prevent thread interruptions */
-                ThreadPoolFactory.scheduleVoiceTask(manager.getId(), () -> connection.disconnect().block());
+                ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> connection.disconnect().block());
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -111,7 +111,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
-        ThreadPoolFactory.scheduleVoiceTask(manager.getId(), () -> manager.sendText("Now Playing: " + track.getInfo().title)); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
+        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendText("Now Playing: " + track.getInfo().title)); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
     }
 
     /**
@@ -119,8 +119,8 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     @Override
     public void noMatches() {
-        ThreadPoolFactory.scheduleVoiceTask(manager.getId(), () -> {
-            manager.sendText("Failed to grab audio from the provided arguments");
+        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> {
+            handler.sendText("Failed to grab audio from the provided arguments");
             if (!isActive()) {
                 connection.disconnect().block(); //If the queue is empty, we will disconnect from the voice channel.
             }
@@ -132,8 +132,8 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     @Override
     public void loadFailed(final FriendlyException exception) {
-        ThreadPoolFactory.scheduleVoiceTask(manager.getId(), () -> {
-            manager.sendText("Failed to load track: " + exception.getMessage());
+        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> {
+            handler.sendText("Failed to load track: " + exception.getMessage());
             if (!isActive()) {
                 connection.disconnect().block(); //If the queue is empty, we will disconnect from the voice channel.
             }
@@ -171,8 +171,8 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      * @param channel the channel to send messages to
      * @param connection the connection to disconnect from
      */
-    public void setChannelData(GuildManager manager, VoiceConnection connection) {
-        this.manager = manager;
+    public void setChannelData(GuildInteractionHandler handler, VoiceConnection connection) {
+        this.handler = handler;
         this.connection = connection;
     }
 }

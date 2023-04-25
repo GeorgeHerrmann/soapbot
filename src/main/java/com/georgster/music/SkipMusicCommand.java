@@ -8,7 +8,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
@@ -33,21 +33,21 @@ public class SkipMusicCommand implements Command {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        GuildManager manager = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
         if (scheduler.isActive()) {
             List<String> message = CommandParser.parseGeneric(event.getDiscordEvent().getFormattedMessage());
             if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();
-                manager.sendText("Skipping all tracks in the queue");
+                handler.sendText("Skipping all tracks in the queue");
             } else {
-                manager.sendText("Skipping the currently playing track");
+                handler.sendText("Skipping the currently playing track");
             }
             player.stopTrack();
             logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
         } else {
             logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
-            manager.sendText("No tracks are currently playing");
+            handler.sendText("No tracks are currently playing");
         }
     }
 

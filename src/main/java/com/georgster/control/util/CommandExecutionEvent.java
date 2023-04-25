@@ -46,13 +46,13 @@ public class CommandExecutionEvent {
         this.client = client;
         this.dispatcher = dispatcher;
         this.command = command;
-        this.manager = new GuildInteractionHandler(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
-        manager.setActiveChannel(discordEvent.getChannel());
+        this.handler = new GuildInteractionHandler(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
+        handler.setActiveChannel(discordEvent.getChannel());
         if (discordEvent.isChatInteraction()) { // If the Event was fired from a slash command
-            manager.setActiveInteraction((ChatInputInteractionEvent) discordEvent.getEvent());
+            handler.setActiveInteraction((ChatInputInteractionEvent) discordEvent.getEvent());
         }
 
-        this.logger = new MultiLogger(manager, command.getClass()); // Used to log messages about the Event
+        this.logger = new MultiLogger(handler, command.getClass()); // Used to log messages about the Event
 
         if (command instanceof ParseableCommand) { // If the Command is parseable, it gets a CommandParser
             parser = ((ParseableCommand) command).getCommandParser();
@@ -78,7 +78,7 @@ public class CommandExecutionEvent {
             } catch (Exception e) {
                 logger.append("Caught error: " + e.getMessage() + "\n", LogDestination.SYSTEM, LogDestination.FILE);
                 logger.append("\tInvalid arguments, sending a help message\n", LogDestination.NONAPI);
-                manager.sendText(command.help(), command.getClass().getSimpleName());
+                handler.sendText(command.help(), command.getClass().getSimpleName());
             }
         } else {
             args = Collections.emptyList();
@@ -97,7 +97,7 @@ public class CommandExecutionEvent {
         if (hasPermission(args)) {
             command.execute(this);
         } else {
-            manager.sendText("You need " + command.getRequiredPermission(args) + " to use this command.");
+            handler.sendText("You need " + command.getRequiredPermission(args) + " to use this command.");
             logger.append("User is missing permission: " + command.getRequiredPermission(args) + " to use this command.", LogDestination.NONAPI);
         }
     }

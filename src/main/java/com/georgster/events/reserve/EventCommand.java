@@ -10,7 +10,7 @@ import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
@@ -44,7 +44,7 @@ public class EventCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        GuildManager manager = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
         CommandParser parser = event.getCommandParser();
 
         if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
@@ -66,10 +66,10 @@ public class EventCommand implements ParseableCommand {
                 }
                 response.append("Type !events [NAME] for more information about a specific event");
                 String[] output = SoapUtility.splitFirst(response.toString());
-                manager.sendText(output[1], output[0]);
+                handler.sendText(output[1], output[0]);
             } else {
                 logger.append("\tThere are no events currently active\n", LogDestination.NONAPI);
-                manager.sendText("There are no events currently active");
+                handler.sendText("There are no events currently active");
             }
         } else if (parser.getMatchingRule("I").equals("mention") || parser.getMatchingRule("I").equals("ping")) {
             if (eventManager.eventExists(parser.get(0), TYPE)) {
@@ -79,10 +79,10 @@ public class EventCommand implements ParseableCommand {
                 logger.append("\tMentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                 StringBuilder response = new StringBuilder();
-                reserve.getReservedUsers().forEach(user -> response.append(manager.getMember(user).getMention() + " "));
-                manager.sendPlainText(response.toString()); //If sendText is used, the embed will prevent users from being mentioned
+                reserve.getReservedUsers().forEach(user -> response.append(handler.getMember(user).getMention() + " "));
+                handler.sendPlainText(response.toString()); //If sendText is used, the embed will prevent users from being mentioned
             } else {
-                manager.sendText("This event does not exist, type !events list for a list of all active events");
+                handler.sendText("This event does not exist, type !events list for a list of all active events");
             }
         } else { //Shows information about an event
             if (eventManager.eventExists(parser.get(0), TYPE)) {
@@ -107,11 +107,11 @@ public class EventCommand implements ParseableCommand {
                     response.append("This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                 }
                 response.append("\nReserved users:\n");
-                reserve.getReservedUsers().forEach(user -> response.append("\t- " + manager.getMember(user).getUsername() + "\n"));
+                reserve.getReservedUsers().forEach(user -> response.append("\t- " + handler.getMember(user).getUsername() + "\n"));
                 String[] output = SoapUtility.splitFirst(response.toString());
-                manager.sendText(output[1], output[0]);
+                handler.sendText(output[1], output[0]);
             } else {
-                manager.sendText("This event does not exist, type !events list for a list of all active events");
+                handler.sendText("This event does not exist, type !events list for a list of all active events");
             }
         }
     }

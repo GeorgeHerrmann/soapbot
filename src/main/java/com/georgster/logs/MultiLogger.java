@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.georgster.api.ActionWriter;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 
 /**
@@ -22,7 +22,7 @@ public class MultiLogger {
     private static final String LOGFILELOCATION = Paths.get(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "logs", "data").toString();
 
     private final EnumMap<LogDestination, String> logs; //Each log message is mapped to its destination
-    private final GuildManager manager; //The manager for the Guild
+    private final GuildInteractionHandler handler;
     private final Class<?> source;
 
     /**
@@ -32,9 +32,9 @@ public class MultiLogger {
      * @param manager The manager of the {@code Guild} for logs to be sent to.
      * @param source The class of the object that is logging.
      */
-    public MultiLogger(GuildManager manager, Class<?> source) {
+    public MultiLogger(GuildInteractionHandler handler, Class<?> source) {
         logs = new EnumMap<>(LogDestination.class);
-        this.manager = manager;
+        this.handler = handler;
         this.source = source;
     }
 
@@ -126,7 +126,7 @@ public class MultiLogger {
     public void logDiscord(String discord) {
         if (canLog() && !discord.isEmpty()) {
             String[] output = SoapUtility.splitFirst(discord);
-            GuildManager.sendText(output[1], output[0], manager.getTextChannel("bot-logs"));
+            GuildInteractionHandler.sendText(output[1], output[0], handler.getTextChannel("bot-logs"));
         }
     }
 
@@ -176,7 +176,7 @@ public class MultiLogger {
      * @return {@code true} if the bot-logs channel can be logged to, {@code false} otherwise.
      */
     private boolean canLog() {
-        return (manager.getTextChannel("bot-logs") != null);
+        return (handler.getTextChannel("bot-logs") != null);
     }
 
     /**

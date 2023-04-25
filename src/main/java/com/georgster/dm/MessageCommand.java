@@ -9,7 +9,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.permissions.PermissibleAction;
 
@@ -32,7 +32,7 @@ public class MessageCommand implements Command {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         DiscordEvent discordEvent = event.getDiscordEvent();
-        GuildManager manager = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
         List<String> contents = new ArrayList<>(Arrays.asList(discordEvent.getFormattedMessage().split(" ")));
         contents.remove(0);
@@ -57,7 +57,7 @@ public class MessageCommand implements Command {
             logger.append("\n\tNo users found, sending help message",
             LogDestination.NONAPI);
             String[] output = SoapUtility.splitFirst(help());
-            manager.sendText(output[1], output[0]);
+            handler.sendText(output[1], output[0]);
         }
     }
 

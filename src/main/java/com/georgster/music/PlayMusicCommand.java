@@ -8,7 +8,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.permissions.PermissibleAction;
@@ -49,7 +49,7 @@ public class PlayMusicCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        final GuildManager manager = event.getGuildManager();
+        final GuildInteractionHandler handler = event.getGuildInteractionHandler();
         final MultiLogger logger = event.getLogger();
         final CommandParser parser = event.getCommandParser();
         final Member member = event.getDiscordEvent().getAuthorAsMember(); //Makes sure the member is valid
@@ -62,7 +62,7 @@ public class PlayMusicCommand implements ParseableCommand {
                     logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
                     LogDestination.NONAPI);
                     VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
-                    scheduler.setChannelData(manager, connection);
+                    scheduler.setChannelData(handler, connection);
 
                     int retryAttempts = 0;
                     while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {

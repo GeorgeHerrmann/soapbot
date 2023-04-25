@@ -42,7 +42,7 @@ public class UnreserveCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        GuildInteractionHandler handler = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
         CommandParser parser = event.getCommandParser();
         DiscordEvent discordEvent = event.getDiscordEvent();
 

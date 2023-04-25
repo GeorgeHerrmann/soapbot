@@ -45,7 +45,7 @@ public class ReserveCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        GuildInteractionHandler handler = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
         DiscordEvent discordEvent = event.getDiscordEvent();
         try {
             ReserveEvent reserve = assignCorrectEvent(event);
@@ -107,7 +107,7 @@ public class ReserveCommand implements ParseableCommand {
      * @throws IllegalArgumentException If the user's command message is in the wrong format
      */
     private ReserveEvent assignCorrectEvent(CommandExecutionEvent event) throws IllegalArgumentException {
-        GuildInteractionHandler manager = event.getGuildManager();
+        GuildInteractionHandler manager = event.getGuildInteractionHandler();
         CommandParser parser = event.getCommandParser();
 
         List<String> message = parser.getArguments();

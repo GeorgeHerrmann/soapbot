@@ -8,7 +8,7 @@ import java.util.Random;
 
 import com.georgster.api.ActionWriter;
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 
 /**
  * A PlinkoGame represents a game of plinko that is created on a "!plinko play:" command.
@@ -22,7 +22,7 @@ public class PlinkoGame {
     private String guild; //The ID of the guild the game was played in
     private Channel channel; //The channel where the game existed
     private Random rand; //Keeps track of the random elements of the game
-    private final GuildManager manager;
+    private final GuildInteractionHandler handler;
     /*
      * A 2D array representation of the Plinko board. PlinkoGame
      * uses this array to quickly determine the next location of the chip,
@@ -52,7 +52,7 @@ public class PlinkoGame {
         guild = event.getDiscordEvent().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
         channel = event.getDiscordEvent().getChannel();
         rand = new Random();
-        this.manager = event.getGuildManager();
+        this.handler = event.getGuildInteractionHandler();
     }
 
     /**
@@ -71,7 +71,7 @@ public class PlinkoGame {
             sBoard.append("\n");
         }
         sBoard.setCharAt(spot, '0'); //Places the chip
-        Message message = manager.sendPlainText(sBoard.toString()); //Creates the initial message of the board state
+        Message message = handler.sendPlainText(sBoard.toString()); //Creates the initial message of the board state
         /* The handling of the creation of the plinko game is different than updating it, therefore we do these updates outside the loop */
         sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
 
@@ -145,7 +145,7 @@ public class PlinkoGame {
             sBoard.append("\n");
         }
 
-        manager.sendPlainText(sBoard.toString());
+        handler.sendPlainText(sBoard.toString());
     }
 
     /**

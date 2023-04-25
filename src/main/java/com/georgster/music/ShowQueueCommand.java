@@ -8,7 +8,7 @@ import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
@@ -30,7 +30,7 @@ public class ShowQueueCommand implements Command {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        GuildManager manager = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;
@@ -43,12 +43,12 @@ public class ShowQueueCommand implements Command {
                 logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
 
                 String[] output = SoapUtility.splitFirst(response.toString());
-                manager.sendText(output[1], output[0]);
+                handler.sendText(output[1], output[0]);
                 response = new StringBuilder();
             }
             x++;
         }
-        manager.sendText(response.toString());
+        handler.sendText(response.toString());
     }
 
     /**

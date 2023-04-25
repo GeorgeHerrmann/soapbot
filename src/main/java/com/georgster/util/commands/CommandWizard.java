@@ -3,7 +3,7 @@ package com.georgster.util.commands;
 import java.util.List;
 
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
@@ -24,8 +24,8 @@ public class CommandWizard {
 
     private Message initial; // The initial message sent by the wizard
     private Member caller; // The user who called the wizard
-    private final CommandExecutionEvent pipeline; // The manager managing the guild from the original command
-    private final GuildManager manager;
+    private final CommandExecutionEvent pipeline;
+    private final GuildInteractionHandler handler;
     private boolean ended; // Whether or not the wizard has ended
     private String end; // The string that ends the wizard
     private String title; // The title of messages sent by this wizard
@@ -33,7 +33,7 @@ public class CommandWizard {
     /**
      * Creates a new wizard by the given caller for the given guild manager that
      * ends when the given string is sent. The guild manager must have an
-     * {@link GuildManager#getEventDispatcher() event dispatcher} attached
+     * {@link GuildInteractionHandler#getEventDispatcher() event dispatcher} attached
      * to it by the {@code SoapClient}. Therefore, any calling command must
      * declare it needs the EventDispatcher with {@link com.georgster.Command#needsDispatcher()}.
      * 
@@ -48,7 +48,7 @@ public class CommandWizard {
         this.end = end;
         initial = null;
         this.pipeline = pipeline;
-        this.manager = pipeline.getGuildManager();
+        this.handler = pipeline.getGuildInteractionHandler();
         this.title = title;
     }
 
@@ -82,11 +82,11 @@ public class CommandWizard {
 
         step += "\nYour options are: " + String.join(", ", options);
         if (initial == null) {
-            initial = manager.sendText(step, title, ActionRow.of(menu));
+            initial = handler.sendText(step, title, ActionRow.of(menu));
             initial.addReaction(ReactionEmoji.unicode("❌")).block();
         } else {
             try {
-                initial = manager.editMessageContent(initial, step, title, ActionRow.of(menu));
+                initial = handler.editMessageContent(initial, step, title, ActionRow.of(menu));
             } catch (Exception e) {
                 System.out.println("here");
             }
@@ -121,7 +121,7 @@ public class CommandWizard {
             .filter(event -> event.getMessage().get().getId().asString().equals(initial.getId().asString()))
             .subscribe(event -> {
                 output.append(event.getValues().get(0));
-                manager.setActiveSelectMenuInteraction(event);
+                handler.setActiveSelectMenuInteraction(event);
             });
 
         int timeout = 0;
@@ -154,7 +154,7 @@ public class CommandWizard {
      * @param message The message to send to the user.
      */
     public void sendPrivateMessage(String message) {
-        manager.sendText(message);
+        handler.sendText(message);
     }
 
 }

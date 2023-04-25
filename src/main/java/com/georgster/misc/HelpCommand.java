@@ -15,7 +15,7 @@ import com.georgster.control.util.ClientPipeline;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildManager;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 
@@ -44,7 +44,7 @@ public class HelpCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         CommandParser parser = event.getCommandParser();
-        GuildManager manager = event.getGuildManager();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
         String arg = "";
         try {
@@ -67,7 +67,7 @@ public class HelpCommand implements ParseableCommand {
         }
         logger.append("Responding to a !help command request", LogDestination.API);
         String[] output = SoapUtility.splitFirst(response.toString());
-        manager.sendText(output[1], output[0]);
+        handler.sendText(output[1], output[0]);
     }
 
     /**
