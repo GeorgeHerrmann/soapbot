@@ -34,6 +34,14 @@ public class ClientPipeline {
         this.guild = guild;
     }
 
+    /**
+     * Creates a new ClientPipeline with the given {@code EventDispatcher},
+     * {@code Guild}, and {@code RestClient}.
+     * 
+     * @param dispatcher    the event dispatcher
+     * @param guild        the guild
+     * @param restClient    the rest client
+     */
     public ClientPipeline(EventDispatcher dispatcher, Guild guild, RestClient restClient) {
         this.dispatcher = dispatcher;
         this.guild = guild;
