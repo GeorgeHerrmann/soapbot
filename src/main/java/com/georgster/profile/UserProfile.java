@@ -5,14 +5,9 @@ package com.georgster.profile;
  * A Profile holds data regarding a user's inside a specific Discord server.
  */
 public class UserProfile {
-    /* All data a profile needs to hold is instantiated here */
     private String guildId; //Snowflake Guild ID associated with this user's profile in a guild
     private String memberId; //Snowflake member ID
     private String username; //User's discord username
-
-    public UserProfile() {
-        
-    }
 
     /**
      * Constructs a {@code Profile} for a specific {@code Member} inside of a {@code Guild}.

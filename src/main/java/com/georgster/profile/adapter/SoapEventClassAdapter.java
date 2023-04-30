@@ -4,12 +4,21 @@ import com.georgster.events.SoapEvent;
 import com.georgster.events.reserve.ReserveEvent;
 import com.google.gson.JsonParseException;
 
-public class SoapEventDeserializer extends DatabaseObjectDeserializer<SoapEvent> {
+/**
+ * An adapter that allows for the deserialization of inherited {@code SoapEvent}s.
+ */
+public class SoapEventClassAdapter extends DatabaseObjectClassAdapter<SoapEvent> {
 
-    public SoapEventDeserializer() {
+    /** 
+     * Constructs a {@code SoapEventClassAdapter}.
+     */
+    public SoapEventClassAdapter() {
         super("reserved");
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Class<? extends SoapEvent> getType(String keyword) throws JsonParseException {
         if (keyword.equals("reserved")) {
