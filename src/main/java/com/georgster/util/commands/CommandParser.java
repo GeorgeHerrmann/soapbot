@@ -8,36 +8,36 @@ import com.georgster.util.SoapUtility;
 
 
 /**
- * A CommandParser parses a command and returns a list of arguments.
+ * <p>A CommandParser parses a command and returns a list of arguments.
  * A pattern is a string that defines the arguments of a command, and
  * must be in the format <num1>|<req> <num2>|<req> ... <numn>|<req> where
  * num is the number of arguments that arg takes and req is whether or not
  * the argument is required. The parser will prioritize required arguments,
- * and will return the first set of arguments that match the pattern.
+ * and will return the first set of arguments that match the pattern.</p>
  * 
- * The "num" or number of arguments can be defined by putting a number 
- * for the number of arguments, or by putting a V for a varying number of arguments.
+ * <p>The "num" or number of arguments can be defined by putting a number 
+ * for the number of arguments, or by putting a V for a varying number of arguments.</p>
  * 
- * The "req" or required can be defined by putting a R for required, or an O for optional.
+ * <p>The "req" or required can be defined by putting a R for required, or an O for optional.</p>
  * 
- * A pattern that has a varying number of arguments may not always return the desired
+ * <p>A pattern that has a varying number of arguments may not always return the desired
  * output unless the parser is given identifiers and/or rules. Identifiers are strings
  * that are used to identify arguments, and rules are strings that define how the parser
  * should parse the command. The parser will return the first set of arguments that match
  * the pattern, and the identifiers and rules will be used to determine how argument
  * are "grouped" for the returning list. Rules and identifiers are optional, but may help
- * the parser return the desired output.
+ * the parser return the desired output.</p>
  * 
- * For example, a valid pattern would be "V|R 1|R" which means that the command must 
+ * <p>For example, a valid pattern would be "V|R 1|R" which means that the command must 
  * start with a varying number of required arguments, followed by a required argument.
  * A parse("Testing the command parser") with this pattern would
- * return ["Testing the command", "parser"].
+ * return ["Testing the command", "parser"].</p>
  * 
- * Another example would be "V|R 1|O 1|R". Without specific argument identifiers, this
+ * <p>Another example would be "V|R 1|O 1|R". Without specific argument identifiers, this
  * pattern would return ["Testing the command", "parser"]. With "parser" being the 
  * only argument identifier, this pattern would still return the same result. However,
  * with "command" and "parser" being the argument identifiers, this pattern would return
- * ["Testing the", "command", "parser"].
+ * ["Testing the", "command", "parser"].</p>
  * 
  * @author George Herrmann
  */
@@ -51,10 +51,10 @@ public class CommandParser {
 
     /**
      * Creates a new CommandParser with the given pattern.
-     * A pattern is a string that defines the arguments of a command, and
+     * <p>A pattern is a string that defines the arguments of a command, and
      * must be in the format <num1>|<req> <num2>|<req> ... <numn>|<req> where
      * num is the number of arguments that arg takes and req is whether or not
-     * the argument is required.
+     * the argument is required.</p>
      * 
      * @param pattern The pattern to use for parsing commands.
      * @throws IllegalArgumentException If the pattern is not in the correct format.
@@ -86,8 +86,8 @@ public class CommandParser {
      * Identifiers may help the parser if there is only one variable argument, but is really only necessary
      * if there are multiple variable arguments.
      * 
-     * NOTE: Adding rules and/or identifiers is only necessary if you have a varying amount of 
-     * arguments, otherwise the parser will automatically correctly parse the command.
+     * <p><b>NOTE:</b> Adding rules and/or identifiers is only necessary if you have a varying amount of 
+     * arguments, otherwise the parser will automatically correctly parse the command.</p>
      * @param identifiers The identifiers to use for parsing commands.
      */
     public void addIdentifiers(String... identifiers) {
@@ -104,35 +104,40 @@ public class CommandParser {
     }
 
     /**
-     * Adds rules to the parser. Rules are strings that define the format for the arguments
+     * <p>Adds rules to the parser. Rules are strings that define the format for the arguments
      * of a command. If a rule is set using this method, a rule for every argument in the
-     * pattern must be set. For example: if the pattern is "V|R 1|R", then two rules must be set.
+     * pattern must be set.</p>
+     * <p>For example: if the pattern is "V|R 1|R", then two rules must be set.
      * For optional arguments, the parser will not throw an exception if the argument does not
      * match the rule, but will simply ignore it. However, if the argument is required and
-     * does not match the rule, the parser will throw an exception. Multiple rules for one argument 
+     * does not match the rule, the parser will throw an exception.</p>
+     * <p>Multiple rules for one argument 
      * can be specified with a | for 'or' and a & for 'and', however you can only pair 'and' for E rules (as E rules are mutually exclusive)
      * because there is no reason you would want, for example, an argument to be the last argument OR a number,
-     * since that means anything that is a number is already valid.
+     * since that means anything that is a number is already valid.</p>
      * 
      * Valid rules are as follows:
-     * - "N" if this argument must contain a number
-     * - "!N" if this argument must not contain a number
-     * - "S" if this argument must contain a string
-     * - "!S" if this argument must not contain a string
-     * - "I" if this argument must be an identifier
-     * - "T" if this argument must contain a time
-     * - "X" if this argument has no rules
-     * - "E1" if this argument must be the last argument
-     * - "E2" if this argument must be the second to last argument
+     * <ul>
+     * <li>- "LE" if each "word" in this argument should contain at least one letter</li>
+     * <li>- "N" if this argument must contain a number</li>
+     * <li>- "!N" if this argument must not contain a number</li>
+     * <li>- "S" if this argument must contain a string</li>
+     * <li>- "!S" if this argument must not contain a string</li>
+     * <li>- "I" if this argument must be an identifier</li>
+     * <li>- "T" if this argument must contain a time</li>
+     * <li>- "X" if this argument has no rules</li>
+     * <li>- "E1" if this argument must be the last argument</li>
+     * <li>- "E2" if this argument must be the second to last argument</li>
+     * </ul>
      * 
-     * For example: the reserve command is in the format V|R 1|O 1|O. The varying
+     * <p>For example: the reserve command is in the format V|R 1|O 1|O. The varying
      * argument has no rules, however both the optional arguments must contain a number.
      * Therefore, the rules would be "X N N". With these rules in place, a parse() of
      * "reserve testing parser 2" would return ["testing parser", "2"]. If no rules
-     * were set, the parse() would return "testing" "parser" "2".
+     * were set, the parse() would return "testing" "parser" "2".</p>
      * 
-     * NOTE: Adding rules and/or identifiers is only necessary if you have a varying amount of 
-     * arguments, otherwise the parser will automatically correctly parse the command.
+     * <p><b>NOTE:</b> Adding rules and/or identifiers is only necessary if you have a varying amount of 
+     * arguments, otherwise the parser will automatically correctly parse the command.</p>
      * @param rules The rules to use for parsing commands.
      * @throws IllegalArgumentException If the number of rules does not match the number of arguments in the pattern, or if the rules are not in the correct format.
      */
@@ -143,8 +148,8 @@ public class CommandParser {
             throw new IllegalArgumentException("The number of rules must match the number of arguments in the pattern.");
         } else {
             for (String s : split) {
-                if (!s.contains("N") && !s.contains("!N") && !s.contains("S") && !s.contains("!S") && !s.contains("X") && !s.contains("T") && !s.contains("E") && !s.contains("I")) {
-                    throw new IllegalArgumentException("Rules must be in the format N, !N, S, !S, I, X, T, E1, or E2.");
+                if (!s.contains("N") && !s.contains("!N") && !s.contains("S") && !s.contains("!S") && !s.contains("X") && !s.contains("T") && !s.contains("E") && !s.contains("I") && !s.contains("L")) {
+                    throw new IllegalArgumentException("Rules must be in the format LE, N, !N, S, !S, I, X, T, E1, or E2.");
                 } else {
                     rulesList.add(s);
                 }
@@ -433,6 +438,7 @@ public class CommandParser {
      * Checks if the given argument matches the given rule.
      * 
      * Valid rules are as follows:
+     * - "LE" if this each "word" in this argument should contain a letter
      * - "N" if this argument must be a number
      * - "!N" if this argument must not be a number
      * - "S" if this argument must contain a string
@@ -474,6 +480,16 @@ public class CommandParser {
                 }
             }
         }
+
+        if (rule.contains("LE") && (!returns || !and)) { //if each word in the arg must have a letter
+            for (int i = 0; i < arg.length(); i++) {
+                if (Character.isLetter(arg.charAt(i))) {
+                    returns = !rule.contains("!");
+                    if (returns) and = true;
+                }
+            }
+        }
+
         /* For each rule, we only want to examine if returns isn't already true or if we are using an 'and' rule */
         if (rule.contains("N") && (!returns || !and)) { //If the arg must be a number
             try {

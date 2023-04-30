@@ -15,7 +15,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
 import com.georgster.events.SoapEvent;
-import com.georgster.profile.adapter.DatabaseObjectDeserializer;
+import com.georgster.profile.adapter.DatabaseObjectClassAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.mongodb.client.MongoClient;
@@ -32,7 +32,7 @@ import static com.mongodb.client.model.Filters.eq;
 /**
  * <p>A service capable of storing and retrieving objects from SOAP Bot's MongoDB database.
  * It can be used to store and retrieve any object through any methods, however interfaces
- * or abstract classes must use a {@link DatabaseObjectDeserializer} to supply this service
+ * or abstract classes must use a {@link DatabaseObjectClassAdapter} to supply this service
  * with the correct class type.</p>
  * 
  * <p>Methods which require an "identifierName" and "identifierValue" parameter are used to
@@ -53,7 +53,7 @@ public class DatabaseService<T> {
     /**
      * <p>Creates a new DatabaseService instance for a specific Discord server.
      * Objects stored or retrieved will be of the given class type.
-     * If the class type is an interface or abstract class, a {@link DatabaseObjectDeserializer}
+     * If the class type is an interface or abstract class, a {@link DatabaseObjectClassAdapter}
      * must be used for most method calls to supply the extending class type.</p>
      * 
      * <p>This service will only store or retrieve objects from the collection of the given {@code ProfileType}.</p>
@@ -153,7 +153,7 @@ public class DatabaseService<T> {
      * @param deserializer The deserializer to use to get the class type of the object to search for.
      * @return Whether or not an object exists in the database with the given identifier name and value of
      */
-    public boolean objectExists(String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+    public boolean objectExists(String identifierName, String identifierValue, DatabaseObjectClassAdapter<T> deserializer) {
         return getObject(identifierName, identifierValue, deserializer) != null;
     }
 
@@ -190,7 +190,7 @@ public class DatabaseService<T> {
      * @param deserializer The deserializer to use to get the class type of the object to search for.
      * @return The object found by the given identifier name and value of the class type specified by the given deserializer.
      */
-    public T getObject(String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+    public T getObject(String identifierName, String identifierValue, DatabaseObjectClassAdapter<T> deserializer) {
         DBObject<T> object = new DBObject<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
@@ -235,7 +235,7 @@ public class DatabaseService<T> {
      * @param deserializer The deserializer to use to get the class type of the objects to search for.
      * @return All objects in the database for this service's {@code ProfileType} of the class type specified by the given deserializer.
      */
-    public List<T> getAllObjects(DatabaseObjectDeserializer<T> deserializer) {
+    public List<T> getAllObjects(DatabaseObjectClassAdapter<T> deserializer) {
         DBObject<List<T>> objects = new DBObject<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
@@ -273,7 +273,7 @@ public class DatabaseService<T> {
      * @param identifierValue The value of the field to search for.
      * @param deserializer The deserializer to use to get the class type of the object to search for.
      */
-    public void removeObjectIfExists(String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+    public void removeObjectIfExists(String identifierName, String identifierValue, DatabaseObjectClassAdapter<T> deserializer) {
         if (objectExists(identifierName, identifierValue, deserializer)) {
             removeObject(identifierName, identifierValue);
         }
@@ -300,7 +300,7 @@ public class DatabaseService<T> {
      * @param identifierValue The value of the field to search for.
      * @param deserializer The deserializer to use to get the class type of the object to search for.
      */
-    public void addObjectIfNotExists(T object, String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+    public void addObjectIfNotExists(T object, String identifierName, String identifierValue, DatabaseObjectClassAdapter<T> deserializer) {
         if (!objectExists(identifierName, identifierValue, deserializer)) {
             addObject(object);
         }
@@ -327,7 +327,7 @@ public class DatabaseService<T> {
      * @param identifierValue The value of the field to search for.
      * @param deserializer The deserializer to use to get the class type of the object to search for.
      */
-    public void updateObjectIfExists(T object, String identifierName, String identifierValue, DatabaseObjectDeserializer<T> deserializer) {
+    public void updateObjectIfExists(T object, String identifierName, String identifierValue, DatabaseObjectClassAdapter<T> deserializer) {
         if (objectExists(identifierName, identifierValue, deserializer)) {
             updateObject(identifierName, identifierValue, object);
         }

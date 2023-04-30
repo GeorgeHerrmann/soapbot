@@ -8,8 +8,8 @@ import com.georgster.events.SoapEventHandler;
 import com.georgster.events.SoapEventType;
 import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
-import com.georgster.profile.adapter.DatabaseObjectDeserializer;
-import com.georgster.profile.adapter.SoapEventDeserializer;
+import com.georgster.profile.adapter.DatabaseObjectClassAdapter;
+import com.georgster.profile.adapter.SoapEventClassAdapter;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 
@@ -22,7 +22,7 @@ import discord4j.core.object.entity.Guild;
  * through the {@code SoapEventHandler}.
  */
 public class SoapEventManager {
-    private static final DatabaseObjectDeserializer<SoapEvent> eventDeserializer = new SoapEventDeserializer();
+    private static final DatabaseObjectClassAdapter<SoapEvent> eventDeserializer = new SoapEventClassAdapter();
     private final List<SoapEvent> events;//The List of events this manager is observing
     private final GuildInteractionHandler handler;
     private final DatabaseService<SoapEvent> dbService;
