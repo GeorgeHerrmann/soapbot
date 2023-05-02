@@ -3,6 +3,8 @@ package com.georgster.util.thread;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import discord4j.common.util.Snowflake;
+
 /**
  * A factory class for creating and managing thread pools for each {@code SoapClient}.
  */
@@ -21,8 +23,8 @@ public class ThreadPoolFactory {
      * 
      * @param guildId The guild ID to create a thread pool manager for
      */
-    public static void createThreadPoolManager(String guildId) {
-        CLIENT_THREAD_POOL_MANAGERS.computeIfAbsent(guildId, ThreadPoolManager::new);
+    public static void createThreadPoolManager(Snowflake guildId) {
+        CLIENT_THREAD_POOL_MANAGERS.computeIfAbsent(guildId.asString(), ThreadPoolManager::new);
     }
 
     /**

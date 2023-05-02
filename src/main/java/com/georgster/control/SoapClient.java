@@ -52,7 +52,7 @@ public final class SoapClient {
      * @param event The GuildCreateEvent that was fired.
      */
     protected void onGuildCreate(GuildCreateEvent event) {
-        ThreadPoolFactory.createThreadPoolManager(event.getGuild().getId().asString());
+        ThreadPoolFactory.createThreadPoolManager(event.getGuild().getId());
 
         GuildInteractionHandler handler = new GuildInteractionHandler(event.getGuild());
     
