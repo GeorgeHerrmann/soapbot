@@ -45,8 +45,10 @@ public class SoapEventManager {
      */
     public void restartEvents() {
         dbService.getAllObjects(eventDeserializer).forEach(event -> {
-            events.add(event);
+            if (!eventExists(event)) {
+                events.add(event);
             ThreadPoolFactory.scheduleEventTask(handler.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
+            }
         });
     }
 
