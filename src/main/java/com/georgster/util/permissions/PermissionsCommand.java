@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.PermissionsManager;
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -27,12 +27,12 @@ public class PermissionsCommand implements ParseableCommand {
     private PermissionsManager permissionsManager;
 
     /**
-     * Creates a new PermissionsCommand with the given {@code ClientPipeline}.
+     * Creates a new PermissionsCommand with the given {@code ClientContext}.
      * 
-     * @param pipeline The pipeline to get the {@code PermissionsManager} from
+     * @param context The context to get the {@code PermissionsManager} from
      */
-    public PermissionsCommand(ClientPipeline pipeline) {
-        this.permissionsManager = pipeline.getPermissionsManager();
+    public PermissionsCommand(ClientContext context) {
+        this.permissionsManager = context.getPermissionsManager();
     }
 
     /**

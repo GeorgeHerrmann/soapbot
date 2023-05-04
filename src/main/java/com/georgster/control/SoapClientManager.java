@@ -3,7 +3,7 @@ package com.georgster.control;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.logs.MultiLogger;
 
 import discord4j.common.util.Snowflake;
@@ -98,7 +98,7 @@ public final class SoapClientManager {
      */
     private void distributeClient(GuildCreateEvent event) {
         Snowflake flake = event.getGuild().getId();
-        clients.computeIfAbsent(flake, client -> new SoapClient(new ClientPipeline(dispatcher, event.getGuild(), discordClient.getRestClient()))); //Creates a new SoapClient if one does not already exist for the Guild
+        clients.computeIfAbsent(flake, client -> new SoapClient(new ClientContext(dispatcher, event.getGuild(), discordClient.getRestClient()))); //Creates a new SoapClient if one does not already exist for the Guild
         clients.get(flake).onGuildCreate(event); //Distributes the event to the client
     }
 

@@ -3,7 +3,7 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -37,11 +37,16 @@ public class PlayMusicCommand implements ParseableCommand {
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
-    public PlayMusicCommand(ClientPipeline pipeline) {
-        this.provider = pipeline.getAudioInterface().getProvider();
-        this.playerManager = pipeline.getAudioInterface().getPlayerManager();
-        this.player = pipeline.getAudioInterface().getPlayer();
-        this.scheduler = pipeline.getAudioInterface().getScheduler();
+    /**
+     * Creates a new PlayMusicCommand from the given {@code ClientContext}.
+     * 
+     * @param context The {@code ClientContext} to get audio components from
+     */
+    public PlayMusicCommand(ClientContext context) {
+        this.provider = context.getAudioContext().getProvider();
+        this.playerManager = context.getAudioContext().getPlayerManager();
+        this.player = context.getAudioContext().getPlayer();
+        this.scheduler = context.getAudioContext().getScheduler();
         this.player.addListener(scheduler);
     }
 

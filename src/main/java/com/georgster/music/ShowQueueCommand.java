@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.Command;
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -21,8 +21,13 @@ public class ShowQueueCommand implements Command {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private LinkedBlockingQueue<AudioTrack> queue;
 
-    public ShowQueueCommand(ClientPipeline pipeline) {
-        this.queue = pipeline.getAudioInterface().getScheduler().getQueue();
+    /**
+     * Creates a new ShowQueueCommand from the given {@code ClientContext}.
+     * 
+     * @param context The {@code ClientContext} to get audio components from
+     */
+    public ShowQueueCommand(ClientContext context) {
+        this.queue = context.getAudioContext().getScheduler().getQueue();
     }
 
     /**

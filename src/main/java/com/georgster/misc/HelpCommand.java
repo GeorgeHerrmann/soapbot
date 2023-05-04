@@ -11,7 +11,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -30,12 +30,12 @@ public class HelpCommand implements ParseableCommand {
     private CommandRegistry register; //SoapBot's Command Registry
 
     /**
-     * Creates a new {@code HelpCommand} with the given {@code ClientPipeline}.
+     * Creates a new {@code HelpCommand} with the given {@code ClientContext}.
      * 
-     * @param pipeline The pipeline to get the {@code CommandRegistry} from
+     * @param context The context to get the {@code CommandRegistry} from
      */
-    public HelpCommand(ClientPipeline pipeline) {
-        register = pipeline.getCommandRegistry();
+    public HelpCommand(ClientContext context) {
+        register = context.getCommandRegistry();
     }
 
     /**

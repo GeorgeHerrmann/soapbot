@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.SoapEventManager;
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
@@ -31,12 +31,12 @@ public class EventCommand implements ParseableCommand {
     private SoapEventManager eventManager;
 
     /**
-     * Creates a new {@code EventCommand} with the given {@code ClientPipeline}.
+     * Creates a new {@code EventCommand} with the given {@code ClientContext}.
      * 
-     * @param pipeline The pipeline to get the {@code EventManager} from
+     * @param context The context to get the {@code EventManager} from
      */
-    public EventCommand(ClientPipeline pipeline) {
-        this.eventManager = pipeline.getEventManager();
+    public EventCommand(ClientContext context) {
+        this.eventManager = context.getEventManager();
     }
 
     /**

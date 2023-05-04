@@ -3,46 +3,46 @@ package com.georgster.control.util;
 import com.georgster.control.CommandRegistry;
 import com.georgster.control.PermissionsManager;
 import com.georgster.control.SoapEventManager;
-import com.georgster.music.components.AudioInterface;
+import com.georgster.music.components.AudioContext;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.entity.Guild;
 import discord4j.rest.RestClient;
 
 /**
- * A Pipeline that carries active data from the {@code SoapClientManager} to its
- * {@code SoapClients}.
+ * A context of objects from the {@code SoapClientManager} and a {@code SoapClient}
+ * for all client subsystems to use.
  */
-public class ClientPipeline {
+public class ClientContext {
     private final EventDispatcher dispatcher;
     private final Guild guild;
-    private AudioInterface audioInterface;
+    private AudioContext audioContext;
     private SoapEventManager eventManager;
     private PermissionsManager permissionsManager;
     private CommandRegistry commandRegistry;
     private RestClient restClient;
 
     /**
-     * Creates a new ClientPipeline with the given {@code EventDispatcher} and
+     * Creates a new ClientContext with the given {@code EventDispatcher} and
      * {@code Guild}.
      * 
      * @param dispatcher the event dispatcher
      * @param guild     the guild
      */
-    public ClientPipeline(EventDispatcher dispatcher, Guild guild) {
+    public ClientContext(EventDispatcher dispatcher, Guild guild) {
         this.dispatcher = dispatcher;
         this.guild = guild;
     }
 
     /**
-     * Creates a new ClientPipeline with the given {@code EventDispatcher},
+     * Creates a new ClientContext with the given {@code EventDispatcher},
      * {@code Guild}, and {@code RestClient}.
      * 
      * @param dispatcher    the event dispatcher
      * @param guild        the guild
      * @param restClient    the rest client
      */
-    public ClientPipeline(EventDispatcher dispatcher, Guild guild, RestClient restClient) {
+    public ClientContext(EventDispatcher dispatcher, Guild guild, RestClient restClient) {
         this.dispatcher = dispatcher;
         this.guild = guild;
         this.restClient = restClient;
@@ -67,12 +67,12 @@ public class ClientPipeline {
     }
 
     /**
-     * Returns the audio interface.
+     * Returns the audio context.
      * 
-     * @return the audio interface
+     * @return the audio context
      */
-    public AudioInterface getAudioInterface() {
-        return audioInterface;
+    public AudioContext getAudioContext() {
+        return audioContext;
     }
 
     /**
@@ -94,12 +94,12 @@ public class ClientPipeline {
     }
 
     /**
-     * Sets the audio interface.
+     * Sets the audio context.
      * 
-     * @param audioInterface the audio interface
+     * @param audioInterface the audio context
      */
-    public void setAudioInterface(AudioInterface audioInterface) {
-        this.audioInterface = audioInterface;
+    public void setAudioInterface(AudioContext audioContext) {
+        this.audioContext = audioContext;
     }
 
     /**

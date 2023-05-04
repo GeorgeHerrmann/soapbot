@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
@@ -31,7 +31,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class CommandRegistry {
     
-    private final ClientPipeline pipeline;
+    private final ClientContext pipeline;
     private final List<Class<? extends Command>> commands;
 
     /**
@@ -42,7 +42,7 @@ public class CommandRegistry {
      * 
      * @param pipeline the ClientPipeline feeding this registry's commands.
      */
-    public CommandRegistry(ClientPipeline pipeline) { //HelpCommand will be unique
+    public CommandRegistry(ClientContext pipeline) { //HelpCommand will be unique
         this.pipeline = pipeline;
         pipeline.setCommandRegistry(this);
         
@@ -107,7 +107,7 @@ public class CommandRegistry {
         List<Command> commandList = new ArrayList<>();
         commands.forEach(command -> {
             try { // Commands that need access to high level objects (such as the AudioInterface, EventManager, etc.)
-                commandList.add(command.getDeclaredConstructor(ClientPipeline.class).newInstance(pipeline));
+                commandList.add(command.getDeclaredConstructor(ClientContext.class).newInstance(pipeline));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 try { // Commands that don't need access to high level objects
                     commandList.add(command.getDeclaredConstructor().newInstance());

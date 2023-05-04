@@ -3,7 +3,7 @@ package com.georgster.music;
 import java.util.List;
 
 import com.georgster.Command;
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -23,9 +23,14 @@ public class SkipMusicCommand implements Command {
     private AudioPlayer player;
     private TrackScheduler scheduler;
 
-    public SkipMusicCommand(ClientPipeline pipeline) {
-        this.player = pipeline.getAudioInterface().getPlayer();
-        this.scheduler = pipeline.getAudioInterface().getScheduler();
+    /**
+     * Creates a new SkipMusicCommand from the given {@code ClientContext}.
+     * 
+     * @param context The {@code ClientContext} to get audio components from
+     */
+    public SkipMusicCommand(ClientContext context) {
+        this.player = context.getAudioContext().getPlayer();
+        this.scheduler = context.getAudioContext().getScheduler();
     }
 
     /**

@@ -3,7 +3,7 @@ package com.georgster.control;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
 import com.georgster.util.GuildInteractionHandler;
@@ -28,7 +28,7 @@ public class PermissionsManager {
      * 
      * @param pipeline the pipeline carrying the {@code Guild} to manage permissions for
      */
-    public PermissionsManager(ClientPipeline pipeline) {
+    public PermissionsManager(ClientContext pipeline) {
         this.handler = new GuildInteractionHandler(pipeline.getGuild());
         this.groups = new ArrayList<>();
         this.dbService = new DatabaseService<>(handler.getId(), ProfileType.PERMISSIONS, PermissionGroup.class);

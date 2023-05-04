@@ -1,9 +1,9 @@
 package com.georgster.control;
 
-import com.georgster.control.util.ClientPipeline;
+import com.georgster.control.util.ClientContext;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.music.components.AudioInterface;
+import com.georgster.music.components.AudioContext;
 import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
 import com.georgster.profile.UserProfile;
@@ -22,7 +22,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  */
 public final class SoapClient {
     private final Snowflake flake;
-    private final AudioInterface audioInterface;
+    private final AudioContext audioInterface;
     private final CommandRegistry registry;
     private final SoapEventManager eventManager;
     private final PermissionsManager permissionsManager;
@@ -32,9 +32,9 @@ public final class SoapClient {
      * by its unique {@code Snowflake}. Sets up an audio interface and
      * constructs a new {@code CommandRegistry} for this client.
      */
-    protected SoapClient(ClientPipeline pipeline) {
+    protected SoapClient(ClientContext pipeline) {
         flake = pipeline.getGuild().getId();
-        audioInterface = new AudioInterface();
+        audioInterface = new AudioContext();
         eventManager = new SoapEventManager(pipeline.getGuild());
         permissionsManager = new PermissionsManager(pipeline);
         pipeline.setAudioInterface(audioInterface);
@@ -112,7 +112,7 @@ public final class SoapClient {
      * 
      * @return The AudioInterface for this SoapClient.
      */
-    public AudioInterface getAudioInterface() {
+    public AudioContext getAudioInterface() {
         return audioInterface;
     }
 

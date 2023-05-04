@@ -10,18 +10,18 @@ import discord4j.voice.AudioProvider;
 
 /**
  * An aggregation of all the objects SOAP Bot uses to play audio in a single
- * {@code Guild}. Each {@code SoapClient} has its own {@code AudioInterface}.
+ * {@code Guild}. Each {@code SoapClient} has its own {@code AudioContext}.
  */
-public class AudioInterface {
+public class AudioContext {
     private final AudioPlayerManager playerManager;
     private final AudioPlayer player;
     private final TrackScheduler scheduler;
     private final AudioProvider provider;
 
     /**
-     * Creates a new {@code AudioInterface}.
+     * Creates a new {@code AudioContext}.
      */
-    public AudioInterface() {
+    public AudioContext() {
         playerManager = new DefaultAudioPlayerManager();
         // This is an optimization strategy that Discord4J can utilize
         playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
@@ -32,36 +32,36 @@ public class AudioInterface {
     }
 
     /**
-     * Returns the {@code AudioPlayerManager} used by this {@code AudioInterface}.
+     * Returns the {@code AudioPlayerManager} used by this {@code AudioContext}.
      * 
-     * @return the {@code AudioPlayerManager} used by this {@code AudioInterface}
+     * @return the {@code AudioPlayerManager} used by this {@code AudioContext}
      */
     public AudioPlayerManager getPlayerManager() {
         return playerManager;
     }
 
     /**
-     * Returns the {@code AudioPlayer} used by this {@code AudioInterface}.
+     * Returns the {@code AudioPlayer} used by this {@code AudioContext}.
      * 
-     * @return the {@code AudioPlayer} used by this {@code AudioInterface}
+     * @return the {@code AudioPlayer} used by this {@code AudioContext}
      */
     public AudioPlayer getPlayer() {
         return player;
     }
 
     /**
-     * Returns the {@code TrackScheduler} used by this {@code AudioInterface}.
+     * Returns the {@code TrackScheduler} used by this {@code AudioContext}.
      * 
-     * @return the {@code TrackScheduler} used by this {@code AudioInterface}
+     * @return the {@code TrackScheduler} used by this {@code AudioContext}
      */
     public TrackScheduler getScheduler() {
         return scheduler;
     }
 
     /**
-     * Returns the {@code AudioProvider} used by this {@code AudioInterface}.
+     * Returns the {@code AudioProvider} used by this {@code AudioContext}.
      * 
-     * @return the {@code AudioProvider} used by this {@code AudioInterface}
+     * @return the {@code AudioProvider} used by this {@code AudioContext}
      */
     public AudioProvider getProvider() {
         return provider;

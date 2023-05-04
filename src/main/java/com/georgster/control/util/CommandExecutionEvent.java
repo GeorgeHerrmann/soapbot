@@ -11,7 +11,7 @@ import com.georgster.control.SoapClient;
 import com.georgster.control.SoapEventManager;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.music.components.AudioInterface;
+import com.georgster.music.components.AudioContext;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
@@ -153,7 +153,7 @@ public class CommandExecutionEvent {
      * 
      * @return the {@code AudioInterface} for the SoapClient in this Event.
      */
-    public AudioInterface getAudioInterface() {
+    public AudioContext getAudioInterface() {
         return client.getAudioInterface();
     }
 
