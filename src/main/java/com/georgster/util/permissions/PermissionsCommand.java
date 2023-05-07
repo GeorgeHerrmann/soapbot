@@ -21,7 +21,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the bot's actions following the !permissions command.
  */
 public class PermissionsCommand implements ParseableCommand {
-    private static final String PATTERN = "V|R";
+    private static final String PATTERN = "V|R 1|O";
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private PermissionsManager permissionsManager;
@@ -39,7 +39,7 @@ public class PermissionsCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        final GuildInteractionHandler manager = event.getGuildInteractionHandler();
+        final GuildInteractionHandler handler = event.getGuildInteractionHandler();
         final CommandParser parser = event.getCommandParser();
         final MultiLogger logger = event.getLogger();
 
@@ -49,16 +49,26 @@ public class PermissionsCommand implements ParseableCommand {
             StringBuilder response = new StringBuilder("Permission Groups:\n");
             permissionsManager.getAll().forEach(group -> response.append("\t" + group.getName() + "\n"));
             response.append("Use !permissions [group] to see the permissions for a group");
-            manager.sendText(response.toString());
+            handler.sendText(response.toString());
         } else if (parser.get(0).equals("manage")) {
             managePermissions(event);
+        } else if (parser.get(0).equals("addall")) {
+            try {
+                PermissibleAction action = PermissionsManager.getAction(parser.get(1).toUpperCase());
+                permissionsManager.getAll().forEach(group -> group.addPermission(action));
+                handler.sendText("Added " + action.toString() + " to all groups");
+                logger.append("\tAdded " + action.toString() + " to all groups", LogDestination.NONAPI);
+            } catch (IllegalArgumentException e) {
+                handler.sendText("That is not a valid action. Please try again");
+                logger.append("\tInvalid action: " + parser.get(1), LogDestination.NONAPI);
+            }
         } else {
             String group = parser.get(0);
             if (permissionsManager.exists(group)) {
                 PermissionGroup permissionGroup = permissionsManager.get(group);
-                manager.sendText("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
+                handler.sendText("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
             } else {
-                manager.sendText("That is not a valid group. Please try again");
+                handler.sendText("That is not a valid group. Please try again");
             }
         }
     }
@@ -196,7 +206,7 @@ public class PermissionsCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withIdentifiers("list", "manage").build();
+        return new ParseBuilder(PATTERN).withIdentifiers("list", "manage", "addall").build();
     }
     
     /**
@@ -204,7 +214,7 @@ public class PermissionsCommand implements ParseableCommand {
      */
     @Override
     public PermissibleAction getRequiredPermission(List<String> args) {
-        if (args.contains("manage")) {
+        if (args.contains("manage") || args.contains("addall")) {
             return PermissibleAction.MANAGEPERMISSIONS;
         } else {
             return PermissibleAction.PERMISSIONSCOMMAND;
@@ -234,6 +244,12 @@ public class PermissionsCommand implements ParseableCommand {
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .build())
+                    .addOption(ApplicationCommandOptionData.builder()
+                        .name("permission")
+                        .description("The permission to add/remove (if applicable)")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
                 .build();
     }
 
@@ -245,6 +261,7 @@ public class PermissionsCommand implements ParseableCommand {
         "\nUsage:" +
         "\n\t!permissions list - List all the groups" +
         "\n\t!permissions [group] - List all the permissions for a group" +
-        "\n\t!permissions manage - Manage all SOAP Bot permissions for roles in this server";
+        "\n\t!permissions manage - Manage all SOAP Bot permissions for roles in this server" +
+        "\n\t!permissions addall [permission] - Add all permissions to a role";
     }
 }

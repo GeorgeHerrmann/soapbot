@@ -1,5 +1,9 @@
 package com.georgster.util.permissions;
 
+/**
+ * An enum of all the actions requiring permissions that can be performed by a user.
+ * Any action not declared by a Command will be considered a {@link #DEFAULT} action.
+ */
 public enum PermissibleAction {
     MANAGEEVENT,
     MANAGEPERMISSIONS,

@@ -6,19 +6,49 @@ import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 
+import discord4j.discordjson.json.ApplicationCommandRequest;
+
+/**
+ * A simple command that responds with "Hello world!". Features the simplest
+ * implementation of a command.
+ */
 public class HelloWorldCommand implements Command {
+    private boolean needsNewRegistration = false;
+
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandExecutionEvent event) {
         event.getGuildInteractionHandler().sendText("Hello world!");
         event.getLogger().append("\tResponding to a !hello command request", LogDestination.API, LogDestination.NONAPI);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("hello", "hello world", "helloworld");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
         "\n\t- !hello = Responds with 'Hello world!'";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        if (!needsNewRegistration) return null;
+
+        return ApplicationCommandRequest.builder()
+            .name("hello")
+            .description("Responds with 'Hello world!'")
+            .build();
     }
 }

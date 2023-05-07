@@ -17,5 +17,8 @@
 2.312
     - Added "!helloworld" command
 
-2.321
+2.320
     - Reworked SOAPBot's client-level managers into abstract classes for easier additions
+
+2.321
+    - Added addall subcommand to PermissionsManager

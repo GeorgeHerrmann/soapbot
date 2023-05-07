@@ -48,6 +48,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
                     if (role.getPermissions().contains(Permission.ADMINISTRATOR)) {
                         group.addPermission(PermissibleAction.ADMIN);
                     } else {
+                        group.addPermission(PermissibleAction.MENTIONEVENT);
                         group.addPermission(PermissibleAction.HELPCOMMAND);
                         group.addPermission(PermissibleAction.PLAYMUSIC);
                         group.addPermission(PermissibleAction.SKIPMUSIC);
@@ -107,7 +108,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     }
 
     /**
-     * A utility method to get a {@code PermissibleAction} from a string.
+     * A utility method for get a {@code PermissibleAction} from a string.
      * 
      * @param name the name of the {@code PermissibleAction} to get
      * @return the {@code PermissibleAction} with the given name
