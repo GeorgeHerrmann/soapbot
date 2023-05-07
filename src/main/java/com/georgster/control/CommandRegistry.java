@@ -11,6 +11,7 @@ import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.EventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
+import com.georgster.misc.HelloWorldCommand;
 import com.georgster.misc.HelpCommand;
 import com.georgster.misc.PongCommand;
 import com.georgster.misc.SoapCommand;
@@ -59,7 +60,8 @@ public class CommandRegistry {
             ShowQueueCommand.class,
             SkipMusicCommand.class,
             PermissionsCommand.class,
-            TestCommand.class
+            TestCommand.class,
+            HelloWorldCommand.class
         ));
     }
 

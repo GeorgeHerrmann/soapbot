@@ -10,3 +10,9 @@
         - ParseableCommands can now control autoformatting via their CommandParser
     - Fixed a bug where database operations were desynced from the rest of SOAP Bot, causing rare race conditions
     - Fixed a bug where SOAP Bot could crash if too many unkept threads were active
+
+2.311
+    - Fixed a bug where SOAPEvents would unconditionally be restarted by the event manager on reconnection GuildCreateEvents, even if they were already active, causing duplicate versions to exist
+
+2.312
+    - Added "!helloworld" command
