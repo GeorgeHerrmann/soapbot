@@ -1,5 +1,7 @@
 package com.georgster.control;
 
+import com.georgster.control.manager.PermissionsManager;
+import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -32,15 +34,15 @@ public final class SoapClient {
      * by its unique {@code Snowflake}. Sets up an audio interface and
      * constructs a new {@code CommandRegistry} for this client.
      */
-    protected SoapClient(ClientContext pipeline) {
-        flake = pipeline.getGuild().getId();
+    protected SoapClient(ClientContext context) {
+        flake = context.getGuild().getId();
         audioInterface = new AudioContext();
-        eventManager = new SoapEventManager(pipeline.getGuild());
-        permissionsManager = new PermissionsManager(pipeline);
-        pipeline.setAudioInterface(audioInterface);
-        pipeline.setEventManager(eventManager);
-        pipeline.setPermissionsManager(permissionsManager);
-        registry = new CommandRegistry(pipeline);
+        eventManager = new SoapEventManager(context);
+        permissionsManager = new PermissionsManager(context);
+        context.setAudioInterface(audioInterface);
+        context.setEventManager(eventManager);
+        context.setPermissionsManager(permissionsManager);
+        registry = new CommandRegistry(context);
         registry.registerGlobalCommands();
     }
 
@@ -65,7 +67,7 @@ public final class SoapClient {
 
         permissionsManager.setupBasic();
 
-        logger.append("\n\t Restarted " + eventManager.getEventCount() + " events for " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
+        logger.append("\n\t Restarted " + eventManager.getCount() + " events for " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
 
         logger.append("\n\t Updating Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
 

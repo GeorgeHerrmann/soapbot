@@ -1,8 +1,8 @@
 package com.georgster.control.util;
 
 import com.georgster.control.CommandRegistry;
-import com.georgster.control.PermissionsManager;
-import com.georgster.control.SoapEventManager;
+import com.georgster.control.manager.PermissionsManager;
+import com.georgster.control.manager.SoapEventManager;
 import com.georgster.music.components.AudioContext;
 
 import discord4j.core.event.EventDispatcher;

@@ -3,7 +3,7 @@ package com.georgster.events.reserve;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.SoapEventManager;
+import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
@@ -46,18 +46,18 @@ public class UnreserveCommand implements ParseableCommand {
         CommandParser parser = event.getCommandParser();
         DiscordEvent discordEvent = event.getDiscordEvent();
 
-        if (eventManager.eventExists(parser.get(0), TYPE)) {
-            ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
+        if (eventManager.exists(parser.get(0), TYPE)) {
+            ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
             if (reserve.alreadyReserved(discordEvent.getAuthorAsMember().getTag())) {
 
                 logger.append("\tRemoving " + discordEvent.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
                 reserve.removeReserved(discordEvent.getAuthorAsMember().getTag());
                 if (reserve.getReserved() <= 0) {
-                    eventManager.removeEvent(reserve);
+                    eventManager.remove(reserve);
                     logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
                     handler.sendText("There are no more people reserved to this event, this event has been removed");
                 } else {
-                    eventManager.updateEvent(reserve);
+                    eventManager.update(reserve);
                     handler.sendText("You have unreserved from " + reserve.getIdentifier());
                 }
             } else {

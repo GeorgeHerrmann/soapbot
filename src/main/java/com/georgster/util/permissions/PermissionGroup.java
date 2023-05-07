@@ -3,12 +3,14 @@ package com.georgster.util.permissions;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.control.manager.Manageable;
+
 /**
  * A {@code PermissionGroup} is a collection of {@code PermissibleActions} that
  * can be assigned to a group with an associated name. Generally, the name of
  * the group will be the name of the role that the group is assigned to.
  */
-public class PermissionGroup {
+public class PermissionGroup implements Manageable {
     private String name;
     private List<PermissibleAction> actions;
 
@@ -84,5 +86,15 @@ public class PermissionGroup {
         if (hasPermission(action)) {
             actions.remove(action);
         }
+    }
+
+    /**
+     * Returns the name of the group.
+     * 
+     * @return the name of the group
+     */
+    @Override
+    public String getIdentifier() {
+        return getName();
     }
 }

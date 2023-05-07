@@ -6,14 +6,16 @@ import java.util.List;
 import com.georgster.control.util.ClientContext;
 import com.georgster.profile.DatabaseService;
 import com.georgster.profile.ProfileType;
+import com.georgster.profile.adapter.DatabaseObjectClassAdapter;
 import com.georgster.util.GuildInteractionHandler;
 
 import discord4j.core.object.entity.Guild;
 
 /**
- * A framework for managing non-extending nor implementing objects that are stored in SOAPBot's database.
+ * A framework for managing extending or implementing objects that are stored in SOAPBot's database.
  */
-public abstract class SoapManager<T extends Manageable> {
+public abstract class AbstractSoapManager<T extends Manageable> {
+    protected DatabaseObjectClassAdapter<T> adapter; // The adapter that will be used to convert the objects from the database.
     protected String identifierName; // The name of the identifier field in the database.
     protected List<T> observees; // The objects that this manager is managing.
     protected DatabaseService<T> dbService; // The service that this manager will use to access the database.
@@ -26,12 +28,14 @@ public abstract class SoapManager<T extends Manageable> {
      * @param profileType The type of profile that this manager will be accessing.
      * @param observeeClass The class of the objects that this manager will be managing.
      * @param identifierName The name of the identifier field in the database.
+     * @param adapter The adapter that will be used to convert the objects from the database.
      */
-    protected SoapManager(ClientContext context, ProfileType profileType, Class<T> observeeClass, String identifierName) {
+    protected AbstractSoapManager(ClientContext context, ProfileType profileType, Class<T> observeeClass, String identifierName, DatabaseObjectClassAdapter<T> adapter) {
         this.handler = new GuildInteractionHandler(context.getGuild());
         this.dbService = new DatabaseService<>(handler.getId(), profileType, observeeClass);
         this.observees = new ArrayList<>();
         this.identifierName = identifierName;
+        this.adapter = adapter;
     }
 
     /**
@@ -41,7 +45,7 @@ public abstract class SoapManager<T extends Manageable> {
      */
     public void add(T observee) {
         if (!exists(observee.getIdentifier())) {
-            dbService.addObjectIfNotExists(observee, identifierName, observee.getIdentifier());
+            dbService.addObjectIfNotExists(observee, identifierName, observee.getIdentifier(), adapter);
             observees.add(observee);
         }
     }
@@ -73,7 +77,7 @@ public abstract class SoapManager<T extends Manageable> {
      */
     public void remove(T observee) {
         if (exists(observee)) {
-            dbService.removeObjectIfExists(identifierName, observee.getIdentifier());
+            dbService.removeObjectIfExists(identifierName, observee.getIdentifier(), adapter);
             observees.remove(observee);
         }
     }
@@ -85,7 +89,7 @@ public abstract class SoapManager<T extends Manageable> {
      */
     public void remove(String identifier) {
         observees.stream().filter(observee -> observee.getIdentifier().equals(identifier)).forEach(observee -> {
-            dbService.removeObjectIfExists(identifierName, identifier);
+            dbService.removeObjectIfExists(identifierName, identifier, adapter);
             observees.remove(observee);
         });
     }
@@ -94,8 +98,7 @@ public abstract class SoapManager<T extends Manageable> {
      * Removes all objects from the manager.
      */
     public void removeAll() {
-        observees.forEach(observee -> dbService.removeObjectIfExists(identifierName, observee.getIdentifier()));
-        observees.clear();
+        observees.forEach(this::remove);
     }
 
     /**
@@ -125,7 +128,7 @@ public abstract class SoapManager<T extends Manageable> {
     public void update(T observee) {
         observees.stream().filter(examiner -> examiner.getIdentifier().equals(observee.getIdentifier())).forEach(examiner -> {
             observees.set(observees.indexOf(examiner), observee); //Replace the old observee with the new one
-            dbService.updateObjectIfExists(observee, identifierName, observee.getIdentifier());
+            dbService.updateObjectIfExists(observee, identifierName, observee.getIdentifier(), adapter);
         });
     }
 
@@ -141,18 +144,17 @@ public abstract class SoapManager<T extends Manageable> {
     /**
      * Checks if the manager is empty.
      * 
-     * @return True if the manager is empty, false otherwise.
+     * @return
      */
     public boolean isEmpty() {
         return observees.isEmpty();
     }
 
     /**
-     * Gets the guild that this manager is managing objects for.
+     * Gets the guild that this manager is associated with.
      * 
-     * @return The guild that this manager is managing objects for.
+     * @return The guild that this manager is associated with.
      */
-    
     public Guild getGuild() {
         return handler.getGuild();
     }

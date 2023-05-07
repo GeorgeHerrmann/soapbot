@@ -3,7 +3,7 @@ package com.georgster.events.reserve;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.SoapEventManager;
+import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
@@ -51,10 +51,10 @@ public class EventCommand implements ParseableCommand {
             logger.append("Showing all events in a text channel", LogDestination.API);
 
             StringBuilder response = new StringBuilder();
-            if (eventManager.areEvents(TYPE)) {
+            if (eventManager.hasAny(TYPE)) {
                 logger.append("\tShowing the user a list of events\n", LogDestination.NONAPI);
                 response.append("All events:\n");
-                List<SoapEvent> events = eventManager.getEvents(TYPE);
+                List<SoapEvent> events = eventManager.getAll(TYPE);
                 for (int i = 0; i < events.size(); i++) {
                     /* The EventManager will ensure we get events of the correct type, so casting is safe */
                     ReserveEvent reserve = (ReserveEvent) events.get(i);
@@ -72,9 +72,9 @@ public class EventCommand implements ParseableCommand {
                 handler.sendText("There are no events currently active");
             }
         } else if (parser.getMatchingRule("I").equals("mention") || parser.getMatchingRule("I").equals("ping")) {
-            if (eventManager.eventExists(parser.get(0), TYPE)) {
+            if (eventManager.exists(parser.get(0), TYPE)) {
                 logger.append("Mentioning all users that have reserved to an event", LogDestination.API);
-                ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
+                ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
 
                 logger.append("\tMentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
@@ -85,9 +85,9 @@ public class EventCommand implements ParseableCommand {
                 handler.sendText("This event does not exist, type !events list for a list of all active events");
             }
         } else { //Shows information about an event
-            if (eventManager.eventExists(parser.get(0), TYPE)) {
+            if (eventManager.exists(parser.get(0), TYPE)) {
                 logger.append("Showing information about a specific event in a text channel", LogDestination.API);
-                ReserveEvent reserve = (ReserveEvent) eventManager.getEvent(parser.get(0));
+                ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
 
                 logger.append("Showing information about event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 

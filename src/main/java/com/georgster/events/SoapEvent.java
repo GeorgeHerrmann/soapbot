@@ -1,5 +1,6 @@
 package com.georgster.events;
 
+import com.georgster.control.manager.Manageable;
 import com.georgster.util.GuildInteractionHandler;
 
 /**
@@ -7,15 +8,7 @@ import com.georgster.util.GuildInteractionHandler;
  * to schedule and fulfill said event. A SOAPEvent is scheduled upon
  * creation, and is fulfilled when the conditions to fulfill the event are met.
  */
-public interface SoapEvent {
-
-    /**
-     * Returns the identifier of the event. Every SOAPEvent must have a unique identifier.
-     * How this identifier is generated is up to the implementation of the SOAPEvent.
-     * 
-     * @return the identifier of the event
-     */
-    public String getIdentifier();
+public interface SoapEvent extends Manageable {
 
     /**
      * Returns the type of the event. The type of the event is used to determine

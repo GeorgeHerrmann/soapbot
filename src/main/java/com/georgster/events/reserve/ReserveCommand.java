@@ -3,7 +3,7 @@ package com.georgster.events.reserve;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.SoapEventManager;
+import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
@@ -50,7 +50,7 @@ public class ReserveCommand implements ParseableCommand {
         try {
             ReserveEvent reserve = assignCorrectEvent(event);
         
-            if (eventManager.eventExists(reserve.getIdentifier(), TYPE)) {
+            if (eventManager.exists(reserve.getIdentifier(), TYPE)) {
                 if (!reserve.isFull()) {
                     discordEvent.getAuthorOptionally().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
@@ -58,7 +58,7 @@ public class ReserveCommand implements ParseableCommand {
                         } else {
                             logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
-                            eventManager.updateEvent(reserve);
+                            eventManager.update(reserve);
                             handler.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
                             reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
                         }
@@ -69,7 +69,7 @@ public class ReserveCommand implements ParseableCommand {
             } else {
                 logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
                 discordEvent.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
-                eventManager.addEvent(reserve);
+                eventManager.add(reserve);
                 String messageString = "";
                 if (reserve.isTimeless()) {
                     logger.append("\tThis event is timeless\n", LogDestination.NONAPI);
@@ -114,12 +114,12 @@ public class ReserveCommand implements ParseableCommand {
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();
 
         if (message.size() == 1) { //Means the user is trying to reserve to an event that already exists
-            if (eventManager.eventExists(message.get(0), TYPE)) { //If the event exists, we get the event and return it
-                return (ReserveEvent) eventManager.getEvent(message.get(0));
+            if (eventManager.exists(message.get(0), TYPE)) { //If the event exists, we get the event and return it
+                return (ReserveEvent) eventManager.get(message.get(0));
             } else {
                 throw new IllegalArgumentException("This event doesn't exist. Type !help reserve to see how to make a new event.");
             }
-        } else if (message.size() == 2 && !eventManager.eventExists(message.get(0), TYPE)) { //Creating an event that is either Unlimited or Timeless
+        } else if (message.size() == 2 && !eventManager.exists(message.get(0), TYPE)) { //Creating an event that is either Unlimited or Timeless
             try {
                 if (Integer.parseInt(message.get(1)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 return new ReserveEvent(message.get(0), Integer.parseInt(message.get(1)), channelName); //If the user only inputs a number, the event is Timeless
@@ -130,7 +130,7 @@ public class ReserveCommand implements ParseableCommand {
                     throw new IllegalArgumentException(e2.getMessage());
                 }
             }
-        } else if (message.size() == 3 && !eventManager.eventExists(message.get(0), TYPE)) { //Creates a new event that has a number of slots and a time
+        } else if (message.size() == 3 && !eventManager.exists(message.get(0), TYPE)) { //Creates a new event that has a number of slots and a time
             try { //If the event doesn't already exist, we can attempt to create a new one
                 if (Integer.parseInt(parser.getMatchingRule("N")) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 //Should be in the format !reserve [EVENTNAME] [NUMPEOPLE] [TIME]

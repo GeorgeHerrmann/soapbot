@@ -3,7 +3,7 @@ package com.georgster.util.permissions;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.PermissionsManager;
+import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
@@ -47,15 +47,15 @@ public class PermissionsCommand implements ParseableCommand {
 
         if (parser.get(0).equals("list")) {
             StringBuilder response = new StringBuilder("Permission Groups:\n");
-            permissionsManager.getGroups().forEach(group -> response.append("\t" + group.getName() + "\n"));
+            permissionsManager.getAll().forEach(group -> response.append("\t" + group.getName() + "\n"));
             response.append("Use !permissions [group] to see the permissions for a group");
             manager.sendText(response.toString());
         } else if (parser.get(0).equals("manage")) {
             managePermissions(event);
         } else {
             String group = parser.get(0);
-            if (permissionsManager.groupExists(group)) {
-                PermissionGroup permissionGroup = permissionsManager.getGroup(group);
+            if (permissionsManager.exists(group)) {
+                PermissionGroup permissionGroup = permissionsManager.get(group);
                 manager.sendText("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
             } else {
                 manager.sendText("That is not a valid group. Please try again");
@@ -79,15 +79,15 @@ public class PermissionsCommand implements ParseableCommand {
         PermissionGroup group = null;
 
         while (valid) {
-            String[] groups = new String[permissionsManager.getGroupCount()];
+            String[] groups = new String[permissionsManager.getCount()];
             for (int i = 0; i < groups.length; i++) {
-                groups[i] = permissionsManager.getGroups().get(i).getName();
+                groups[i] = permissionsManager.getAll().get(i).getName();
             }
             String response = wizard.step("Which Role would you like to manage?", groups);
             if (response == null) {
                 valid = false;
             } else {
-                group = permissionsManager.getGroup(response);
+                group = permissionsManager.get(response);
                 valid = groupOptions(wizard, group);
             }
         }
@@ -134,7 +134,7 @@ public class PermissionsCommand implements ParseableCommand {
     private boolean addPermission(CommandWizard wizard, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
-            group = permissionsManager.getGroup(group.getName());
+            group = permissionsManager.get(group.getName());
             String[] perms = new String[PermissibleAction.values().length + 1];
             for (PermissibleAction action : PermissibleAction.values()) {
                 perms[action.ordinal()] = action.toString();
@@ -148,7 +148,7 @@ public class PermissionsCommand implements ParseableCommand {
             } else {
                 PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
                 group.addPermission(action);
-                permissionsManager.updateGroup(group);
+                permissionsManager.update(group);
                 wizard.sendPrivateMessage("Added " + action.toString() + " to " + group.getName());
             }
         }
@@ -166,7 +166,7 @@ public class PermissionsCommand implements ParseableCommand {
     private boolean removePermission(CommandWizard wizard, PermissionGroup group) {
         boolean valid = true;
         while (valid) {
-            group = permissionsManager.getGroup(group.getName());
+            group = permissionsManager.get(group.getName());
             String[] perms = new String[group.getActions().size() + 1];
             for (int i = 0; i < group.getActions().size(); i++) {
                 perms[i] = group.getActions().get(i).toString();
@@ -181,7 +181,7 @@ public class PermissionsCommand implements ParseableCommand {
                 PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
                 if (group.getActions().contains(action)) {
                     group.removePermission(action);
-                    permissionsManager.updateGroup(group);
+                    permissionsManager.update(group);
                     wizard.sendPrivateMessage("Removed " + action.toString() + " from " + group.getName());
                 } else {
                     wizard.sendPrivateMessage("That permission is not in the group. Please try again");

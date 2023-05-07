@@ -1,5 +1,5 @@
 package com.georgster.events;
-import com.georgster.control.SoapEventManager;
+import com.georgster.control.manager.SoapEventManager;
 import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.util.GuildInteractionHandler;
 
@@ -27,7 +27,7 @@ public class SoapEventHandler {
      */
     public static void scheduleEvent(SoapEvent event, SoapEventManager eventManager) {
         GuildInteractionHandler handler = new GuildInteractionHandler(eventManager.getGuild());
-        if (eventManager.eventExists(event.getIdentifier())) {
+        if (eventManager.exists(event.getIdentifier())) {
             if (event.getType() == SoapEventType.RESERVE) {
                 handler.setActiveChannel(handler.getTextChannel(((ReserveEvent) event).getChannel()));
             }
@@ -36,8 +36,8 @@ public class SoapEventHandler {
             } else {
                 handler.sendText("Event " + event.getIdentifier() + " has been cancelled");
             }
-            if (eventManager.eventExists(event.getIdentifier())) {
-                eventManager.removeEvent(event);
+            if (eventManager.exists(event.getIdentifier())) {
+                eventManager.remove(event);
             }
         }
     }
@@ -54,10 +54,10 @@ public class SoapEventHandler {
     private static boolean validateSoapEvent(SoapEvent event, SoapEventManager eventManager) {
         try {
             /* Will continue to wait until the event has been removed/cancelled, or the fulfillment condition has been met */
-            while (eventManager.eventExists(event.getIdentifier()) && !eventManager.getEvent(event.getIdentifier()).fulfilled()) {
+            while (eventManager.exists(event.getIdentifier()) && !eventManager.get(event.getIdentifier()).fulfilled()) {
                 Thread.sleep(2000);
             }
-            if (!eventManager.eventExists(event.getIdentifier())) { //If it was removed we return false
+            if (!eventManager.exists(event.getIdentifier())) { //If it was removed we return false
                 return false;
             }
         } catch (Exception e) { //If we are interrupted we return false
