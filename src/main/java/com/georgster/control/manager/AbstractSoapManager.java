@@ -144,7 +144,7 @@ public abstract class AbstractSoapManager<T extends Manageable> {
     /**
      * Checks if the manager is empty.
      * 
-     * @return
+     * @return True if the manager is empty, false otherwise.
      */
     public boolean isEmpty() {
         return observees.isEmpty();
