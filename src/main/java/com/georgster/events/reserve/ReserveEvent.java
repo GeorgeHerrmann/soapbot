@@ -2,6 +2,7 @@ package com.georgster.events.reserve;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class ReserveEvent implements SoapEvent {
         this.reserved = 0; //We will always start with one person reserved
         this.channel = channel;
         reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
-        this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
+        this.date = getCorrectDate(time);
     }
 
     /**
@@ -122,7 +123,7 @@ public class ReserveEvent implements SoapEvent {
         this.reserved = 0;
         this.channel = channel;
         reservedUsers = new ArrayList<>();
-        this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
+        this.date = getCorrectDate(time);
     }
 
     /**
@@ -144,6 +145,24 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
+     * Returns the correct Date String based on the time of the event.
+     * If the time of the event has already passed, the date will be set to the next day.
+     * Otherwise, the date will be set to the current day.
+     * <p><b>Note:</b> This method should be used when a time, but not a date, is specified.</p>
+     * 
+     * @param time the time of the event
+     * @return the correct date of the event
+     */
+    private String getCorrectDate(String time) {
+        LocalTime localTime = LocalTime.parse(time);
+        if (LocalTime.now(ZoneId.of("-05:00")).isAfter(localTime)) {
+            return LocalDate.now(ZoneId.of("-05:00")).plusDays(1).toString();
+        } else {
+            return LocalDate.now(ZoneId.of("-05:00")).toString();
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public boolean fulfilled() {
@@ -154,6 +173,7 @@ public class ReserveEvent implements SoapEvent {
             if (until < 0 && Math.abs(until) > 60) {
                 until = Math.abs(until);
             }
+            System.out.println(until);
             return until <= 0;
         } else {
             return reserved >= numPeople;
