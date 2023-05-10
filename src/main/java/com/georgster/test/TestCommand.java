@@ -4,8 +4,6 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.logs.LogDestination;
-import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -16,17 +14,18 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class TestCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-    private static final boolean ACTIVE = true;
+    private static final boolean ACTIVE = false;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        String output = SoapUtility.insertSpaces(event.getCommandParser().get(0));
-        event.getLogger().append(output, LogDestination.NONAPI);
-        event.getGuildInteractionHandler().sendText(output);
+        throw new UnsupportedOperationException("Not active");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public CommandParser getCommandParser() {
         return new CommandParser("V|R");
     }

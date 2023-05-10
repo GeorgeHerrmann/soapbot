@@ -86,13 +86,26 @@ public class SoapUtility {
         return String.format("%02d:%02d%s", hour, minute, amPm);
     }
 
-    public static String insertSpaces(String input) {
+    /**
+     * Corrects spacing issues in date strings.
+     * 
+     * @param input the date string to correct
+     * @return the corrected date string
+     */
+    private static String insertSpaces(String input) {
         // Insert spaces between month/day and day suffix (st/nd/rd/th)
         input = input.replaceAll("(?<=[a-zA-Z])(?=[0-9])", " ");
         input = input.replaceAll("(?<=[0-9])(?=[a-zA-Z]{2})", " ");
         return input;
     }
 
+    /**
+     * Parses a String describing a month into an standardized Date string.
+     * 
+     * @param inputDate the date string to parse
+     * @return the parsed date string
+     * @throws IllegalArgumentException if the input date string is invalid
+     */
     public static String convertDate(String inputDate) throws IllegalArgumentException {
         inputDate = insertSpaces(inputDate);
         LocalDate date = null;
@@ -114,12 +127,25 @@ public class SoapUtility {
         return date.toString();
     }
 
+    /**
+     * Formats a standardized date string into a more readable format.
+     * 
+     * @param dateTimeString the date string to format
+     * @return the formatted date string
+     */
     public static String formatDate(String dateTimeString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
         LocalDate date = LocalDate.parse(dateTimeString);
         return date.format(formatter);
     }
 
+    /**
+     * Parses an exact date string (ex: "dec 25th") into a LocalDate object.
+     * 
+     * @param inputDate the date string to parse
+     * @return the parsed LocalDate object
+     * @throws DateTimeParseException if the input date string is invalid
+     */
     private static LocalDate parseSpecificDate(String inputDate) throws DateTimeParseException {
         String[] parts = inputDate.split(" ");
         if (parts.length == 2) {
@@ -140,6 +166,12 @@ public class SoapUtility {
         }
     }
 
+    /**
+     * Parses a month string into an integer.
+     * 
+     * @param monthString the month string to parse
+     * @return the parsed month integer
+     */
     public static int parseMonth(String monthString) {
         switch (monthString.toLowerCase(Locale.ENGLISH)) {
             case "jan":
