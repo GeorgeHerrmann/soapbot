@@ -193,9 +193,7 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
-     * Returns the identifier of the event.
-     * 
-     * @return the identifier of the event
+     * {@inheritDoc}
      */
     public String getIdentifier() {
         return identifier;
