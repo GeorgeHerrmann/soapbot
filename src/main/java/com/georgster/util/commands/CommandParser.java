@@ -125,6 +125,7 @@ public class CommandParser {
      * <li>- "!S" if this argument must not contain a string</li>
      * <li>- "I" if this argument must be an identifier</li>
      * <li>- "T" if this argument must contain a time</li>
+     * <li>- "D" if this argument must contain a date</li>
      * <li>- "X" if this argument has no rules</li>
      * <li>- "E1" if this argument must be the last argument</li>
      * <li>- "E2" if this argument must be the second to last argument</li>
@@ -148,8 +149,8 @@ public class CommandParser {
             throw new IllegalArgumentException("The number of rules must match the number of arguments in the pattern.");
         } else {
             for (String s : split) {
-                if (!s.contains("N") && !s.contains("!N") && !s.contains("S") && !s.contains("!S") && !s.contains("X") && !s.contains("T") && !s.contains("E") && !s.contains("I") && !s.contains("L")) {
-                    throw new IllegalArgumentException("Rules must be in the format LE, N, !N, S, !S, I, X, T, E1, or E2.");
+                if (!s.contains("N") && !s.contains("!N") && !s.contains("S") && !s.contains("!S") && !s.contains("X") && !s.contains("T") && !s.contains("D") && !s.contains("!D") && !s.contains("E") && !s.contains("I") && !s.contains("L")) {
+                    throw new IllegalArgumentException("Rules must be in the format LE, N, !N, S, !S, I, X, T, D, E1, or E2.");
                 } else {
                     rulesList.add(s);
                 }
@@ -444,6 +445,7 @@ public class CommandParser {
      * - "S" if this argument must contain a string
      * - "!S" if this argument must not contain a string
      * - "T" if this argument must contain a time
+     * - "D" if this argument must contain a date
      * - "X" if this argument has no rules
      * - "I" if this argument must be an identifier
      * - "E1" if this argument must is the last argument
@@ -516,6 +518,16 @@ public class CommandParser {
                 if (returns) and = true;
             } catch (IllegalArgumentException e) {
                 returns = false;
+                if (returns) and = true;
+            }
+        }
+        if (rule.contains("D") && (!returns || !and)) { //If the arg must be in a time format the timeConverter accepts
+            try {
+                SoapUtility.convertDate(arg);
+                returns = !rule.contains("!");
+                if (returns) and = true;
+            } catch (IllegalArgumentException e) {
+                returns = rule.contains("!");
                 if (returns) and = true;
             }
         }

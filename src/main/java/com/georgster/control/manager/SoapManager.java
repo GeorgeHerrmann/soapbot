@@ -20,7 +20,7 @@ public abstract class SoapManager<T extends Manageable> {
     protected GuildInteractionHandler handler; // The handler that this manager will use to interact with the guild.
 
     /**
-     * Creates a new AbstractSoapManager which will access the database using the given paramaters.
+     * Creates a new SoapManager which will access the database using the given paramaters.
      * 
      * @param context The context of the SOAPClient that is using this manager.
      * @param profileType The type of profile that this manager will be accessing.

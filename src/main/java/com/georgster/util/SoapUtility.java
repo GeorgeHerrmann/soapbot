@@ -1,5 +1,9 @@
 package com.georgster.util;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Locale;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -80,6 +84,102 @@ public class SoapUtility {
             hour = 12;
         }
         return String.format("%02d:%02d%s", hour, minute, amPm);
+    }
+
+    public static String insertSpaces(String input) {
+        // Insert spaces between month/day and day suffix (st/nd/rd/th)
+        input = input.replaceAll("(?<=[a-zA-Z])(?=[0-9])", " ");
+        input = input.replaceAll("(?<=[0-9])(?=[a-zA-Z]{2})", " ");
+        return input;
+    }
+
+    public static String convertDate(String inputDate) throws IllegalArgumentException {
+        inputDate = insertSpaces(inputDate);
+        LocalDate date = null;
+        try {
+            date = parseSpecificDate(inputDate);
+        } catch (DateTimeParseException e) {
+            try {
+                if (inputDate.equalsIgnoreCase("tomorrow")) {
+                    date = LocalDate.now().plusDays(1);
+                } else {
+                    String[] parts = inputDate.split(" ");
+                    int daysToAdd = Integer.parseInt(parts[1]);
+                    date = LocalDate.now().plusDays(daysToAdd);
+                }
+            } catch (Exception ex) {
+                throw new IllegalArgumentException("Invalid date format, valid date formats are MMM dd, yyyy, MMM dd, yy, MMM dd, yyyy, tomorrow, and in x days");
+            }
+        }
+        return date.toString();
+    }
+
+    public static String formatDate(String dateTimeString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+        LocalDate date = LocalDate.parse(dateTimeString);
+        return date.format(formatter);
+    }
+
+    private static LocalDate parseSpecificDate(String inputDate) throws DateTimeParseException {
+        String[] parts = inputDate.split(" ");
+        if (parts.length == 2) {
+            int dayOfMonth = Integer.parseInt(parts[1].replaceAll("\\D+", ""));
+            int month = parseMonth(parts[0]);
+            int year = LocalDate.now().getYear();
+            if (LocalDate.now().getMonthValue() > month || (LocalDate.now().getMonthValue() == month && LocalDate.now().getDayOfMonth() > dayOfMonth)) {
+                year++;
+            }
+            return LocalDate.of(year, month, dayOfMonth);
+        } else if (parts.length == 3) {
+            int dayOfMonth = Integer.parseInt(parts[1].replaceAll("\\D+", ""));
+            int month = parseMonth(parts[0]);
+            int year = Integer.parseInt(parts[2]);
+            return LocalDate.of(year, month, dayOfMonth);
+        } else {
+            throw new DateTimeParseException("Invalid input format", inputDate, 0);
+        }
+    }
+
+    public static int parseMonth(String monthString) {
+        switch (monthString.toLowerCase(Locale.ENGLISH)) {
+            case "jan":
+            case "january":
+                return 1;
+            case "feb":
+            case "february":
+                return 2;
+            case "mar":
+            case "march":
+                return 3;
+            case "apr":
+            case "april":
+                return 4;
+            case "may":
+                return 5;
+            case "jun":
+            case "june":
+                return 6;
+            case "jul":
+            case "july":
+                return 7;
+            case "aug":
+            case "august":
+                return 8;
+            case "sep":
+            case "september":
+                return 9;
+            case "oct":
+            case "october":
+                return 10;
+            case "nov":
+            case "november":
+                return 11;
+            case "dec":
+            case "december":
+                return 12;
+            default:
+                throw new DateTimeParseException("Invalid month", monthString, 0);
+        }
     }
 
     /**

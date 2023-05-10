@@ -106,6 +106,7 @@ public class EventCommand implements ParseableCommand {
                     response.append("\t- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
                     response.append("This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                 }
+                response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
                 response.append("\nReserved users:\n");
                 reserve.getReservedUsers().forEach(user -> response.append("\t- " + handler.getMember(user).getUsername() + "\n"));
                 String[] output = SoapUtility.splitFirst(response.toString());

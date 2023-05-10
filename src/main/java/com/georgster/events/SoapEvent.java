@@ -40,4 +40,11 @@ public interface SoapEvent extends Manageable {
      * @param handler the GuildInteractionHandler that will be used to fulfill the event
      */
     public void onFulfill(GuildInteractionHandler handler);
+
+    /**
+     * Returns the channel that the event will be fulfilled in.
+     * 
+     * @return the channel that the event will be fulfilled in
+     */
+    public String getChannel();
 }

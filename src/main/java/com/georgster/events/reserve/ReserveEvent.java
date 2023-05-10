@@ -1,6 +1,7 @@
 package com.georgster.events.reserve;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,13 +27,10 @@ public class ReserveEvent implements SoapEvent {
     private int numPeople;
     private int reserved;
     private String time;
+    private String date;
     private String channel;
     private List<String> reservedUsers;
     private SoapEventType type = SoapEventType.RESERVE;
-
-    public ReserveEvent() {
-        
-    }
     
     /**
      * Constructs a ReserveEvent object with an identifier, number of people, number of people
@@ -46,13 +44,14 @@ public class ReserveEvent implements SoapEvent {
      * @param channel the name of the channel the event was reserved in
      * @param reservedUsers a list of users that have reserved for the event
      */
-    public ReserveEvent(String identifier, int numPeople, int reserved, String time, String channel, List<String> reservedUsers) {
+    public ReserveEvent(String identifier, int numPeople, int reserved, String time, String channel, List<String> reservedUsers, String date) {
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.reserved = reserved;
         this.time = time;
         this.channel = channel;
         this.reservedUsers = reservedUsers;
+        this.date = date;
     }
 
     /**
@@ -64,6 +63,25 @@ public class ReserveEvent implements SoapEvent {
      * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, int numPeople, String time, String channel) {
+        this.identifier = identifier;
+        this.numPeople = numPeople;
+        this.time = time;
+        this.reserved = 0; //We will always start with one person reserved
+        this.channel = channel;
+        reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
+        this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
+    }
+
+    /**
+     * Constructs a ReserveEvent object with an identifier, number of people, time, date, and channel name.
+     * This constructor is used when a ReserveEvent that is neither Unlimited nor Timeless is created.
+     * @param identifier the name of the event
+     * @param numPeople the number of people needed to start the event
+     * @param time the time the event will start
+     * @param channel the name of the channel the event was reserved in
+     */
+    public ReserveEvent(String identifier, int numPeople, String time, String channel, String date) {
+        this.date = date;
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.time = time;
@@ -86,6 +104,7 @@ public class ReserveEvent implements SoapEvent {
         this.time = "99:99"; //A Timeless event will always be at 99:99
         this.channel = channel;
         reservedUsers = new ArrayList<>();
+        this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
     }
 
     /**
@@ -103,6 +122,25 @@ public class ReserveEvent implements SoapEvent {
         this.reserved = 0;
         this.channel = channel;
         reservedUsers = new ArrayList<>();
+        this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
+    }
+
+    /**
+     * Constructs a ReserveEvent object with an identifier, time, date and channel name.
+     * This constructor is used when a ReserveEvent that is Unlimited is created.
+     * 
+     * @param identifier the name of the event
+     * @param time the time the event will start
+     * @param channel the name of the channel the event was reserved in
+     */
+    public ReserveEvent(String identifier, String time, String channel, String date) {
+        this.date = date;
+        this.identifier = identifier;
+        this.time = time;
+        this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start
+        this.reserved = 0;
+        this.channel = channel;
+        reservedUsers = new ArrayList<>();
     }
 
     /**
@@ -110,7 +148,9 @@ public class ReserveEvent implements SoapEvent {
      */
     public boolean fulfilled() {
         if (!isTimeless()) {
-            long until = (LocalTime.now(ZoneId.of("-05:00")).until(LocalTime.parse(time), ChronoUnit.SECONDS)) - 3600;
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00"));
+            String eventDateTimeString = date + "T" + time + ":00";
+            long until = (now.until(LocalDateTime.parse(eventDateTimeString), ChronoUnit.SECONDS)) - 3600;
             if (until < 0 && Math.abs(until) > 60) {
                 until = Math.abs(until);
             }
@@ -192,6 +232,15 @@ public class ReserveEvent implements SoapEvent {
      */
     public String getTime() {
         return time;
+    }
+
+    /**
+     * Returns the date the event will start.
+     * 
+     * @return the date the event will start
+     */
+    public String getDate() {
+        return date;
     }
 
     /**

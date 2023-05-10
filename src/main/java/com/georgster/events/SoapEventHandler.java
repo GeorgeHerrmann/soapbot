@@ -1,6 +1,5 @@
 package com.georgster.events;
 import com.georgster.control.manager.SoapEventManager;
-import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.util.GuildInteractionHandler;
 
 /**
@@ -28,9 +27,7 @@ public class SoapEventHandler {
     public static void scheduleEvent(SoapEvent event, SoapEventManager eventManager) {
         GuildInteractionHandler handler = new GuildInteractionHandler(eventManager.getGuild());
         if (eventManager.exists(event.getIdentifier())) {
-            if (event.getType() == SoapEventType.RESERVE) {
-                handler.setActiveChannel(handler.getTextChannel(((ReserveEvent) event).getChannel()));
-            }
+            handler.setActiveChannel(handler.getTextChannel(event.getChannel()));
             if (validateSoapEvent(event, eventManager)) {
                 event.onFulfill(handler);
             } else {
@@ -44,7 +41,7 @@ public class SoapEventHandler {
 
     
     /**
-     * Validates a {@code SoapEvent} by waiting until the event has been cancelled, is no longer validm
+     * Validates a {@code SoapEvent} by waiting until the event has been cancelled, is no longer valid
      * or the event's {@code fulfilled()} condition has been met.
      * 
      * @param event the event to be validated

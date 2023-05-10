@@ -2,8 +2,11 @@ package com.georgster.test;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.logs.LogDestination;
+import com.georgster.util.SoapUtility;
+import com.georgster.util.commands.CommandParser;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -11,15 +14,21 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Used to test on going features. This command will be considered active if the
  * {@code ACTIVE} field is set to {@code true}.
  */
-public class TestCommand implements Command {
+public class TestCommand implements ParseableCommand {
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-    private static final boolean ACTIVE = false;
+    private static final boolean ACTIVE = true;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        throw new UnsupportedOperationException(); // This command is not active
+        String output = SoapUtility.insertSpaces(event.getCommandParser().get(0));
+        event.getLogger().append(output, LogDestination.NONAPI);
+        event.getGuildInteractionHandler().sendText(output);
+    }
+
+    public CommandParser getCommandParser() {
+        return new CommandParser("V|R");
     }
 
     /**

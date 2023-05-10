@@ -25,7 +25,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the command for reserving to and creating events.
  */
 public class ReserveCommand implements ParseableCommand {
-    private static final String PATTERN = "V|R 1|O 1|O";
+    private static final String PATTERN = "V|R 1|O 1|O V|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
     private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
@@ -81,6 +81,7 @@ public class ReserveCommand implements ParseableCommand {
                     logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
+                messageString += "\nScheduled for: " + SoapUtility.formatDate(reserve.getDate());
                 handler.sendText(messageString, reserve.getIdentifier() + " event created");
             }
         } catch (IllegalArgumentException e) { // assignCorrectEvent will send custom error messages, all other exceptions are handled by the CommandExecutionEvent
@@ -94,7 +95,7 @@ public class ReserveCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withRules("X N|T N|T").build();
+        return new ParseBuilder(PATTERN).withRules("X N|T T|D X").withIdentifiers("in").build();
     }
 
 
@@ -139,6 +140,34 @@ public class ReserveCommand implements ParseableCommand {
                 temp = parser.getMatchingRules("T");
                 String time = temp.get(temp.size() - 1);
                 return new ReserveEvent(message.get(0), numPeople, SoapUtility.timeConverter(time), channelName);
+            } catch (Exception ex) {
+                try {
+                    //Should be in the format !reserve [EVENTNAME] [TIME] [DATE]
+                    List<String> temp = parser.getMatchingRules("T");
+                    String time = temp.get(temp.size() - 1);
+                    temp = parser.getMatchingRules("D");
+                    String date = temp.get(temp.size() - 1);
+                    return new ReserveEvent(message.get(0), SoapUtility.timeConverter(time), channelName, SoapUtility.convertDate(date));
+                } catch (NumberFormatException e) { //If the user's command is in the wrong format
+                    throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
+                } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
+                    throw new IllegalArgumentException(e.getMessage());
+                } catch (IndexOutOfBoundsException e) { //If the name of the event has some issue the parser can't handle
+                    throw new IllegalArgumentException("There is an issue with the name of the event. The event name cannot have a number unless it is attached to a word." + 
+                    "\n\t- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
+                }
+            }
+        } else if (message.size() == 4 && !eventManager.exists(message.get(0), TYPE)) {
+            //Should be in the format !reserve [EVENTNAME] [NUMPEOPLE] [TIME] [DATE]
+            try {
+                if (Integer.parseInt(parser.getMatchingRule("N")) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
+                List<String> temp = parser.getMatchingRules("N");
+                int numPeople = Integer.parseInt(temp.get(temp.size() - 1));
+                temp = parser.getMatchingRules("T");
+                String time = temp.get(temp.size() - 1);
+                temp = parser.getMatchingRules("D");
+                String date = temp.get(temp.size() - 1);
+                return new ReserveEvent(message.get(0), numPeople, SoapUtility.timeConverter(time), channelName, SoapUtility.convertDate(date));
             } catch (NumberFormatException e) { //If the user's command is in the wrong format
                 throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
             } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
@@ -201,6 +230,12 @@ public class ReserveCommand implements ParseableCommand {
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false)
                         .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("date")
+                        .description("The date the event will pop")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
                 .build();
     }
 
@@ -210,13 +245,18 @@ public class ReserveCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
+        "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME] [DATE]' to create a new event with for a specific time and date with a certain number of people" +
+        "\n\t\t - This event will pop when the specified time hits" +
         "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME]' to create a new event with for a specific time with a certain number of people" +
         "\n\t\t - This event will pop when the specified time hits" +
         "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT]' to create a new event with a certain number of people" +
         "\n\t\t - This event will pop when the specified number of people have reserved" +
+        "\n\t- '!reserve [EVENTNAME] [TIME] [DATE]' to create a new event for a specific time and date" +
+        "\n\t\t - This event will pop when the specified time hits" +
         "\n\t- '!reserve [EVENTNAME] [TIME]' to create a new event for a specific time" +
         "\n\t\t - This event will pop when the specified time hits" +
         "\n\t- '!reserve [EVENTNAME]' to reserve to an event that already exists" +
-        "\n\t - !events for information about the event command";
+        "\n\t - !events for information about the event command" +
+        "\n\t*Note: Date formats should be one word, ex: Dec8, Dec8,2024, or in3days*";
     }
 }
