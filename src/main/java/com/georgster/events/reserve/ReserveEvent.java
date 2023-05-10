@@ -173,7 +173,6 @@ public class ReserveEvent implements SoapEvent {
             if (until < 0 && Math.abs(until) > 60) {
                 until = Math.abs(until);
             }
-            System.out.println(until);
             return until <= 0;
         } else {
             return reserved >= numPeople;
