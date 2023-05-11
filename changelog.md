@@ -33,8 +33,11 @@
 2.331
     - Fixed reserve event scheduling for events with no dates and a time that was set earlier in the day
 
-2.333
+2.332
     - Updated command application lifecycle
         - Command's no longer decide their registration status, the CommandRegistry does
             - Definition updates are done automatically on startup for Global Commands
         - Added a static global discord api call ThreadPool which will manage all non-guild specific tasks for all of SOAPBot
+
+2.333
+    - Fixed parsing of ReserveCommand when the number of people was put after the time

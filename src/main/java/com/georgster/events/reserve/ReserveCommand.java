@@ -94,7 +94,7 @@ public class ReserveCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withRules("X N|T T|D X").withIdentifiers("in").build();
+        return new ParseBuilder(PATTERN).withRules("X N|T N|T|D D").withIdentifiers("in").build();
     }
 
 
