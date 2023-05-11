@@ -18,8 +18,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the actions following the execution of a "!plinko" command.
  */
 public class PlinkoCommand implements ParseableCommand {
-    
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
+
     private static final String PATTERN = "1|R 1|O";
 
     /**
@@ -71,8 +70,6 @@ public class PlinkoCommand implements ParseableCommand {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Play a game of Plinko!")

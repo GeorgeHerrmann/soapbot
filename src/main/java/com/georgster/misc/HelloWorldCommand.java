@@ -13,7 +13,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * implementation of a command.
  */
 public class HelloWorldCommand implements Command {
-    private boolean needsNewRegistration = false;
 
     /**
      * {@inheritDoc}
@@ -44,7 +43,6 @@ public class HelloWorldCommand implements Command {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
 
         return ApplicationCommandRequest.builder()
             .name("hello")

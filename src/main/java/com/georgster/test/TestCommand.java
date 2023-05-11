@@ -13,7 +13,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements ParseableCommand {
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private static final boolean ACTIVE = false;
 
     /**
@@ -46,11 +45,9 @@ public class TestCommand implements ParseableCommand {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
-                .name(getAliases().get(0))
-                .description("Description test")
+                .name("test")
+                .description("Used to test on going features.")
                 .build();
     }
 

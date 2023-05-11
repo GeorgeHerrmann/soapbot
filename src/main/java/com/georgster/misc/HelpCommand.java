@@ -25,8 +25,7 @@ import com.georgster.util.commands.CommandParser;
 public class HelpCommand implements ParseableCommand {
 
     private static final String PATTERN = "1|O"; //A regex pattern to parse the contents of a !help command request
-
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
+    
     private CommandRegistry register; //SoapBot's Command Registry
 
     /**
@@ -90,7 +89,6 @@ public class HelpCommand implements ParseableCommand {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
 
         ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))

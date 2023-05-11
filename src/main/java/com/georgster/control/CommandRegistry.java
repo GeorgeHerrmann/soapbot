@@ -88,15 +88,21 @@ public class CommandRegistry {
      * if the command has a valid ApplicationCommandRequest, which they will if
      * the command states it needs a new registration.
      */
-    public void registerGlobalCommands() {
-        long appId = pipeline.getRestClient().getApplicationId().block();
+    protected void registerGlobalCommands() {
+        ThreadPoolFactory.scheduleGlobalDiscordApiTask(() -> { //These tasks are scheduled to run on the global Discord API thread.
+            long appId = pipeline.getRestClient().getApplicationId().block();
+            
+            List<ApplicationCommandRequest> newCommandRequests = new ArrayList<>(); // SOAPBot's records of the commands
 
-        getCommands().forEach(command -> {
-            ApplicationCommandRequest cmd = command.getCommandApplicationInformation();
+            getCommands().forEach(command -> { // Obtains the ApplicationCommandRequest for each command
+                ApplicationCommandRequest request = command.getCommandApplicationInformation();
+                if (request != null) { // Commands that don't want to be registered will return null
+                    newCommandRequests.add(request);
+                }
+            });
 
-            if (cmd != null) { //If the command doesn't want to be registered to discord, it will return null.
-                pipeline.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, cmd).block();
-            }
+            // Overwrites the global commands with the new ones
+            pipeline.getRestClient().getApplicationService().bulkOverwriteGlobalApplicationCommand(appId, newCommandRequests).subscribe();
         });
     }
 

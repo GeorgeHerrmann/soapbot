@@ -17,6 +17,8 @@ import java.util.concurrent.Executors;
 public class ThreadPoolManager {
     private String guildId; // The guild ID that this thread pool manager is for
 
+    private static final ExecutorService GLOBAL_DISCORD_API_CALL_POOL = Executors.newSingleThreadExecutor(); // Responsible for all global Discord API calls
+
     private final ExecutorService databaseThreadPool = Executors.newCachedThreadPool(); 
     private final ExecutorService eventThreadPool = Executors.newFixedThreadPool(10); //Can schedule 10 events at once
     private final ExecutorService commandThreadPool = Executors.newFixedThreadPool(3); // Can schedule 3 commands at once
@@ -76,5 +78,14 @@ public class ThreadPoolManager {
      */
     protected void scheduleVoiceTask(Runnable task) {
         voiceThreadPool.submit(task);
+    }
+
+    /**
+     * Schedule a task to be executed by the global Discord API call thread pool manager.
+     * 
+     * @param task The task to be executed
+     */
+    protected static void scheduleGlobalDiscordApiCallTask(Runnable task) {
+        GLOBAL_DISCORD_API_CALL_POOL.submit(task);
     }
 }

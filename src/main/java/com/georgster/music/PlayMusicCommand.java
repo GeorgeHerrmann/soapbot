@@ -35,8 +35,6 @@ public class PlayMusicCommand implements ParseableCommand {
     private TrackScheduler scheduler;
     private static final String PATTERN = "1|R";
 
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-
     /**
      * Creates a new PlayMusicCommand from the given {@code ClientContext}.
      * 
@@ -132,8 +130,6 @@ public class PlayMusicCommand implements ParseableCommand {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Play music in a discord channel")

@@ -18,7 +18,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the bot's actions following the !queue command.
  */
 public class ShowQueueCommand implements Command {
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private LinkedBlockingQueue<AudioTrack> queue;
 
     /**
@@ -68,8 +67,6 @@ public class ShowQueueCommand implements Command {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Show the current audio queue")

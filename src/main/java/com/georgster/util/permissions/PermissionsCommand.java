@@ -23,7 +23,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class PermissionsCommand implements ParseableCommand {
     private static final String PATTERN = "V|R 1|O";
 
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private PermissionsManager permissionsManager;
 
     /**
@@ -233,8 +232,6 @@ public class PermissionsCommand implements ParseableCommand {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Control the permissions for SOAP Bot")

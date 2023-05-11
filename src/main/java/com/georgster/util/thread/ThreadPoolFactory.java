@@ -64,10 +64,22 @@ public class ThreadPoolFactory {
     /**
      * Schedules a task to be executed by the voice thread pool manager for the given guild ID.
      * Each Guild can schedule only one voice task at a time.
+     * 
      * @param guildId The guild ID to schedule the task for
      * @param task The task to be executed
      */
     public static void scheduleVoiceTask(String guildId, Runnable task) {
         CLIENT_THREAD_POOL_MANAGERS.get(guildId).scheduleVoiceTask(task);
+    }
+
+    /**
+     * Schedules a task to be executed by the global thread pool manager.
+     * <b>NOT</b> to be used for Guild specific tasks.
+     * All of SOAPBot can schedule only one global discord api task at a time.
+     * 
+     * @param task The task to be executed
+     */
+    public static void scheduleGlobalDiscordApiTask(Runnable task) {
+        ThreadPoolManager.scheduleGlobalDiscordApiCallTask(task);
     }
 }

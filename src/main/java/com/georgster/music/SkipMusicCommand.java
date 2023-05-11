@@ -18,8 +18,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the bot's actions following the !skip command.
  */
 public class SkipMusicCommand implements Command {
-
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private AudioPlayer player;
     private TrackScheduler scheduler;
 
@@ -68,8 +66,6 @@ public class SkipMusicCommand implements Command {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("skip the currently playing track or all tracks in the queue")

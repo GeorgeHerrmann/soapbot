@@ -17,7 +17,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the actions following a "!ping" command.
  */
 public class PongCommand implements Command {
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * {@inheritDoc}
@@ -51,8 +50,6 @@ public class PongCommand implements Command {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Responds with pong! for each 'ping' in your message")

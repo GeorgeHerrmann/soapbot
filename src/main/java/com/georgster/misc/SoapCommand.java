@@ -17,7 +17,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * A SoapCommand is represents the actions following a "!soapbot" command.
  */
 public class SoapCommand implements Command {
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
 
     /**
      * {@inheritDoc}
@@ -64,8 +63,6 @@ public class SoapCommand implements Command {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Show information about SOAP Bot")

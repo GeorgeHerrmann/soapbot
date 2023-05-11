@@ -27,7 +27,6 @@ public class EventCommand implements ParseableCommand {
     private static final String PATTERN = "V|R 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
     private SoapEventManager eventManager;
 
     /**
@@ -149,7 +148,6 @@ public class EventCommand implements ParseableCommand {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))

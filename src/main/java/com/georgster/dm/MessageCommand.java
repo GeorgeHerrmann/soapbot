@@ -24,8 +24,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class MessageCommand implements Command {
 
-    private boolean needsNewRegistration = false; // Set to true only if the command registry should send a new command definition to Discord
-
     /**
      * {@inheritDoc}
      */
@@ -78,8 +76,6 @@ public class MessageCommand implements Command {
      */
     @Override
     public ApplicationCommandRequest getCommandApplicationInformation() {
-        if (!needsNewRegistration) return null;
-
         return ApplicationCommandRequest.builder()
             .name(getAliases().get(0))
             .description("Sends a private message to a user")
