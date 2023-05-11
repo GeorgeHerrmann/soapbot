@@ -22,3 +22,19 @@
 
 2.321
     - Added addall subcommand to PermissionsManager
+
+2.330
+    - Added dates of ReserveEvents
+        - Reserve events can now be scheduled for a date associated with their time.
+            - Accepts formats such as: "tomorrow", "in x days", "MMMDD", etc
+            - Dates are not mandatory and can be left out on event creation
+        - All event-based commands can now view an event's date
+
+2.331
+    - Fixed reserve event scheduling for events with no dates and a time that was set earlier in the day
+
+2.333
+    - Updated command application lifecycle
+        - Command's no longer decide their registration status, the CommandRegistry does
+            - Definition updates are done automatically on startup for Global Commands
+        - Added a static global discord api call ThreadPool which will manage all non-guild specific tasks for all of SOAPBot
