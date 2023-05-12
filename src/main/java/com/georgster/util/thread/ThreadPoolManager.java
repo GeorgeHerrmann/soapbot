@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
  *  <li>Event: 10</li>
  *  <li>Command: 3</li>
  *  <li>Voice: 1</li>
+ *  <li>Global Discord API calls: 1</li>
  * </ul>
  */
 public class ThreadPoolManager {
