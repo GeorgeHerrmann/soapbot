@@ -71,6 +71,7 @@ public class CommandRegistry {
      * supported by the DiscordEvent class will be able to be executed.
      * 
      * @param event the Event that prompted this call.
+     * @param client the SoapClient that received the event.
      */
     public void getAndExecute(Event event, SoapClient client) {
         DiscordEvent transformer = new DiscordEvent(event);
