@@ -32,7 +32,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class CommandRegistry {
     
-    private final ClientContext pipeline;
+    private final ClientContext context;
     private final List<Class<? extends Command>> commands;
 
     /**
@@ -41,11 +41,11 @@ public class CommandRegistry {
      * Any command that requires the SoapClient's objects (such as the AudioProvider, AudioPlayer, etc.)
      * can access it through the client parameter.
      * 
-     * @param pipeline the ClientPipeline feeding this registry's commands.
+     * @param context the ClientContext feeding this registry's commands.
      */
-    public CommandRegistry(ClientContext pipeline) { //HelpCommand will be unique
-        this.pipeline = pipeline;
-        pipeline.setCommandRegistry(this);
+    public CommandRegistry(ClientContext context) { //HelpCommand will be unique
+        this.context = context;
+        context.setCommandRegistry(this);
         
         commands = new ArrayList<>(List.of(
             PongCommand.class,
@@ -78,7 +78,7 @@ public class CommandRegistry {
         String attemptedCommand = transformer.getCommandName().toLowerCase();
         getCommands().forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
-                CommandExecutionEvent executionEvent = new CommandExecutionEvent(transformer, client, pipeline.getDispatcher(), command);
+                CommandExecutionEvent executionEvent = new CommandExecutionEvent(transformer, client, context.getDispatcher(), command);
                 ThreadPoolFactory.scheduleCommandTask(client.getSnowflake().asString(), executionEvent::executeCommand);
             }
         });
@@ -91,7 +91,7 @@ public class CommandRegistry {
      */
     protected void registerGlobalCommands() {
         ThreadPoolFactory.scheduleGlobalDiscordApiTask(() -> { //These tasks are scheduled to run on the global Discord API thread.
-            long appId = pipeline.getRestClient().getApplicationId().block();
+            long appId = context.getRestClient().getApplicationId().block();
             
             List<ApplicationCommandRequest> newCommandRequests = new ArrayList<>(); // SOAPBot's records of the commands
 
@@ -103,7 +103,7 @@ public class CommandRegistry {
             });
 
             // Overwrites the global commands with the new ones
-            pipeline.getRestClient().getApplicationService().bulkOverwriteGlobalApplicationCommand(appId, newCommandRequests).subscribe();
+            context.getRestClient().getApplicationService().bulkOverwriteGlobalApplicationCommand(appId, newCommandRequests).subscribe();
         });
     }
 
@@ -116,7 +116,7 @@ public class CommandRegistry {
         List<Command> commandList = new ArrayList<>();
         commands.forEach(command -> {
             try { // Commands that need access to high level objects (such as the AudioInterface, EventManager, etc.)
-                commandList.add(command.getDeclaredConstructor(ClientContext.class).newInstance(pipeline));
+                commandList.add(command.getDeclaredConstructor(ClientContext.class).newInstance(context));
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 try { // Commands that don't need access to high level objects
                     commandList.add(command.getDeclaredConstructor().newInstance());
