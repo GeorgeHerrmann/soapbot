@@ -18,7 +18,6 @@ import reactor.core.Disposable;
 
 public class MenuMessageListener implements UserInputListener {
     private static final int TIMEOUT_TIME = 300; // will wait 30s for a response (is in ms)
-    private static final String END_STRING = "end";
 
     private final String endMessage;
     private final String title;
@@ -39,7 +38,6 @@ public class MenuMessageListener implements UserInputListener {
     public WizardState prompt(WizardState inputState) {
         String prompt = inputState.getMessage();
         String[] options = inputState.getOptions();
-        //boolean ended = inputState.hasEnded();
 
         SelectMenu.Option[] menuOptions = new SelectMenu.Option[options.length];
 
@@ -111,7 +109,9 @@ public class MenuMessageListener implements UserInputListener {
         canceller.dispose(); // Dispose of the listeners
         canceller2.dispose();
         canceller3.dispose();
-        return output.toString();
+
+        inputState.setMessage(output.toString());
+        return inputState;
     }
     
 }

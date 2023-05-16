@@ -19,6 +19,14 @@ public class WizardState {
         return message;
     }
 
+    public String getOption(int index) {
+        return options[index];
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public String[] getOptions() {
         return options;
     }
