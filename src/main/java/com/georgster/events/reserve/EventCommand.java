@@ -17,6 +17,7 @@ import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -156,6 +157,16 @@ public class EventCommand implements ParseableCommand {
                         .name("event")
                         .description("The event to show information about")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("option")
+                        .description("Select what to do with the event")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                                .name("mention")
+                                .value("mention")
+                                .build())
                         .required(false)
                         .build())
                 .build();
