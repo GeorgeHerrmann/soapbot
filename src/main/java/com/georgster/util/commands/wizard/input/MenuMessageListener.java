@@ -16,6 +16,12 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
 import reactor.core.Disposable;
 
+/**
+ * Sends a message to the user in a {@code SelectMenu} and records their response via either
+ * selecting or typing the option. This listener will timeout after 30s of inactivity following
+ * {@code prompt()} being called, and can be ended early by the user by reacting with the
+ * {@code ❌} emoji.
+ */
 public class MenuMessageListener implements UserInputListener {
     private static final int TIMEOUT_TIME = 300; // will wait 30s for a response (is in ms)
 
@@ -26,6 +32,15 @@ public class MenuMessageListener implements UserInputListener {
     private final Member user;
     private Message message;
 
+    /**
+     * Creates a new {@code MenuMessageListener} with the given parameters.
+     * 
+     * @param endMessage Message to send when the listener ends.
+     * @param title Title of the menu.
+     * @param dispatcher Dispatcher to listen for events on.
+     * @param handler Handler to send messages with.
+     * @param user User to send messages to.
+     */
     public MenuMessageListener(String endMessage, String title, EventDispatcher dispatcher, GuildInteractionHandler handler, Member user) {
         this.endMessage = endMessage;
         this.title = title;
@@ -35,6 +50,9 @@ public class MenuMessageListener implements UserInputListener {
         this.message = null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public WizardState prompt(WizardState inputState) {
         String prompt = inputState.getMessage();
         String[] options = inputState.getOptions();
@@ -114,6 +132,9 @@ public class MenuMessageListener implements UserInputListener {
         return inputState;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void editCurrentMessageContent(String newContent) {
         message = handler.editMessageContent(message, newContent, title);
     }

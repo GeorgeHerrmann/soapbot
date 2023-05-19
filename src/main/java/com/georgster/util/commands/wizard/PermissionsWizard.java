@@ -6,22 +6,37 @@ import com.georgster.util.commands.wizard.input.InputListenerFactory;
 import com.georgster.util.permissions.PermissibleAction;
 import com.georgster.util.permissions.PermissionGroup;
 
+/**
+ * Wizard for managing permissions.
+ */
 public class PermissionsWizard extends InputWizard {
     private static final String TITLE = "Permissions Wizard";
 
     private PermissionsManager permissionsManager;
 
+    /**
+     * Creates a new permissions wizard.
+     * 
+     * @param event Command execution event that triggered the wizard.
+     * @param permissionsManager Permissions manager to use.
+     */
     public PermissionsWizard(CommandExecutionEvent event, PermissionsManager permissionsManager) {
         super (event, InputListenerFactory.createMenuMessageListener(event, TITLE));
         this.permissionsManager = permissionsManager;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         handler.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
         managePermissions();
         end();
     }
 
+    /**
+     * The main menu for the permissions wizard.
+     */
     private void managePermissions() {
         while (isActive()) {
             String[] groups = new String[permissionsManager.getCount()];
@@ -35,6 +50,11 @@ public class PermissionsWizard extends InputWizard {
         }
     }
 
+    /**
+     * Screen for managing a group's permissions.
+     * 
+     * @param group The group to manage.
+     */
     private void groupOptions(PermissionGroup group) {
         while (isActive()) {
             WizardResponse output = withResponse((response -> {
@@ -52,6 +72,11 @@ public class PermissionsWizard extends InputWizard {
         }
     }
 
+    /**
+     * Screen for adding a permission to a group.
+     * 
+     * @param inputGroup The group to add the permission to.
+     */
     private void addPermission(PermissionGroup inputGroup) {
         while (isActive()) {
             final PermissionGroup group = permissionsManager.get(inputGroup.getName());
@@ -72,6 +97,11 @@ public class PermissionsWizard extends InputWizard {
         }
     }
 
+    /**
+     * Screen for removing a permission from a group.
+     * 
+     * @param inputGroup The group to remove the permission from.
+     */
     private void removePermission(PermissionGroup inputGroup) {
         while (isActive()) {
             final PermissionGroup group = permissionsManager.get(inputGroup.getName());
