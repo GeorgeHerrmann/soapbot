@@ -97,7 +97,7 @@ public class MenuMessageListener implements UserInputListener {
                     canceller2.dispose();
                     canceller3.dispose();
                     inputState.end();
-                    return null;
+                    return inputState;
                 }
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -112,6 +112,10 @@ public class MenuMessageListener implements UserInputListener {
 
         inputState.setMessage(output.toString());
         return inputState;
+    }
+
+    public void editCurrentMessageContent(String newContent) {
+        message = handler.editMessageContent(message, newContent, title);
     }
     
 }
