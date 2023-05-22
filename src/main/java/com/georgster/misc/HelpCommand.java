@@ -56,7 +56,7 @@ public class HelpCommand implements ParseableCommand {
         for (Command command : register.getCommands()) {
             if (command.getAliases().contains(arg)) {
                 logger.append("\tCommand found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
-                response = new StringBuilder(command.help());
+                response = new StringBuilder(command.getClass().getSimpleName() + "\n" + command.help());
                 break;
             } else {
                 if (!command.getAliases().isEmpty()) {

@@ -91,6 +91,7 @@ public class CommandRegistry {
      */
     protected void registerGlobalCommands() {
         ThreadPoolFactory.scheduleGlobalDiscordApiTask(() -> { //These tasks are scheduled to run on the global Discord API thread.
+
             long appId = context.getRestClient().getApplicationId().block();
             
             List<ApplicationCommandRequest> newCommandRequests = new ArrayList<>(); // SOAPBot's records of the commands
@@ -100,6 +101,10 @@ public class CommandRegistry {
                 if (request != null) { // Commands that don't want to be registered will return null
                     newCommandRequests.add(request);
                 }
+            });
+
+            context.getRestClient().getApplicationService().getGuildApplicationCommands(appId, context.getGuild().getId().asLong()).collectList().block().forEach(guildCommand -> {
+                context.getRestClient().getApplicationService().deleteGuildApplicationCommand(appId, context.getGuild().getId().asLong(), guildCommand.id().asLong());
             });
 
             // Overwrites the global commands with the new ones
