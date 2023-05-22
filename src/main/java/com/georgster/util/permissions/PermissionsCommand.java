@@ -56,7 +56,10 @@ public class PermissionsCommand implements ParseableCommand {
         } else if (parser.get(0).equals("addall")) {
             try {
                 PermissibleAction action = PermissionsManager.getAction(parser.get(1).toUpperCase());
-                permissionsManager.getAll().forEach(group -> group.addPermission(action));
+                permissionsManager.getAll().forEach(group -> {
+                    group.addPermission(action);
+                    permissionsManager.update(group);
+                });
                 handler.sendText("Added " + action.toString() + " to all groups");
                 logger.append("\tAdded " + action.toString() + " to all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
