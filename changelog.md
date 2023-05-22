@@ -41,3 +41,9 @@
 
 2.333
     - Fixed parsing of ReserveCommand when the number of people was put after the time
+
+2.334
+    - Fixed an issue with the HelpCommand not formatting command help messages properly
+
+2.335
+    - Fixed an issue with the PermissionsCommand "addall" feature not properly updating group's permissions
