@@ -15,6 +15,7 @@ import com.georgster.misc.HelloWorldCommand;
 import com.georgster.misc.HelpCommand;
 import com.georgster.misc.PongCommand;
 import com.georgster.misc.SoapCommand;
+import com.georgster.misc.TheFinalShapeCommand;
 import com.georgster.music.PlayMusicCommand;
 import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
@@ -61,7 +62,8 @@ public class CommandRegistry {
             SkipMusicCommand.class,
             PermissionsCommand.class,
             TestCommand.class,
-            HelloWorldCommand.class
+            HelloWorldCommand.class,
+            TheFinalShapeCommand.class
         ));
     }
 
