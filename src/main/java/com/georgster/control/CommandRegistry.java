@@ -20,7 +20,6 @@ import com.georgster.music.PlayMusicCommand;
 import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
 import com.georgster.plinko.PlinkoCommand;
-import com.georgster.test.TestCommand;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.permissions.PermissionsCommand;
 import com.georgster.util.thread.ThreadPoolFactory;
@@ -61,7 +60,6 @@ public class CommandRegistry {
             ShowQueueCommand.class,
             SkipMusicCommand.class,
             PermissionsCommand.class,
-            TestCommand.class,
             HelloWorldCommand.class,
             TheFinalShapeCommand.class
         ));
@@ -105,9 +103,14 @@ public class CommandRegistry {
                 }
             });
 
-            context.getRestClient().getApplicationService().getGuildApplicationCommands(appId, context.getGuild().getId().asLong()).collectList().block().forEach(guildCommand -> {
-                context.getRestClient().getApplicationService().deleteGuildApplicationCommand(appId, context.getGuild().getId().asLong(), guildCommand.id().asLong());
-            });
+            context.getRestClient().getApplicationService().getGlobalApplicationCommands(appId).collectList().block().forEach(globalCommand -> 
+                newCommandRequests.stream().filter(examiner -> !globalCommand.name().equals(examiner.name()))
+                                    .forEach(newRequest -> context.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, newRequest).block())
+            );
+
+            context.getRestClient().getApplicationService().getGuildApplicationCommands(appId, context.getGuild().getId().asLong()).collectList().block().forEach(guildCommand -> 
+                context.getRestClient().getApplicationService().deleteGuildApplicationCommand(appId, context.getGuild().getId().asLong(), guildCommand.id().asLong()).subscribe()
+            );
 
             // Overwrites the global commands with the new ones
             context.getRestClient().getApplicationService().bulkOverwriteGlobalApplicationCommand(appId, newCommandRequests).subscribe();
