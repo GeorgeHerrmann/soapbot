@@ -12,6 +12,7 @@ import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.SoapUtility;
 
 /**
  * A ReserveEvent object is created when a user uses the !reserve command
@@ -200,6 +201,15 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
+     * Sets the identifier for this event.
+     * 
+     * @param identifier the new identifier.
+     */
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    /**
      * Adds a person to the number of people that have reserved for the event.
      */
     public void addReserved(String user) {
@@ -225,12 +235,28 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
-     * Returns the number of people needed to start the event.
+     * Returns the maximum amount of people who can reserve to this event.
+     * If the event is timeless, this event will pop once the maximum number
+     * of reservees has been reached.
      * 
      * @return the number of people needed to start the event
      */
     public int getNumPeople() {
         return numPeople;
+    }
+
+    /**
+     * Sets the new maximum number of people for the event.
+     * 
+     * @param newNumPeople The new maximum number of people for the event.
+     * @throws IllegalArgumentException If the new max is less than the number of people already reserved.
+     */
+    public void setNumPeople(int newNumPeople) throws IllegalArgumentException {
+        if (newNumPeople < reserved) {
+            throw new IllegalArgumentException("Maximum number of reservees can not be less than current number of reservees");
+        } else {
+            numPeople = newNumPeople;
+        }
     }
 
     /**
@@ -252,12 +278,34 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
+     * Sets the time for the event. The time will be standardized, therefore any time standard
+     * accepted by {@link SoapUtility#timeConverter(String)} will be accepted.
+     * 
+     * @param time The new time.
+     * @throws IllegalArgumentException If the time string is in an invalid format.
+     */
+    public void setTime(String time) throws IllegalArgumentException {
+        this.time = SoapUtility.timeConverter(time); 
+    }
+
+    /**
      * Returns the date the event will start.
      * 
      * @return the date the event will start
      */
     public String getDate() {
         return date;
+    }
+
+    /**
+     * Sets the date for the event. The date will be standardized, therefore any date standard
+     * accepted by {@link SoapUtility#convertDate(String)} will be accepted.
+     * 
+     * @param date The new date.
+     * @throws IllegalArgumentException If the date string is in an invalid format.
+     */
+    public void setDate(String date) throws IllegalArgumentException {
+        this.date = SoapUtility.convertDate(date);
     }
 
     /**
