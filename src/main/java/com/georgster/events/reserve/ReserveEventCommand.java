@@ -14,6 +14,8 @@ import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.wizard.InputWizard;
+import com.georgster.util.commands.wizard.ReserveEventWizard;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -22,20 +24,20 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
- * Represents the command for managing events.
+ * Represents the command for managing reserve events.
  */
-public class EventCommand implements ParseableCommand {
+public class ReserveEventCommand implements ParseableCommand {
     private static final String PATTERN = "V|R 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
     private SoapEventManager eventManager;
 
     /**
-     * Creates a new {@code EventCommand} with the given {@code ClientContext}.
+     * Creates a new {@code ReserveEventCommand} with the given {@code ClientContext}.
      * 
      * @param context The context to get the {@code EventManager} from
      */
-    public EventCommand(ClientContext context) {
+    public ReserveEventCommand(ClientContext context) {
         this.eventManager = context.getEventManager();
     }
 
@@ -48,12 +50,12 @@ public class EventCommand implements ParseableCommand {
         CommandParser parser = event.getCommandParser();
 
         if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
-            logger.append("Showing all events in a text channel", LogDestination.API);
+            logger.append("Showing all reserve events in a text channel", LogDestination.API);
 
             StringBuilder response = new StringBuilder();
             if (eventManager.hasAny(TYPE)) {
-                logger.append("\tShowing the user a list of events\n", LogDestination.NONAPI);
-                response.append("All events:\n");
+                logger.append("\tShowing the user a list of reserve events\n", LogDestination.NONAPI);
+                response.append("All reserve events:\n");
                 List<SoapEvent> events = eventManager.getAll(TYPE);
                 for (int i = 0; i < events.size(); i++) {
                     /* The EventManager will ensure we get events of the correct type, so casting is safe */
@@ -64,12 +66,12 @@ public class EventCommand implements ParseableCommand {
                         response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
                     }
                 }
-                response.append("Type !events [NAME] for more information about a specific event");
+                response.append("Type !events [NAME] for more information about a specific reserve event");
                 String[] output = SoapUtility.splitFirst(response.toString());
                 handler.sendText(output[1], output[0]);
             } else {
-                logger.append("\tThere are no events currently active\n", LogDestination.NONAPI);
-                handler.sendText("There are no events currently active");
+                logger.append("\tThere are no reserve events currently active\n", LogDestination.NONAPI);
+                handler.sendText("There are no reserve events currently active");
             }
         } else if (parser.getMatchingRule("I").equals("mention") || parser.getMatchingRule("I").equals("ping")) {
             if (eventManager.exists(parser.get(0), TYPE)) {
@@ -82,14 +84,18 @@ public class EventCommand implements ParseableCommand {
                 reserve.getReservedUsers().forEach(user -> response.append(handler.getMember(user).getMention() + " "));
                 handler.sendPlainText(response.toString()); //If sendText is used, the embed will prevent users from being mentioned
             } else {
-                handler.sendText("This event does not exist, type !events list for a list of all active events");
+                handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
             }
+        } else if (parser.getMatchingRule("I").equals("manage")) {
+            InputWizard wizard = new ReserveEventWizard(event, eventManager);
+            wizard.begin();
+            logger.append("\tBeginning the reserve event wizard", LogDestination.NONAPI);
         } else { //Shows information about an event
             if (eventManager.exists(parser.get(0), TYPE)) {
-                logger.append("Showing information about a specific event in a text channel", LogDestination.API);
+                logger.append("Showing information about a specific reserve event in a text channel", LogDestination.API);
                 ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
 
-                logger.append("Showing information about event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
+                logger.append("Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                 StringBuilder response = new StringBuilder();
                 response.append("Event: " + reserve.getIdentifier() + "\n");
@@ -112,7 +118,7 @@ public class EventCommand implements ParseableCommand {
                 String[] output = SoapUtility.splitFirst(response.toString());
                 handler.sendText(output[1], output[0]);
             } else {
-                handler.sendText("This event does not exist, type !events list for a list of all active events");
+                handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
             }
         }
     }
@@ -124,6 +130,8 @@ public class EventCommand implements ParseableCommand {
     public PermissibleAction getRequiredPermission(List<String> args) {
         if (args.contains("mention") || args.contains("ping")) {
             return PermissibleAction.MENTIONEVENT;
+        } else if (args.contains("manage")) {
+            return PermissibleAction.MANAGEEVENT;
         } else {
             return PermissibleAction.DEFAULT;
         }
@@ -134,14 +142,14 @@ public class EventCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping").withRules("X I").build();
+        return new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping", "manage").withRules("X I").build();
     }
 
     /**
      * {@inheritDoc}
      */
     public List<String> getAliases() {
-        return List.of("events", "event");
+        return List.of("events", "event", "reserveevents", "reserveevent", "re", "resevent", "rese", "revent");
     }
 
     /**
@@ -152,16 +160,16 @@ public class EventCommand implements ParseableCommand {
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
-                .description("Shows information about events")
+                .description("Shows information about reserve events")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("event")
-                        .description("The event to show information about")
+                        .description("The reserve event to show information about")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false)
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("option")
-                        .description("Select what to do with the event")
+                        .description("Select what to do with the reserve event")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .addChoice(ApplicationCommandOptionChoiceData.builder()
                                 .name("mention")
@@ -178,8 +186,8 @@ public class EventCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t- !events list to list all events" +
-        "\n\t- !events [NAME] for information about a specific event" +
+        "\n\t- !events list to list all reserve events" +
+        "\n\t- !events [NAME] for information about a specific reserve event" +
         "\n\t- !events [NAME] mention to mention all users that have reserved to an event" +
         "\n\t- !unreserve [NAME] to unreserve from an event" +
         "\n\t\t - An event will be removed if there are no more people reserved to it" +

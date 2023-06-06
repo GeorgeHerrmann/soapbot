@@ -21,6 +21,9 @@ import reactor.core.Disposable;
  * selecting or typing the option. This listener will timeout after 30s of inactivity following
  * {@code prompt()} being called, and can be ended early by the user by reacting with the
  * {@code ❌} emoji.
+ * <p>
+ * <b>Note:</b> If there are no options, or the only option is "back" on calling {@link #prompt(WizardState)},
+ * this listener will accept any message-based input, otherwise only an input matching one of the options will be accepted.
  */
 public class MenuMessageListener implements UserInputListener {
     private static final int TIMEOUT_TIME = 300; // will wait 30s for a response (is in ms)
@@ -57,6 +60,8 @@ public class MenuMessageListener implements UserInputListener {
         String prompt = inputState.getMessage();
         String[] options = inputState.getOptions();
 
+        boolean mustMatch = !(options.length > 0 && options[0].equals("back"));
+
         SelectMenu.Option[] menuOptions = new SelectMenu.Option[options.length];
 
         for (int i = 0; i < options.length; i++) {
@@ -83,7 +88,7 @@ public class MenuMessageListener implements UserInputListener {
         Disposable canceller = dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
-            .filter(event -> List.of(options).contains(event.getMessage().getContent().toLowerCase()) || event.getMessage().getContent().toLowerCase().equals(endMessage))
+            .filter(event -> (List.of(options).contains(event.getMessage().getContent().toLowerCase()) || !mustMatch) || event.getMessage().getContent().toLowerCase().equals(endMessage))
             .subscribe(event -> {
                 if (event.getMessage().getContent().equals(endMessage)) {
                     inputState.end();
