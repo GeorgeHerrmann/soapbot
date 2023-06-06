@@ -47,3 +47,10 @@
 
 2.335
     - Fixed an issue with the PermissionsCommand "addall" feature not properly updating group's permissions
+
+2.340
+    - EventCommand:
+        - Changed to the ReserveEventCommand, all relevant texts modified
+        - Added more aliases such as "re", "resevent", "revent", etc.
+        - Added a Reserve Event wizard, allowing users to edit existing Reserve Events
+            - Can be accessed via !event manage
