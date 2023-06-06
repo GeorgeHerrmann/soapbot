@@ -8,7 +8,7 @@ import com.georgster.Command;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.dm.MessageCommand;
-import com.georgster.events.reserve.EventCommand;
+import com.georgster.events.reserve.ReserveEventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.misc.HelloWorldCommand;
@@ -52,7 +52,7 @@ public class CommandRegistry {
             SoapCommand.class,
             HelpCommand.class,
             ReserveCommand.class,
-            EventCommand.class,
+            ReserveEventCommand.class,
             UnreserveCommand.class,
             MessageCommand.class,
             PlinkoCommand.class,

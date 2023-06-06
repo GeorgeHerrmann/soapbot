@@ -156,10 +156,10 @@ public class ReserveEvent implements SoapEvent {
      */
     private String getCorrectDate(String time) {
         LocalTime localTime = LocalTime.parse(time);
-        if (LocalTime.now(ZoneId.of("-05:00")).isAfter(localTime)) {
-            return LocalDate.now(ZoneId.of("-05:00")).plusDays(1).toString();
+        if (LocalTime.now(ZoneId.systemDefault()).isAfter(localTime)) {
+            return LocalDate.now(ZoneId.systemDefault()).plusDays(1).toString();
         } else {
-            return LocalDate.now(ZoneId.of("-05:00")).toString();
+            return LocalDate.now(ZoneId.systemDefault()).toString();
         }
     }
 
@@ -285,7 +285,21 @@ public class ReserveEvent implements SoapEvent {
      * @throws IllegalArgumentException If the time string is in an invalid format.
      */
     public void setTime(String time) throws IllegalArgumentException {
-        this.time = SoapUtility.timeConverter(time); 
+        this.time = SoapUtility.timeConverter(time);
+        if (isToday()) {
+            this.date = getCorrectDate(this.time); //Makes sure date time is not in the past
+        }
+    }
+
+    /**
+     * Returns whether this reserve event's date is today's date.
+     * 
+     * @return True if the date is today's date, false otherwise.
+     */
+    public boolean isToday() {
+        LocalDate now = LocalDate.now(ZoneId.of("-05:00"));
+        LocalDate eventDate = LocalDate.parse(date);
+        return (now.getYear() == eventDate.getYear() && now.getDayOfYear() == (eventDate.getDayOfYear() - 1));
     }
 
     /**
