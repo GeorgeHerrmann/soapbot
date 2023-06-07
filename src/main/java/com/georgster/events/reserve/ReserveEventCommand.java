@@ -119,7 +119,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 }
                 response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
                 response.append("\nReserved users:\n");
-                reserve.getReservedUsers().forEach(user -> response.append("\t- " + handler.getMember(user).getUsername() + "\n"));
+                reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMember(user).getUsername() + "\n"));
                 String[] output = SoapUtility.splitFirst(response.toString());
                 handler.sendText(output[1], output[0]);
             } else {
