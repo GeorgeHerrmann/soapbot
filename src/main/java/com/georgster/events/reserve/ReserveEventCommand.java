@@ -115,7 +115,7 @@ public class ReserveEventCommand implements ParseableCommand {
                     response.append("\t- This event will pop once the needed number of people have reserved to it");
                 } else {
                     response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
-                    response.append("\n\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
+                    response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                 }
                 response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
                 response.append("\nReserved users:\n");
