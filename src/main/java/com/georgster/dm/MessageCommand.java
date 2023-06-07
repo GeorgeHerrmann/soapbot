@@ -43,8 +43,7 @@ public class MessageCommand implements Command {
         }
         if (!discordEvent.getPresentUsers().isEmpty()) {
             for (User user : discordEvent.getPresentUsers()) {
-                logger.append("\n\tFound User: " + user.getTag() + ", sending DM",
-                LogDestination.NONAPI);
+                logger.append("\n- Found User: " + user.getTag() + ", sending DM", LogDestination.NONAPI);
 
                 user.getPrivateChannel().block().createMessage(response.toString()).block();
                 if (discordEvent.isChatInteraction()) {
@@ -52,7 +51,7 @@ public class MessageCommand implements Command {
                 }
             }
         } else {
-            logger.append("\n\tNo users found, sending help message",
+            logger.append("\n- No users found, sending help message",
             LogDestination.NONAPI);
             String[] output = SoapUtility.splitFirst(help());
             handler.sendText(output[1], output[0]);
@@ -106,8 +105,8 @@ public class MessageCommand implements Command {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n\t - !message @[USERS] [MESSAGE]" +
-        "\n\t\t Ex: !message @georgster#8086 hello" + 
-        "\n\t\t Or: !message @georgster#8086 @Milkmqn#9457 hello";
+        "\n - !message @[USERS] [MESSAGE]" +
+        "\n\t Ex: !message @georgster#8086 hello" + 
+        "\n\t Or: !message @georgster#8086 @Milkmqn#9457 hello";
     }
 }

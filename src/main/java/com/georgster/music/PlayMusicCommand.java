@@ -62,22 +62,22 @@ public class PlayMusicCommand implements ParseableCommand {
             if (voiceState != null) { //They must be in a voice channel
                 final VoiceChannel channel = voiceState.getChannel().block();
                 if (channel != null) { //And that channel must exist
-                    logger.append("\tVerified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
+                    logger.append("- Verified Member and Voice Channel, distributing audio to the AudioPlayer and TrackScheduler\n",
                     LogDestination.NONAPI);
                     VoiceConnection connection = channel.join().withProvider(provider).block(); //allows us to modify the bot's connection state
                     scheduler.setChannelData(handler, connection);
 
                     int retryAttempts = 0;
                     while (!attemptAudioStart(parser.get(0)) && retryAttempts < 3) {
-                        logger.append("\tFailed to play audio, retrying...\n", LogDestination.NONAPI);
+                        logger.append("- Failed to play audio, retrying...\n", LogDestination.NONAPI);
                         retryAttempts++;
                     }
                     if (retryAttempts >= 3) {
-                        logger.append("\tFailed to play audio, retry limit reached\n", LogDestination.NONAPI);
+                        logger.append("- Failed to play audio, retry limit reached\n", LogDestination.NONAPI);
                     } else {
-                        logger.append("\tSuccessfully start audio\n", LogDestination.NONAPI);
+                        logger.append("- Successfully start audio\n", LogDestination.NONAPI);
                     }
-                    logger.append("Playing audio in a discord channel", LogDestination.API);
+                    logger.append("- Playing audio in a discord channel", LogDestination.API);
                 }
             }
         }
@@ -148,10 +148,10 @@ public class PlayMusicCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
-        "\n\t!skip to skip the current track" +
-        "\n\t!skip all to skip all tracks in the queue" +
-        "\n\t!queue to see all tracks in the queue";
+        "\n- !play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
+        "\n- !skip to skip the current track" +
+        "\n- !skip all to skip all tracks in the queue" +
+        "\n- !queue to see all tracks in the queue";
     }
     
 }

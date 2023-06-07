@@ -67,16 +67,16 @@ public final class SoapClient {
 
         permissionsManager.setupBasic();
 
-        logger.append("\n\t Restarted " + eventManager.getCount() + " events for " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
+        logger.append("\n-  Restarted " + eventManager.getCount() + " events for " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
 
-        logger.append("\n\t Updating Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
+        logger.append("\n-  Updating Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
 
         handler.getAllMembers().forEach(member -> {
           String id = member.getId().asString();
           service.addObjectIfNotExists(new UserProfile(handler.getId(), id, member.getUsername()), "memberId", id);
           service.updateObjectIfExists(new UserProfile(handler.getId(), id, member.getUsername()), "memberId", id);
         });
-        logger.append("\n\t Updated " + handler.getAllMembers().size() + " User Profiles for " + handler.getGuild().getName(), LogDestination.NONAPI);
+        logger.append("\n- Updated " + handler.getAllMembers().size() + " User Profiles for " + handler.getGuild().getName(), LogDestination.NONAPI);
         logger.sendAll();
     }
 

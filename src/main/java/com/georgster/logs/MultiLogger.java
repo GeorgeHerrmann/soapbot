@@ -137,6 +137,7 @@ public class MultiLogger {
      */
     public void logSystem(String system) {
         if (!system.isEmpty()) {
+            system = system.replace("- ", "\t");
             Logger logger = LoggerFactory.getLogger(source);
             logger.info(system);
         }
@@ -150,7 +151,7 @@ public class MultiLogger {
     public void logFile(String file) {
         if (!file.isEmpty()) {
             try (FileWriter writer = new FileWriter(Paths.get(LOGFILELOCATION, "log.txt").toString(), true)) {
-                writer.write(source.getName() + ": " + file + "\n");
+                writer.write(source.getName() + ": " + file.replace("- ", "\t") + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -165,7 +166,7 @@ public class MultiLogger {
      */
     public void logApi(String api) {
         if (!api.isEmpty()) {
-            api = api.replace("\t", "").replace("\n", "");
+            api = api.replace("\t", "").replace("\n", "").replace("- ", "");
             ActionWriter.writeAction(api);
         }
     }

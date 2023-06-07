@@ -19,7 +19,7 @@ public class HelloWorldCommand implements Command {
      */
     public void execute(CommandExecutionEvent event) {
         event.getGuildInteractionHandler().sendText("Hello world!");
-        event.getLogger().append("\tResponding to a !hello command request", LogDestination.API, LogDestination.NONAPI);
+        event.getLogger().append("- Responding to a !hello command request", LogDestination.API, LogDestination.NONAPI);
     }
 
     /**
@@ -35,7 +35,7 @@ public class HelloWorldCommand implements Command {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t- !hello = Responds with 'Hello world!'";
+        "\n- !hello = Responds with 'Hello world!'";
     }
 
     /**

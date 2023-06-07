@@ -73,12 +73,12 @@ public class CommandExecutionEvent {
         if (command instanceof ParseableCommand) {
             try {
                 args = parser.parse(discordEvent.getFormattedMessage());
-                logger.append("\tArguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
+                logger.append("- Arguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
                 executeIfPermission(args);
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.append("Caught " + e.getClass().getSimpleName() + ": " + e.getMessage() + "\n", LogDestination.SYSTEM, LogDestination.FILE);
-                logger.append("\tInvalid arguments, sending a help message\n", LogDestination.NONAPI);
+                logger.append("- Caught " + e.getClass().getSimpleName() + ": " + e.getMessage() + "\n", LogDestination.SYSTEM, LogDestination.FILE);
+                logger.append("- Invalid arguments, sending a help message\n", LogDestination.NONAPI);
                 handler.sendText(command.help(), command.getClass().getSimpleName());
             }
         } else {
@@ -99,7 +99,7 @@ public class CommandExecutionEvent {
             command.execute(this);
         } else {
             handler.sendText("You need " + command.getRequiredPermission(args) + " to use this command.");
-            logger.append("User is missing permission: " + command.getRequiredPermission(args) + " to use this command.", LogDestination.NONAPI);
+            logger.append("- User is missing permission: " + command.getRequiredPermission(args) + " to use this command.", LogDestination.NONAPI);
         }
     }
     

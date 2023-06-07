@@ -30,10 +30,10 @@ public class PlinkoCommand implements ParseableCommand {
 
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (parser.get(0).equals("play")) {
-            logger.append("\tBeginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
+            logger.append("- Beginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
             game.play();
         } else if (parser.get(0).equals("board")) {
-            logger.append("\tShowing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
+            logger.append("- Showing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
             game.showBoard();
         }
     }
@@ -95,8 +95,8 @@ public class PlinkoCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t- '!plinko play' to simulate a game of plinko" +
-        "\n\t- '!plinko board' to show an empty plinko board";
+        "\n- '!plinko play' to simulate a game of plinko" +
+        "\n- '!plinko board' to show an empty plinko board";
     }
 
 }

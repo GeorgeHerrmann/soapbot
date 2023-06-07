@@ -54,23 +54,23 @@ public class ReserveEventCommand implements ParseableCommand {
 
             StringBuilder response = new StringBuilder();
             if (eventManager.hasAny(TYPE)) {
-                logger.append("\tShowing the user a list of reserve events\n", LogDestination.NONAPI);
+                logger.append("- Showing the user a list of reserve events\n", LogDestination.NONAPI);
                 response.append("All reserve events:\n");
                 List<SoapEvent> events = eventManager.getAll(TYPE);
                 for (int i = 0; i < events.size(); i++) {
                     /* The EventManager will ensure we get events of the correct type, so casting is safe */
                     ReserveEvent reserve = (ReserveEvent) events.get(i);
                     if (reserve.isTimeless()) {
-                        response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
+                        response.append("-" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
                     } else {
-                        response.append("\t" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
+                        response.append("-" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
                     }
                 }
                 response.append("Type !events [NAME] for more information about a specific reserve event");
                 String[] output = SoapUtility.splitFirst(response.toString());
                 handler.sendText(output[1], output[0]);
             } else {
-                logger.append("\tThere are no reserve events currently active\n", LogDestination.NONAPI);
+                logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
                 handler.sendText("There are no reserve events currently active");
             }
         } else if (parser.getMatchingRule("I").equals("mention") || parser.getMatchingRule("I").equals("ping")) {
@@ -78,7 +78,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 logger.append("Mentioning all users that have reserved to an event", LogDestination.API);
                 ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
 
-                logger.append("\tMentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
+                logger.append("- Mentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                 StringBuilder response = new StringBuilder();
                 reserve.getReservedUsers().forEach(user -> response.append(handler.getMember(user).getMention() + " "));
@@ -87,9 +87,14 @@ public class ReserveEventCommand implements ParseableCommand {
                 handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
             }
         } else if (parser.getMatchingRule("I").equals("manage")) {
-            InputWizard wizard = new ReserveEventWizard(event, eventManager);
-            wizard.begin();
-            logger.append("\tBeginning the reserve event wizard", LogDestination.NONAPI);
+            if (eventManager.hasAny(TYPE)) {
+                InputWizard wizard = new ReserveEventWizard(event);
+                wizard.begin();
+                logger.append("- Beginning the reserve event wizard", LogDestination.NONAPI);
+            } else {
+                handler.sendText("There are no Reserve Events to manage.", "Reserve Event Wizard");
+                logger.append("- There are no reserve events to manage.", LogDestination.NONAPI);
+            }
         } else { //Shows information about an event
             if (eventManager.exists(parser.get(0), TYPE)) {
                 logger.append("Showing information about a specific reserve event in a text channel", LogDestination.API);
@@ -99,18 +104,18 @@ public class ReserveEventCommand implements ParseableCommand {
 
                 StringBuilder response = new StringBuilder();
                 response.append("Event: " + reserve.getIdentifier() + "\n");
-                response.append("\tReserved: " + reserve.getReserved() + "\n");
+                response.append("- Reserved: " + reserve.getReserved() + "\n");
                 if (reserve.isUnlimited()) {
                     response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
                 } else {
-                    response.append("\t- Needed: " + reserve.getNumPeople() + "\n");
+                    response.append("- Needed: " + reserve.getNumPeople() + "\n");
                 }
                 if (reserve.isTimeless()) {
-                    response.append("\t- This event has no associated time\n");
-                    response.append("This event will pop once the needed number of people have reserved to it");
+                    response.append("- This event has no associated time\n");
+                    response.append("\t- This event will pop once the needed number of people have reserved to it");
                 } else {
-                    response.append("\t- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
-                    response.append("This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
+                    response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
+                    response.append("\t-This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
                 }
                 response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
                 response.append("\nReserved users:\n");
@@ -131,7 +136,7 @@ public class ReserveEventCommand implements ParseableCommand {
         if (args.contains("mention") || args.contains("ping")) {
             return PermissibleAction.MENTIONEVENT;
         } else if (args.contains("manage")) {
-            return PermissibleAction.MANAGEEVENT;
+            return PermissibleAction.MANAGEEVENTS;
         } else {
             return PermissibleAction.DEFAULT;
         }
@@ -186,11 +191,11 @@ public class ReserveEventCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t- !events list to list all reserve events" +
-        "\n\t- !events [NAME] for information about a specific reserve event" +
-        "\n\t- !events [NAME] mention to mention all users that have reserved to an event" +
-        "\n\t- !unreserve [NAME] to unreserve from an event" +
-        "\n\t\t - An event will be removed if there are no more people reserved to it" +
+        "\n- !events list to list all reserve events" +
+        "\n- !events [NAME] for information about a specific reserve event" +
+        "\n- !events [NAME] mention to mention all users that have reserved to an event" +
+        "\n- !unreserve [NAME] to unreserve from an event" +
+        "\n\t - An event will be removed if there are no more people reserved to it" +
         "\nType !help reserve for information about reserving to or creating an event";
     }
     

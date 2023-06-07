@@ -186,9 +186,9 @@ public class ReserveEvent implements SoapEvent {
     public void onFulfill(GuildInteractionHandler handler) {
         ActionWriter.writeAction("Starting event " + identifier);
         StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
-        "\t- " + reserved + "/" + numPeople + " reserved with the following people:");
+        "- " + reserved + "/" + numPeople + " reserved with the following people:");
         for (String name : reservedUsers) { //We add the names of the people who reserved to the event
-            response.append("\n\t\t- " + handler.getMember(name).getMention());
+            response.append("\n\t- " + handler.getMember(name).getMention());
         }
         handler.sendText(response.toString());
     }
@@ -275,6 +275,13 @@ public class ReserveEvent implements SoapEvent {
      */
     public String getTime() {
         return time;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getOwner() {
+        return reservedUsers.get(0);
     }
 
     /**

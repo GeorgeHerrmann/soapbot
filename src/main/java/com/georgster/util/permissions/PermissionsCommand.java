@@ -43,7 +43,7 @@ public class PermissionsCommand implements ParseableCommand {
         final CommandParser parser = event.getCommandParser();
         final MultiLogger logger = event.getLogger();
 
-        logger.append("\tParsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
+        logger.append("- Parsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
 
         if (parser.get(0).equals("list")) {
             StringBuilder response = new StringBuilder("Permission Groups:\n");
@@ -51,7 +51,7 @@ public class PermissionsCommand implements ParseableCommand {
             response.append("Use !permissions [group] to see the permissions for a group");
             handler.sendText(response.toString());
         } else if (parser.get(0).equals("manage")) {
-            InputWizard wizard = new PermissionsWizard(event, permissionsManager);
+            InputWizard wizard = new PermissionsWizard(event);
             wizard.begin();
         } else if (parser.get(0).equals("addall")) {
             try {
@@ -61,10 +61,10 @@ public class PermissionsCommand implements ParseableCommand {
                     permissionsManager.update(group);
                 });
                 handler.sendText("Added " + action.toString() + " to all groups");
-                logger.append("\tAdded " + action.toString() + " to all groups", LogDestination.NONAPI);
+                logger.append("- Added " + action.toString() + " to all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
                 handler.sendText("That is not a valid action. Please try again");
-                logger.append("\tInvalid action: " + parser.get(1), LogDestination.NONAPI);
+                logger.append("- Invalid action: " + parser.get(1), LogDestination.NONAPI);
             }
         } else {
             String group = parser.get(0);
@@ -133,9 +133,9 @@ public class PermissionsCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t!permissions list - List all the groups" +
-        "\n\t!permissions [group] - List all the permissions for a group" +
-        "\n\t!permissions manage - Manage all SOAP Bot permissions for roles in this server" +
-        "\n\t!permissions addall [permission] - Add all permissions to a role";
+        "\n!permissions list - List all the groups" +
+        "\n!permissions [group] - List all the permissions for a group" +
+        "\n!permissions manage - Manage all SOAP Bot permissions for roles in this server" +
+        "\n!permissions addall [permission] - Add all permissions to a role";
     }
 }

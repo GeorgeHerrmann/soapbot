@@ -20,9 +20,9 @@ public class PermissionsWizard extends InputWizard {
      * @param event Command execution event that triggered the wizard.
      * @param permissionsManager Permissions manager to use.
      */
-    public PermissionsWizard(CommandExecutionEvent event, PermissionsManager permissionsManager) {
+    public PermissionsWizard(CommandExecutionEvent event) {
         super (event, InputListenerFactory.createMenuMessageListener(event, TITLE));
-        this.permissionsManager = permissionsManager;
+        this.permissionsManager = event.getPermissionsManager();
     }
 
     /**

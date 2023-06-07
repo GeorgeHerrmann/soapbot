@@ -55,7 +55,7 @@ public class HelpCommand implements ParseableCommand {
         StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
         for (Command command : register.getCommands()) {
             if (command.getAliases().contains(arg)) {
-                logger.append("\tCommand found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+                logger.append("- Command found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
                 response = new StringBuilder(command.getClass().getSimpleName() + "\n" + command.help());
                 break;
             } else {
@@ -125,8 +125,8 @@ public class HelpCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n!help for a list of all commands" +
-        "\n!help [COMMAND] for help regarding a specific command";
+        "\n- !help for a list of all commands" +
+        "\n- !help [COMMAND] for help regarding a specific command";
     }
     
 }

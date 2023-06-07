@@ -31,7 +31,7 @@ public class TheFinalShapeCommand implements Command {
         int minutes = (int) currentTime.until(finalShapeReleaseDate.minusMonths(months).minusDays(days).minusHours(hours), ChronoUnit.MINUTES);
 
         handler.sendText("Destiny 2: The Final Shape drops in " + months + " months, " + days + " days, " + hours + " hours, " + minutes + " minutes.");
-        event.getLogger().append("Showing how long until Destiny 2: The Final Shape drops", LogDestination.NONAPI, LogDestination.API);
+        event.getLogger().append("- Showing how long until Destiny 2: The Final Shape drops", LogDestination.NONAPI, LogDestination.API);
     }
 
     /**

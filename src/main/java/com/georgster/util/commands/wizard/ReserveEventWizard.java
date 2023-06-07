@@ -25,9 +25,9 @@ public class ReserveEventWizard extends InputWizard {
      * @param event The event that triggered the creation of this wizard.
      * @param eventManager The event manager for the SoapClient's Guild.
      */
-    public ReserveEventWizard(CommandExecutionEvent event, SoapEventManager eventManager) {
+    public ReserveEventWizard(CommandExecutionEvent event) {
         super(event, InputListenerFactory.createMenuMessageListener(event, TITLE));
-        this.eventManager = eventManager;
+        this.eventManager = event.getEventManager();
     }
 
     /**

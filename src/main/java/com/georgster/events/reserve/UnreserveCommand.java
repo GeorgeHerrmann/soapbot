@@ -49,11 +49,11 @@ public class UnreserveCommand implements ParseableCommand {
             ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
             if (reserve.alreadyReserved(discordEvent.getAuthorAsMember().getTag())) {
 
-                logger.append("\tRemoving " + discordEvent.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
+                logger.append("- Removing " + discordEvent.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
                 reserve.removeReserved(discordEvent.getAuthorAsMember().getTag());
                 if (reserve.getReserved() <= 0) {
                     eventManager.remove(reserve);
-                    logger.append("\n\tRemoving event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
+                    logger.append("\n- Removing event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
                     handler.sendText("There are no more people reserved to this event, this event has been removed");
                 } else {
                     eventManager.update(reserve);
@@ -112,10 +112,10 @@ public class UnreserveCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t- !events list to list all events" +
-        "\n\t- !events [NAME] for information about a specific event" +
-        "\n\t- !unreserve [NAME] to unreserve from an event" +
-        "\n\t\t - An event will be removed if there are no more people reserved to it" +
+        "\n- !events list to list all events" +
+        "\n- !events [NAME] for information about a specific event" +
+        "\n- !unreserve [NAME] to unreserve from an event" +
+        "\n\t - An event will be removed if there are no more people reserved to it" +
         "\nType !help reserve for information about reserving to or creating an event";
     }
 

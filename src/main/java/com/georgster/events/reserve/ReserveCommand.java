@@ -55,7 +55,7 @@ public class ReserveCommand implements ParseableCommand {
                         if (reserve.alreadyReserved(user.getTag())) {
                             handler.sendText("You have already reserved for this event, type !event " + reserve.getIdentifier() + " unreserve to unreserve");
                         } else {
-                            logger.append("Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
+                            logger.append("- Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
                             eventManager.update(reserve);
                             handler.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
@@ -66,21 +66,21 @@ public class ReserveCommand implements ParseableCommand {
                     handler.sendText("Event " + reserve.getIdentifier() + " is full");
                 }
             } else {
-                logger.append("\tCreating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
+                logger.append("- Creating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
                 discordEvent.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
                 eventManager.add(reserve);
                 String messageString = "";
                 if (reserve.isTimeless()) {
-                    logger.append("\tThis event is timeless\n", LogDestination.NONAPI);
+                    logger.append("- This event is timeless\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else if (reserve.isUnlimited()) {
-                    logger.append("\tThis event is unlimited\n", LogDestination.NONAPI);
+                    logger.append("- This event is unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else {
-                    logger.append("\tThis event is neither timeless nor unlimited\n", LogDestination.NONAPI);
+                    logger.append("- This event is neither timeless nor unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
-                messageString += "\nScheduled for: " + SoapUtility.formatDate(reserve.getDate());
+                messageString += "\n- Scheduled for: " + SoapUtility.formatDate(reserve.getDate());
                 handler.sendText(messageString, reserve.getIdentifier() + " event created");
             }
         } catch (IllegalArgumentException e) { // assignCorrectEvent will send custom error messages, all other exceptions are handled by the CommandExecutionEvent
@@ -242,18 +242,18 @@ public class ReserveCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME] [DATE]' to create a new event with for a specific time and date with a certain number of people" +
-        "\n\t\t - This event will pop when the specified time hits" +
-        "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME]' to create a new event with for a specific time with a certain number of people" +
-        "\n\t\t - This event will pop when the specified time hits" +
-        "\n\t- '!reserve [EVENTNAME] [PLAYERCOUNT]' to create a new event with a certain number of people" +
-        "\n\t\t - This event will pop when the specified number of people have reserved" +
-        "\n\t- '!reserve [EVENTNAME] [TIME] [DATE]' to create a new event for a specific time and date" +
-        "\n\t\t - This event will pop when the specified time hits" +
-        "\n\t- '!reserve [EVENTNAME] [TIME]' to create a new event for a specific time" +
-        "\n\t\t - This event will pop when the specified time hits" +
-        "\n\t- '!reserve [EVENTNAME]' to reserve to an event that already exists" +
-        "\n\t - !events for information about the event command" +
-        "\n\t*Note: Date formats should be one word, ex: Dec8, Dec8,2024, or in3days*";
+        "\n- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME] [DATE]' to create a new event with for a specific time and date with a certain number of people" +
+        "\n\t - This event will pop when the specified time hits" +
+        "\n- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME]' to create a new event with for a specific time with a certain number of people" +
+        "\n\t - This event will pop when the specified time hits" +
+        "\n- '!reserve [EVENTNAME] [PLAYERCOUNT]' to create a new event with a certain number of people" +
+        "\n\t - This event will pop when the specified number of people have reserved" +
+        "\n- '!reserve [EVENTNAME] [TIME] [DATE]' to create a new event for a specific time and date" +
+        "\n\t - This event will pop when the specified time hits" +
+        "\n- '!reserve [EVENTNAME] [TIME]' to create a new event for a specific time" +
+        "\n\t - This event will pop when the specified time hits" +
+        "\n- '!reserve [EVENTNAME]' to reserve to an event that already exists" +
+        "\n - !events for information about the event command" +
+        "\n*Note: Time and Date formats should be one word, ex: Dec8, Dec8,2024, or in3days*";
     }
 }

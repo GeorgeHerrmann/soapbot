@@ -47,9 +47,9 @@ public class SkipMusicCommand implements Command {
                 handler.sendText("Skipping the currently playing track");
             }
             player.stopTrack();
-            logger.append("\tSkipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
+            logger.append("- Skipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
         } else {
-            logger.append("\tNo tracks found in queue", LogDestination.NONAPI);
+            logger.append("- No tracks found in queue", LogDestination.NONAPI);
             handler.sendText("No tracks are currently playing");
         }
     }
@@ -78,10 +78,10 @@ public class SkipMusicCommand implements Command {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
-        "\n\t!skip to skip the current track" +
-        "\n\t!skip all to skip all tracks in the queue" +
-        "\n\t!queue to see all tracks in the queue";
+        "\n- !play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
+        "\n- !skip to skip the current track" +
+        "\n- !skip all to skip all tracks in the queue" +
+        "\n- !queue to see all tracks in the queue";
     }
     
 }

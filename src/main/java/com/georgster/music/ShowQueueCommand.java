@@ -39,12 +39,12 @@ public class ShowQueueCommand implements Command {
         StringBuilder response = new StringBuilder("Current Queue:\n");
         int x = 1;
 
-        logger.append("\tShowing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
+        logger.append("- Showing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
 
         for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
             response.append("\t" + x + ") " + i.getInfo().title + "\n");
             if (response.length() >= 1800) {
-                logger.append("\tQueue too large, sending multiple responses to Discord", LogDestination.NONAPI);
+                logger.append("- Queue too large, sending multiple responses to Discord", LogDestination.NONAPI);
 
                 String[] output = SoapUtility.splitFirst(response.toString());
                 handler.sendText(output[1], output[0]);
@@ -79,10 +79,10 @@ public class ShowQueueCommand implements Command {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n\t!play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
-        "\n\t!skip to skip the current track" +
-        "\n\t!skip all to skip all tracks in the queue" +
-        "\n\t!queue to see all tracks in the queue";
+        "\n- !play [AUDIO LINK] to queue an audio track to play in the voice channel you are in" +
+        "\n- !skip to skip the current track" +
+        "\n- !skip all to skip all tracks in the queue" +
+        "\n- !queue to see all tracks in the queue";
     }
     
 }

@@ -54,3 +54,8 @@
         - Added more aliases such as "re", "resevent", "revent", etc.
         - Added a Reserve Event wizard, allowing users to edit existing Reserve Events
             - Can be accessed via !event manage
+
+2.341
+    - Updated all logging and help-based formats.
+        - Now consistent with new discord bulleted formatting
+        - The multi-logger will convert to appropriate logging standards for each format

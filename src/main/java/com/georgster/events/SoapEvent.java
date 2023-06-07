@@ -20,6 +20,13 @@ public interface SoapEvent extends Manageable {
     public SoapEventType getType();
 
     /**
+     * Returns the tag of the current owner of this SoapEvent.
+     * 
+     * @return the tag of this event's current owner.
+     */
+    public String getOwner();
+
+    /**
      * Returns whether or not the event is the same as the event being compared.
      * 
      * @param compare the event being compared to
