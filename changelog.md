@@ -59,3 +59,7 @@
     - Updated all logging and help-based formats.
         - Now consistent with new discord bulleted formatting
         - The multi-logger will convert to appropriate logging standards for each format
+
+2.342
+    - Updated ReserveEvent's incorrectly scheduling a day in advance
+    - Fixed various formatting issues with the switch to the new Discord formatting system

@@ -156,10 +156,10 @@ public class ReserveEvent implements SoapEvent {
      */
     private String getCorrectDate(String time) {
         LocalTime localTime = LocalTime.parse(time);
-        if (LocalTime.now(ZoneId.systemDefault()).isAfter(localTime)) {
-            return LocalDate.now(ZoneId.systemDefault()).plusDays(1).toString();
+        if (LocalTime.now(ZoneId.of("-05:00")).plusHours(1).isAfter(localTime)) {
+            return LocalDate.now(ZoneId.of("-05:00")).plusDays(1).toString();
         } else {
-            return LocalDate.now(ZoneId.systemDefault()).toString();
+            return LocalDate.now(ZoneId.of("-05:00")).toString();
         }
     }
 
