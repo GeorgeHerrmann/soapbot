@@ -9,6 +9,7 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.ReserveEventCommand;
+import com.georgster.events.poll.PollEventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.misc.HelloWorldCommand;
@@ -63,7 +64,8 @@ public class CommandRegistry {
             SkipMusicCommand.class,
             PermissionsCommand.class,
             HelloWorldCommand.class,
-            TheFinalShapeCommand.class
+            TheFinalShapeCommand.class,
+            PollEventCommand.class
         ));
     }
 

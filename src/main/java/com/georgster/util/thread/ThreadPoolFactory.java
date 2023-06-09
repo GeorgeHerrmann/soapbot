@@ -28,15 +28,13 @@ public class ThreadPoolFactory {
     }
 
     /**
-     * Schedules a task to be executed by the database thread pool manager for the given guild ID.
+     * Schedules a task to be executed by the database general pool manager for the given guild ID.
      * 
      * @param guildId The guild ID to schedule the task for
      * @param task   The task to be executed
-     * @deprecated Causing race conditions, use {@link #scheduleCommandTask(String, Runnable)} instead
      */
-    @Deprecated
-    public static void scheduleDatabaseTask(String guildId, Runnable task) {
-        CLIENT_THREAD_POOL_MANAGERS.get(guildId).scheduleDatabaseTask(task);
+    public static void scheduleGeneralTask(String guildId, Runnable task) {
+        CLIENT_THREAD_POOL_MANAGERS.get(guildId).scheduleGeneralTask(task);
     }
 
     /**

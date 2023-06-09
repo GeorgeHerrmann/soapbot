@@ -4,13 +4,14 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.SoapUtility;
 
 public class PollEvent implements SoapEvent {
     private static final SoapEventType TYPE = SoapEventType.POLL;
@@ -21,13 +22,13 @@ public class PollEvent implements SoapEvent {
     private String channel;
     private String owner;
 
-    // User creation
+    // Wizard creation
     public PollEvent(String identifier, String channel, String owner) {
         this.identifier = identifier;
         this.channel = channel;
         this.owner = owner;
         this.experiation = getExperiationTime();
-        this.options = new HashMap<>();
+        this.options = new TreeMap<>();
     }
 
     // Database
@@ -40,24 +41,20 @@ public class PollEvent implements SoapEvent {
     }
 
     private String getExperiationTime() {
-        LocalTime now = LocalTime.now(ZoneId.of("-05:00"));
+        LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
         return now.plusMinutes(5).toString();
     }
 
     public boolean fulfilled() {
-        LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
-        LocalTime eventTime = LocalTime.parse(experiation);
-        long until = now.until(eventTime, ChronoUnit.SECONDS);
-        if (until < 0 && Math.abs(until) > 60) {
-            until = Math.abs(until);
-        }
-        return until <= 0;
+        return until() <= 0;
     }
 
     public void onFulfill(GuildInteractionHandler handler) {
         StringBuilder sb = new StringBuilder("Poll " + identifier + " has concluded! The votes are as follows:\n");
         Map<String, Integer> voteTally = getVoteTally();
         voteTally.forEach((option, votes) -> sb.append("- " + option + ": " + votes + " votes\n"));
+
+        handler.sendText(sb.toString(), "Poll " + getIdentifier() + " concluded!");
     }
 
     public boolean alreadyVoted(String voter) {
@@ -100,7 +97,7 @@ public class PollEvent implements SoapEvent {
     }
 
     public Map<String, Integer> getVoteTally() {
-        Map<String, Integer> voteMap = new HashMap<>();
+        Map<String, Integer> voteMap = new TreeMap<>();
 
         options.forEach((option, voters) -> voteMap.put(option, voters.size()));
 
@@ -121,6 +118,24 @@ public class PollEvent implements SoapEvent {
 
     public String getChannel() {
         return channel;
+    }
+
+    public void setExperation(String timeString) throws IllegalArgumentException {
+        try {
+            this.experiation = SoapUtility.calculateFutureDateTime(timeString);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
+    public int until() {
+        LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
+        LocalTime eventTime = LocalTime.parse(experiation);
+        long until = now.until(eventTime, ChronoUnit.SECONDS);
+        if (until < 0 && Math.abs(until) > 60) {
+            until = Math.abs(until);
+        }
+        return (int) until;
     }
 
     public boolean same(SoapEvent compare) {

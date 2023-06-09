@@ -5,8 +5,10 @@ import java.util.function.Consumer;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.wizard.input.UserInputListener;
+import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
 
 /**
@@ -180,6 +182,26 @@ public abstract class InputWizard {
             withResponse.accept(response);
             return WizardResponse.NEXT;
         }
+    }
+
+    /**
+     * Sends a message in this wizard's active text channel that will self-delte in five minutes.
+     * Invokes {@link GuildInteractionHandler#sendText(String, String)} for message sending.
+     * 
+     * @param text The body of the message.
+     * @param title The title of the message.
+     */
+    protected void sendMessage(String text, String title) {
+        ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> {
+            Message message = handler.sendText(text, title);
+            try {
+                Thread.sleep(5000);
+                message.delete().block();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+        });
     }
 
 }

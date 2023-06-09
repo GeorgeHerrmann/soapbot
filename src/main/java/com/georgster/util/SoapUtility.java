@@ -1,6 +1,8 @@
 package com.georgster.util;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
@@ -94,8 +96,8 @@ public class SoapUtility {
      */
     private static String insertSpaces(String input) {
         // Insert spaces between month/day and day suffix (st/nd/rd/th)
-        input = input.replaceAll("(?<=[a-zA-Z])(?=[0-9])", " ");
-        input = input.replaceAll("(?<=[0-9])(?=[a-zA-Z]{2})", " ");
+        input = input.replaceAll("(?<=[a-zA-Z])(?=\\d)", " ");
+        input = input.replaceAll("(?<=\\d)(?=[a-zA-Z]{2})", " ");
         return input;
     }
 
@@ -226,6 +228,72 @@ public class SoapUtility {
         split[0] = line.substring(0, line.indexOf("\n"));
         split[1] = line.substring(line.indexOf("\n") + 1);
         return split;
+    }
+
+    public static String calculateFutureDateTime(String timeString) {
+        // Remove leading/trailing whitespace and convert to lowercase
+        String input = timeString.trim().toLowerCase();
+
+        // Extract numeric value and unit from the input string
+        int value;
+        String unit;
+        if (input.contains("minute") || input.contains("min") || input.contains("mins") || input.contains("minutes")) {
+            unit = "minute";
+            value = extractNumericValue(input);
+        } else if (input.contains("hour") || input.contains("hr") || input.contains("hrs") || input.contains("hours")) {
+            unit = "hour";
+            value = extractNumericValue(input);
+        } else {
+            throw new IllegalArgumentException("Invalid time unit, accepted formats are '5 mins', '3 hours', etc");
+        }
+
+        // Get the current LocalDateTime
+        LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
+
+        // Calculate the future LocalDateTime
+        LocalTime futureTime;
+        if (unit.equals("minute")) {
+            futureTime = now.plusMinutes(value);
+        } else { // unit.equals("hour")
+            futureTime = now.plusHours(value);
+        }
+
+        // Return the future LocalDateTime as a string
+        return futureTime.toString();
+    }
+
+    private static int extractNumericValue(String input) {
+        // Remove non-digit characters
+        String numericString = input.replaceAll("\\D+", "");
+        return Integer.parseInt(numericString);
+    }
+
+    public static String convertSecondsToHoursMinutes(int seconds) {
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        int remainingSeconds = seconds % 60;
+
+        StringBuilder result = new StringBuilder();
+
+        if (hours > 0) {
+            result.append(hours).append(hours == 1 ? " hour" : " hours");
+        }
+
+        if (minutes > 0) {
+            if (result.length() > 0) {
+                result.append(" ");
+            }
+            result.append(minutes).append(minutes == 1 ? " minute" : " minutes");
+        }
+
+        if (remainingSeconds > 0) {
+            if (result.length() > 0) {
+                result.append(" ");
+            }
+            result.append(remainingSeconds).append(remainingSeconds == 1 ? " second" : " seconds");
+        }
+
+        return result.toString();
     }
 
 }

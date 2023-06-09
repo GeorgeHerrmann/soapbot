@@ -73,6 +73,16 @@ public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
     }
 
     /**
+     * Returns the number of events of the given type in this manager.
+     * 
+     * @param type The type to compare with.
+     * @return The number of events of the given type.
+     */
+    public int getCount(SoapEventType type) {
+        return (int) observees.stream().filter(event -> event.getType() == type).count();
+    }
+
+    /**
      * Returns whether or not the given event exists in this manager with the given type.
      * 
      * @param event the event to check for
