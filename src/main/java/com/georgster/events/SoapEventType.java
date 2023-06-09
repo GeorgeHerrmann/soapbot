@@ -7,5 +7,9 @@ public enum SoapEventType {
     /**
      * Represents a ReserveEvent.
      */
-    RESERVE
+    RESERVE,
+    /**
+     * Represents a PollEvent.
+     */
+    POLL
 }

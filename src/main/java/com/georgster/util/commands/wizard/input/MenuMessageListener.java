@@ -22,7 +22,7 @@ import reactor.core.Disposable;
  * {@code prompt()} being called, and can be ended early by the user by reacting with the
  * {@code ❌} emoji.
  * <p>
- * <b>Note:</b> If there are no options, or the only option is "back" on calling {@link #prompt(WizardState)},
+ * <b>Note:</b> If there are zero or one options when calling {@link #prompt(WizardState)},
  * this listener will accept any message-based input, otherwise only an input matching one of the options will be accepted.
  */
 public class MenuMessageListener implements UserInputListener {
@@ -60,7 +60,7 @@ public class MenuMessageListener implements UserInputListener {
         String prompt = inputState.getMessage();
         String[] options = inputState.getOptions();
 
-        boolean mustMatch = !(options.length > 0 && options[0].equals("back"));
+        boolean mustMatch = (options.length > 1);
 
         SelectMenu.Option[] menuOptions = new SelectMenu.Option[options.length];
 

@@ -25,6 +25,8 @@ import com.georgster.util.SoapUtility;
  * cannot be both Timeless and Unlimited.
  */
 public class ReserveEvent implements SoapEvent {
+    private static final SoapEventType TYPE = SoapEventType.RESERVE;
+
     private String identifier;
     private int numPeople;
     private int reserved;
@@ -32,7 +34,6 @@ public class ReserveEvent implements SoapEvent {
     private String date;
     private String channel;
     private List<String> reservedUsers;
-    private SoapEventType type = SoapEventType.RESERVE;
     
     /**
      * Constructs a ReserveEvent object with an identifier, number of people, number of people
@@ -353,7 +354,7 @@ public class ReserveEvent implements SoapEvent {
      * @return the type of the event
      */
     public SoapEventType getType() {
-        return type;
+        return TYPE;
     }
 
     /**
@@ -408,7 +409,7 @@ public class ReserveEvent implements SoapEvent {
         && numPeople == event.getNumPeople()
         && reserved == event.getReserved()
         && reservedUsers.equals(event.getReservedUsers())
-        && type == event.getType();
+        && TYPE == event.getType();
     }
 
 }

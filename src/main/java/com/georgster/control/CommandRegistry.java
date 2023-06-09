@@ -20,6 +20,7 @@ import com.georgster.music.PlayMusicCommand;
 import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
 import com.georgster.plinko.PlinkoCommand;
+import com.georgster.test.TestCommand;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.permissions.PermissionsCommand;
 import com.georgster.util.thread.ThreadPoolFactory;
@@ -48,6 +49,7 @@ public class CommandRegistry {
         context.setCommandRegistry(this);
         
         commands = new ArrayList<>(List.of(
+            TestCommand.class,
             PongCommand.class,
             SoapCommand.class,
             HelpCommand.class,

@@ -5,6 +5,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.wizard.PollEventWizard;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -13,13 +14,15 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements Command {
-    private static final boolean ACTIVE = false;
+    private static final boolean ACTIVE = true;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        throw new UnsupportedOperationException("This command is not active");
+        PollEventWizard wizard = new PollEventWizard(event);
+        wizard.begin();
+        //event.getGuildInteractionHandler().sendText("Wizard begun");
     }
 
     /**
