@@ -99,8 +99,11 @@ public class DatabaseService<T> {
      */
     public void addObject(T object) {
         withDatabase(database -> {
-            MongoCollection<T> collection = database.getCollection(type.toString().toLowerCase(), classType);
-            collection.insertOne(object);
+            Gson gson = new Gson();
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
+            
+            Document document = Document.parse(gson.toJson(object));
+            collection.insertOne(document);
         });
     }
 

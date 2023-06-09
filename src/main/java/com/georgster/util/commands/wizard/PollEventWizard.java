@@ -123,6 +123,8 @@ public class PollEventWizard extends InputWizard {
         withResponse((response -> {
             event.removeVoter(voter);
             event.addVoter(response, voter);
+            eventManager.update(event);
+            handler.sendText("You have voted for: " + response);
         }), prompt, optionsArr);
     }
 }

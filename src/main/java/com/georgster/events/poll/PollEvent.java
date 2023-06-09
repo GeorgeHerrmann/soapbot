@@ -16,14 +16,14 @@ public class PollEvent implements SoapEvent {
     private static final SoapEventType TYPE = SoapEventType.POLL;
     
     private String experiation; // Standardized time String
-    private String title;
+    private String identifier;
     private Map<String, List<String>> options; // Option and the voters
     private String channel;
     private String owner;
 
     // User creation
-    public PollEvent(String title, String channel, String owner) {
-        this.title = title;
+    public PollEvent(String identifier, String channel, String owner) {
+        this.identifier = identifier;
         this.channel = channel;
         this.owner = owner;
         this.experiation = getExperiationTime();
@@ -31,8 +31,8 @@ public class PollEvent implements SoapEvent {
     }
 
     // Database
-    public PollEvent(String title, String channel, String owner, Map<String, List<String>> options, String experiation) {
-        this.title = title;
+    public PollEvent(String identifier, String channel, String owner, Map<String, List<String>> options, String experiation) {
+        this.identifier = identifier;
         this.channel = channel;
         this.owner = owner;
         this.options = options;
@@ -55,7 +55,7 @@ public class PollEvent implements SoapEvent {
     }
 
     public void onFulfill(GuildInteractionHandler handler) {
-        StringBuilder sb = new StringBuilder("Poll " + title + " has concluded! The votes are as follows:\n");
+        StringBuilder sb = new StringBuilder("Poll " + identifier + " has concluded! The votes are as follows:\n");
         Map<String, Integer> voteTally = getVoteTally();
         voteTally.forEach((option, votes) -> sb.append("- " + option + ": " + votes + " votes\n"));
     }
@@ -108,7 +108,7 @@ public class PollEvent implements SoapEvent {
     }
 
     public String getIdentifier() {
-        return title;
+        return identifier;
     }
 
     public String getOwner() {
@@ -128,7 +128,7 @@ public class PollEvent implements SoapEvent {
             return false;
         }
         
-        return title.equals(compare.getIdentifier())
+        return identifier.equals(compare.getIdentifier())
             && channel.equals(compare.getChannel());
     }
 }
