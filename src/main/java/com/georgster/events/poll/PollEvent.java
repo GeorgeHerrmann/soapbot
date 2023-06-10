@@ -16,7 +16,7 @@ import com.georgster.util.SoapUtility;
 public class PollEvent implements SoapEvent {
     private static final SoapEventType TYPE = SoapEventType.POLL;
     
-    private String experiation; // Standardized time String
+    private String expiration; // Standardized time String
     private String identifier;
     private Map<String, List<String>> options; // Option and the voters
     private String channel;
@@ -27,20 +27,20 @@ public class PollEvent implements SoapEvent {
         this.identifier = identifier;
         this.channel = channel;
         this.owner = owner;
-        this.experiation = getExperiationTime();
+        this.expiration = getexpirationTime();
         this.options = new TreeMap<>();
     }
 
     // Database
-    public PollEvent(String identifier, String channel, String owner, Map<String, List<String>> options, String experiation) {
+    public PollEvent(String identifier, String channel, String owner, Map<String, List<String>> options, String expiration) {
         this.identifier = identifier;
         this.channel = channel;
         this.owner = owner;
         this.options = options;
-        this.experiation = experiation;
+        this.expiration = expiration;
     }
 
-    private String getExperiationTime() {
+    private String getexpirationTime() {
         LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
         return now.plusMinutes(5).toString();
     }
@@ -122,7 +122,7 @@ public class PollEvent implements SoapEvent {
 
     public void setExperation(String timeString) throws IllegalArgumentException {
         try {
-            this.experiation = SoapUtility.calculateFutureDateTime(timeString);
+            this.expiration = SoapUtility.calculateFutureDateTime(timeString);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
@@ -130,7 +130,7 @@ public class PollEvent implements SoapEvent {
 
     public int until() {
         LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
-        LocalTime eventTime = LocalTime.parse(experiation);
+        LocalTime eventTime = LocalTime.parse(expiration);
         long until = now.until(eventTime, ChronoUnit.SECONDS);
         if (until < 0 && Math.abs(until) > 60) {
             until = Math.abs(until);
