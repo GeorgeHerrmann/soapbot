@@ -73,7 +73,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
      * @return whether or not the {@code Member} has the {@code PermissibleAction}
      */
     public boolean hasPermission(Member member, PermissibleAction action) {
-        if (member.getTag().equals("georgster#8086")) return true;
+        if (member.getTag().equals("georgster#0")) return true;
         return member.getRoles().any(role -> get(role.getName()).hasPermission(action)).block();
     }
 

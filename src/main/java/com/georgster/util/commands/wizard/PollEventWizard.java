@@ -12,6 +12,9 @@ import com.georgster.util.commands.wizard.input.InputListenerFactory;
 
 import discord4j.core.object.entity.channel.TextChannel;
 
+/**
+ * An {@link InputWizard} for handling PollEvents.
+ */
 public class PollEventWizard extends InputWizard {
 
     private static final String TITLE = "Poll Event Wizard";
@@ -19,17 +22,26 @@ public class PollEventWizard extends InputWizard {
 
     private SoapEventManager eventManager;
 
+    /**
+     * Creates a PollEventWizard.
+     */
     public PollEventWizard(CommandExecutionEvent event) {
         super(event, InputListenerFactory.createMenuMessageListener(event, TITLE));
         this.eventManager = event.getEventManager();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         handler.sendText("Welcome to the poll event wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         wizardOptions();
         end();
     }
 
+    /**
+     * The main menu for the wizard.
+     */
     private void wizardOptions() {
         String prompt = "What would you like to do?";
         String[] options = {"create a poll", "vote on a poll", "view a poll"};
@@ -54,6 +66,9 @@ public class PollEventWizard extends InputWizard {
         }
     }
 
+    /**
+     * Options for viewing 
+     */
     private void pollViewingOptions() {
         while (isActive()) {
 

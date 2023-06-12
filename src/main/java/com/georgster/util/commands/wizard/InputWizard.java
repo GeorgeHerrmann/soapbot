@@ -185,7 +185,8 @@ public abstract class InputWizard {
     }
 
     /**
-     * Sends a message in this wizard's active text channel that will self-delte in five minutes.
+     * Sends a message in this wizard's active text channel that will self-delete in five seconds.
+     * <p>
      * Invokes {@link GuildInteractionHandler#sendText(String, String)} for message sending.
      * 
      * @param text The body of the message.

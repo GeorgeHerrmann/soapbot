@@ -230,6 +230,12 @@ public class SoapUtility {
         return split;
     }
 
+    /**
+     * Converts a string describing an incremented time in the future to a standardized {@link LocalDateTime} String.
+     * 
+     * @param timeString The descriptor string.
+     * @return The standardized string.
+     */
     public static String calculateFutureDateTime(String timeString) {
         // Remove leading/trailing whitespace and convert to lowercase
         String input = timeString.trim().toLowerCase();
@@ -267,12 +273,24 @@ public class SoapUtility {
         return futureTime.toString();
     }
 
+    /**
+     * Extracts the numeric value from a date or time descriptor.
+     * 
+     * @param input A date or time descriptor.
+     * @return The numeric value from the descriptor.
+     */
     private static int extractNumericValue(String input) {
         // Remove non-digit characters
         String numericString = input.replaceAll("\\D+", "");
         return Integer.parseInt(numericString);
     }
 
+    /**
+     * Returns a String that more clearly describes a time given a number of seconds.
+     * 
+     * @param seconds The number of seconds.
+     * @return A String that more clearly describes a time.
+     */
     public static String convertSecondsToHoursMinutes(int seconds) {
         int hours = seconds / 3600;
         int minutes = (seconds % 3600) / 60;
