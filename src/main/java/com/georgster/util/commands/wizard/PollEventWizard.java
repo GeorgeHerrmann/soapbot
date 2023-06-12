@@ -66,11 +66,7 @@ public class PollEventWizard extends InputWizard {
 
             WizardResponse wizardResponse = withResponse((response -> {
                 PollEvent event = (PollEvent) eventManager.get(response);
-
-                StringBuilder sb = new StringBuilder();
-                event.getVoteTally().forEach(((option, voters) -> sb.append("- " + option + ": " + voters + " votes\n")));
-                sb.append("Active for another " + SoapUtility.convertSecondsToHoursMinutes(event.until()) + "");
-                handler.sendText(sb.toString(), event.getIdentifier());
+                handler.sendText(event.toString(), event.getIdentifier());
             }), prompt, options);
 
             if (wizardResponse == WizardResponse.BACK) {
@@ -101,17 +97,18 @@ public class PollEventWizard extends InputWizard {
     }
 
     private void setExperation(PollEvent event) {
-        String prompt = "Please type how long the poll should last for, or select use default";
+        String prompt = "Please type how long the poll should last for, or select use default setting.\n" +
+                        "You can type things like: 10 days, 1 hour, 15 minutes";
         String[] options = {"use default setting"};
 
         while (isActive()) {
             withResponseFirst((response -> {
                 if (response.equals("use default setting")) {
-                    event.setExperation("5 mins");
+                    event.setDateTime("5 mins");
                     addOptions(event);
                 } else {
                     try {
-                        event.setExperation(response);
+                        event.setDateTime(response);
                         addOptions(event);
                     } catch (IllegalArgumentException e) {
                         sendMessage(e.getMessage(), TITLE);
@@ -135,7 +132,7 @@ public class PollEventWizard extends InputWizard {
                         eventManager.add(event);
                         StringBuilder sb = new StringBuilder("A new poll " + event.getIdentifier() + " has been created with the following options:\n");
                         event.getOptions().forEach(option -> sb.append("- " + option + "\n"));
-                        sb.append("This poll lasts for: " + SoapUtility.convertSecondsToHoursMinutes(event.until()) + ". Type !poll to vote!");
+                        sb.append("This poll lasts for: " + SoapUtility.convertSecondsToHoursMinutes((int) event.until()) + ". Type !poll to vote!");
                         handler.sendText(sb.toString(), "Poll Created");
                         wizardOptions();
                     }
@@ -181,7 +178,7 @@ public class PollEventWizard extends InputWizard {
             event.removeVoter(voter);
             event.addVoter(response, voter);
             eventManager.update(event);
-            sendMessage("You have voted for: " + response, TITLE);
+            handler.sendText(getUser().getUsername() + " has voted for: " + response + ".\n Current votes are:\n" + event.toString(), event.getIdentifier());
         }), prompt, optionsArr);
     }
 }

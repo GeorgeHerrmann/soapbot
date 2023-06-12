@@ -1,7 +1,7 @@
 package com.georgster.util;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -116,11 +116,11 @@ public class SoapUtility {
         } catch (DateTimeParseException e) {
             try {
                 if (inputDate.equalsIgnoreCase("tomorrow")) {
-                    date = LocalDate.now().plusDays(1);
+                    date = LocalDate.now(ZoneId.of("-05:00")).plusDays(1);
                 } else {
                     String[] parts = inputDate.split(" ");
                     int daysToAdd = Integer.parseInt(parts[1]);
-                    date = LocalDate.now().plusDays(daysToAdd);
+                    date = LocalDate.now(ZoneId.of("-05:00")).plusDays(daysToAdd);
                 }
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Invalid date format, valid date formats are MMM dd, yyyy, MMM dd, yy, MMM dd, yyyy, tomorrow, and in x days");
@@ -154,7 +154,7 @@ public class SoapUtility {
             int dayOfMonth = Integer.parseInt(parts[1].replaceAll("\\D+", ""));
             int month = parseMonth(parts[0]);
             int year = LocalDate.now().getYear();
-            if (LocalDate.now().getMonthValue() > month || (LocalDate.now().getMonthValue() == month && LocalDate.now().getDayOfMonth() > dayOfMonth)) {
+            if (LocalDate.now(ZoneId.of("-05:00")).getMonthValue() > month || (LocalDate.now(ZoneId.of("-05:00")).getMonthValue() == month && LocalDate.now(ZoneId.of("-05:00")).getDayOfMonth() > dayOfMonth)) {
                 year++;
             }
             return LocalDate.of(year, month, dayOfMonth);
@@ -243,19 +243,24 @@ public class SoapUtility {
         } else if (input.contains("hour") || input.contains("hr") || input.contains("hrs") || input.contains("hours")) {
             unit = "hour";
             value = extractNumericValue(input);
+        } else if (input.contains("day") || input.contains("days")) {
+            unit = "day";
+            value = extractNumericValue(input);
         } else {
-            throw new IllegalArgumentException("Invalid time unit, accepted formats are '5 mins', '3 hours', etc");
+            throw new IllegalArgumentException("Invalid time unit, accepted formats are '5 mins', '3 hours', '4 days', etc");
         }
 
         // Get the current LocalDateTime
-        LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00")).plusHours(1);
 
         // Calculate the future LocalDateTime
-        LocalTime futureTime;
+        LocalDateTime futureTime;
         if (unit.equals("minute")) {
             futureTime = now.plusMinutes(value);
-        } else { // unit.equals("hour")
+        } else if (unit.equals("hour")) {
             futureTime = now.plusHours(value);
+        } else { // days
+            futureTime = now.plusDays(value);
         }
 
         // Return the future LocalDateTime as a string

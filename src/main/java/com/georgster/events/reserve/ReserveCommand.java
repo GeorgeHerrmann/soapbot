@@ -138,7 +138,7 @@ public class ReserveCommand implements ParseableCommand {
                 int numPeople = Integer.parseInt(temp.get(temp.size() - 1));
                 temp = parser.getMatchingRules("T");
                 String time = temp.get(temp.size() - 1);
-                return new ReserveEvent(message.get(0), numPeople, SoapUtility.timeConverter(time), channelName);
+                return new ReserveEvent(message.get(0), numPeople, time, channelName);
             } catch (Exception ex) {
                 try {
                     //Should be in the format !reserve [EVENTNAME] [TIME] [DATE]
@@ -146,7 +146,7 @@ public class ReserveCommand implements ParseableCommand {
                     String time = temp.get(temp.size() - 1);
                     temp = parser.getMatchingRules("D");
                     String date = temp.get(temp.size() - 1);
-                    return new ReserveEvent(message.get(0), SoapUtility.timeConverter(time), channelName, SoapUtility.convertDate(date));
+                    return new ReserveEvent(message.get(0), time, channelName, date);
                 } catch (NumberFormatException e) { //If the user's command is in the wrong format
                     throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
                 } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
@@ -166,14 +166,14 @@ public class ReserveCommand implements ParseableCommand {
                 String time = temp.get(temp.size() - 1);
                 temp = parser.getMatchingRules("D");
                 String date = temp.get(temp.size() - 1);
-                return new ReserveEvent(message.get(0), numPeople, SoapUtility.timeConverter(time), channelName, SoapUtility.convertDate(date));
+                return new ReserveEvent(message.get(0), numPeople, time, channelName, date);
             } catch (NumberFormatException e) { //If the user's command is in the wrong format
                 throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
             } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
                 throw new IllegalArgumentException(e.getMessage());
             } catch (IndexOutOfBoundsException e) { //If the name of the event has some issue the parser can't handle
                 throw new IllegalArgumentException("There is an issue with the name of the event. The event name cannot have a number unless it is attached to a word." + 
-                "\n\t- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
+                "\n- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
             }
         }
         throw new IllegalArgumentException("Incorrect Reserve Event Format or this event already exists, simply type !reserve [EVENTNAME] if you want to reserve to an event that exists.");

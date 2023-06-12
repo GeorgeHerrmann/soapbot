@@ -2,7 +2,6 @@ package com.georgster.events.poll;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,13 +9,13 @@ import java.util.TreeMap;
 
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
+import com.georgster.events.TimedEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 
-public class PollEvent implements SoapEvent {
+public class PollEvent extends TimedEvent implements SoapEvent {
     private static final SoapEventType TYPE = SoapEventType.POLL;
-    
-    private String expiration; // Standardized time String
+
     private String identifier;
     private Map<String, List<String>> options; // Option and the voters
     private String channel;
@@ -24,23 +23,25 @@ public class PollEvent implements SoapEvent {
 
     // Wizard creation
     public PollEvent(String identifier, String channel, String owner) {
+        super(getexpirationTime());
+
         this.identifier = identifier;
         this.channel = channel;
         this.owner = owner;
-        this.expiration = getexpirationTime();
         this.options = new TreeMap<>();
     }
 
     // Database
-    public PollEvent(String identifier, String channel, String owner, Map<String, List<String>> options, String expiration) {
+    public PollEvent(String identifier, String channel, String owner, Map<String, List<String>> options, String time, String date) {
+        super (time, date);
+
         this.identifier = identifier;
         this.channel = channel;
         this.owner = owner;
         this.options = options;
-        this.expiration = expiration;
     }
 
-    private String getexpirationTime() {
+    private static String getexpirationTime() {
         LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
         return now.plusMinutes(5).toString();
     }
@@ -120,24 +121,6 @@ public class PollEvent implements SoapEvent {
         return channel;
     }
 
-    public void setExperation(String timeString) throws IllegalArgumentException {
-        try {
-            this.expiration = SoapUtility.calculateFutureDateTime(timeString);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
-
-    public int until() {
-        LocalTime now = LocalTime.now(ZoneId.of("-05:00")).plusHours(1);
-        LocalTime eventTime = LocalTime.parse(expiration);
-        long until = now.until(eventTime, ChronoUnit.SECONDS);
-        if (until < 0 && Math.abs(until) > 60) {
-            until = Math.abs(until);
-        }
-        return (int) until;
-    }
-
     public boolean same(SoapEvent compare) {
         if (!(compare instanceof PollEvent)) {
             return false;
@@ -145,5 +128,18 @@ public class PollEvent implements SoapEvent {
         
         return identifier.equals(compare.getIdentifier())
             && channel.equals(compare.getChannel());
+    }
+
+    /**
+     * Returns a String describing this {@code PollEvent}.
+     * 
+     * @return A String describing this {@code PollEvent}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        getVoteTally().forEach(((option, voters) -> sb.append("- " + option + ": " + voters + " votes\n")));
+        sb.append("Active for another " + SoapUtility.convertSecondsToHoursMinutes((int) until()) + "");
+        return sb.toString();
     }
 }
