@@ -74,5 +74,7 @@
             - Like Reserve Events, polls can be scheduled for any time in the future
     - Fixed an issue causing timed events to duplicate themselves when being restarted and the time until the event's expiration was between -60 and 0 seconds
     - Fixed an issue where certain reserve events could not be viewed using the ReserveEventCommand
-        
+    
+2.351
+    - Fixed an issue where events with a time, but no date, could not be created.
 

@@ -63,7 +63,6 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
 
         this.identifier = identifier;
         this.numPeople = numPeople;
-        this.time = time;
         this.reserved = 0; //We will always start with one person reserved
         this.channel = channel;
         reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
