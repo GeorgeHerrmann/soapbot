@@ -9,8 +9,14 @@ import com.georgster.util.commands.wizard.PollEventWizard;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-//!poll - Bring up menu
+/**
+ * A command for interacting with {@code PollEvents}.
+ */
 public class PollEventCommand implements Command {
+
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandExecutionEvent event) {
         event.getLogger().append("- Beginning the Poll Wizard", LogDestination.NONAPI);
 
@@ -18,6 +24,9 @@ public class PollEventCommand implements Command {
         wizard.begin();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("poll", "polls", "pe", "pevent", "pollevent");
     }

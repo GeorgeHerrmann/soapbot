@@ -67,7 +67,7 @@ public class PollEventWizard extends InputWizard {
     }
 
     /**
-     * Options for viewing 
+     * Options for viewing a poll.
      */
     private void pollViewingOptions() {
         while (isActive()) {
@@ -92,6 +92,9 @@ public class PollEventWizard extends InputWizard {
 
     }
 
+    /**
+     * Window for creating the title for a poll.
+     */
     private void createPoll() {
         String prompt = "Please enter the prompt for the poll";
 
@@ -111,6 +114,11 @@ public class PollEventWizard extends InputWizard {
         }
     }
 
+    /**
+     * Window for setting the expiration for a poll.
+     * 
+     * @param event The PollEvent that is being built.
+     */
     private void setExperation(PollEvent event) {
         String prompt = "Please type how long the poll should last for, or select use default setting.\n" +
                         "You can type things like: 10 days, 1 hour, 15 minutes";
@@ -134,6 +142,11 @@ public class PollEventWizard extends InputWizard {
 
     }
 
+    /**
+     * Window for adding options to a poll.
+     * 
+     * @param event The PollEvent that is being built.
+     */
     private void addOptions(PollEvent event) {
         String prompt = "Please type the options for the poll, one at a time in their own messages, then click continue when complete.";
         String[] options = {"continue"};
@@ -159,6 +172,9 @@ public class PollEventWizard extends InputWizard {
         }
     }
 
+    /**
+     * Window for voting on a poll.
+     */
     private void pollVotingOptions() {
         while (isActive()) {
             String prompt = "Which poll would you like to vote on?";
@@ -179,6 +195,11 @@ public class PollEventWizard extends InputWizard {
         }
     }
 
+    /**
+     * Window for selecting an option for a poll to vote for.
+     * 
+     * @param event The PollEvent to vote for.
+     */
     private void pollVote(PollEvent event) {
         String voter = getUser().getTag();
 
