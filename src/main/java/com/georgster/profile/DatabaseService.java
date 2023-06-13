@@ -99,8 +99,11 @@ public class DatabaseService<T> {
      */
     public void addObject(T object) {
         withDatabase(database -> {
-            MongoCollection<T> collection = database.getCollection(type.toString().toLowerCase(), classType);
-            collection.insertOne(object);
+            Gson gson = new Gson();
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
+            
+            Document document = Document.parse(gson.toJson(object));
+            collection.insertOne(document);
         });
     }
 
@@ -113,9 +116,12 @@ public class DatabaseService<T> {
      */
     public void updateObject(String identifierName, String identifierValue, T object) {
         withDatabase(database -> {
-            MongoCollection<T> collection = database.getCollection(type.toString().toLowerCase(), classType);
+            Gson gson = new Gson();
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson filter = eq(identifierName, identifierValue);
-            collection.replaceOne(filter, object);
+
+            Document document = Document.parse(gson.toJson(object));
+            collection.replaceOne(filter, document);
         });
     }
 

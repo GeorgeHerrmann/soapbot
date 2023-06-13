@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
  * <p>Each task scheduled will be executed immediately if a thread is available, otherwise it will be queued.</p>
  * <p>Maximum concurrent tasks for each thread pool:</p>
  * <ul>
- *  <li>Database: unlimited</li>
+ *  <li>General: unlimited</li>
  *  <li>Event: 10</li>
  *  <li>Command: 3</li>
  *  <li>Voice: 1</li>
@@ -20,7 +20,7 @@ public class ThreadPoolManager {
 
     private static final ExecutorService GLOBAL_DISCORD_API_CALL_POOL = Executors.newSingleThreadExecutor(); // Responsible for all global Discord API calls
 
-    private final ExecutorService databaseThreadPool = Executors.newCachedThreadPool(); 
+    private final ExecutorService generalThreadPool = Executors.newCachedThreadPool(); 
     private final ExecutorService eventThreadPool = Executors.newFixedThreadPool(10); //Can schedule 10 events at once
     private final ExecutorService commandThreadPool = Executors.newFixedThreadPool(3); // Can schedule 3 commands at once
     private final ExecutorService voiceThreadPool = Executors.newSingleThreadExecutor(); // Can schedule 1 voice task at once
@@ -44,14 +44,12 @@ public class ThreadPoolManager {
     }
 
     /**
-     * Schedules a task to be executed by the database thread pool manager.
+     * Schedules a task to be executed by the general thread pool manager.
      * 
      * @param task The task to be executed
-     * @deprecated causing race conditions, use {@link #scheduleCommandTask(Runnable)} instead
      */
-    @Deprecated
-    protected void scheduleDatabaseTask(Runnable task) {
-        databaseThreadPool.submit(task);
+    protected void scheduleGeneralTask(Runnable task) {
+        generalThreadPool.submit(task);
     }
 
     /**

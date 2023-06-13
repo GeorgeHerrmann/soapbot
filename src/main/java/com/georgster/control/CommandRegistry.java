@@ -9,6 +9,7 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.dm.MessageCommand;
 import com.georgster.events.reserve.ReserveEventCommand;
+import com.georgster.events.poll.PollEventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.misc.HelloWorldCommand;
@@ -20,6 +21,7 @@ import com.georgster.music.PlayMusicCommand;
 import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
 import com.georgster.plinko.PlinkoCommand;
+import com.georgster.test.TestCommand;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.permissions.PermissionsCommand;
 import com.georgster.util.thread.ThreadPoolFactory;
@@ -48,6 +50,7 @@ public class CommandRegistry {
         context.setCommandRegistry(this);
         
         commands = new ArrayList<>(List.of(
+            TestCommand.class,
             PongCommand.class,
             SoapCommand.class,
             HelpCommand.class,
@@ -61,7 +64,8 @@ public class CommandRegistry {
             SkipMusicCommand.class,
             PermissionsCommand.class,
             HelloWorldCommand.class,
-            TheFinalShapeCommand.class
+            TheFinalShapeCommand.class,
+            PollEventCommand.class
         ));
     }
 

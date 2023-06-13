@@ -1,16 +1,11 @@
 package com.georgster.events.reserve;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
+import com.georgster.events.TimedEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 
@@ -19,20 +14,19 @@ import com.georgster.util.SoapUtility;
  * with a new identifier. Every ReserveEvent object has an identifier, number,
  * of people needed to start the event, number of people reserved, a time,
  * the name of the channel the event was reserved in, and a list of reserved users.
- * 
+ * <p>
  * An event that is Timeless has no associated time, while an event that is
  * Unlimited has no associated number of people needed to start the event. A ReserveEvent
  * cannot be both Timeless and Unlimited.
  */
-public class ReserveEvent implements SoapEvent {
+public class ReserveEvent extends TimedEvent implements SoapEvent {
+    private static final SoapEventType TYPE = SoapEventType.RESERVE;
+
     private String identifier;
     private int numPeople;
     private int reserved;
-    private String time;
-    private String date;
     private String channel;
     private List<String> reservedUsers;
-    private SoapEventType type = SoapEventType.RESERVE;
     
     /**
      * Constructs a ReserveEvent object with an identifier, number of people, number of people
@@ -47,13 +41,13 @@ public class ReserveEvent implements SoapEvent {
      * @param reservedUsers a list of users that have reserved for the event
      */
     public ReserveEvent(String identifier, int numPeople, int reserved, String time, String channel, List<String> reservedUsers, String date) {
+        super(time, date);
+
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.reserved = reserved;
-        this.time = time;
         this.channel = channel;
         this.reservedUsers = reservedUsers;
-        this.date = date;
     }
 
     /**
@@ -65,13 +59,14 @@ public class ReserveEvent implements SoapEvent {
      * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, int numPeople, String time, String channel) {
+        super(time);
+
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.time = time;
         this.reserved = 0; //We will always start with one person reserved
         this.channel = channel;
         reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
-        this.date = getCorrectDate(time);
     }
 
     /**
@@ -83,10 +78,10 @@ public class ReserveEvent implements SoapEvent {
      * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, int numPeople, String time, String channel, String date) {
-        this.date = date;
+        super(time, date);
+
         this.identifier = identifier;
         this.numPeople = numPeople;
-        this.time = time;
         this.reserved = 0; //We will always start with one person reserved
         this.channel = channel;
         reservedUsers = new ArrayList<>(); //We will create a new list for reserved users
@@ -100,13 +95,13 @@ public class ReserveEvent implements SoapEvent {
      * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, int numPeople, String channel) {
+        super("99:99");
+
         this.identifier = identifier;
         this.numPeople = numPeople;
         this.reserved = 0;
-        this.time = "99:99"; //A Timeless event will always be at 99:99
         this.channel = channel;
         reservedUsers = new ArrayList<>();
-        this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
     }
 
     /**
@@ -118,13 +113,13 @@ public class ReserveEvent implements SoapEvent {
      * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, String time, String channel) {
+        super(time);
+
         this.identifier = identifier;
-        this.time = time;
         this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start
         this.reserved = 0;
         this.channel = channel;
         reservedUsers = new ArrayList<>();
-        this.date = getCorrectDate(time);
     }
 
     /**
@@ -136,9 +131,9 @@ public class ReserveEvent implements SoapEvent {
      * @param channel the name of the channel the event was reserved in
      */
     public ReserveEvent(String identifier, String time, String channel, String date) {
-        this.date = date;
+        super(time, date);
+
         this.identifier = identifier;
-        this.time = time;
         this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start
         this.reserved = 0;
         this.channel = channel;
@@ -146,35 +141,11 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
-     * Returns the correct Date String based on the time of the event.
-     * If the time of the event has already passed, the date will be set to the next day.
-     * Otherwise, the date will be set to the current day.
-     * <p><b>Note:</b> This method should be used when a time, but not a date, is specified.</p>
-     * 
-     * @param time the time of the event
-     * @return the correct date of the event
-     */
-    private String getCorrectDate(String time) {
-        LocalTime localTime = LocalTime.parse(time);
-        if (LocalTime.now(ZoneId.of("-05:00")).plusHours(1).isAfter(localTime)) {
-            return LocalDate.now(ZoneId.of("-05:00")).plusDays(1).toString();
-        } else {
-            return LocalDate.now(ZoneId.of("-05:00")).toString();
-        }
-    }
-
-    /**
      * {@inheritDoc}
      */
     public boolean fulfilled() {
         if (!isTimeless()) {
-            LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00"));
-            String eventDateTimeString = date + "T" + time + ":00";
-            long until = (now.until(LocalDateTime.parse(eventDateTimeString), ChronoUnit.SECONDS)) - 3600;
-            if (until < 0 && Math.abs(until) > 60) {
-                until = Math.abs(until);
-            }
-            return until <= 0;
+            return until() <= 0;
         } else {
             return reserved >= numPeople;
         }
@@ -269,64 +240,10 @@ public class ReserveEvent implements SoapEvent {
     }
 
     /**
-     * Returns the time the event will start.
-     * 
-     * @return the time the event will start
-     */
-    public String getTime() {
-        return time;
-    }
-
-    /**
      * {@inheritDoc}
      */
     public String getOwner() {
         return reservedUsers.get(0);
-    }
-
-    /**
-     * Sets the time for the event. The time will be standardized, therefore any time standard
-     * accepted by {@link SoapUtility#timeConverter(String)} will be accepted.
-     * 
-     * @param time The new time.
-     * @throws IllegalArgumentException If the time string is in an invalid format.
-     */
-    public void setTime(String time) throws IllegalArgumentException {
-        this.time = SoapUtility.timeConverter(time);
-        if (isToday()) {
-            this.date = getCorrectDate(this.time); //Makes sure date time is not in the past
-        }
-    }
-
-    /**
-     * Returns whether this reserve event's date is today's date.
-     * 
-     * @return True if the date is today's date, false otherwise.
-     */
-    public boolean isToday() {
-        LocalDate now = LocalDate.now(ZoneId.of("-05:00"));
-        LocalDate eventDate = LocalDate.parse(date);
-        return (now.getYear() == eventDate.getYear() && now.getDayOfYear() == (eventDate.getDayOfYear() - 1));
-    }
-
-    /**
-     * Returns the date the event will start.
-     * 
-     * @return the date the event will start
-     */
-    public String getDate() {
-        return date;
-    }
-
-    /**
-     * Sets the date for the event. The date will be standardized, therefore any date standard
-     * accepted by {@link SoapUtility#convertDate(String)} will be accepted.
-     * 
-     * @param date The new date.
-     * @throws IllegalArgumentException If the date string is in an invalid format.
-     */
-    public void setDate(String date) throws IllegalArgumentException {
-        this.date = SoapUtility.convertDate(date);
     }
 
     /**
@@ -353,7 +270,7 @@ public class ReserveEvent implements SoapEvent {
      * @return the type of the event
      */
     public SoapEventType getType() {
-        return type;
+        return TYPE;
     }
 
     /**
@@ -408,7 +325,35 @@ public class ReserveEvent implements SoapEvent {
         && numPeople == event.getNumPeople()
         && reserved == event.getReserved()
         && reservedUsers.equals(event.getReservedUsers())
-        && type == event.getType();
+        && TYPE == event.getType();
+    }
+
+    /**
+     * Returns a String describing this {@code ReserveEvent}.
+     * 
+     * @return A String describing this {@code ReserveEvent}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder response = new StringBuilder();
+        response.append("Event: " + getIdentifier() + "\n");
+        response.append("- Reserved: " + getReserved() + "\n");
+        if (isUnlimited()) {
+            response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
+        } else {
+            response.append("- Needed: " + getNumPeople() + "\n");
+        }
+        if (isTimeless()) {
+            response.append("- This event has no associated time\n");
+            response.append("\t- This event will pop once the needed number of people have reserved to it");
+        } else {
+            response.append("- Time: " + SoapUtility.convertToAmPm(getTime()) + "\n");
+            response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(getTime()));
+        }
+        response.append("\nScheduled for: " + SoapUtility.formatDate(getDate()));
+        response.append("\nReserved users:\n");
+        getReservedUsers().forEach(user -> response.append("- " + user + "\n"));
+        return response.toString();
     }
 
 }

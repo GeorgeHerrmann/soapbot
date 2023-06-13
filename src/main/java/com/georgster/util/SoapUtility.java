@@ -1,6 +1,8 @@
 package com.georgster.util;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
@@ -94,8 +96,8 @@ public class SoapUtility {
      */
     private static String insertSpaces(String input) {
         // Insert spaces between month/day and day suffix (st/nd/rd/th)
-        input = input.replaceAll("(?<=[a-zA-Z])(?=[0-9])", " ");
-        input = input.replaceAll("(?<=[0-9])(?=[a-zA-Z]{2})", " ");
+        input = input.replaceAll("(?<=[a-zA-Z])(?=\\d)", " ");
+        input = input.replaceAll("(?<=\\d)(?=[a-zA-Z]{2})", " ");
         return input;
     }
 
@@ -114,11 +116,11 @@ public class SoapUtility {
         } catch (DateTimeParseException e) {
             try {
                 if (inputDate.equalsIgnoreCase("tomorrow")) {
-                    date = LocalDate.now().plusDays(1);
+                    date = LocalDate.now(ZoneId.of("-05:00")).plusDays(1);
                 } else {
                     String[] parts = inputDate.split(" ");
                     int daysToAdd = Integer.parseInt(parts[1]);
-                    date = LocalDate.now().plusDays(daysToAdd);
+                    date = LocalDate.now(ZoneId.of("-05:00")).plusDays(daysToAdd);
                 }
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Invalid date format, valid date formats are MMM dd, yyyy, MMM dd, yy, MMM dd, yyyy, tomorrow, and in x days");
@@ -152,7 +154,7 @@ public class SoapUtility {
             int dayOfMonth = Integer.parseInt(parts[1].replaceAll("\\D+", ""));
             int month = parseMonth(parts[0]);
             int year = LocalDate.now().getYear();
-            if (LocalDate.now().getMonthValue() > month || (LocalDate.now().getMonthValue() == month && LocalDate.now().getDayOfMonth() > dayOfMonth)) {
+            if (LocalDate.now(ZoneId.of("-05:00")).getMonthValue() > month || (LocalDate.now(ZoneId.of("-05:00")).getMonthValue() == month && LocalDate.now(ZoneId.of("-05:00")).getDayOfMonth() > dayOfMonth)) {
                 year++;
             }
             return LocalDate.of(year, month, dayOfMonth);
@@ -226,6 +228,95 @@ public class SoapUtility {
         split[0] = line.substring(0, line.indexOf("\n"));
         split[1] = line.substring(line.indexOf("\n") + 1);
         return split;
+    }
+
+    /**
+     * Converts a string describing an incremented time in the future to a standardized {@link LocalDateTime} String.
+     * 
+     * @param timeString The descriptor string.
+     * @return The standardized string.
+     */
+    public static String calculateFutureDateTime(String timeString) {
+        // Remove leading/trailing whitespace and convert to lowercase
+        String input = timeString.trim().toLowerCase();
+
+        // Extract numeric value and unit from the input string
+        int value;
+        String unit;
+        if (input.contains("minute") || input.contains("min") || input.contains("mins") || input.contains("minutes")) {
+            unit = "minute";
+            value = extractNumericValue(input);
+        } else if (input.contains("hour") || input.contains("hr") || input.contains("hrs") || input.contains("hours")) {
+            unit = "hour";
+            value = extractNumericValue(input);
+        } else if (input.contains("day") || input.contains("days")) {
+            unit = "day";
+            value = extractNumericValue(input);
+        } else {
+            throw new IllegalArgumentException("Invalid time unit, accepted formats are '5 mins', '3 hours', '4 days', etc");
+        }
+
+        // Get the current LocalDateTime
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00")).plusHours(1);
+
+        // Calculate the future LocalDateTime
+        LocalDateTime futureTime;
+        if (unit.equals("minute")) {
+            futureTime = now.plusMinutes(value);
+        } else if (unit.equals("hour")) {
+            futureTime = now.plusHours(value);
+        } else { // days
+            futureTime = now.plusDays(value);
+        }
+
+        // Return the future LocalDateTime as a string
+        return futureTime.toString();
+    }
+
+    /**
+     * Extracts the numeric value from a date or time descriptor.
+     * 
+     * @param input A date or time descriptor.
+     * @return The numeric value from the descriptor.
+     */
+    private static int extractNumericValue(String input) {
+        // Remove non-digit characters
+        String numericString = input.replaceAll("\\D+", "");
+        return Integer.parseInt(numericString);
+    }
+
+    /**
+     * Returns a String that more clearly describes a time given a number of seconds.
+     * 
+     * @param seconds The number of seconds.
+     * @return A String that more clearly describes a time.
+     */
+    public static String convertSecondsToHoursMinutes(int seconds) {
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        int remainingSeconds = seconds % 60;
+
+        StringBuilder result = new StringBuilder();
+
+        if (hours > 0) {
+            result.append(hours).append(hours == 1 ? " hour" : " hours");
+        }
+
+        if (minutes > 0) {
+            if (result.length() > 0) {
+                result.append(" ");
+            }
+            result.append(minutes).append(minutes == 1 ? " minute" : " minutes");
+        }
+
+        if (remainingSeconds > 0) {
+            if (result.length() > 0) {
+                result.append(" ");
+            }
+            result.append(remainingSeconds).append(remainingSeconds == 1 ? " second" : " seconds");
+        }
+
+        return result.toString();
     }
 
 }

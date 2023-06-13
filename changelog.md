@@ -63,3 +63,16 @@
 2.342
     - Updated ReserveEvent's incorrectly scheduling a day in advance
     - Fixed various formatting issues with the switch to the new Discord formatting system
+
+2.350
+    - Standardized all events which use dates or times to the TimedEvent
+        - Will handle all data management involving times and dates for all implementations
+    - Added a poll system
+        - Uses the new InputWizard system to handle all user interaction
+        - Polls can be created with a prompt and an unlimited number of options
+        - A duration for how long a poll can be active can be specified
+            - Like Reserve Events, polls can be scheduled for any time in the future
+    - Fixed an issue causing timed events to duplicate themselves when being restarted and the time until the event's expiration was between -60 and 0 seconds
+    - Fixed an issue where certain reserve events could not be viewed using the ReserveEventCommand
+        
+

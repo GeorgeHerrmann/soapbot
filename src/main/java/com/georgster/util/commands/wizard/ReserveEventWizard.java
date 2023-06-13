@@ -34,7 +34,7 @@ public class ReserveEventWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendText("Welcome to the reserve event wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
+        handler.sendText("Welcome to the reserve event wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         manageEvents();
         end();
     }
@@ -75,7 +75,7 @@ public class ReserveEventWizard extends InputWizard {
                     editDate(event);
                 } else if (response.equals("delete event")) {
                     eventManager.remove(event);
-                    handler.sendText("Removed reserve event " + event.getIdentifier(), TITLE);
+                    sendMessage("Removed reserve event " + event.getIdentifier(), TITLE);
                     manageEvents();
                 }
             }), prompt, options);
@@ -99,11 +99,11 @@ public class ReserveEventWizard extends InputWizard {
                 try {
                     event.setNumPeople(Integer.parseInt(response));
                     eventManager.update(event);
-                    handler.sendText("Updated event " + event.getIdentifier() + " to allow " + response + " reservees.", TITLE);
+                    sendMessage("Updated event " + event.getIdentifier() + " to allow " + response + " reservees.", TITLE);
                 }  catch (NumberFormatException e) {
-                    handler.sendText("That is not a number, please enter a number", TITLE);
+                    sendMessage("That is not a number, please enter a number", TITLE);
                 } catch (IllegalArgumentException e) {
-                    handler.sendText(e.getMessage(), TITLE);
+                    sendMessage(e.getMessage(), TITLE);
                 }
             }), prompt);
             if (wizardResponse == WizardResponse.BACK) {
@@ -126,10 +126,10 @@ public class ReserveEventWizard extends InputWizard {
                 try {
                     event.setTime(response);
                     eventManager.update(event);
-                    handler.sendText("Updated event " + event.getIdentifier() + " to have the time " + SoapUtility.convertToAmPm(event.getTime()) + "." +
+                    sendMessage("Updated event " + event.getIdentifier() + " to have the time " + SoapUtility.convertToAmPm(event.getTime()) + "." +
                                     "\n*Note: The date may have been adjusted if the new date time was in the past*", TITLE);
                 } catch (IllegalArgumentException e) {
-                    handler.sendText(e.getMessage(), TITLE);
+                    sendMessage(e.getMessage(), TITLE);
                 }
             }), prompt);
             if (wizardResponse == WizardResponse.BACK) {
@@ -152,9 +152,9 @@ public class ReserveEventWizard extends InputWizard {
                 try {
                     event.setDate(response);
                     eventManager.update(event);
-                    handler.sendText("Updated event " + event.getIdentifier() + " to have the date " + SoapUtility.formatDate(event.getDate()) + ".", TITLE);
+                    sendMessage("Updated event " + event.getIdentifier() + " to have the date " + SoapUtility.formatDate(event.getDate()) + ".", TITLE);
                 } catch (IllegalArgumentException e) {
-                    handler.sendText(e.getMessage(), TITLE);
+                    sendMessage(e.getMessage(), TITLE);
                 }
             }), prompt);
             if (wizardResponse == WizardResponse.BACK) {

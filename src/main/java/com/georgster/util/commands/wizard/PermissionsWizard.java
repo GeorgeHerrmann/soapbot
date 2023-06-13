@@ -29,7 +29,7 @@ public class PermissionsWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard");
+        handler.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         managePermissions();
         end();
     }
@@ -63,7 +63,7 @@ public class PermissionsWizard extends InputWizard {
                 } else if (response.equals("remove")) {
                     removePermission(group);
                 } else if (response.equals("list")) {
-                    handler.sendText("Permissions for " + group.getName() + ":\n" + group.getActions().toString());
+                    handler.sendText("Permissions for " + group.getName() + ":\n" + group.getActions().toString(), TITLE);
                 }
             }), "What would you like to do for " + group.getName() + "?", "add", "remove", "list");
             if (output == WizardResponse.BACK) {
@@ -89,7 +89,7 @@ public class PermissionsWizard extends InputWizard {
                 PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
                 group.addPermission(action);
                 permissionsManager.update(group);
-                handler.sendText("Added " + action.toString() + " to " + group.getName());
+                sendMessage("Added " + action.toString() + " to " + group.getName(), TITLE);
             }), "What permission would you like to add?", perms);
             if (output == WizardResponse.BACK) {
                 return;
@@ -115,9 +115,9 @@ public class PermissionsWizard extends InputWizard {
                 if (group.getActions().contains(action)) {
                     group.removePermission(action);
                     permissionsManager.update(group);
-                    handler.sendText("Removed " + action.toString() + " from " + group.getName());
+                    sendMessage("Removed " + action.toString() + " from " + group.getName(), TITLE);
                 } else {
-                    handler.sendText("That permission is not in the group. Please try again");
+                    sendMessage("That permission is not in the group. Please try again", TITLE);
                 }
             }), "What permission would you like to remove?", perms);
             if (output == WizardResponse.BACK) {
