@@ -78,3 +78,7 @@
 2.351
     - Fixed an issue where events with a time, but no date, could not be created.
 
+2.352
+    - Reworked the InputWizard Engine
+        - Can now fully run implementators without any direction from the implementation
+            - Only logic from the extending class on what to prompt and how to handle the response is required
