@@ -34,7 +34,7 @@ public abstract class TimedEvent {
             this.time = time;
             this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
         } else {
-            this.date = getCorrectDate(time);
+            this.date = getCorrectDate(SoapUtility.timeConverter(time));
             setTime(time);
         }
     }

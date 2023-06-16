@@ -82,3 +82,7 @@
     - Reworked the InputWizard Engine
         - Can now fully run implementators without any direction from the implementation
             - Only logic from the extending class on what to prompt and how to handle the response is required
+
+2.353
+    - Fixed an issue where TimedEvents with only a time would fail to be created on AM/PM inputs
+      because the time was not converted before determining the correct scheduling date.
