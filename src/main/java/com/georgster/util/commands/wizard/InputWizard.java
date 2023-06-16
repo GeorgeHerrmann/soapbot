@@ -1,5 +1,9 @@
 package com.georgster.util.commands.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.function.Consumer;
 
 import com.georgster.control.util.CommandExecutionEvent;
@@ -14,42 +18,50 @@ import discord4j.core.object.entity.channel.Channel;
 /**
  * Abstract class for creating a wizard that prompts the user for input and records the response.
  * <p>In order to define different states for the wizard, states should be defined in methods which
- * point to eachother, stemming from {@link #begin()}. Responses should be handled with {@code withResponseFirst()}
- * for the first state, and {@code withResponse()} for all other states. Example implementation:</p>
+ * point to eachother with {@link #nextWindow(String, Object...)}, stemming from {@link #begin()}.
+ * Responses should be handled with {@link #withResponseBack(Consumer, String, String...)} for states with back functionality,
+ * and {@code withResponse()} for all other states.</p>
+ * 
+ * Implementations can use {@link #sendMessage(String, String)} to send self-expiring messages, or access {@link #handler} for more control
+ * over Guild interactions. {@link #user} is the user of the InputWizard.
+ * <p>
+ * Example implementation:
  * <pre>
  * {@code
  * public void begin() {
+ *    nextWindow("pickHeadsOrTails");
+ * }
+ * 
+ * protected void pickHeadsOrTails() {
  *    String prompt = "Pick heads or tails";
  *    String[] options = {"heads", "tails"};
- *    withResponseFirst((response -> {
+ *    withResponse((response -> {
  *      if (response.equalsIgnoreCase("heads")) {
- *          pickedHeads();
+ *          nextWindow("pickedHeads");
  *      } else {
- *          pickedTails();
+ *          nextWindow("pickedTails");
  *      }
  *    }), prompt, options);
  * }
  * 
- * public void pickedHeads() {
- *   while (isActive()) { // For states which be repeated
- *      String prompt = "You picked heads. Pick a number between 1 and 2";
- *      String[] options = {"1", "2"};
- *      withResponse((response -> {
- *          if (response.equals("1")) {
- *              picked1();
- *          } else {
- *              picked2();
- *          }
- *      }), prompt, options);
- *      if (output == WizardResponse.BACK) { // For states which you can go back to the previous state
- *          return;
- *      }
- *   }
+ * protected void pickedHeads() {
+ *    String prompt = "You picked heads. Pick a number between 1 and 2";
+ *    String[] options = {"1", "2"};
+ *    withResponseBack((response -> {
+ *        if (response.equals("1")) {
+ *            nextWindow("picked1");
+ *        } else {
+ *            nextWindow("picked2");
+ *        }
+ *    }), prompt, options);
  * }
  * </pre>
  * 
  */
 public abstract class InputWizard {
+    private Deque<Method> activeFunctions; //Stack of methods that have been or are executing
+    private Deque<Object[]> activeFunctionParams; //Stack of parameters for methods that have been or are executing
+
     protected final Member user;
     private boolean isActive;
     private boolean awaitingResponse;
@@ -57,17 +69,80 @@ public abstract class InputWizard {
     private final UserInputListener listener;
 
     /**
-     * Creates a new InputWizard with the given event and listener.
+     * Initializes the InputWizard engine.
      * 
-     * @param event Event to create the wizard from.
-     * @param listener Listener to handle input.
+     * @param event The event that prompted the Wizard creation.
+     * @param listener The {@code UserInputListener} which will handle the user interaction.
      */
     protected InputWizard(CommandExecutionEvent event, UserInputListener listener) {
+        this.activeFunctions = new ArrayDeque<>();
+        this.activeFunctionParams = new ArrayDeque<>();
+
         this.user = event.getDiscordEvent().getAuthorAsMember();
         this.handler = event.getGuildInteractionHandler();
         this.isActive = true;
         this.awaitingResponse = false;
         this.listener = listener;
+    }
+
+    /**
+     * Immediately switches to a new window in this {@code InputWizard}, given
+     * the name of a method in the wizard and the parameters required to run it.
+     * 
+     * @param methodName The name of the method which will run the next window in this {@code InputWizard}.
+     * @param parameters The parameters for said method.
+     */
+    protected void nextWindow(String methodName, Object... parameters) {
+        try {
+            activeFunctions.push(getMethod(methodName, parameters));
+            activeFunctionParams.push(parameters);
+            invokeCurrentMethod();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Returns to the previous window of this {@code InputWizard}, given one exists.
+     */
+    protected void goBack() {
+        activeFunctions.pop();
+        activeFunctionParams.pop();
+        invokeCurrentMethod();
+    }
+
+    /**
+     * Runs the current method for as long as this {@code InputWizard} is active.
+     */
+    private void invokeCurrentMethod() {
+        while (isActive()) {
+            try {
+                activeFunctions.peek().invoke(this, activeFunctionParams.peek());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Returns the Method that is in this {@code InputWizard} if one exists.
+     * 
+     * @param methodName The name of the method.
+     * @param parameters The parameters of the method.
+     * @return The Method object.
+     * @throws NoSuchMethodException If no method exist, or the method is no visible.
+     */
+    private Method getMethod(String methodName, Object... parameters) throws NoSuchMethodException {
+        Class<?>[] paramClasses = new Class[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            paramClasses[i] = parameters[i].getClass();
+        }
+
+        try {
+            return this.getClass().getDeclaredMethod(methodName, paramClasses);
+        } catch (NoSuchMethodException e) {
+           throw new NoSuchMethodException("Method: " + methodName + " does not exist inside of InputWizard: " + this.getClass().getSimpleName() + ", or the method is not protected.");
+        }
     }
 
     /**
@@ -96,7 +171,7 @@ public abstract class InputWizard {
     /**
      * Begins the wizard.
      */
-    public abstract void begin(); // The first state should be defined here
+    public abstract void begin();
 
     /**
      * Returns whether the wizard is active.
@@ -144,43 +219,40 @@ public abstract class InputWizard {
     }
 
     /**
-     * A handler for the response from the first state of the wizard.
+     * A handler for the response from a state of the wizard, prompting them with the given options.
      * 
      * @param withResponse Handler for the response.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      */
-    protected void withResponseFirst(Consumer<String> withResponse, String message, String... options) {
+    protected void withResponse(Consumer<String> withResponse, String message, String... options) {
         String response = prompt(message, options);
         if (response == null) {
-                isActive = false;
+            isActive = false;
         } else {
             withResponse.accept(response);
         }
     }
 
     /**
-     * A handler for the response from a state of the wizard.
+     * A handler for the response from a state of the wizard, prompting them with the given options
+     * and including back functionality.
      * 
      * @param withResponse Handler for the response.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
-     * @return A {@link WizardResponse} indicating the result of the response.
      */
-    protected WizardResponse withResponse(Consumer<String> withResponse, String message, String... options) {
+    protected void withResponseBack(Consumer<String> withResponse, String message, String... options) {
         String[] optionsWithBack = new String[options.length + 1];
         System.arraycopy(options, 0, optionsWithBack, 0, options.length);
         optionsWithBack[options.length] = "back";
-
         String response = prompt(message, optionsWithBack);
         if (response == null) {
             isActive = false;
-            return WizardResponse.ENDED;
         } else if (response.equalsIgnoreCase("back")) {
-            return WizardResponse.BACK;
+            goBack();
         } else {
             withResponse.accept(response);
-            return WizardResponse.NEXT;
         }
     }
 
@@ -204,5 +276,4 @@ public abstract class InputWizard {
             }
         });
     }
-
 }

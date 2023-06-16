@@ -5,6 +5,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
+import com.georgster.util.commands.wizard.InputWizard;
 import com.georgster.util.commands.wizard.PollEventWizard;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -20,7 +21,7 @@ public class PollEventCommand implements Command {
     public void execute(CommandExecutionEvent event) {
         event.getLogger().append("- Beginning the Poll Wizard", LogDestination.NONAPI);
 
-        PollEventWizard wizard = new PollEventWizard(event);
+        InputWizard wizard = new PollEventWizard(event);
         wizard.begin();
     }
 

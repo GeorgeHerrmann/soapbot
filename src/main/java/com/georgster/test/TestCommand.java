@@ -2,7 +2,7 @@ package com.georgster.test;
 
 import java.util.List;
 
-import com.georgster.ParseableCommand;
+import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.commands.CommandParser;
 
@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Used to test on going features. This command will be considered active if the
  * {@code ACTIVE} field is set to {@code true}.
  */
-public class TestCommand implements ParseableCommand { 
+public class TestCommand implements Command { 
     private static final boolean ACTIVE = false;
 
     /**

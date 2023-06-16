@@ -60,7 +60,7 @@ public class MenuMessageListener implements UserInputListener {
         String prompt = inputState.getMessage();
         String[] options = inputState.getOptions();
 
-        boolean mustMatch = (options.length > 1);
+        boolean mustMatch = (options.length > 2 || !((List.of(options).contains("back") && options.length == 2) || options.length == 1));
 
         SelectMenu.Option[] menuOptions = new SelectMenu.Option[options.length];
 
