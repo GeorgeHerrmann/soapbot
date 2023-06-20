@@ -89,8 +89,8 @@ public class ReserveEventCommand implements ParseableCommand {
         } else if (parser.getMatchingRule("I").equals("manage")) {
             if (eventManager.hasAny(TYPE)) {
                 InputWizard wizard = new ReserveEventWizard(event);
+                logger.append("- Beginning the reserve event wizard\n", LogDestination.NONAPI);
                 wizard.begin();
-                logger.append("- Beginning the reserve event wizard", LogDestination.NONAPI);
             } else {
                 handler.sendText("There are no Reserve Events to manage.", "Reserve Event Wizard");
                 logger.append("- There are no reserve events to manage.", LogDestination.NONAPI);

@@ -19,7 +19,7 @@ public class PollEventCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        event.getLogger().append("- Beginning the Poll Wizard", LogDestination.NONAPI);
+        event.getLogger().append("- Beginning the Poll Wizard\n", LogDestination.NONAPI);
 
         InputWizard wizard = new PollEventWizard(event);
         wizard.begin();
