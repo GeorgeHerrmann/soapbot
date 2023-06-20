@@ -86,3 +86,7 @@
 2.353
     - Fixed an issue where TimedEvents with only a time would fail to be created on AM/PM inputs
       because the time was not converted before determining the correct scheduling date.
+
+2.354
+    - Added a ButtonMessage UserInputListener
+        - Functions similarly to the MenuMessage listener, but with buttons.

@@ -7,6 +7,8 @@ import java.util.Deque;
 import java.util.function.Consumer;
 
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.wizard.input.UserInputListener;
 import com.georgster.util.thread.ThreadPoolFactory;
@@ -67,6 +69,7 @@ public abstract class InputWizard {
     private boolean awaitingResponse;
     protected final GuildInteractionHandler handler;
     private final UserInputListener listener;
+    protected final MultiLogger logger;
 
     /**
      * Initializes the InputWizard engine.
@@ -83,6 +86,7 @@ public abstract class InputWizard {
         this.isActive = true;
         this.awaitingResponse = false;
         this.listener = listener;
+        this.logger = event.getLogger();
     }
 
     /**
@@ -97,6 +101,8 @@ public abstract class InputWizard {
             activeFunctions.push(getMethod(methodName, parameters));
             activeFunctionParams.push(parameters);
             invokeCurrentMethod();
+
+            logger.append("- Switching to window: " + methodName + "\n", LogDestination.NONAPI);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -109,6 +115,7 @@ public abstract class InputWizard {
         activeFunctions.pop();
         activeFunctionParams.pop();
         invokeCurrentMethod();
+        logger.append("- Returning to the previous window" + "\n", LogDestination.NONAPI);
     }
 
     /**

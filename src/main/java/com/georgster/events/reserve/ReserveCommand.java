@@ -101,10 +101,9 @@ public class ReserveCommand implements ParseableCommand {
     /**
      * Assigns the correct ReserveEvents based on the user's command message.
      * 
-     * @param manager The GuildManager that is managing the guild
-     * @param parser The CommandParser that is parsing the user's command message
-     * @return The ReserveEvent that the user wants to create or reserve to
-     * @throws IllegalArgumentException If the user's command message is in the wrong format
+     * @param event The CommandExecutionEvent that prompted the creation of this ReserveEvent.
+     * @return The ReserveEvent that the user wants to create or reserve to.
+     * @throws IllegalArgumentException If the user's command message is in the wrong format.
      */
     private ReserveEvent assignCorrectEvent(CommandExecutionEvent event) throws IllegalArgumentException {
         GuildInteractionHandler manager = event.getGuildInteractionHandler();

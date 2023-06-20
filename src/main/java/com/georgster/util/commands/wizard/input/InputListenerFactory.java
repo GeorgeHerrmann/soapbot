@@ -2,6 +2,8 @@ package com.georgster.util.commands.wizard.input;
 
 import com.georgster.control.util.CommandExecutionEvent;
 
+import discord4j.core.object.component.Button;
+
 /**
  * Factory class for creating input listeners.
  */
@@ -26,5 +28,18 @@ public class InputListenerFactory {
      */
     public static UserInputListener createMenuMessageListener(CommandExecutionEvent event, String title) {
         return new MenuMessageListener("end", title, event.getEventDispatcher(), event.getGuildInteractionHandler(), event.getDiscordEvent().getAuthorAsMember());
+    }
+
+    /**
+     * Returns a {@link ButtonMessageListener} * Sends a message to the user in a {@code Message}
+     * containing {@link Button}s as the options. Users can respond by either clicking on the 
+     * corresponding button, or by sending a message containing a valid option.
+     * 
+     * @param event Command execution event that triggered the wizard.
+     * @param title Title of the menu.
+     * @return {@link ButtonMessageListener} that will send a message containing buttons and record responses.
+     */
+    public static UserInputListener createButtonMessageListener(CommandExecutionEvent event, String title) {
+        return new ButtonMessageListener("end", title, event.getEventDispatcher(), event.getGuildInteractionHandler(), event.getDiscordEvent().getAuthorAsMember());
     }
 }

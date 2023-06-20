@@ -3,7 +3,7 @@ package com.georgster.util;
 import java.util.List;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
+import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -25,7 +25,7 @@ public class GuildInteractionHandler {
     private Guild guild; //The guild being interacted with
     private Channel activeChannel; //The channel that is currently active
     private ChatInputInteractionEvent activeInteraction; //The active interaction
-    private SelectMenuInteractionEvent activeSelectMenuInteraction; //The active select menu interaction
+    private ComponentInteractionEvent activeComponentInteraction; //The active select menu interaction
 
     /**
      * Creates a new GuildInteractionHandler for the given guild.
@@ -85,8 +85,8 @@ public class GuildInteractionHandler {
      * 
      * @param interaction the new active select menu interaction event
      */
-    public void setActiveSelectMenuInteraction(SelectMenuInteractionEvent interaction) {
-        activeSelectMenuInteraction = interaction;
+    public void setActiveComponentInteraction(ComponentInteractionEvent interaction) {
+        activeComponentInteraction = interaction;
     }
 
     /**
@@ -112,8 +112,8 @@ public class GuildInteractionHandler {
      * 
      * @return the select menu interaction that is currently active
      */
-    public SelectMenuInteractionEvent getActiveSelectMenuInteraction() {
-        return activeSelectMenuInteraction;
+    public ComponentInteractionEvent getComponentInteractionEvent() {
+        return activeComponentInteraction;
     }
 
     /**
@@ -126,8 +126,8 @@ public class GuildInteractionHandler {
     /**
      * Kills the active select menu interaction event for this handler, setting it to null.
      */
-    public void killActiveSelectMenuInteraction() {
-        activeSelectMenuInteraction = null;
+    public void killActiveComponentInteraction() {
+        activeComponentInteraction = null;
     }
 
     /**
@@ -233,14 +233,14 @@ public class GuildInteractionHandler {
      * 
      * @param text the message to send
      * @param title the title of the message
-     * @param component the component to add to the message
+     * @param components the components to add to the message
      * @throws IllegalStateException if the active channel is not a text channel
      */
-    public Message sendText(String text, String title, LayoutComponent component) throws IllegalStateException {
+    public Message sendText(String text, String title, LayoutComponent... components) throws IllegalStateException {
         if (activeInteraction != null) {
             try {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addComponent(component).build();
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
                 activeInteraction.reply(spec).block();
                 Message message = activeInteraction.getReply().block();
                 killActiveInteraction();
@@ -252,7 +252,7 @@ public class GuildInteractionHandler {
             if (activeChannel != null) {
                 try {
                     EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(component);
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
                     return ((TextChannel) activeChannel).createMessage(spec).block();
                 } catch (NullPointerException e) {
                     throw new IllegalStateException("There was an issue sending the message to the active channel.");
@@ -272,9 +272,9 @@ public class GuildInteractionHandler {
     public Message editMessageContent(Message message, String text) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
         if (message != null) {
-            if (activeSelectMenuInteraction != null) {
-                Message returns = activeSelectMenuInteraction.getReply().block();
-                killActiveSelectMenuInteraction();
+            if (activeComponentInteraction != null) {
+                Message returns = activeComponentInteraction.getReply().block();
+                killActiveComponentInteraction();
                 return returns;
             } else {
                 return message.edit().withEmbeds(embed).block();
@@ -294,10 +294,10 @@ public class GuildInteractionHandler {
     public Message editMessageContent(Message message, String text, String title) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
         if (message != null) {
-            if (activeSelectMenuInteraction != null) {
-                activeSelectMenuInteraction.edit().withEmbeds(embed).block();
-                Message returns = activeSelectMenuInteraction.getReply().block();
-                killActiveSelectMenuInteraction();
+            if (activeComponentInteraction != null) {
+                activeComponentInteraction.edit().withEmbeds(embed).block();
+                Message returns = activeComponentInteraction.getReply().block();
+                killActiveComponentInteraction();
                 return returns;
             } else {
                 return message.edit().withEmbeds(embed).block();
@@ -313,18 +313,18 @@ public class GuildInteractionHandler {
      * @param message the message to send
      * @param text the message to send
      * @param title the title of the message
-     * @param component the component to add to the message
+     * @param components the components to add to the message
      */
-    public Message editMessageContent(Message message, String text, String title, LayoutComponent component) {
+    public Message editMessageContent(Message message, String text, String title, LayoutComponent... components) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
         if (message != null) {
-            if (activeSelectMenuInteraction != null) {
-                activeSelectMenuInteraction.edit().withEmbeds(embed).withComponents(component).block();
-                Message returns = activeSelectMenuInteraction.getReply().block();
-                killActiveSelectMenuInteraction();
+            if (activeComponentInteraction != null) {
+                activeComponentInteraction.edit().withEmbeds(embed).withComponents(components).block();
+                Message returns = activeComponentInteraction.getReply().block();
+                killActiveComponentInteraction();
                 return returns;
             } else {
-                return message.edit().withEmbeds(embed).withComponents(component).block();
+                return message.edit().withEmbeds(embed).withComponents(components).block();
             }
         }
         return null;
