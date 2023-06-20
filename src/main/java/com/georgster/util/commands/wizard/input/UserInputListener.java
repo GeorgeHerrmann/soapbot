@@ -3,7 +3,7 @@ package com.georgster.util.commands.wizard.input;
 import com.georgster.util.commands.wizard.WizardState;
 
 /**
- * Interface for classes that listen for user input within an {@link com.georgster.util.commands.wizard.OldInputWizard}.
+ * Interface for classes that listen for user input within an {@link com.georgster.util.commands.wizard.InputWizard}.
  */
 public interface UserInputListener {
     /**

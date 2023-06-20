@@ -1,7 +1,7 @@
 package com.georgster.util.commands.wizard;
 
 /**
- * A bridge between the {@link OldInputWizard} and the {@link com.georgster.util.commands.wizard.input.UserInputListener}.
+ * A bridge between the {@link InputWizard} and the {@link com.georgster.util.commands.wizard.input.UserInputListener}.
  */
 public class WizardState {
     private boolean hasEnded;

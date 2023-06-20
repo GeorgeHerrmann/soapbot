@@ -100,9 +100,10 @@ public abstract class InputWizard {
         try {
             activeFunctions.push(getMethod(methodName, parameters));
             activeFunctionParams.push(parameters);
-            invokeCurrentMethod();
 
             logger.append("- Switching to window: " + methodName + "\n", LogDestination.NONAPI);
+
+            invokeCurrentMethod();
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -112,10 +113,11 @@ public abstract class InputWizard {
      * Returns to the previous window of this {@code InputWizard}, given one exists.
      */
     protected void goBack() {
+        logger.append("- Returning to the previous window" + "\n", LogDestination.NONAPI);
+
         activeFunctions.pop();
         activeFunctionParams.pop();
         invokeCurrentMethod();
-        logger.append("- Returning to the previous window" + "\n", LogDestination.NONAPI);
     }
 
     /**
