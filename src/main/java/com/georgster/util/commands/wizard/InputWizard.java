@@ -10,6 +10,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.commands.wizard.input.InputListenerFactory;
 import com.georgster.util.commands.wizard.input.UserInputListener;
 import com.georgster.util.thread.ThreadPoolFactory;
 
@@ -21,8 +22,7 @@ import discord4j.core.object.entity.channel.Channel;
  * Abstract class for creating a wizard that prompts the user for input and records the response.
  * <p>In order to define different states for the wizard, states should be defined in methods which
  * point to eachother with {@link #nextWindow(String, Object...)}, stemming from {@link #begin()}.
- * Responses should be handled with {@link #withResponseBack(Consumer, String, String...)} for states with back functionality,
- * and {@code withResponse()} for all other states.</p>
+ * Responses should be handled with {@link #withResponse(Consumer, Boolean, String, String...)} to define logic for how to handle a user's response.</p>
  * 
  * Implementations can use {@link #sendMessage(String, String)} to send self-expiring messages, or access {@link #handler} for more control
  * over Guild interactions. {@link #user} is the user of the InputWizard.
@@ -43,19 +43,19 @@ import discord4j.core.object.entity.channel.Channel;
  *      } else {
  *          nextWindow("pickedTails");
  *      }
- *    }), prompt, options);
+ *    }), false, prompt, options);
  * }
  * 
  * protected void pickedHeads() {
  *    String prompt = "You picked heads. Pick a number between 1 and 2";
  *    String[] options = {"1", "2"};
- *    withResponseBack((response -> {
+ *    withResponse((response -> {
  *        if (response.equals("1")) {
  *            nextWindow("picked1");
  *        } else {
  *            nextWindow("picked2");
  *        }
- *    }), prompt, options);
+ *    }), true, prompt, options);
  * }
  * </pre>
  * 
@@ -155,18 +155,42 @@ public abstract class InputWizard {
     }
 
     /**
-     * Prompts the user with a message and options and returns the response,
-     * or null if the wizard has ended.
+     * Prompts the user using this Wizard's default {@link UserInputListener} 
+     * with a message and options and returns the response, or null if the wizard was ended.
      * 
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
-     * @return Response from the user, or null if the wizard has ended.
+     * @return Response from the user, or null if the wizard was ended.
      */
     private String prompt(String message, String... options) {
         WizardState state = new WizardState(message, options);
         awaitingResponse = true;
 
         state = listener.prompt(state);
+        awaitingResponse = false;
+        isActive = !state.hasEnded();
+
+        if (state.hasEnded()) {
+            return null;
+        }
+
+        return state.getMessage();
+    }
+
+    /**
+     * Prompts the user using the input {@link UserInputListener} 
+     * with a message and options and returns the response, or null if the wizard was ended.
+     * 
+     * @param newListener The {@link UserInputListener} to prompt the user with.
+     * @param message Message to prompt the user with.
+     * @param options Options to provide the user.
+     * @return Response from the user, or null if the wizard was ended.
+     */
+    private String prompt(UserInputListener newListener, String message, String... options) {
+        WizardState state = new WizardState(message, options);
+        awaitingResponse = true;
+
+        state = newListener.prompt(state);
         awaitingResponse = false;
         isActive = !state.hasEnded();
 
@@ -228,13 +252,71 @@ public abstract class InputWizard {
     }
 
     /**
-     * A handler for the response from a state of the wizard, prompting them with the given options.
+     * A handler for the response from a method (or "window") of the wizard, prompting them with the given options.
+     * <p>
+     * This method uses this Wizard's default {@link UserInputListener} to gather the user's response and, therefore,
+     * the way the user is prompted and shown their options is determined by the listener. Refer to the configured
+     * {@link UserInputListener} for documentation, or view the {@link InputListenerFactory}.
+     * <p>
+     * {@code withResponse} defines the logic for what this wizard should do once a valid response is given
+     * by the user. Implementing wizards can assume that the logic will only be run when a valid response is given,
+     * excluding the back option or a user ending the wizard (as those are automatically handled).
+     * <p>
+     * If {@code backOption} is true, the window will include full back option functionality, irregardless
+     * if there are any previous windows to return to.
+     * 
+     * @param withResponse Handler for the response.
+     * @param backOption True if this window should include back option functionality, false otherwise.
+     * @param message Message to prompt the user with.
+     * @param options Options to provide the user.
+     * @see InputListenerFactory
+     */
+    protected void withResponse(Consumer<String> withResponse, boolean backOption, String message, String... options) {
+        if (backOption) {
+            withResponseBack(withResponse, message, options);
+        } else {
+            withResponse(withResponse, message, options);
+        }
+    }
+
+    /**
+     * A handler for the response from a method (or "window") of the wizard, prompting them with the given options.
+     * <p>
+     * This method uses the provided {@link UserInputListener} to gather the user's response and, therefore,
+     * the way the user is prompted and shown their options is determined by the listener. Refer to the configured
+     * {@link UserInputListener} for documentation, or view the {@link InputListenerFactory}.
+     * <p>
+     * {@code withResponse} defines the logic for what this wizard should do once a valid response is given
+     * by the user. Implementing wizards can assume that the logic will only be run when a valid response is given,
+     * excluding the back option or a user ending the wizard (as those are automatically handled).
+     * <p>
+     * If {@code backOption} is true, the window will include full back option functionality, irregardless
+     * if there are any previous windows to return to.
+     * 
+     * @param withResponse Handler for the response.
+     * @param backOption True if this window should include back option functionality, false otherwise.
+     * @param newListener The {@link UserInputListener} to prompt the user and get their response.
+     * @param message Message to prompt the user with.
+     * @param options Options to provide the user.
+     * @see InputListenerFactory
+     */
+    protected void withResponse(Consumer<String> withResponse, boolean backOption, UserInputListener newListener, String message, String... options) {
+        if (backOption) {
+            withResponseBack(withResponse, newListener, message, options);
+        } else {
+            withResponse(withResponse, newListener, message, options);
+        }
+    }
+
+    /**
+     * A handler for the response from a state of the wizard, prompting them with the given options
+     * using this Wizard's default {@link UserInputListener}.
      * 
      * @param withResponse Handler for the response.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      */
-    protected void withResponse(Consumer<String> withResponse, String message, String... options) {
+    private void withResponse(Consumer<String> withResponse, String message, String... options) {
         String response = prompt(message, options);
         if (response == null) {
             isActive = false;
@@ -245,17 +327,56 @@ public abstract class InputWizard {
 
     /**
      * A handler for the response from a state of the wizard, prompting them with the given options
-     * and including back functionality.
+     * and including back functionality using this Wizard's default {@link UserInputListener}.
      * 
      * @param withResponse Handler for the response.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      */
-    protected void withResponseBack(Consumer<String> withResponse, String message, String... options) {
+    private void withResponseBack(Consumer<String> withResponse, String message, String... options) {
         String[] optionsWithBack = new String[options.length + 1];
         System.arraycopy(options, 0, optionsWithBack, 0, options.length);
         optionsWithBack[options.length] = "back";
         String response = prompt(message, optionsWithBack);
+        if (response == null) {
+            isActive = false;
+        } else if (response.equalsIgnoreCase("back")) {
+            goBack();
+        } else {
+            withResponse.accept(response);
+        }
+    }
+
+    /**
+     * A handler for the response from a state of the wizard, prompting them with the given options
+     * using the given {@link UserInputListener}.
+     * 
+     * @param withResponse Handler for the response.
+     * @param message Message to prompt the user with.
+     * @param options Options to provide the user.
+     */
+    private void withResponse(Consumer<String> withResponse, UserInputListener newListener, String message, String... options) {
+        String response = prompt(newListener, message, options);
+        if (response == null) {
+            isActive = false;
+        } else {
+            withResponse.accept(response);
+        }
+    }
+
+    /**
+     * A handler for the response from a state of the wizard, prompting them with the given options
+     * and including back functionality using the given {@link UserInputListener}.
+     * 
+     * @param withResponse Handler for the response.
+     * @param message Message to prompt the user with.
+     * @param options Options to provide the user.
+     */
+    private void withResponseBack(Consumer<String> withResponse, UserInputListener newListener, String message, String... options) {
+        String[] optionsWithBack = new String[options.length + 1];
+        System.arraycopy(options, 0, optionsWithBack, 0, options.length);
+        optionsWithBack[options.length] = "back";
+        String response = prompt(newListener, message, optionsWithBack);
         if (response == null) {
             isActive = false;
         } else if (response.equalsIgnoreCase("back")) {

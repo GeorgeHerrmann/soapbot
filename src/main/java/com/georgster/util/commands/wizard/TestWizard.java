@@ -34,15 +34,15 @@ public class TestWizard extends InputWizard {
         withResponse((response -> {
             sendMessage("Found response: " + response, TITLE);
             nextWindow("windowTwo");
-        }), prompt, "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven");
+        }), false, prompt, "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven");
     }
 
     protected void windowTwo() {
         String prompt = "Test Screen 2";
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             sendMessage("Found response: " + response, TITLE);
-        }), prompt);
+        }), true, prompt);
     }
     
 }

@@ -52,7 +52,7 @@ public class ReserveEventWizard extends InputWizard {
 
         withResponse((response -> 
             nextWindow("manageEvent", ((ReserveEvent) eventManager.get(response)))
-        ), prompt, options);
+        ), false, prompt, options);
     }
 
     /**
@@ -63,7 +63,7 @@ public class ReserveEventWizard extends InputWizard {
     protected void manageEvent(ReserveEvent event) {
         String prompt = "What would you like to edit about reserve event " + event.getIdentifier() + " ?";
         String[] options = {"number of people", "time", "date", "delete event"};
-        withResponseBack((response -> {
+        withResponse((response -> {
             if (response.equals("number of people")) {
                 nextWindow("editNumPeople", event);
             } else if (response.equals("time")) {
@@ -75,7 +75,7 @@ public class ReserveEventWizard extends InputWizard {
                 sendMessage("Removed reserve event " + event.getIdentifier(), TITLE);
                 nextWindow("manageEvents");
             }
-        }), prompt, options);
+        }), true, prompt, options);
     }
 
     /**
@@ -87,7 +87,7 @@ public class ReserveEventWizard extends InputWizard {
         String prompt = "Current max number of reservees: " + event.getNumPeople() + "\n" + 
                     "Please enter the new maximum number of people that can reserve to " + event.getIdentifier();
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             try {
                 event.setNumPeople(Integer.parseInt(response));
                 eventManager.update(event);
@@ -97,7 +97,7 @@ public class ReserveEventWizard extends InputWizard {
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
             }
-        }), prompt);
+        }), true, prompt);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ReserveEventWizard extends InputWizard {
         String prompt = "Current time: " + SoapUtility.convertToAmPm(event.getTime()) + "\n" + 
                     "Please enter the new time for " + event.getIdentifier();
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             try {
                 event.setTime(response);
                 eventManager.update(event);
@@ -118,7 +118,7 @@ public class ReserveEventWizard extends InputWizard {
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
             }
-        }), prompt);
+        }), true, prompt);
     }
 
     /**
@@ -138,6 +138,6 @@ public class ReserveEventWizard extends InputWizard {
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
             }
-        }), prompt);
+        }), true, prompt);
     }
 }

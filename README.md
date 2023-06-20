@@ -12,9 +12,12 @@ Current features:
     - Events are saved and scheduled, even if the bot happens to go offline.
     - Features a high level of flexibility, allowing for various types of events with times, player counts, etc.
     - Allows users to manage events and features utility for events
+  - A poll system with a user friendly window system.
+    - Polls can be created, edited, voted on and viewed and last for a specified amount of time.
   - A fully-featured permissions system that integrates with Discord's role system.
-  - A back and forth dynamic conversational system
-    - Allows for users to input data via "wizards" or have basic conversations with SOAP Bot
+  - A back and forth dynamic conversational system via the InputWizard and UserInputListener
+    - Allows for users to input data via user-friendly "wizards"
+    - Is highly modular and easy to setup and edit, allowing for full flexibility and customization.
   - and more!
 
 

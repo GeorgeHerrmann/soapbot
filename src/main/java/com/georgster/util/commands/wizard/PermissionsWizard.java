@@ -45,7 +45,7 @@ public class PermissionsWizard extends InputWizard {
         withResponse((response -> {
             PermissionGroup group = permissionsManager.get(response);
             nextWindow("groupOptions", group);
-        }), "Which Role would you like to manage?", groups);
+        }), false, "Which Role would you like to manage?", groups);
     }
 
     /**
@@ -54,7 +54,7 @@ public class PermissionsWizard extends InputWizard {
      * @param group The group to manage.
      */
     protected void groupOptions(PermissionGroup group) {
-        withResponseBack((response -> {
+        withResponse((response -> {
             if (response.equals("add")) {
                 nextWindow("addPermission", group);
             } else if (response.equals("remove")) {
@@ -62,7 +62,7 @@ public class PermissionsWizard extends InputWizard {
             } else if (response.equals("list")) {
                 handler.sendText("Permissions for " + group.getName() + ":\n" + group.getActions().toString(), TITLE);
             }
-        }), "What would you like to do for " + group.getName() + "?", "add", "remove", "list");
+        }), true, "What would you like to do for " + group.getName() + "?", "add", "remove", "list");
     }
 
     /**
@@ -77,12 +77,12 @@ public class PermissionsWizard extends InputWizard {
             perms[action.ordinal()] = action.toString();
         }
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
             group.addPermission(action);
             permissionsManager.update(group);
             sendMessage("Added " + action.toString() + " to " + group.getName(), TITLE);
-        }), "What permission would you like to add?", perms);
+        }), true, "What permission would you like to add?", perms);
     }
 
     /**
@@ -97,7 +97,7 @@ public class PermissionsWizard extends InputWizard {
             perms[i] = group.getActions().get(i).toString();
         }
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             PermissibleAction action = PermissibleAction.valueOf(response.toUpperCase());
             if (group.getActions().contains(action)) {
                 group.removePermission(action);
@@ -106,6 +106,6 @@ public class PermissionsWizard extends InputWizard {
             } else {
                 sendMessage("That permission is not in the group. Please try again", TITLE);
             }
-        }), "What permission would you like to remove?", perms);
+        }), true, "What permission would you like to remove?", perms);
     }
 }

@@ -90,3 +90,7 @@
 2.354
     - Added a ButtonMessage UserInputListener
         - Functions similarly to the MenuMessage listener, but with buttons.
+
+2.355
+    - Added the ability for InputWizards to override their default UserInputListener on a window to window basis
+    - Cleaned up the withResponse handler to use a single method, with a boolean to determine the back option

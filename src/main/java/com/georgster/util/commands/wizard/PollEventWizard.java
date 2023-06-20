@@ -61,7 +61,7 @@ public class PollEventWizard extends InputWizard {
                     nextWindow("pollViewingOptions");
                 }
             }
-        }), prompt, options);
+        }), false, prompt, options);
     }
 
     /**
@@ -75,10 +75,10 @@ public class PollEventWizard extends InputWizard {
             options[i] = events.get(i).getIdentifier();
         }
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             PollEvent event = (PollEvent) eventManager.get(response);
             handler.sendText(event.toString(), event.getIdentifier());
-        }), prompt, options);
+        }), true, prompt, options);
     }
 
     /**
@@ -87,14 +87,14 @@ public class PollEventWizard extends InputWizard {
     protected void createPoll() {
         String prompt = "Please enter the prompt for the poll";
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             if (!eventManager.exists(response, TYPE)) {
                 PollEvent event = new PollEvent(response, ((TextChannel) getChannel()).getName(), getUser().getTag());
                 nextWindow("setExpiration", event);
             } else {
                 sendMessage("A poll with that title already exists, please pick a new name", TITLE);
             }
-        }), prompt);
+        }), true, prompt);
     }
 
     /**
@@ -107,7 +107,7 @@ public class PollEventWizard extends InputWizard {
                         "You can type things like: 10 days, 1 hour, 15 minutes";
         String[] options = {"use default setting"};
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             if (response.equals("use default setting")) {
                 event.setDateTime("5 mins");
                 nextWindow("addOptions", event);
@@ -119,7 +119,7 @@ public class PollEventWizard extends InputWizard {
                     sendMessage(e.getMessage(), TITLE);
                 }
             }
-        }), prompt, options);
+        }), true, prompt, options);
 
     }
 
@@ -132,7 +132,7 @@ public class PollEventWizard extends InputWizard {
         String prompt = "Please type the options for the poll, one at a time in their own messages, then click continue when complete.";
         String[] options = {"continue"};
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             if (response.equals("continue")) {
                 if (event.getOptions().isEmpty()) {
                     sendMessage("You must add at least 1 option", TITLE);
@@ -148,7 +148,7 @@ public class PollEventWizard extends InputWizard {
                 event.addOption(response);
                 sendMessage("Added " + response + " to this event's options.", TITLE);
             }
-        }), prompt, options);
+        }), true, prompt, options);
     }
 
     /**
@@ -162,10 +162,10 @@ public class PollEventWizard extends InputWizard {
             options[i] = events.get(i).getIdentifier();
         }
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             PollEvent event = (PollEvent) eventManager.get(response);
             nextWindow("pollVote", event);
-        }), prompt, options);
+        }), true, prompt, options);
     }
 
     /**
@@ -183,11 +183,11 @@ public class PollEventWizard extends InputWizard {
             optionsArr[i] = options.get(i);
         }
 
-        withResponseBack((response -> {
+        withResponse((response -> {
             event.removeVoter(voter);
             event.addVoter(response, voter);
             eventManager.update(event);
             handler.sendText(getUser().getUsername() + " has voted for: " + response + ".\n Current votes are:\n" + event.toString(), event.getIdentifier());
-        }), prompt, optionsArr);
+        }), true, prompt, optionsArr);
     }
 }
