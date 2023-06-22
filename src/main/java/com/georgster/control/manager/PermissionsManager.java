@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.ClientContext;
-import com.georgster.profile.ProfileType;
+import com.georgster.database.ProfileType;
 import com.georgster.util.permissions.PermissibleAction;
 import com.georgster.util.permissions.PermissionGroup;
 import discord4j.core.object.entity.Member;

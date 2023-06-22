@@ -1,4 +1,4 @@
-package com.georgster.profile;
+package com.georgster.database;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,8 +14,8 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
+import com.georgster.database.adapter.DatabaseObjectClassAdapter;
 import com.georgster.events.SoapEvent;
-import com.georgster.profile.adapter.DatabaseObjectClassAdapter;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.mongodb.client.MongoClient;
@@ -76,7 +76,7 @@ public class DatabaseService<T> {
     private static void createClient() {
         if (mongoClient == null) {
             try {
-                mongoClient = MongoClients.create(Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "profile", "dbconnection.txt")));
+                mongoClient = MongoClients.create(Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "database", "dbconnection.txt")));
             } catch (IOException e) {
                 e.printStackTrace();
             }

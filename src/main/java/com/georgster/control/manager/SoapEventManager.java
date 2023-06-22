@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.ClientContext;
+import com.georgster.database.ProfileType;
+import com.georgster.database.adapter.SoapEventClassAdapter;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventHandler;
 import com.georgster.events.SoapEventType;
-import com.georgster.profile.ProfileType;
-import com.georgster.profile.adapter.SoapEventClassAdapter;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 /**

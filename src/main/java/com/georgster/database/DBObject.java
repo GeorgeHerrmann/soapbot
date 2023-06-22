@@ -1,4 +1,4 @@
-package com.georgster.profile;
+package com.georgster.database;
 
 /**
  * A Wrapper class representing an object that has been retrieved from the database.

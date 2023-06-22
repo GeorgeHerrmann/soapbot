@@ -13,7 +13,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements Command { 
-    private static final boolean ACTIVE = true;
+    private static final boolean ACTIVE = false;
 
     /**
      * {@inheritDoc}
