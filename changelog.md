@@ -94,3 +94,7 @@
 2.355
     - Added the ability for InputWizards to override their default UserInputListener on a window to window basis
     - Cleaned up the withResponse handler to use a single method, with a boolean to determine the back option
+
+2.356
+    - Added edit polls functionality to the Poll Event Wizard
+        - Users can add or remove options, or remove a poll all together.
