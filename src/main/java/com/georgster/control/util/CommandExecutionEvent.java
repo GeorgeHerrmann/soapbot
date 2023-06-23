@@ -17,6 +17,7 @@ import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
 /**
@@ -74,6 +75,7 @@ public class CommandExecutionEvent {
             try {
                 args = parser.parse(discordEvent.getFormattedMessage());
                 logger.append("- Arguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
+                deferIfNecessary();
                 executeIfPermission(args);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -87,6 +89,20 @@ public class CommandExecutionEvent {
         }
 
         logger.sendAll();
+    }
+
+    /**
+     * Defers the reply of the inner {@code Event} in this event's {@link DiscordEvent} if
+     * necessary, and enables this event's {@link GuildInteractionHandler} reply deferring mode.
+     * 
+     * @see GuildInteractionHandler#enableReplyDeferring()
+     */
+    private void deferIfNecessary() {
+        if (discordEvent.getEvent() instanceof ApplicationCommandInteractionEvent && command.shouldDefer()) {
+            ApplicationCommandInteractionEvent event = (ApplicationCommandInteractionEvent) discordEvent.getEvent();
+            this.handler.enableReplyDeferring();
+            event.deferReply().block();
+        }
     }
 
    /**

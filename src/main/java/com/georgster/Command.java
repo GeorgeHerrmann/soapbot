@@ -56,4 +56,14 @@ public interface Command {
      * @return A string containing information on how to use this {@code Command}.
      */
     public String help();
+
+    /**
+     * Returns true the reply from a {@code ApplicationCommandInteractionEvent} should be deferred
+     * because this command may take a while to compute its response, false otherwise.
+     * 
+     * @return If the reply should be deferred, false otherwise.
+     */
+    default boolean shouldDefer() {
+        return false;
+    }
 }

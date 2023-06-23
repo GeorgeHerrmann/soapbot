@@ -114,7 +114,8 @@ public class ChatCompletionManager extends SoapManager<MemberChatCompletions> {
 
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(new ChatMessage("system", "You are a Discord bot called SOAP Bot who was created by georgster." +
-                                                    "You have many features, but if anyone is confused on how to use the bot, tell them to use !help"));
+                                                    "You have many features, but if anyone is confused on how to use the bot, tell them to use !help" +
+                                                    "or use slash commands (with '/') to bring up a menu of commands."));
 
         completions.getTokens().forEach(token -> 
             token.forEach((k,v) -> {

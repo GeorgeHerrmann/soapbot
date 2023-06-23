@@ -15,6 +15,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.InteractionReplyEditSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 
@@ -27,6 +28,8 @@ public class GuildInteractionHandler {
     private ChatInputInteractionEvent activeInteraction; //The active interaction
     private ComponentInteractionEvent activeComponentInteraction; //The active select menu interaction
 
+    private boolean deferReply; //If a reply was deferred elsewhere, requiring a reply edit
+
     /**
      * Creates a new GuildInteractionHandler for the given guild.
      * 
@@ -34,6 +37,17 @@ public class GuildInteractionHandler {
      */
     public GuildInteractionHandler(Guild guild) {
         this.guild = guild;
+        this.deferReply = false;
+    }
+
+    /**
+     * Switches this handler to reply deferring mode.
+     * If reply deferring mode is on, this handler will edit replies from
+     * {@code ApplicationCommandInteractionEvents}, and will automatically
+     * disable once a successful defer edit has been made.
+     */
+    public void enableReplyDeferring() {
+        this.deferReply = true;
     }
 
     /**
@@ -141,7 +155,12 @@ public class GuildInteractionHandler {
     public Message sendPlainText(String text) throws IllegalStateException {
         if (activeInteraction != null) {
             try {
-                activeInteraction.reply(text).block();
+                if (deferReply) {
+                    activeInteraction.editReply(text).block();
+                } else {
+                    activeInteraction.reply(text).block();
+                    deferReply = false;
+                }
                 Message message = activeInteraction.getReply().block();
                 killActiveInteraction();
                 return message;
@@ -171,8 +190,14 @@ public class GuildInteractionHandler {
         if (activeInteraction != null) {
             try {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
-                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
-                activeInteraction.reply(spec).block();
+                if (deferReply) {
+                    InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
+                    activeInteraction.editReply(spec).block();
+                    deferReply = false;
+                } else {
+                    InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                    activeInteraction.reply(spec).block();
+                }
                 Message message = activeInteraction.getReply().block();
                 killActiveInteraction();
                 return message;
@@ -205,8 +230,14 @@ public class GuildInteractionHandler {
         if (activeInteraction != null) {
             try {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
-                activeInteraction.reply(spec).block();
+                if (deferReply) {
+                    InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
+                    activeInteraction.editReply(spec).block();
+                    deferReply = false;
+                } else {
+                    InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                    activeInteraction.reply(spec).block();
+                }
                 Message message = activeInteraction.getReply().block();
                 killActiveInteraction();
                 return message;
@@ -240,8 +271,14 @@ public class GuildInteractionHandler {
         if (activeInteraction != null) {
             try {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
-                activeInteraction.reply(spec).block();
+                if (deferReply) {
+                    InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
+                    activeInteraction.editReply(spec);
+                    deferReply = false;
+                } else {
+                    InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
+                    activeInteraction.reply(spec).block();
+                }
                 Message message = activeInteraction.getReply().block();
                 killActiveInteraction();
                 return message;

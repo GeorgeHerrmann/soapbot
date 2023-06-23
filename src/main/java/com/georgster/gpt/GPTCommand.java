@@ -68,7 +68,7 @@ public class GPTCommand implements ParseableCommand {
     public String help() {
          return "Aliases: " + getAliases().toString() +
         "\nUsage:" +
-        "\n!ask [PROMPT] - Give SOAP Bot a prompt and have it respond";
+        "\n- !ask [PROMPT] - Give SOAP Bot a prompt and have it respond";
     }
 
     /**
@@ -97,6 +97,14 @@ public class GPTCommand implements ParseableCommand {
                         .required(true)
                         .build())
                 .build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean shouldDefer() {
+        return true;
     }
     
 }
