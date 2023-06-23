@@ -113,7 +113,8 @@ public class ChatCompletionManager extends SoapManager<MemberChatCompletions> {
         MemberChatCompletions completions = get(id);
 
         List<ChatMessage> messages = new ArrayList<>();
-        messages.add(new ChatMessage("system", "You are a Discord bot called SOAP Bot."));
+        messages.add(new ChatMessage("system", "You are a Discord bot called SOAP Bot who was created by georgster." +
+                                                    "You have many features, but if anyone is confused on how to use the bot, tell them to use !help"));
 
         completions.getTokens().forEach(token -> 
             token.forEach((k,v) -> {
@@ -129,7 +130,6 @@ public class ChatCompletionManager extends SoapManager<MemberChatCompletions> {
         List<String> responses = new ArrayList<>();
 
         aiService.createChatCompletion(request).getChoices().forEach(choice -> responses.add(choice.getMessage().getContent()));
-        System.out.println(responses.size());
         completions.addCompletion(prompt, responses.get(0));
 
         update(completions);
