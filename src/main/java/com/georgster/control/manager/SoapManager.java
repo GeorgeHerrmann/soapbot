@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.ClientContext;
-import com.georgster.profile.DatabaseService;
-import com.georgster.profile.ProfileType;
+import com.georgster.database.DatabaseService;
+import com.georgster.database.ProfileType;
 import com.georgster.util.GuildInteractionHandler;
 
 import discord4j.core.object.entity.Guild;

@@ -12,6 +12,7 @@ import com.georgster.events.reserve.ReserveEventCommand;
 import com.georgster.events.poll.PollEventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
+import com.georgster.gpt.GPTCommand;
 import com.georgster.misc.HelloWorldCommand;
 import com.georgster.misc.HelpCommand;
 import com.georgster.misc.PongCommand;
@@ -65,7 +66,8 @@ public class CommandRegistry {
             PermissionsCommand.class,
             HelloWorldCommand.class,
             TheFinalShapeCommand.class,
-            PollEventCommand.class
+            PollEventCommand.class,
+            GPTCommand.class
         ));
     }
 

@@ -98,3 +98,19 @@
 2.356
     - Added edit polls functionality to the Poll Event Wizard
         - Users can add or remove options, or remove a poll all together.
+
+2.360
+    - Added GPT 3.5 integration to SOAP Bot via !ask
+        - SOAP Bot will recall a user's previous ten messages between the GPT AI and themselves and use it as context
+        - Each conversation is between one member and the AI, SOAP Bot will only send context of the user who is using the command at that time.
+        - SOAP Bot will instruct the AI to respond as the "Discord Bot, SOAP Bot"
+        - SOAP Bot will give mild context on how to use the bot to the AI
+            - More coming soon for this
+        - When gathering a response from the GPT AI, SOAP Bot will simply send the response if only one existed,
+          or provide an interactive wizard (the IterableStringWizard) to switch between responses if multiple possibilities were sent.
+    - Fixed an issue where the Help Command would not list all commands when using !help
+    - Fixed an issue where some commands would fail to respond when using slash commands and they took longer than three seconds to compute a response
+        - Created a basic framework for reply deferrals for longer executing commands (rare)
+    - Fixed an issue where some PermissionGroups has null permissions, causing issues with Permission Management.
+    - Fixed an issue where some Reserve Events would not properly mention users when using !events [name] mention
+        - A temporary solution has been implemented, with a more full one to the entire event system coming later

@@ -66,6 +66,19 @@ public class PermissionsCommand implements ParseableCommand {
                 handler.sendText("That is not a valid action. Please try again");
                 logger.append("- Invalid action: " + parser.get(1), LogDestination.NONAPI);
             }
+        } else if (parser.get(0).equals("removeall")) {
+              try {
+                PermissibleAction action = PermissionsManager.getAction(parser.get(1).toUpperCase());
+                permissionsManager.getAll().forEach(group -> {
+                    group.removePermission(action);
+                    permissionsManager.update(group);
+                });
+                handler.sendText("Removed " + action.toString() + " from all groups");
+                logger.append("- Removed " + action.toString() + " from all groups", LogDestination.NONAPI);
+            } catch (IllegalArgumentException e) {
+                handler.sendText("That is not a valid action. Please try again");
+                logger.append("- Invalid action: " + parser.get(1), LogDestination.NONAPI);
+            }
         } else {
             String group = parser.get(0);
             if (permissionsManager.exists(group)) {
@@ -82,7 +95,7 @@ public class PermissionsCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withIdentifiers("list", "manage", "addall").build();
+        return new ParseBuilder(PATTERN).withIdentifiers("list", "manage", "addall", "removeall").build();
     }
     
     /**
@@ -90,7 +103,7 @@ public class PermissionsCommand implements ParseableCommand {
      */
     @Override
     public PermissibleAction getRequiredPermission(List<String> args) {
-        if (args.contains("manage") || args.contains("addall")) {
+        if (args.contains("manage") || args.contains("addall") || args.contains("removeall")) {
             return PermissibleAction.MANAGEPERMISSIONS;
         } else {
             return PermissibleAction.PERMISSIONSCOMMAND;

@@ -45,7 +45,7 @@ public class HelpCommand implements ParseableCommand {
         CommandParser parser = event.getCommandParser();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
-        String arg = "";
+        String arg = parser.get(0).toLowerCase();
         try {
             arg = parser.get(0).toLowerCase();
         } catch (Exception e) {
@@ -124,9 +124,16 @@ public class HelpCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public String help() {
+        StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
+        for (Command command : register.getCommands()) {
+            if (!command.getAliases().isEmpty()) {
+                response.append(command.getAliases().get(0) + " ");
+            }
+        }
+
         return "Aliases: " + getAliases().toString() +
-        "\n- !help for a list of all commands" +
-        "\n- !help [COMMAND] for help regarding a specific command";
+        "\n" + response.toString();
+
     }
     
 }

@@ -1,4 +1,4 @@
-package com.georgster.profile;
+package com.georgster.database;
 
 
 /**
