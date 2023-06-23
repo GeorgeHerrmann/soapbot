@@ -75,7 +75,12 @@ public final class SoapClient {
 
         logger.append("\n-  Restarted " + eventManager.getCount() + " events for " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
 
-        logger.append("\n-  Updating Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
+        logger.append("\n-  Updated Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
+
+        logger.append("\n -  Loaded in " + permissionsManager.getCount() + " Permission Groups for " + handler.getGuild().getName(), LogDestination.NONAPI);
+
+        logger.append("\n -  Cached " + completionManager.getCount() + " conversations between members of " +
+                      handler.getGuild().getName() + " and SOAP Bot's AI", LogDestination.NONAPI);
 
         handler.getAllMembers().forEach(member -> {
           String id = member.getId().asString();

@@ -111,6 +111,6 @@
     - Fixed an issue where the Help Command would not list all commands when using !help
     - Fixed an issue where some commands would fail to respond when using slash commands and they took longer than three seconds to compute a response
         - Created a basic framework for reply deferrals for longer executing commands (rare)
-    - Fixed an issue where some PermissionGroups has null permissions, causing issues with Permission Management.
+    - Fixed an issue where some PermissionGroups had null permissions, causing issues with Permission Management.
     - Fixed an issue where some Reserve Events would not properly mention users when using !events [name] mention
         - A temporary solution has been implemented, with a more full one to the entire event system coming later

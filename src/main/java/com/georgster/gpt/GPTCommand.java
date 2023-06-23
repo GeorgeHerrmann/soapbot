@@ -6,6 +6,8 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.wizard.IterableStringWizard;
@@ -36,13 +38,17 @@ public class GPTCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
+        MultiLogger logger = event.getLogger();
 
         String prompt = event.getCommandParser().get(0);
+        logger.append("- Sending a chat completion request to OpenAI", LogDestination.NONAPI, LogDestination.API);
         List<String> responses = manager.createCompletionGetAll(prompt, event.getDiscordEvent().getAuthorAsMember());
         
         if (responses.size() == 1) {
+            logger.append("- Only one response found, sending it in plain text", LogDestination.NONAPI);
             handler.sendPlainText(responses.get(0));
         } else if (responses.size() > 1) {
+            logger.append("- Multiple responses found, starting an iterable wizard to view them", LogDestination.NONAPI);
             IterableStringWizard wizard = new IterableStringWizard(event, "Responses", responses);
             wizard.begin();
         }
