@@ -41,7 +41,7 @@ public class GPTCommand implements ParseableCommand {
         MultiLogger logger = event.getLogger();
 
         String prompt = event.getCommandParser().get(0);
-        logger.append("- Sending a chat completion request to OpenAI", LogDestination.NONAPI, LogDestination.API);
+        logger.append("- Sending a chat completion request to OpenAI\n", LogDestination.NONAPI, LogDestination.API);
         List<String> responses = manager.createCompletionGetAll(prompt, event.getDiscordEvent().getAuthorAsMember());
         
         if (responses.size() == 1) {
