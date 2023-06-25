@@ -1,4 +1,4 @@
-package com.georgster.profile.adapter;
+package com.georgster.database.adapter;
 
 import com.georgster.events.SoapEvent;
 import com.georgster.events.poll.PollEvent;

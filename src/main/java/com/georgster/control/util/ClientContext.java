@@ -1,6 +1,7 @@
 package com.georgster.control.util;
 
 import com.georgster.control.CommandRegistry;
+import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.music.components.AudioContext;
@@ -19,6 +20,7 @@ public class ClientContext {
     private AudioContext audioContext;
     private SoapEventManager eventManager;
     private PermissionsManager permissionsManager;
+    private ChatCompletionManager completionManager;
     private CommandRegistry commandRegistry;
     private RestClient restClient;
 
@@ -94,6 +96,15 @@ public class ClientContext {
     }
 
     /**
+     * Returns the ChatCompletionManager.
+     * 
+     * @return the chat completion manager.
+     */
+    public ChatCompletionManager getChatCompletionManager() {
+        return completionManager;
+    }
+
+    /**
      * Sets the audio context.
      * 
      * @param audioInterface the audio context
@@ -118,6 +129,15 @@ public class ClientContext {
      */
     public void setPermissionsManager(PermissionsManager permissionsManager) {
         this.permissionsManager = permissionsManager;
+    }
+
+    /**
+     * Sets the chat completion manager.
+     * 
+     * @param completionManager The chat completion manager.
+     */
+    public void setChatCompletionManager(ChatCompletionManager completionManager) {
+        this.completionManager = completionManager;
     }
 
     /**

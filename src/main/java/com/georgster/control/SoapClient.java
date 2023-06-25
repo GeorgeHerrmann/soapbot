@@ -1,14 +1,15 @@
 package com.georgster.control;
 
+import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.util.ClientContext;
+import com.georgster.database.DatabaseService;
+import com.georgster.database.ProfileType;
+import com.georgster.database.UserProfile;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
-import com.georgster.profile.DatabaseService;
-import com.georgster.profile.ProfileType;
-import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 
@@ -28,6 +29,7 @@ public final class SoapClient {
     private final CommandRegistry registry;
     private final SoapEventManager eventManager;
     private final PermissionsManager permissionsManager;
+    private final ChatCompletionManager completionManager;
     
     /**
      * Creates a new {@code SoapClient} for the associated {@code Guild} represented
@@ -39,9 +41,11 @@ public final class SoapClient {
         audioInterface = new AudioContext();
         eventManager = new SoapEventManager(context);
         permissionsManager = new PermissionsManager(context);
+        completionManager = new ChatCompletionManager(context);
         context.setAudioInterface(audioInterface);
         context.setEventManager(eventManager);
         context.setPermissionsManager(permissionsManager);
+        context.setChatCompletionManager(completionManager);
         registry = new CommandRegistry(context);
         registry.registerGlobalCommands();
     }
@@ -67,9 +71,16 @@ public final class SoapClient {
 
         permissionsManager.setupBasic();
 
+        completionManager.load();
+
         logger.append("\n-  Restarted " + eventManager.getCount() + " events for " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
 
-        logger.append("\n-  Updating Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
+        logger.append("\n-  Updated Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
+
+        logger.append("\n -  Loaded in " + permissionsManager.getCount() + " Permission Groups for " + handler.getGuild().getName(), LogDestination.NONAPI);
+
+        logger.append("\n -  Cached " + completionManager.getCount() + " conversations between members of " +
+                      handler.getGuild().getName() + " and SOAP Bot's AI", LogDestination.NONAPI);
 
         handler.getAllMembers().forEach(member -> {
           String id = member.getId().asString();

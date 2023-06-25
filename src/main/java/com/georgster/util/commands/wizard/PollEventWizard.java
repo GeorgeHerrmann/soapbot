@@ -44,7 +44,7 @@ public class PollEventWizard extends InputWizard {
      */
     protected void wizardOptions() {
         String prompt = "What would you like to do?";
-        String[] options = {"create a poll", "vote on a poll", "view a poll"};
+        String[] options = {"create a poll", "vote on a poll", "view a poll", "edit a poll"};
         withResponse((response -> {
             if (response.equals("create a poll")) {
                 nextWindow("createPoll");
@@ -59,6 +59,12 @@ public class PollEventWizard extends InputWizard {
                     sendMessage("No polls currently exist", TITLE);
                 } else {
                     nextWindow("pollViewingOptions");
+                }
+            } else if (response.equals("edit a poll")) {
+                if (!eventManager.hasAny(TYPE)) {
+                    sendMessage("No polls currently exist", TITLE);
+                } else {
+                    nextWindow("pollEditOptions");
                 }
             }
         }), false, prompt, options);
@@ -79,6 +85,68 @@ public class PollEventWizard extends InputWizard {
             PollEvent event = (PollEvent) eventManager.get(response);
             handler.sendText(event.toString(), event.getIdentifier());
         }), true, prompt, options);
+    }
+
+    /**
+     * Window for selecting a poll to edit.
+     */
+    protected void pollEditOptions() {
+        String prompt = "Which poll would you like to edit?";
+        String[] options = new String[eventManager.getCount(TYPE)];
+        List<SoapEvent> events = eventManager.getAll(TYPE);
+        for (int i = 0; i < eventManager.getCount(TYPE); i++) {
+            options[i] = events.get(i).getIdentifier();
+        }
+
+        withResponse((response -> {
+            PollEvent event = (PollEvent) eventManager.get(response);
+            nextWindow("editPoll", event);
+        }), true, prompt, options);
+    }
+
+    /**
+     * Window for selecting how to edit a poll.
+     * 
+     * @param event The poll being edited.
+     */
+    protected void editPoll(PollEvent event) {
+        String prompt = "What would you like to edit about poll: " + event.getIdentifier() + "?";
+        String[] options = {"add option", "remove option", "delete poll"};
+
+        withResponse((response -> {
+            if (response.equals("add option")) {
+                nextWindow("addOptions", event);
+            } else if (response.equals("remove option")) {
+                nextWindow("removeOption", event);
+            } else if (response.equals("delete poll")) {
+                eventManager.remove(event);
+                nextWindow("wizardOptions");
+            }
+        }), true, prompt, options);
+    }
+
+    /**
+     * Window to remove options from a poll.
+     * 
+     * @param event The PollEvent being edited.
+     */
+    protected void removeOption(PollEvent event) {
+        String prompt = "Which option would you like to remove from poll: " + event.getIdentifier() + "?";
+
+        List<String> pollOptions = event.getOptions();
+        String[] options = pollOptions.toArray(new String[pollOptions.size()]);
+
+        if (event.getOptions().isEmpty()) {
+            eventManager.remove(event);
+            sendMessage("There are no more options for poll " + event.getIdentifier() + ", it has been removed.", TITLE);
+            nextWindow("wizardOptions");
+        } else {
+            withResponse((response -> {
+                event.removeOption(response);
+                eventManager.update(event);
+                sendMessage("You have removed " + response + " from poll " + event.getIdentifier(), TITLE);
+            }), true, prompt, options);
+        }
     }
 
     /**
@@ -137,12 +205,18 @@ public class PollEventWizard extends InputWizard {
                 if (event.getOptions().isEmpty()) {
                     sendMessage("You must add at least 1 option", TITLE);
                 } else {
-                    eventManager.add(event);
-                    StringBuilder sb = new StringBuilder("A new poll " + event.getIdentifier() + " has been created with the following options:\n");
-                    event.getOptions().forEach(option -> sb.append("- " + option + "\n"));
-                    sb.append("This poll lasts for: " + SoapUtility.convertSecondsToHoursMinutes((int) event.until()) + ". Type !poll to vote!");
-                    handler.sendText(sb.toString(), "Poll Created");
-                    nextWindow("wizardOptions");
+                    if (eventManager.exists(event, TYPE)) { // If reached by the "edit poll" window
+                        eventManager.update(event);
+                        handler.sendText("Now has the following options:\n" + event.toString(), "Poll " + event.getIdentifier() + "updated");
+                        goBack();
+                    } else { // If reached by the "create poll" window
+                        eventManager.add(event);
+                        StringBuilder sb = new StringBuilder("A new poll " + event.getIdentifier() + " has been created with the following options:\n");
+                        event.getOptions().forEach(option -> sb.append("- " + option + "\n"));
+                        sb.append("This poll lasts for: " + SoapUtility.convertSecondsToHoursMinutes((int) event.until()) + ". Type !poll to vote!");
+                        handler.sendText(sb.toString(), "Poll Created");
+                        nextWindow("wizardOptions");
+                    }
                 }
             } else {
                 event.addOption(response);
