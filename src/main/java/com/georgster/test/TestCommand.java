@@ -19,7 +19,7 @@ public class TestCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        throw new UnsupportedOperationException("Test command is inactive. Set ACTIVE to true to enable this command");
+        throw new UnsupportedOperationException("Test command is currently inactive");
     }
 
     /**

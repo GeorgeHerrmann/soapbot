@@ -37,9 +37,9 @@ public class IterableStringWizard extends InputWizard {
         }
 
         withResponse((response -> {
-            if (response.equals("<=")) {
+            if (response.equals("back")) {
                 nextWindow("iterateState", index - 1);
-            } else if (response.equals("=>")) {
+            } else if (response.equals("next")) {
                 nextWindow("iterateState", index + 1);
             }
         }), false, prompt, choices);
