@@ -11,9 +11,7 @@ import com.georgster.util.GuildInteractionHandler;
 public interface SoapEvent extends Manageable {
 
     /**
-     * Returns the type of the event. The type of the event is used to determine
-     * how the SoapEventHandler will handle the event. Every SOAPEvent must
-     * declare its type from the SoapEventType enum.
+     * Returns the {@link SoapEventType} of the event.
      * 
      * @return the type of the event
      */
