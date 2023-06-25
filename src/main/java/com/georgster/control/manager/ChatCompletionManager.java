@@ -40,7 +40,9 @@ public class ChatCompletionManager extends SoapManager<MemberChatCompletions> {
      */
     private static void createService() {
         try {
-            aiService = new OpenAiService(Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "gpt", "openaikey.txt")));
+            if (aiService == null) {
+                aiService = new OpenAiService(Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "gpt", "openaikey.txt")));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -50,7 +52,7 @@ public class ChatCompletionManager extends SoapManager<MemberChatCompletions> {
      * Loads all previous chat completions into this manager.
      */
     public void load() {
-        dbService.getAllObjects().forEach(completion -> observees.add(completion));
+        dbService.getAllObjects().forEach(observees::add);
     }
 
     /**

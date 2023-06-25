@@ -78,9 +78,11 @@ public class CommandExecutionEvent {
                 deferIfNecessary();
                 executeIfPermission(args);
             } catch (Exception e) {
-                e.printStackTrace();
-                logger.append("- Caught " + e.getClass().getSimpleName() + ": " + e.getMessage() + "\n", LogDestination.SYSTEM, LogDestination.FILE);
-                logger.append("- Invalid arguments, sending a help message\n", LogDestination.NONAPI);
+                logger.append("- Failed to execute, sending a help message\n", LogDestination.NONAPI);
+                logger.append("Caught " + e.getClass().getSimpleName() + ": " + e.getMessage() + "\n", LogDestination.SYSTEM, LogDestination.FILE);
+                for (StackTraceElement element : e.getStackTrace()) {
+                    logger.append("\t" + element.toString() + "\n", LogDestination.FILE, LogDestination.SYSTEM);
+                }
                 handler.sendText(command.help(), command.getClass().getSimpleName());
             }
         } else {

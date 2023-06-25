@@ -15,9 +15,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
 import com.georgster.database.adapter.DatabaseObjectClassAdapter;
-import com.georgster.events.SoapEvent;
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -222,7 +220,6 @@ public class DatabaseService<T> {
      * @return All objects in the database for this service's {@code ProfileType}.
      */
     public List<T> getAllObjects() {
-        if (classType == SoapEvent.class) throw new JsonParseException("Cannot use this method for SoapEvent");
         DBObject<List<T>> objects = new DBObject<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
