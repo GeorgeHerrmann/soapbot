@@ -44,9 +44,9 @@ public class ReserveEventWizard extends InputWizard {
      */
     protected void manageEvents() {
         String prompt = "Which Reserve event would you like to manage?";
-        String[] options = new String[eventManager.getCount()];
+        String[] options = new String[eventManager.getCount(TYPE)];
         List<SoapEvent> events = eventManager.getAll(TYPE);
-        for (int i = 0; i < eventManager.getCount(); i++) {
+        for (int i = 0; i < eventManager.getCount(TYPE); i++) {
             options[i] = events.get(i).getIdentifier();
         }
 
