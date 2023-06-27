@@ -155,12 +155,11 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
      */
     public void onFulfill(GuildInteractionHandler handler) {
         ActionWriter.writeAction("Starting event " + identifier);
-        StringBuilder response = new StringBuilder("Event " + identifier + " has started!\n" +
-        "- " + reserved + "/" + numPeople + " reserved with the following people:");
+        StringBuilder response = new StringBuilder("**" + reserved + "/" + numPeople + "** reserved with the following people:");
         for (String name : reservedUsers) { //We add the names of the people who reserved to the event
-            response.append("\n\t- " + handler.getMember(name).getMention());
+            response.append("\n- " + handler.getMember(name).getMention());
         }
-        handler.sendText(response.toString());
+        handler.sendText(response.toString(), "Event " + identifier + " has started!");
     }
 
     /**
