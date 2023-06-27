@@ -42,15 +42,20 @@ public class GPTCommand implements ParseableCommand {
 
         String prompt = event.getCommandParser().get(0);
         logger.append("- Sending a chat completion request to OpenAI\n", LogDestination.NONAPI, LogDestination.API);
-        List<String> responses = manager.createCompletionGetAll(prompt, event.getDiscordEvent().getAuthorAsMember());
+        try {
+            List<String> responses = manager.createCompletionGetAll(prompt, event.getDiscordEvent().getAuthorAsMember());
         
-        if (responses.size() == 1) {
-            logger.append("- Only one response found, sending it in plain text", LogDestination.NONAPI);
-            handler.sendPlainText(responses.get(0));
-        } else if (responses.size() > 1) {
-            logger.append("- Multiple responses found, starting an iterable wizard to view them", LogDestination.NONAPI);
-            IterableStringWizard wizard = new IterableStringWizard(event, "Responses", responses);
-            wizard.begin();
+            if (responses.size() == 1) {
+                logger.append("- Only one response found, sending it in plain text", LogDestination.NONAPI);
+                handler.sendPlainText(responses.get(0));
+            } else if (responses.size() > 1) {
+                logger.append("- Multiple responses found, starting an iterable wizard to view them", LogDestination.NONAPI);
+                IterableStringWizard wizard = new IterableStringWizard(event, "Responses", responses);
+                wizard.begin();
+            }
+        } catch (RuntimeException e) {
+            handler.sendText("Sorry, I couldn't process this in time. Please try again");
+            logger.append("- Request timed out", LogDestination.NONAPI);
         }
     }
 

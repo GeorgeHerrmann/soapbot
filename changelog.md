@@ -122,3 +122,7 @@
         - There is now a UserProfileManager to manage UserProfiles properly with the new system
             - SoapBot's management system is now fully unified
             - A necessary change to the log messages on startup has been made as a result
+
+2.362
+    - Fixed an issue where GPTCommand requests would time out and fall back to displaying the help message
+        - Will now give a proper error message when OpenAI fails to respond in time
