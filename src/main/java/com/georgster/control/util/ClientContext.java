@@ -1,9 +1,16 @@
 package com.georgster.control.util;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+
 import com.georgster.control.CommandRegistry;
 import com.georgster.control.manager.ChatCompletionManager;
+import com.georgster.control.manager.Manageable;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
+import com.georgster.control.manager.SoapManager;
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.music.components.AudioContext;
 
 import discord4j.core.event.EventDispatcher;
@@ -17,10 +24,8 @@ import discord4j.rest.RestClient;
 public class ClientContext {
     private final EventDispatcher dispatcher;
     private final Guild guild;
+    private final Set<SoapManager<? extends Manageable>> managers;
     private AudioContext audioContext;
-    private SoapEventManager eventManager;
-    private PermissionsManager permissionsManager;
-    private ChatCompletionManager completionManager;
     private CommandRegistry commandRegistry;
     private RestClient restClient;
 
@@ -34,6 +39,7 @@ public class ClientContext {
     public ClientContext(EventDispatcher dispatcher, Guild guild) {
         this.dispatcher = dispatcher;
         this.guild = guild;
+        this.managers = new HashSet<>();
     }
 
     /**
@@ -48,6 +54,7 @@ public class ClientContext {
         this.dispatcher = dispatcher;
         this.guild = guild;
         this.restClient = restClient;
+        this.managers = new HashSet<>();
     }
 
     /**
@@ -83,7 +90,7 @@ public class ClientContext {
      * @return the event manager
      */
     public SoapEventManager getEventManager() {
-        return eventManager;
+        return (SoapEventManager) managers.stream().filter(SoapEventManager.class::isInstance).findFirst().orElse(null);
     }
 
     /**
@@ -92,7 +99,7 @@ public class ClientContext {
      * @return the permissions manager
      */
     public PermissionsManager getPermissionsManager() {
-        return permissionsManager;
+        return (PermissionsManager) managers.stream().filter(PermissionsManager.class::isInstance).findFirst().orElse(null);
     }
 
     /**
@@ -101,7 +108,16 @@ public class ClientContext {
      * @return the chat completion manager.
      */
     public ChatCompletionManager getChatCompletionManager() {
-        return completionManager;
+        return (ChatCompletionManager) managers.stream().filter(ChatCompletionManager.class::isInstance).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the UserProfileManager.
+     * 
+     * @return the user profile manager.
+     */
+    public UserProfileManager getUserProfileManager() {
+        return (UserProfileManager) managers.stream().filter(UserProfileManager.class::isInstance).findFirst().orElse(null);
     }
 
     /**
@@ -109,35 +125,29 @@ public class ClientContext {
      * 
      * @param audioInterface the audio context
      */
-    public void setAudioInterface(AudioContext audioContext) {
+    public void setAudioContext(AudioContext audioContext) {
         this.audioContext = audioContext;
     }
 
     /**
-     * Sets the event manager.
+     * Adds the given {@link SoapManager}s to this context. Each {@link ClientContext} for
+     * its {@link SoapClient} can only have one SoapManager for each type.
      * 
-     * @param eventManager the event manager
+     * @param soapManagers The managers to add.
      */
-    public void setEventManager(SoapEventManager eventManager) {
-        this.eventManager = eventManager;
+    public void addManagers(SoapManager<?>... soapManagers) {
+        for (SoapManager<?> manager : soapManagers) {
+            this.managers.add(manager);
+        }
     }
 
     /**
-     * Sets the permissions manager.
+     * Executes the given consumer with each {@link SoapManager} in this context;
      * 
-     * @param permissionsManager the permissions manager
+     * @param action The action to perform with each manager.
      */
-    public void setPermissionsManager(PermissionsManager permissionsManager) {
-        this.permissionsManager = permissionsManager;
-    }
-
-    /**
-     * Sets the chat completion manager.
-     * 
-     * @param completionManager The chat completion manager.
-     */
-    public void setChatCompletionManager(ChatCompletionManager completionManager) {
-        this.completionManager = completionManager;
+    public void forEachManager(Consumer<SoapManager<? extends Manageable>> action) {
+        managers.forEach(action::accept);
     }
 
     /**

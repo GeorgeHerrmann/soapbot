@@ -35,6 +35,13 @@ public abstract class SoapManager<T extends Manageable> {
     }
 
     /**
+     * Loads all non-existing objects from the database into this manager.
+     */
+    public void load() {
+        dbService.getAllObjects().forEach(this::add);
+    }
+
+    /**
      * Adds an object to the manager.
      * 
      * @param observee The object to add.

@@ -30,7 +30,8 @@ public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
     /**
      * Restarts all previously scheduled events this manager was oberserving.
      */
-    public void restartEvents() {
+    @Override
+    public void load() {
         dbService.getAllObjects(adapter).forEach(event -> {
             if (!exists(event)) {
                 observees.add(event);

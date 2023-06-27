@@ -6,9 +6,10 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
-import com.georgster.control.SoapClient;
+import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
@@ -29,8 +30,7 @@ public class CommandExecutionEvent {
     private MultiLogger logger; // Used to log messages about the Event.
     private Command command; // The Command that is being executed
     private DiscordEvent discordEvent; // A transformer used to extract data from the Discord Event that created this Event
-    private SoapClient client; // The SoapClient for the Guild the Event was fired in
-    private EventDispatcher dispatcher; // The EventDispatcher for the SoapClientManager that fired the Event in the Pipeline
+    private ClientContext context; // The context of the SoapClient associated with the event.
     private GuildInteractionHandler handler;
     private CommandParser parser;
 
@@ -38,14 +38,12 @@ public class CommandExecutionEvent {
      * Creates a new CommandExecutionEvent.
      * 
      * @param event the Discord Event that triggered the firing of this Event
-     * @param client the SoapClient for the Guild the Event was fired in
-     * @param dispatcher the EventDispatcher for the SoapClientManager that fired the Event
+     * @param context the context for the SoapClient for the Guild the Event was fired in
      * @param command the Command that is being executed
      */
-    public CommandExecutionEvent(DiscordEvent event, SoapClient client, EventDispatcher dispatcher, Command command) {
+    public CommandExecutionEvent(DiscordEvent event, ClientContext context, Command command) {
         this.discordEvent = event;
-        this.client = client;
-        this.dispatcher = dispatcher;
+        this.context = context;
         this.command = command;
         this.handler = new GuildInteractionHandler(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
         handler.setActiveChannel(discordEvent.getChannel());
@@ -146,7 +144,7 @@ public class CommandExecutionEvent {
      * @return the {@code PermissionsManager} for the SoapClient in this Event.
      */
     public PermissionsManager getPermissionsManager() {
-        return client.getPermissionsManager();
+        return context.getPermissionsManager();
     }
 
     /**
@@ -155,7 +153,25 @@ public class CommandExecutionEvent {
      * @return the {@code SoapEventManager} for the SoapClient in this Event.
      */
     public SoapEventManager getEventManager() {
-        return client.getEventManager();
+        return context.getEventManager();
+    }
+
+    /**
+     * Returns the {@code ChatCompletionManager} for this SoapClient in this Event.
+     * 
+     * @return the {@code ChatCompletionManager} for this SoapClient in this Event.
+     */
+    public ChatCompletionManager getChatCompletionManager() {
+        return context.getChatCompletionManager();
+    }
+
+    /**
+     * Returns the {@code UserProfileManager} for this SoapClient in this Event.
+     * 
+     * @return the {@code UserProfileManager} for this SoapClient in this Event.
+     */
+    public UserProfileManager getUserProfileManager() {
+        return context.getUserProfileManager();
     }
 
     /**
@@ -164,16 +180,26 @@ public class CommandExecutionEvent {
      * @return the {@code CommandRegistry} for the SoapClient in this Event.
      */
     public CommandRegistry getCommandRegistry() {
-        return client.getRegistry();
+        return context.getCommandRegistry();
     }
 
     /**
-     * Returns the {@code AudioInterface} for the SoapClient in this Event.
+     * Returns the {@code AudioContext} for the SoapClient in this Event.
      * 
-     * @return the {@code AudioInterface} for the SoapClient in this Event.
+     * @return the {@code AudioContext} for the SoapClient in this Event.
      */
-    public AudioContext getAudioInterface() {
-        return client.getAudioInterface();
+    public AudioContext getAudioContext() {
+        return context.getAudioContext();
+    }
+
+    /**
+     * Returns the {@link ClientContext} for the {@link SoapClient} this
+     * event originated from.
+     * 
+     * @return The context of the originating SoapClient.
+     */
+    public ClientContext getClientContext() {
+        return context;
     }
 
     /**
@@ -182,7 +208,7 @@ public class CommandExecutionEvent {
      * @return the {@code EventDispatcher} that fired the Event in the Pipeline.
      */
     public EventDispatcher getEventDispatcher() {
-        return dispatcher;
+        return context.getDispatcher();
     }
 
     /**

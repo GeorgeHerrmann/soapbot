@@ -1,10 +1,11 @@
 package com.georgster.database;
 
+import com.georgster.control.manager.Manageable;
 
 /**
  * A Profile holds data regarding a user's inside a specific Discord server.
  */
-public class UserProfile {
+public class UserProfile implements Manageable {
     private String guildId; //Snowflake Guild ID associated with this user's profile in a guild
     private String memberId; //Snowflake member ID
     private String username; //User's discord username
@@ -20,6 +21,13 @@ public class UserProfile {
         guildId = serverId;
         memberId = userId;
         username = user;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getIdentifier() {
+        return getMemberId();
     }
 
     /**

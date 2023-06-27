@@ -3,10 +3,9 @@ package com.georgster.control;
 import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
+import com.georgster.control.manager.SoapManager;
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
-import com.georgster.database.DatabaseService;
-import com.georgster.database.ProfileType;
-import com.georgster.database.UserProfile;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
@@ -21,33 +20,26 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 /**
  * An aggregation of all the shard-specific objects that SOAP Bot needs to run for
  * a single {@code Guild}. Each SoapClient handles all the events that occur in
- * its associated {@code Guild} and houses its {@code CommandRegistry}.
+ * its associated {@code Guild}, houses its {@code CommandRegistry} and has their own Set of {@link SoapManager}s.
  */
 public final class SoapClient {
     private final Snowflake flake;
-    private final AudioContext audioInterface;
-    private final CommandRegistry registry;
-    private final SoapEventManager eventManager;
-    private final PermissionsManager permissionsManager;
-    private final ChatCompletionManager completionManager;
+    private final ClientContext context;
     
     /**
      * Creates a new {@code SoapClient} for the associated {@code Guild} represented
-     * by its unique {@code Snowflake}. Sets up an audio interface and
-     * constructs a new {@code CommandRegistry} for this client.
+     * by its unique {@code Snowflake} and initializes its systems.
      */
     protected SoapClient(ClientContext context) {
         flake = context.getGuild().getId();
-        audioInterface = new AudioContext();
-        eventManager = new SoapEventManager(context);
-        permissionsManager = new PermissionsManager(context);
-        completionManager = new ChatCompletionManager(context);
-        context.setAudioInterface(audioInterface);
-        context.setEventManager(eventManager);
-        context.setPermissionsManager(permissionsManager);
-        context.setChatCompletionManager(completionManager);
-        registry = new CommandRegistry(context);
-        registry.registerGlobalCommands();
+        this.context = context;
+        this.context.setAudioContext(new AudioContext());
+        this.context.addManagers(new SoapEventManager(context),
+                           new PermissionsManager(context),
+                           new ChatCompletionManager(context),
+                           new UserProfileManager(context));
+        this.context.setCommandRegistry(new CommandRegistry(context));
+        this.context.getCommandRegistry().registerGlobalCommands();
     }
 
     /**
@@ -59,35 +51,13 @@ public final class SoapClient {
      */
     protected void onGuildCreate(GuildCreateEvent event) {
         ThreadPoolFactory.createThreadPoolManager(event.getGuild().getId());
-
-        GuildInteractionHandler handler = new GuildInteractionHandler(event.getGuild());
     
-        MultiLogger logger = new MultiLogger(handler, getClass());
-        logger.append("Logging in to server: " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
+        MultiLogger logger = new MultiLogger(new GuildInteractionHandler(event.getGuild()), getClass());
+        logger.append("Logging in to server: " + context.getGuild().getName() + "\n", LogDestination.NONAPI);
 
-        DatabaseService<UserProfile> service = new DatabaseService<>(handler.getId(), ProfileType.PROFILES, UserProfile.class);
+        this.context.forEachManager(SoapManager::load);
+        logger.append("- Initialized " + context.getGuild().getName() + "'s management system", LogDestination.NONAPI);
 
-        eventManager.restartEvents();
-
-        permissionsManager.setupBasic();
-
-        completionManager.load();
-
-        logger.append("\n-  Restarted " + eventManager.getCount() + " events for " + handler.getGuild().getName() + "\n", LogDestination.NONAPI);
-
-        logger.append("\n-  Updated Server Profile for " + handler.getGuild().getName(), LogDestination.NONAPI);
-
-        logger.append("\n -  Loaded in " + permissionsManager.getCount() + " Permission Groups for " + handler.getGuild().getName(), LogDestination.NONAPI);
-
-        logger.append("\n -  Cached " + completionManager.getCount() + " conversations between members of " +
-                      handler.getGuild().getName() + " and SOAP Bot's AI", LogDestination.NONAPI);
-
-        handler.getAllMembers().forEach(member -> {
-          String id = member.getId().asString();
-          service.addObjectIfNotExists(new UserProfile(handler.getId(), id, member.getUsername()), "memberId", id);
-          service.updateObjectIfExists(new UserProfile(handler.getId(), id, member.getUsername()), "memberId", id);
-        });
-        logger.append("\n- Updated " + handler.getAllMembers().size() + " User Profiles for " + handler.getGuild().getName(), LogDestination.NONAPI);
         logger.sendAll();
     }
 
@@ -99,7 +69,7 @@ public final class SoapClient {
      * @param event The MessageCreateEvent that was fired.
      */
     protected void onMessageCreate(MessageCreateEvent event) {
-        registry.getAndExecute(event, this);
+        this.context.getCommandRegistry().getAndExecute(event);
     }
 
     /**
@@ -108,7 +78,7 @@ public final class SoapClient {
      * @param event The ChatInputInteractionEvent that was fired.
      */
     protected void onChatInputInteraction(ChatInputInteractionEvent event) {
-        registry.getAndExecute(event, this);
+        this.context.getCommandRegistry().getAndExecute(event);
     }
 
     /**
@@ -121,40 +91,11 @@ public final class SoapClient {
     }
 
     /**
-     * Gets the {@code AudioInterface} for this SoapClient.
+     * Returns the context of this {@link SoapClient}.
      * 
-     * @return The AudioInterface for this SoapClient.
+     * @return the context of this client.
      */
-    public AudioContext getAudioInterface() {
-        return audioInterface;
-    }
-
-    /**
-     * Gets the {@code SoapEventManager} that is managing the events for this
-     * {@code SoapClient's} associated {@code Guild}.
-     * 
-     * @return The SoapEventManager for this SoapClient.
-     */
-    public SoapEventManager getEventManager() {
-        return eventManager;
-    }
-
-    /**
-     * Gets the {@code PermissionsManager} that is managing the permissions for this
-     * {@code SoapClient}.
-     * 
-     * @return The PermissionsManager for this SoapClient.
-     */
-    public PermissionsManager getPermissionsManager() {
-        return permissionsManager;
-    }
-
-    /**
-     * Gets the CommandRegistry for this SoapClient.
-     * 
-     * @return The CommandRegistry for this SoapClient.
-     */
-    public CommandRegistry getRegistry() {
-        return registry;
+    protected ClientContext getContext() {
+        return this.context;
     }
 }

@@ -114,3 +114,11 @@
     - Fixed an issue where some PermissionGroups had null permissions, causing issues with Permission Management.
     - Fixed an issue where some Reserve Events would not properly mention users when using !events [name] mention
         - A temporary solution has been implemented, with a more full one to the entire event system coming later
+
+2.361
+    - Restructred the way top-level control objects structure their data
+        - SoapClients now use a more scalable ClientContext to hold most of their data
+        - Structured AbstractSoapManagers to extend SoapManagers
+        - There is now a UserProfileManager to manage UserProfiles properly with the new system
+            - SoapBot's management system is now fully unified
+            - A necessary change to the log messages on startup has been made as a result

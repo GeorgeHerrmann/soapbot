@@ -41,8 +41,6 @@ public class CommandRegistry {
     /**
      * Creates a Command Register for the associated SoapClient, 
      * registering all of SOAP Bot's pre-defined commands in it.
-     * Any command that requires the SoapClient's objects (such as the AudioProvider, AudioPlayer, etc.)
-     * can access it through the client parameter.
      * 
      * @param context the ClientContext feeding this registry's commands.
      */
@@ -79,13 +77,13 @@ public class CommandRegistry {
      * @param event the Event that prompted this call.
      * @param client the SoapClient that received the event.
      */
-    public void getAndExecute(Event event, SoapClient client) {
+    public void getAndExecute(Event event) {
         DiscordEvent transformer = new DiscordEvent(event);
         String attemptedCommand = transformer.getCommandName().toLowerCase();
         getCommands().forEach(command -> {
             if (command.getAliases().contains(attemptedCommand)) {
-                CommandExecutionEvent executionEvent = new CommandExecutionEvent(transformer, client, context.getDispatcher(), command);
-                ThreadPoolFactory.scheduleCommandTask(client.getSnowflake().asString(), executionEvent::executeCommand);
+                CommandExecutionEvent executionEvent = new CommandExecutionEvent(transformer, context, command);
+                ThreadPoolFactory.scheduleCommandTask(context.getGuild().getId().asString(), executionEvent::executeCommand);
             }
         });
     }

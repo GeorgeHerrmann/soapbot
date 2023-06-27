@@ -37,7 +37,8 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
      * Sets up a basic configuration for the {@code PermissionGroups} in this manager based on the roles in the guild
      * if it does not already have a configuration and loads the groups that do into this manager.
      */
-    public void setupBasic() {
+    @Override
+    public void load() {
         handler.getAllRoles().forEach(role -> {
             if (!role.getName().equalsIgnoreCase("@everyone")) {
                 PermissionGroup dbgroup = dbService.getObject("name", role.getName());

@@ -1,25 +1,18 @@
 package com.georgster.control.manager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.ClientContext;
-import com.georgster.database.DatabaseService;
 import com.georgster.database.ProfileType;
 import com.georgster.database.adapter.DatabaseObjectClassAdapter;
-import com.georgster.util.GuildInteractionHandler;
 
 import discord4j.core.object.entity.Guild;
 
 /**
  * A framework for managing extending or implementing objects that are stored in SOAPBot's database.
  */
-public abstract class AbstractSoapManager<T extends Manageable> {
+public abstract class AbstractSoapManager<T extends Manageable> extends SoapManager<T> {
     protected DatabaseObjectClassAdapter<T> adapter; // The adapter that will be used to convert the objects from the database.
-    protected String identifierName; // The name of the identifier field in the database.
-    protected List<T> observees; // The objects that this manager is managing.
-    protected DatabaseService<T> dbService; // The service that this manager will use to access the database.
-    protected GuildInteractionHandler handler; // The handler that this manager will use to interact with the guild.
 
     /**
      * Creates a new AbstractSoapManager which will access the database using the given paramaters.
@@ -31,18 +24,22 @@ public abstract class AbstractSoapManager<T extends Manageable> {
      * @param adapter The adapter that will be used to convert the objects from the database.
      */
     protected AbstractSoapManager(ClientContext context, ProfileType profileType, Class<T> observeeClass, String identifierName, DatabaseObjectClassAdapter<T> adapter) {
-        this.handler = new GuildInteractionHandler(context.getGuild());
-        this.dbService = new DatabaseService<>(handler.getId(), profileType, observeeClass);
-        this.observees = new ArrayList<>();
-        this.identifierName = identifierName;
+        super(context, profileType, observeeClass, identifierName);
         this.adapter = adapter;
     }
 
     /**
-     * Adds an object to the manager.
-     * 
-     * @param observee The object to add.
+     * {@inheritDoc}
      */
+    @Override
+    public void load() {
+        dbService.getAllObjects(adapter).forEach(this::add);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void add(T observee) {
         if (!exists(observee.getIdentifier())) {
             dbService.addObjectIfNotExists(observee, identifierName, observee.getIdentifier(), adapter);
@@ -51,30 +48,25 @@ public abstract class AbstractSoapManager<T extends Manageable> {
     }
 
     /**
-     * Checks if an object exists in the manager.
-     * 
-     * @param observee The object to check.
-     * @return True if the object exists in the manager, false otherwise.
+     * {@inheritDoc}
      */
+    @Override
     public boolean exists(T observee) {
         return observees.contains(observee);
     }
 
     /**
-     * Checks if an object exists in the manager.
-     * 
-     * @param identifier The identifier of the object to check.
-     * @return True if the object exists in the manager, false otherwise.
+     * {@inheritDoc}
      */
+    @Override
     public boolean exists(String identifier) {
         return observees.stream().anyMatch(observee -> observee.getIdentifier().equals(identifier));
     }
 
     /**
-     * Removes an object from the manager.
-     * 
-     * @param observee The object to remove.
+     * {@inheritDoc}
      */
+    @Override
     public void remove(T observee) {
         if (exists(observee)) {
             dbService.removeObjectIfExists(identifierName, observee.getIdentifier(), adapter);
@@ -83,10 +75,9 @@ public abstract class AbstractSoapManager<T extends Manageable> {
     }
 
     /**
-     * Removes an object from the manager.
-     * 
-     * @param identifier The identifier of the object to remove.
+     * {@inheritDoc}
      */
+    @Override
     public void remove(String identifier) {
         observees.stream().filter(observee -> observee.getIdentifier().equals(identifier)).forEach(observee -> {
             dbService.removeObjectIfExists(identifierName, identifier, adapter);
@@ -95,36 +86,33 @@ public abstract class AbstractSoapManager<T extends Manageable> {
     }
 
     /**
-     * Removes all objects from the manager.
+     * {@inheritDoc}
      */
+    @Override
     public void removeAll() {
         observees.forEach(this::remove);
     }
 
     /**
-     * Gets an object from the manager.
-     * 
-     * @param identifier The identifier of the object to get.
-     * @return The object with the given identifier, or null if no such object exists.
+     * {@inheritDoc}
      */
+    @Override
     public T get(String identifier) {
         return observees.stream().filter(observee -> observee.getIdentifier().equals(identifier)).findFirst().orElse(null);
     }
 
     /**
-     * Gets all objects from the manager.
-     * 
-     * @return A list of all objects in the manager.
+     * {@inheritDoc}
      */
+    @Override
     public List<T> getAll() {
         return observees;
     }
 
     /**
-     * Updates an object in the manager.
-     * 
-     * @param observee The object to update.
+     * {@inheritDoc}
      */
+    @Override
     public void update(T observee) {
         observees.stream().filter(examiner -> examiner.getIdentifier().equals(observee.getIdentifier())).forEach(examiner -> {
             observees.set(observees.indexOf(examiner), observee); //Replace the old observee with the new one
@@ -133,28 +121,25 @@ public abstract class AbstractSoapManager<T extends Manageable> {
     }
 
     /**
-     * Gets the number of objects in the manager.
-     * 
-     * @return The number of objects in the manager.
+     * {@inheritDoc}
      */
+    @Override
     public int getCount() {
         return observees.size();
     }
 
     /**
-     * Checks if the manager is empty.
-     * 
-     * @return True if the manager is empty, false otherwise.
+     * {@inheritDoc}
      */
+    @Override
     public boolean isEmpty() {
         return observees.isEmpty();
     }
 
     /**
-     * Gets the guild that this manager is associated with.
-     * 
-     * @return The guild that this manager is associated with.
+     * {@inheritDoc}
      */
+    @Override
     public Guild getGuild() {
         return handler.getGuild();
     }
