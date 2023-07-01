@@ -37,7 +37,6 @@ public class PollEventCommand implements Command {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n- '!poll' to bring up the Poll Wizard";
     }
 

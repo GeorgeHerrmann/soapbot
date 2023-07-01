@@ -5,7 +5,8 @@ import com.georgster.control.util.CommandExecutionEvent;
 import discord4j.core.object.component.Button;
 
 /**
- * Factory class for creating input listeners.
+ * Factory class for creating {@link InputListener}s. All listeners can
+ * be built with {@link InputListener#builder()}.
  */
 public class InputListenerFactory {
 
@@ -19,19 +20,18 @@ public class InputListenerFactory {
     /**
      * Returns {@link MenuMessageListener} which will send a message to the user
      * and provide a menu of options to choose from. Responses can be recorded
-     * via the select menu or a message containing the option. Can be exited
-     * with a message containing "end" or reacting with the "end" emoji.
+     * via the select menu or a message containing the option.
      * 
      * @param event Command execution event that triggered the wizard.
      * @param title Title of the menu.
      * @return {@link MenuMessageListener} that will send a menu message and record responses.
      */
-    public static UserInputListener createMenuMessageListener(CommandExecutionEvent event, String title) {
-        return new MenuMessageListener("end", title, event.getEventDispatcher(), event.getGuildInteractionHandler(), event.getDiscordEvent().getAuthorAsMember());
+    public static InputListener createMenuMessageListener(CommandExecutionEvent event, String title) {
+        return new MenuMessageListener(event, title);
     }
 
     /**
-     * Returns a {@link ButtonMessageListener} * Sends a message to the user in a {@code Message}
+     * Returns a {@link ButtonMessageListener} Sends a message to the user in a {@code Message}
      * containing {@link Button}s as the options. Users can respond by either clicking on the 
      * corresponding button, or by sending a message containing a valid option.
      * 
@@ -39,7 +39,7 @@ public class InputListenerFactory {
      * @param title Title of the menu.
      * @return {@link ButtonMessageListener} that will send a message containing buttons and record responses.
      */
-    public static UserInputListener createButtonMessageListener(CommandExecutionEvent event, String title) {
-        return new ButtonMessageListener("end", title, event.getEventDispatcher(), event.getGuildInteractionHandler(), event.getDiscordEvent().getAuthorAsMember());
+    public static InputListener createButtonMessageListener(CommandExecutionEvent event, String title) {
+        return new ButtonMessageListener(event, title);
     }
 }

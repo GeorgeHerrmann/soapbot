@@ -240,7 +240,6 @@ public class ReserveCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME] [DATE]' to create a new event with for a specific time and date with a certain number of people" +
         "\n\t - This event will pop when the specified time hits" +
         "\n- '!reserve [EVENTNAME] [PLAYERCOUNT] [TIME]' to create a new event with for a specific time with a certain number of people" +

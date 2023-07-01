@@ -7,6 +7,14 @@ import discord4j.common.util.Snowflake;
 
 /**
  * A factory class for creating and managing thread pools for each {@code SoapClient}.
+ * <p>
+ * <p>Maximum concurrent tasks for each Guild's thread pools:</p>
+ * <ul>
+ *  <li>General: unlimited</li>
+ *  <li>Event: 10</li>
+ *  <li>Command: 3</li>
+ *  <li>Voice: 1</li>
+ *  <li>Global Discord API calls: 1</li>
  */
 public class ThreadPoolFactory {
     private static final Map<String, ThreadPoolManager> CLIENT_THREAD_POOL_MANAGERS = new ConcurrentHashMap<>(); // Maps guild IDs to thread pool managers
@@ -28,7 +36,7 @@ public class ThreadPoolFactory {
     }
 
     /**
-     * Schedules a task to be executed by the database general pool manager for the given guild ID.
+     * Schedules a task to be executed by the general pool manager for the given guild ID.
      * 
      * @param guildId The guild ID to schedule the task for
      * @param task   The task to be executed

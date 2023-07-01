@@ -172,7 +172,6 @@ public class ReserveEventCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n- !events list to list all reserve events" +
         "\n- !events [NAME] for information about a specific reserve event" +
         "\n- !events [NAME] mention to mention all users that have reserved to an event" +

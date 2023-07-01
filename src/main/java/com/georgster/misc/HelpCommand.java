@@ -15,9 +15,10 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.wizard.InputWizard;
+import com.georgster.util.commands.wizard.IterableStringWizard;
 
 /**
  * The HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
@@ -43,30 +44,17 @@ public class HelpCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         CommandParser parser = event.getCommandParser();
-        GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
-        String arg = parser.get(0).toLowerCase();
-        try {
-            arg = parser.get(0).toLowerCase();
-        } catch (Exception e) {
-            arg = "";
-        }
-
-        StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
         for (Command command : register.getCommands()) {
-            if (command.getAliases().contains(arg)) {
+            if (command.getAliases().contains(parser.get(0))) {
                 logger.append("- Command found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
-                response = new StringBuilder(command.getClass().getSimpleName() + "\n" + command.help());
+
+                InputWizard helpWizard = new IterableStringWizard(event, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
+                helpWizard.begin();
                 break;
-            } else {
-                if (!command.getAliases().isEmpty()) {
-                    response.append(command.getAliases().get(0) + " ");
-                }
             }
         }
         logger.append("Responding to a !help command request", LogDestination.API);
-        String[] output = SoapUtility.splitFirst(response.toString());
-        handler.sendText(output[1], output[0]);
     }
 
     /**
@@ -124,10 +112,10 @@ public class HelpCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public String help() {
-        StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\nAvailable Commands:\n");
+        StringBuilder response = new StringBuilder("Type !help followed by a command for more information regarding that command\n\t- Available Commands:\n");
         for (Command command : register.getCommands()) {
             if (!command.getAliases().isEmpty()) {
-                response.append(command.getAliases().get(0) + " ");
+                response.append("\t- " + command.getAliases().get(0) + "\n");
             }
         }
 

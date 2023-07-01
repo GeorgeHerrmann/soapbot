@@ -106,7 +106,7 @@ public class MessageCommand implements Command {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\n - !message @[USERS] [MESSAGE]" +
-        "\n\t Ex: !message @georgster#8086 hello" + 
-        "\n\t Or: !message @georgster#8086 @Milkmqn#9457 hello";
+        "\n\t- Examples: !message @georgster#8086 hello" + 
+        "\n\t- Or: !message @georgster#8086 @Milkmqn#9457 hello";
     }
 }

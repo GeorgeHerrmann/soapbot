@@ -10,8 +10,8 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.commands.wizard.input.InputListener;
 import com.georgster.util.commands.wizard.input.InputListenerFactory;
-import com.georgster.util.commands.wizard.input.UserInputListener;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.core.object.entity.Member;
@@ -68,16 +68,16 @@ public abstract class InputWizard {
     private boolean isActive;
     private boolean awaitingResponse;
     protected final GuildInteractionHandler handler;
-    private final UserInputListener listener;
+    private final InputListener listener;
     protected final MultiLogger logger;
 
     /**
      * Initializes the InputWizard engine.
      * 
      * @param event The event that prompted the Wizard creation.
-     * @param listener The {@code UserInputListener} which will handle the user interaction.
+     * @param listener The {@code InputListener} which will handle the user interaction.
      */
-    protected InputWizard(CommandExecutionEvent event, UserInputListener listener) {
+    protected InputWizard(CommandExecutionEvent event, InputListener listener) {
         this.activeFunctions = new ArrayDeque<>();
         this.activeFunctionParams = new ArrayDeque<>();
 
@@ -155,7 +155,7 @@ public abstract class InputWizard {
     }
 
     /**
-     * Prompts the user using this Wizard's default {@link UserInputListener} 
+     * Prompts the user using this Wizard's default {@link InputListener} 
      * with a message and options and returns the response, or null if the wizard was ended.
      * 
      * @param message Message to prompt the user with.
@@ -178,15 +178,15 @@ public abstract class InputWizard {
     }
 
     /**
-     * Prompts the user using the input {@link UserInputListener} 
+     * Prompts the user using the input {@link InputListener} 
      * with a message and options and returns the response, or null if the wizard was ended.
      * 
-     * @param newListener The {@link UserInputListener} to prompt the user with.
+     * @param newListener The {@link InputListener} to prompt the user with.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      * @return Response from the user, or null if the wizard was ended.
      */
-    private String prompt(UserInputListener newListener, String message, String... options) {
+    private String prompt(InputListener newListener, String message, String... options) {
         WizardState state = new WizardState(message, options);
         awaitingResponse = true;
 
@@ -295,12 +295,12 @@ public abstract class InputWizard {
      * 
      * @param withResponse Handler for the response.
      * @param backOption True if this window should include back option functionality, false otherwise.
-     * @param newListener The {@link UserInputListener} to prompt the user and get their response.
+     * @param newListener The {@link InputListener} to prompt the user and get their response.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      * @see InputListenerFactory
      */
-    protected void withResponse(Consumer<String> withResponse, boolean backOption, UserInputListener newListener, String message, String... options) {
+    protected void withResponse(Consumer<String> withResponse, boolean backOption, InputListener newListener, String message, String... options) {
         if (backOption) {
             withResponseBack(withResponse, newListener, message, options);
         } else {
@@ -349,13 +349,13 @@ public abstract class InputWizard {
 
     /**
      * A handler for the response from a state of the wizard, prompting them with the given options
-     * using the given {@link UserInputListener}.
+     * using the given {@link InputListener}.
      * 
      * @param withResponse Handler for the response.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      */
-    private void withResponse(Consumer<String> withResponse, UserInputListener newListener, String message, String... options) {
+    private void withResponse(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
         String response = prompt(newListener, message, options);
         if (response == null) {
             isActive = false;
@@ -366,13 +366,13 @@ public abstract class InputWizard {
 
     /**
      * A handler for the response from a state of the wizard, prompting them with the given options
-     * and including back functionality using the given {@link UserInputListener}.
+     * and including back functionality using the given {@link InputListener}.
      * 
      * @param withResponse Handler for the response.
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      */
-    private void withResponseBack(Consumer<String> withResponse, UserInputListener newListener, String message, String... options) {
+    private void withResponseBack(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
         String[] optionsWithBack = new String[options.length + 1];
         System.arraycopy(options, 0, optionsWithBack, 0, options.length);
         optionsWithBack[options.length] = "back";

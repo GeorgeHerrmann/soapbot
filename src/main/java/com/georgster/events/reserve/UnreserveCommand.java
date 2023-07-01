@@ -111,7 +111,6 @@ public class UnreserveCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n- !events list to list all events" +
         "\n- !events [NAME] for information about a specific event" +
         "\n- !unreserve [NAME] to unreserve from an event" +

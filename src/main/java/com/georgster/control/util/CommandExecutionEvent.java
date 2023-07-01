@@ -6,6 +6,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
+import com.georgster.control.SoapClient;
 import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
@@ -15,7 +16,10 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.wizard.InputWizard;
+import com.georgster.util.commands.wizard.IterableStringWizard;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
@@ -81,7 +85,8 @@ public class CommandExecutionEvent {
                 for (StackTraceElement element : e.getStackTrace()) {
                     logger.append("\t" + element.toString() + "\n", LogDestination.FILE, LogDestination.SYSTEM);
                 }
-                handler.sendText(command.help(), command.getClass().getSimpleName());
+                InputWizard helpWizard = new IterableStringWizard(this, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
+                helpWizard.begin();
             }
         } else {
             args = Collections.emptyList();

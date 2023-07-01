@@ -145,7 +145,6 @@ public class PermissionsCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n!permissions list - List all the groups" +
         "\n!permissions [group] - List all the permissions for a group" +
         "\n!permissions manage - Manage all SOAP Bot permissions for roles in this server" +

@@ -78,7 +78,6 @@ public class GPTCommand implements ParseableCommand {
      */
     public String help() {
          return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n- !ask [PROMPT] - Give SOAP Bot a prompt and have it respond";
     }
 

@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.PatternSyntaxException;
 
@@ -99,6 +101,48 @@ public class SoapUtility {
         input = input.replaceAll("(?<=[a-zA-Z])(?=\\d)", " ");
         input = input.replaceAll("(?<=\\d)(?=[a-zA-Z]{2})", " ");
         return input;
+    }
+
+    /**
+     * Splits a Command's Help message String into a List of more concise Strings.
+     * 
+     * @param input A Command's Help String
+     * @return A list of more concise Strings.
+     */
+    public static List<String> splitHelpString(String input) {
+        List<String> lines = new ArrayList<>();
+        String aliases = null;
+        boolean firstLineSkipped = false;
+        final StringBuilder note = new StringBuilder();
+
+        String[] tokens = input.split("\\r?\\n");
+        for (String token : tokens) {
+            if (token.startsWith("*")) {
+                note.append("\n").append(token);
+            } else {
+                if (!firstLineSkipped) {
+                    aliases = token;
+                    firstLineSkipped = true;
+                    continue;
+                }
+
+                if (token.startsWith("\t")) {
+                    int lastIndex = lines.size() - 1;
+                    if (lastIndex >= 0) {
+                        String lastLine = lines.get(lastIndex);
+                        lastLine += "\n" + token;
+                        lines.set(lastIndex, lastLine);
+                    }
+                } else {
+                    String line = aliases + "\n" + token + note.toString();
+                    lines.add(line);
+                }
+                note.setLength(0);
+            }
+        }
+        lines.replaceAll(line -> line = new StringBuilder(line).append(note).toString());
+
+        return lines;
     }
 
     /**

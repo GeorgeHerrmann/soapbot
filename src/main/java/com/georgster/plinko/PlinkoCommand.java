@@ -94,7 +94,6 @@ public class PlinkoCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n- '!plinko play' to simulate a game of plinko" +
         "\n- '!plinko board' to show an empty plinko board";
     }

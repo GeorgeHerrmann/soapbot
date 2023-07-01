@@ -10,7 +10,7 @@ public class IterableStringWizard extends InputWizard {
     private List<String> args;
 
     public IterableStringWizard(CommandExecutionEvent event, String title, List<String> args) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, title));
+        super(event, InputListenerFactory.createButtonMessageListener(event, title).builder().requireMatch(true, true).withXReaction(false).build());
 
         this.args = args;
     }

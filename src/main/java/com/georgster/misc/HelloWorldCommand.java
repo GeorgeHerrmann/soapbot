@@ -34,7 +34,6 @@ public class HelloWorldCommand implements Command {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\nUsage:" +
         "\n- !hello = Responds with 'Hello world!'";
     }
 
