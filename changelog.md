@@ -126,3 +126,10 @@
 2.362
     - Fixed an issue where GPTCommand requests would time out and fall back to displaying the help message
         - Will now give a proper error message when OpenAI fails to respond in time
+
+2.370
+    - Reworked the InputListener to be much more modular and now share varying properties.
+        - InputListeners can be created by extending the InputListener class
+        - Can be customized via the InputListenerBuilder and obtained via the InputListenerFactory
+    - Reworked Help Messages into iterable Wizards which now display the message one window at a time.
+    
