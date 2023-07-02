@@ -177,7 +177,7 @@ public class ReserveEventCommand implements ParseableCommand {
         "\n- !events [NAME] mention to mention all users that have reserved to an event" +
         "\n- !unreserve [NAME] to unreserve from an event" +
         "\n\t - An event will be removed if there are no more people reserved to it" +
-        "\nType !help reserve for information about reserving to or creating an event";
+        "\n*Type !help reserve for information about reserving to or creating an event*";
     }
     
 }

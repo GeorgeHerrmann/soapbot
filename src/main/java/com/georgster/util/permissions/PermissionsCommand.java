@@ -148,6 +148,6 @@ public class PermissionsCommand implements ParseableCommand {
         "\n!permissions list - List all the groups" +
         "\n!permissions [group] - List all the permissions for a group" +
         "\n!permissions manage - Manage all SOAP Bot permissions for roles in this server" +
-        "\n!permissions addall [permission] - Add all permissions to a role";
+        "\n!permissions addall [permission] - Add a permission to all roles";
     }
 }
