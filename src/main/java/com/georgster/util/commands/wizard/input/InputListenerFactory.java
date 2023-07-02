@@ -42,4 +42,17 @@ public class InputListenerFactory {
     public static InputListener createButtonMessageListener(CommandExecutionEvent event, String title) {
         return new ButtonMessageListener(event, title);
     }
+
+    /**
+     * Returns a {@link MessageListener} Sends a message to the user in a {@code Message} the options.
+     * Users can respond by either clicking on the  corresponding button,
+     * or by sending a message containing a valid option.
+     * 
+     * @param event Command execution event that triggered the wizard.
+     * @param title Title of the menu.
+     * @return {@link MessageListener} that will send a message and record responses.
+     */
+    public static InputListener createMessageListener(CommandExecutionEvent event, String title) {
+        return new MessageListener(event, title);
+    }
 }

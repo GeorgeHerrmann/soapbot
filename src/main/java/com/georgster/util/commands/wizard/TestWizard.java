@@ -16,7 +16,7 @@ public class TestWizard extends InputWizard {
      * @param event The event from {@code TestCommand}.
      */
     public TestWizard(CommandExecutionEvent event) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, TITLE));
+        super(event, InputListenerFactory.createMessageListener(event, TITLE).builder().requireMatch(false, false).build());
     }
 
     /**
@@ -40,9 +40,9 @@ public class TestWizard extends InputWizard {
     protected void windowTwo() {
         String prompt = "Test Screen 2";
 
-        withResponse((response -> {
-            sendMessage("Found response: " + response, TITLE);
-        }), true, prompt);
+        withResponse((response -> 
+            sendMessage("Found response: " + response, TITLE)
+        ), true, prompt);
     }
     
 }

@@ -115,7 +115,7 @@ public class UnreserveCommand implements ParseableCommand {
         "\n- !events [NAME] for information about a specific event" +
         "\n- !unreserve [NAME] to unreserve from an event" +
         "\n\t - An event will be removed if there are no more people reserved to it" +
-        "\nType !help reserve for information about reserving to or creating an event";
+        "\n*Type !help reserve for information about reserving to or creating an event*";
     }
 
     /**

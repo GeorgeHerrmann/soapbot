@@ -132,4 +132,6 @@
         - InputListeners can be created by extending the InputListener class
         - Can be customized via the InputListenerBuilder and obtained via the InputListenerFactory
     - Reworked Help Messages into iterable Wizards which now display the message one window at a time.
-    
+
+2.371
+    - Added a MessageListener
