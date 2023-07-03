@@ -135,3 +135,7 @@
 
 2.371
     - Added a MessageListener
+
+2.372
+    - Fixed an issue where multiple InputWizards being active at once could stop other commands from executing
+        - Each CommandThreadPool can now run ten command tasks at once.

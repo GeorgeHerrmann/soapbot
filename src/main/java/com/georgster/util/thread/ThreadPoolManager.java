@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
  * <ul>
  *  <li>General: unlimited</li>
  *  <li>Event: 10</li>
- *  <li>Command: 3</li>
+ *  <li>Command: 10</li>
  *  <li>Voice: 1</li>
  *  <li>Global Discord API calls: 1</li>
  * </ul>
@@ -22,7 +22,7 @@ public class ThreadPoolManager {
 
     private final ExecutorService generalThreadPool = Executors.newCachedThreadPool(); 
     private final ExecutorService eventThreadPool = Executors.newFixedThreadPool(10); //Can schedule 10 events at once
-    private final ExecutorService commandThreadPool = Executors.newFixedThreadPool(3); // Can schedule 3 commands at once
+    private final ExecutorService commandThreadPool = Executors.newFixedThreadPool(10); // Can schedule 3 commands at once
     private final ExecutorService voiceThreadPool = Executors.newSingleThreadExecutor(); // Can schedule 1 voice task at once
 
     /**

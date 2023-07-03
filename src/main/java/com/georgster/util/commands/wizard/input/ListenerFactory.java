@@ -13,6 +13,14 @@ public interface ListenerFactory {
      * Generally, using {@link EventDispatcher#on(Class)} is reccomended to gain a {@code Flux}
      * that can be manipulated. {@code Flux.Subscribe()} can be used to subscribe logic to the event
      * and gain the {@link Disposable}.
+     * <p>
+     * For example, a listener which records the user's response in a message they send could be created like so:
+     * <pre>
+     * createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
+     *      .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
+     *      .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
+     *      .subscribe(event -> setResponse(event.getMessage().getContent())));
+     * </pre>
      * 
      * @param dispatcher The {@link EventDispatcher} dispatching events.
      * @return A temporary {@link Disposable} event listener.

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.commands.wizard.InputWizard;
 import com.georgster.util.commands.wizard.WizardState;
 
 import discord4j.core.event.EventDispatcher;
@@ -35,20 +36,27 @@ public abstract class InputListener {
 
     private int timeoutTime = 300; // will wait 30s for a response (is in ms)
 
-    protected final String endString;
-    protected final String title;
-    private final EventDispatcher dispatcher;
-    protected final GuildInteractionHandler handler;
-    protected final Member user;
-    private final List<Disposable> listeners;
+    // Configuration properties
+    protected final String endString; // String to type to cancel the listener
+    protected final String title; // The title to attach to messages
+    private final EventDispatcher dispatcher; // Dispatcher sending events
+    protected final GuildInteractionHandler handler; // Handler to interact with the Guild
+    protected final Member user; // The user of the listener
+    private final List<Disposable> listeners; // The Disposable listeners
 
+    // Settings for this listener
     private boolean addXReaction;
-    private boolean mustMatchLenient;
-    private boolean mustMatchStrict;
+    private boolean mustMatchLenient; // If false, mustMatchStrict will always also be false
+    private boolean mustMatchStrict; // If true, mustMatchLenient will always also be true
 
-    protected Message message;
-    private WizardState recentState;
-    private StringBuilder responseContainer;
+    /*
+     * InputListeners work on a message to message basis.
+     * These properties store the most recent data from the last prompt.
+     * If there was no previous message, these will either be empty objects or null.
+     */
+    protected Message message; // This listener's most recent message (to edit)
+    private WizardState recentState; // The most recent state of the communicating InputWizard
+    private StringBuilder responseContainer; // The users most recent response
 
     /**
      * Creates an InputListener from the provided event, title, and String to end the listener.
@@ -73,17 +81,31 @@ public abstract class InputListener {
     }
 
     /**
-     * Adds a new {@link Disposable} listener to this listener.
+     * Adds a new {@link Disposable} temporary listener to this InputListener.
      * <p>
-     * Listeners should verify the correct {@link Member}, {@link Channel}, and {@link Message} is present, if applicable.
+     * Listeners should verify the correct {@link Member}, {@link discord4j.core.object.entity.channel.Channel Channel},
+     * and {@link Message} are present, if applicable.
      * <p>
-     * If the Event that created the listener is a {@link discord4j.core.event.domain.interaction.ComponentInteractionEvent},
-     * {@link GuildInteractionHandler#setActiveComponentInteraction(discord4j.core.event.domain.interaction.ComponentInteractionEvent)} should
-     * be called with the dispatched event.
+     * If the Event that created the listener is a
+     * {@link discord4j.core.event.domain.interaction.ComponentInteractionEvent ComponentInteractionEvent},
+     * such as a {@link discord4j.core.event.domain.interaction.SelectMenuInteractionEvent SelectMenuInteractionEvent} or a
+     * {@link discord4j.core.event.domain.interaction.ButtonInteractionEvent ButtonInteractionEvent},
+     * {@link GuildInteractionHandler#setActiveComponentInteraction(discord4j.core.event.domain.interaction.ComponentInteractionEvent) handler.setActiveComponentInteraction(ComponentInteractionEvent)}
+     * should be called with the dispatched event to update the GuildInteractionHandler's event interactions.
      * <p>
      * If a response is given, it can be set into this listener with {@link #setResponse(String)}.
+     * <p>
+     * If a disposable listener should end this InputListener, {@link WizardState#end()} should be called on the input WizardState
+     * <p>
+     * For example, a listener which records the user's response in a message they send could be created like so:
+     * <pre>
+     * createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
+     *      .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
+     *      .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
+     *      .subscribe(event -> setResponse(event.getMessage().getContent())));
+     * </pre>
      * 
-     * @param listener The {@link Disposable} listener which will listen for some Discord Event.
+     * @param listener The ListenerFactory which will create a {@link Disposable} listener to listen for some Discord Event.
      */
     protected void createListener(ListenerFactory listener) {
         listeners.add(listener.createListener(dispatcher));
