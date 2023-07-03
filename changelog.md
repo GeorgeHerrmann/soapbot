@@ -139,3 +139,7 @@
 2.372
     - Fixed an issue where multiple InputWizards being active at once could stop other commands from executing
         - Each CommandThreadPool can now run ten command tasks at once.
+
+2.373
+    - Fixed an issue where InputListeners with the XReaction mode on would not be cancellable
+      with the reaction past the initial window.

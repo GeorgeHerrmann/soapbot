@@ -121,17 +121,18 @@ public abstract class InputListener {
      * @param components The components to attach (optional).
      */
     protected void sendPromptMessage(String prompt, LayoutComponent... components) {
+
         if (message == null) {
             message = components.length == 0 ? handler.sendText(prompt, title) : handler.sendText(prompt, title, components);
-            if (addXReaction) {
-                addXEmojiListener();
-            }
         } else {
             try {
                 message = components.length == 0 ? handler.editMessageContent(message, prompt, title) : handler.editMessageContent(message, prompt, title, components);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        if (addXReaction) {
+            addXEmojiListener();
         }
     }
 
@@ -140,7 +141,9 @@ public abstract class InputListener {
      * and adds a listener that ends the most recent {@link WizardState} when reacted by this listener's user.
      */
     private void addXEmojiListener() {
-        this.message.addReaction(ReactionEmoji.unicode("❌")).block();
+        if (recentState == null) {
+            this.message.addReaction(ReactionEmoji.unicode("❌")).block();
+        }
         // Create a listener that listens for the user to end the wizard by reacting
         createListener(eventDispatcher -> eventDispatcher.on(ReactionAddEvent.class)
             .filter(event -> event.getMember().get().getId().asString().equals(user.getId().asString()))
@@ -260,6 +263,7 @@ public abstract class InputListener {
      */
     protected WizardState waitForResponse(WizardState inputState) {
         this.recentState = inputState;
+        responseContainer = new StringBuilder();
 
         addEndMessageListener();
         int timeout = 0;
@@ -281,8 +285,6 @@ public abstract class InputListener {
         listeners.forEach(Disposable::dispose);
         listeners.clear();
         recentState.setMessage(responseContainer.toString());
-
-        responseContainer = new StringBuilder();
 
         return recentState;
     }
