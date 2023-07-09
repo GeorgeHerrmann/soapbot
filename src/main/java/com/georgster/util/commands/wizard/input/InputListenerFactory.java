@@ -3,6 +3,7 @@ package com.georgster.util.commands.wizard.input;
 import com.georgster.control.util.CommandExecutionEvent;
 
 import discord4j.core.object.component.Button;
+import discord4j.core.object.reaction.ReactionEmoji;
 
 /**
  * Factory class for creating {@link InputListener}s. All listeners can
@@ -54,5 +55,9 @@ public class InputListenerFactory {
      */
     public static InputListener createMessageListener(CommandExecutionEvent event, String title) {
         return new MessageListener(event, title);
+    }
+
+    public static InputListener createReactionListener(CommandExecutionEvent event, ReactionEmoji emojis) {
+        return new ReactionListener(event, "Test Title", emojis);
     }
 }

@@ -310,11 +310,12 @@ public class GuildInteractionHandler {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
         if (message != null) {
             if (activeComponentInteraction != null) {
+                activeComponentInteraction.edit().withComponents().withEmbeds(embed).block();
                 Message returns = activeComponentInteraction.getReply().block();
                 killActiveComponentInteraction();
                 return returns;
             } else {
-                return message.edit().withEmbeds(embed).block();
+                return message.edit().withEmbeds(embed).withComponents().block();
             }
         }
         return null;
@@ -332,12 +333,12 @@ public class GuildInteractionHandler {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
         if (message != null) {
             if (activeComponentInteraction != null) {
-                activeComponentInteraction.edit().withEmbeds(embed).block();
+                activeComponentInteraction.edit().withComponents().withEmbeds(embed).block();
                 Message returns = activeComponentInteraction.getReply().block();
                 killActiveComponentInteraction();
                 return returns;
             } else {
-                return message.edit().withEmbeds(embed).block();
+                return message.edit().withComponents().withEmbeds(embed).block();
             }
         }
         return null;
