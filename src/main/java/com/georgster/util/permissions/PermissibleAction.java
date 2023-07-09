@@ -21,5 +21,6 @@ public enum PermissibleAction {
     PLINKOGAME,
     PERMISSIONSCOMMAND,
     MENTIONEVENT,
+    POLLCOMMAND,
     DEFAULT
 }

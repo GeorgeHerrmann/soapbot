@@ -7,6 +7,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.util.commands.wizard.InputWizard;
 import com.georgster.util.commands.wizard.PollEventWizard;
+import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -23,6 +24,14 @@ public class PollEventCommand implements Command {
 
         InputWizard wizard = new PollEventWizard(event);
         wizard.begin();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.POLLCOMMAND;
     }
 
     /**
