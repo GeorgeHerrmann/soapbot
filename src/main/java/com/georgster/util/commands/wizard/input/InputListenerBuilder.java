@@ -31,7 +31,7 @@ public class InputListenerBuilder {
      * </ul>
      * 
      * @param setting Whether mustMatch is on or not.
-     * @param strict True if mustMatch should be strict, false if lenient.ww
+     * @param strict True if mustMatch should be strict, false if lenient
      */
     public InputListenerBuilder requireMatch(boolean setting, boolean strict) {
         listener.mustMatch(setting, strict);

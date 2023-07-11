@@ -290,6 +290,24 @@ public abstract class InputListener {
     }
 
     /**
+     * Sets the current message this listener will work with to present {@link #prompt(WizardState)}simple.
+     * 
+     * @param message The new message.
+     */
+    public void setCurrentMessage(Message message) {
+        this.message = message;
+    }
+
+    /**
+     * Cancels the current {@link #prompt(WizardState)} and ends the {@code WizardState}.
+     */
+    public void cancel() {
+        if (recentState != null) {
+            recentState.end();
+        }
+    }
+
+    /**
      * Returns a builder to customize this {@link InputListener}.
      * 
      * @return a builder to customize this {@link InputListener}.

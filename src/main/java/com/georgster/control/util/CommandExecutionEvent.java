@@ -20,10 +20,12 @@ import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.wizard.InputWizard;
 import com.georgster.util.commands.wizard.IterableStringWizard;
+import com.georgster.util.commands.wizard.SwappingWizard;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.entity.Message;
 
 /**
  * An Event fired upon the execution of a SOAPBot {@code Command}. This Event packages
@@ -85,8 +87,12 @@ public class CommandExecutionEvent {
                 for (StackTraceElement element : e.getStackTrace()) {
                     logger.append("\t" + element.toString() + "\n", LogDestination.FILE, LogDestination.SYSTEM);
                 }
+                String[] help = SoapUtility.splitFirst(command.help());
+
                 InputWizard helpWizard = new IterableStringWizard(this, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                helpWizard.begin();
+                Message msg = getGuildInteractionHandler().sendText(help[1], help[0]);
+                InputWizard switcher = new SwappingWizard(this, msg, helpWizard);
+                switcher.begin();
             }
         } else {
             args = Collections.emptyList();

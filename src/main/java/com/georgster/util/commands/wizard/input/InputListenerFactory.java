@@ -57,7 +57,15 @@ public class InputListenerFactory {
         return new MessageListener(event, title);
     }
 
-    public static InputListener createReactionListener(CommandExecutionEvent event, ReactionEmoji emojis) {
+    /**
+     * Creates a {@link ReactionListener} which will attach reaction emojis onto the current message
+     * and record if any of them are clicked, returning the name of the emoji in the reaction.
+     * 
+     * @param event Command execution event that triggered the wizard.
+     * @param title Title of the menu.
+     * @return {@link ReactionListener} that will send a message and record responses.
+     */
+    public static InputListener createReactionListener(CommandExecutionEvent event, ReactionEmoji... emojis) {
         return new ReactionListener(event, "Test Title", emojis);
     }
 }

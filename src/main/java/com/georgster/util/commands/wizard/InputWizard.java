@@ -225,6 +225,21 @@ public abstract class InputWizard {
     }
 
     /**
+     * Restarts this wizard and begins from the first window.
+     */
+    public void restart() {
+        isActive = true;
+        begin();
+    }
+
+    /**
+     * Turns off the wizard without performing additional {@link #end()} activities.
+     */
+    public void shutdown() {
+        isActive = false;
+    }
+
+    /**
      * Returns whether the wizard is awaiting a response.
      * 
      * @return Whether the wizard is awaiting a response.
@@ -249,6 +264,10 @@ public abstract class InputWizard {
      */
     public Channel getChannel() {
         return handler.getActiveChannel();
+    }
+
+    public InputListener getInputListener() {
+        return listener;
     }
 
     /**

@@ -143,3 +143,8 @@
 2.373
     - Fixed an issue where InputListeners with the XReaction mode on would not be cancellable
       with the reaction past the initial window.
+
+2.374
+    - Created a ReactionListener (needs work)
+    - Created a SwappingWizard which can swap between a Message and a Wizard with a reaction.
+        - Migrated the HelpCommand to use a SwappingWizard.

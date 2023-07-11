@@ -5,7 +5,6 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.commands.CommandParser;
-
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**

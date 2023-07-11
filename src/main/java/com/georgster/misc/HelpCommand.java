@@ -1,6 +1,7 @@
 package com.georgster.misc;
 
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData.Builder;
@@ -19,6 +20,7 @@ import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.wizard.InputWizard;
 import com.georgster.util.commands.wizard.IterableStringWizard;
+import com.georgster.util.commands.wizard.SwappingWizard;
 
 /**
  * The HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
@@ -48,9 +50,12 @@ public class HelpCommand implements ParseableCommand {
         for (Command command : register.getCommands()) {
             if (command.getAliases().contains(parser.get(0))) {
                 logger.append("- Command found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
+                String[] help = SoapUtility.splitFirst(command.help());
 
                 InputWizard helpWizard = new IterableStringWizard(event, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                helpWizard.begin();
+                Message msg = event.getGuildInteractionHandler().sendText(help[1], help[0]);
+                InputWizard switcher = new SwappingWizard(event, msg, helpWizard);
+                switcher.begin();
                 break;
             }
         }
