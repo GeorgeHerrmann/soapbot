@@ -161,3 +161,7 @@
                 - If the wizard times out, or the message is lost, quick polls can be presented with !poll present
             - The current PollEventWizard is now accessable with !poll wizard
             - Simply doing !poll now brings up the help menu for polls.
+
+2.381-BETA
+    - Fixed an issue where SOAP Bot could vote on quick polls
+    - Fixed an issue where a wizard's primary user would not update on unlocked Reaction Listeners

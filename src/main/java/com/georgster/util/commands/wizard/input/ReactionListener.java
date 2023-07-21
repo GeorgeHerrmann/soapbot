@@ -59,6 +59,7 @@ public class ReactionListener extends InputListener {
         }
 
         createListener(dispatcher ->  dispatcher.on(ReactionAddEvent.class)
+            .filter(event -> !event.getUser().block().isBot())
             .filter(event -> (lockUser && event.getMember().get().getId().asString().equals(user.getId().asString())) || (!lockUser))
             .filter(event -> emojis.stream().anyMatch(event.getEmoji()::equals))
             .subscribe(event -> { // The event returns the emoji itself, not the codepoint, so we must get it from our options array
@@ -72,6 +73,7 @@ public class ReactionListener extends InputListener {
         );
 
         createListener(dispatcher ->  dispatcher.on(ReactionRemoveEvent.class)
+            .filter(event -> !event.getUser().block().isBot())
             .filter(event -> (lockUser && event.getUser().block().getId().asString().equals(user.getId().asString())) || (!lockUser))
             .filter(event -> emojis.stream().anyMatch(event.getEmoji()::equals))
             .subscribe(event -> {
