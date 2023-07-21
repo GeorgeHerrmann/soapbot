@@ -111,6 +111,12 @@ public class PollEvent extends TimedEvent implements SoapEvent {
         return false;
     }
 
+    public boolean votedFor(String option, String voter) {
+        List<String> voters = options.get(option);
+
+        return voters != null && voters.contains(voter);
+    }
+
     /**
      * Returns a List containing all the options of this event.
      * 

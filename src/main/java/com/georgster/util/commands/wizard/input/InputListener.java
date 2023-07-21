@@ -323,6 +323,10 @@ public abstract class InputListener {
         this.message = message;
     }
 
+    public void setInteractingMember(Member member) {
+        recentState.setMember(member);
+    }
+
     /**
      * Cancels the current {@link #prompt(WizardState)} and ends the {@code WizardState}.
      * If there is no active prompt for this listener, this method does nothing.

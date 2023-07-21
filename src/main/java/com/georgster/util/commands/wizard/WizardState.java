@@ -1,5 +1,7 @@
 package com.georgster.util.commands.wizard;
 
+import discord4j.core.object.entity.Member;
+
 /**
  * A bridge between the {@link InputWizard} and the {@link com.georgster.util.commands.wizard.input.InputListener InputListener}.
  */
@@ -7,6 +9,7 @@ public class WizardState {
     private boolean hasEnded;
     private String message;
     private String[] options;
+    private Member member;
 
     /**
      * Creates a new WizardState with the given message and options.
@@ -14,10 +17,11 @@ public class WizardState {
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      */
-    protected WizardState(String message, String... options) {
+    protected WizardState(String message, Member member, String... options) {
         this.hasEnded = false;
         this.message = message;
         this.options = options;
+        this.member = member;
     }
 
     /**
@@ -71,5 +75,13 @@ public class WizardState {
      */
     public void end() {
         hasEnded = true;
+    }
+
+    public Member getRecentMember() {
+        return member;
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
     }
 }

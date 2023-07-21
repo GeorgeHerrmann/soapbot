@@ -18,6 +18,7 @@ import discord4j.core.object.reaction.ReactionEmoji;
 public class ReactionListener extends InputListener {
 
     private boolean lockUser; // True if this listener will only accept reactions from its primary User, false if anyone can provide inputs.
+    private CommandExecutionEvent executionEvent;
 
     /**
      * Creates a new {@code ReactionListener} with the given parameters.
@@ -37,6 +38,7 @@ public class ReactionListener extends InputListener {
         hasXReaction(true);
         mustMatch(false, false); // This listener has custom matching logic
         this.lockUser = lockUser;
+        this.executionEvent = event;
     }
 
     /**
@@ -65,6 +67,7 @@ public class ReactionListener extends InputListener {
                         setResponse(options[i]); // Returns the input codepoint from the options array
                     }
                 }
+                event.getMember().ifPresent(this::setInteractingMember);
             })
         );
 
@@ -77,6 +80,7 @@ public class ReactionListener extends InputListener {
                         setResponse(options[i]);
                     }
                 }
+                setInteractingMember(event.getUser().block().asMember(executionEvent.getGuildInteractionHandler().getGuild().getId()).block());
             })
         );
 

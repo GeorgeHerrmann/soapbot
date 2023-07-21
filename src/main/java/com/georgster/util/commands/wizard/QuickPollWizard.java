@@ -17,7 +17,7 @@ public class QuickPollWizard extends InputWizard {
     private static final SoapEventType TYPE = SoapEventType.POLL;
 
     public QuickPollWizard(CommandExecutionEvent executionEvent, PollEvent event) {
-        super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier(), false).builder().withXReaction(false).build());
+        super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier(), false).builder().withXReaction(false).withTimeoutDuration(120000).build());
         this.event = event;
         this.eventManager = executionEvent.getEventManager();
         this.executionEvent = executionEvent;
@@ -43,17 +43,15 @@ public class QuickPollWizard extends InputWizard {
         String prompt = localEvent.toString();
 
         withResponse((response -> {
-            System.out.println(response);
+            
             if (response.equalsIgnoreCase("U+2705")) {
                 localEvent.removeVoter(user.getTag());
                 localEvent.addVoter("yes", user.getTag());
                 eventManager.update(localEvent);
-                //handler.sendText(getUser().getUsername() + " has voted for: " + "yes" + ".\n Current votes are:\n" + localEvent.toString(), localEvent.getIdentifier());
             } else if (response.equalsIgnoreCase("U+274C")) {
                 localEvent.removeVoter(user.getTag());
                 localEvent.addVoter("no", user.getTag());
                 eventManager.update(localEvent);
-                //handler.sendText(getUser().getUsername() + " has voted for: " + "no" + ".\n Current votes are:\n" + localEvent.toString(), localEvent.getIdentifier());
             }
             nextWindow("voteForPoll");
         }), false, prompt, "U+2705", "U+274C");

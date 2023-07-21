@@ -64,7 +64,7 @@ public abstract class InputWizard {
     private Deque<Method> activeFunctions; //Stack of methods that have been or are executing
     private Deque<Object[]> activeFunctionParams; //Stack of parameters for methods that have been or are executing
 
-    protected final Member user;
+    protected Member user;
     private boolean isActive;
     private boolean awaitingResponse;
     protected final GuildInteractionHandler handler;
@@ -165,12 +165,13 @@ public abstract class InputWizard {
      * @return Response from the user, or null if the wizard was ended.
      */
     private String prompt(String message, String... options) {
-        WizardState state = new WizardState(message, options);
+        WizardState state = new WizardState(message, user, options);
         awaitingResponse = true;
 
         state = listener.prompt(state);
         awaitingResponse = false;
         isActive = !state.hasEnded();
+        user = state.getRecentMember();
 
         if (state.hasEnded()) {
             return null;
@@ -189,7 +190,7 @@ public abstract class InputWizard {
      * @return Response from the user, or null if the wizard was ended.
      */
     private String prompt(InputListener newListener, String message, String... options) {
-        WizardState state = new WizardState(message, options);
+        WizardState state = new WizardState(message, user, options);
         awaitingResponse = true;
 
         state = newListener.prompt(state);

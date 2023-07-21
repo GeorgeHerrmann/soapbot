@@ -148,3 +148,16 @@
     - Created a ReactionListener (needs work)
     - Created a SwappingWizard which can swap between a Message and a Wizard with a reaction.
         - Migrated the HelpCommand to use a SwappingWizard.
+
+2.380-BETA
+    - Added quick polls and greatly enhanced the wizard and listener system
+        - Added a reaction listener
+            - Allows users to present reactions as options and allows users to select a reaction as a response
+                - Can be customized to allow anyone to click options
+        - Added various customization to input wizards and input listeners
+        - Added quick polls, which are PollEvents which last for one hour and have only "yes" and "no" as options
+            - Quick polls can be created via !poll '[prompt]'
+                - Doing so brings up a reaction wizard allowing any user to vote for the duration of the wizard's lifecycle
+                - If the wizard times out, or the message is lost, quick polls can be presented with !poll present
+            - The current PollEventWizard is now accessable with !poll wizard
+            - Simply doing !poll now brings up the help menu for polls.
