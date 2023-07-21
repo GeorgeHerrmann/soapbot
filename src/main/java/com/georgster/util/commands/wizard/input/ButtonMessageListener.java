@@ -35,7 +35,7 @@ import discord4j.core.object.component.Button;
 public class ButtonMessageListener extends InputListener {
 
     /**
-     * Creates a new {@code ButtonInputListener} with the given parameters.
+     * Creates a new {@code ButtonMessageListener} with the given parameters.
      * 
      * @param event The event that prompted this listener's creation.
      * @param title The title to place onto messages.

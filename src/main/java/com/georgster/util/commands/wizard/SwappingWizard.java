@@ -7,10 +7,9 @@ import com.georgster.util.commands.wizard.input.InputListenerFactory;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.reaction.ReactionEmoji;
 
 /**
- * A high level wizard which can swap between a {@link Message} and an {@link InputWizard}
+ * A high level, unique wizard which can swap between a {@link Message} and an {@link InputWizard}
  * with a reaction of ":repeat:".
  */
 public class SwappingWizard extends InputWizard {
@@ -28,8 +27,8 @@ public class SwappingWizard extends InputWizard {
      * @param message The message to swap to and from.
      * @param wizard The Wizard to swap to and from.
      */
-    public SwappingWizard(CommandExecutionEvent event, Message message, InputWizard wizard) {
-        super(event, InputListenerFactory.createReactionListener(event, ReactionEmoji.codepoints("U+1F501")));
+    public SwappingWizard(CommandExecutionEvent event, Message message, InputWizard wizard) { // No prompt messages sent with the reaction listener, so title is irrelevant
+        super(event, InputListenerFactory.createReactionListener(event, "", true).builder().withPromptMessages(false).withXReaction(false).build());
         this.event = event;
         this.message = message;
         this.wizard = wizard;
@@ -62,7 +61,7 @@ public class SwappingWizard extends InputWizard {
             wizard.getInputListener().cancel();
             wizard.shutdown();
             nextWindow("swap", !onWizard);
-        }), false, "");
+        }), false, "", "U+1F501");
     }
     
 }

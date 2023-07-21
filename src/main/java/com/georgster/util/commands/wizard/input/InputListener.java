@@ -48,6 +48,7 @@ public abstract class InputListener {
     private boolean addXReaction;
     private boolean mustMatchLenient; // If false, mustMatchStrict will always also be false
     private boolean mustMatchStrict; // If true, mustMatchLenient will always also be true
+    private boolean sendPromptMessage; // If false (generally not reccomended), sendPromptMessage(String) does nothing
 
     /*
      * InputListeners work on a message to message basis.
@@ -76,6 +77,7 @@ public abstract class InputListener {
         this.addXReaction = true;
         this.mustMatchLenient = true;
         this.mustMatchStrict = false;
+        this.sendPromptMessage = true;
         this.timeoutTime = 300;
         this.responseContainer = new StringBuilder();
     }
@@ -121,6 +123,7 @@ public abstract class InputListener {
      * @param components The components to attach (optional).
      */
     protected void sendPromptMessage(String prompt, LayoutComponent... components) {
+        if (!sendPromptMessage) return;
 
         if (message == null) {
             message = components.length == 0 ? handler.sendText(prompt, title) : handler.sendText(prompt, title, components);
@@ -173,6 +176,19 @@ public abstract class InputListener {
     }
 
     /**
+     * Sets whether this listener should send prompt messages on
+     * {@link #sendPromptMessage(String, LayoutComponent...)}. If disabled, this listener
+     * will NOT send any prompt message on {@link #prompt(WizardState)}, but will still listen to
+     * and record responses in accordance to all other listener settings. This is always enabled
+     * by default and is <b>not</b> reccomended to be disabled for most listeners.
+     * 
+     * @param setting True if prompt messages should be sent, false otherwise.
+     */
+    public void sendPromptMessage(boolean setting) {
+        this.sendPromptMessage = setting;
+    }
+
+    /**
      * Sets the condition of the match condition and how strict it is.
      * <p>
      * If mustMatch is off, any input will be accepted. Otherwise, if strict mode is on,
@@ -214,6 +230,15 @@ public abstract class InputListener {
      */
     public void editCurrentMessageContent(String newContent) {
         message = handler.editMessageContent(message, newContent, title);
+    }
+
+    /**
+     * Deletes this listener's current presenting message. Note that
+     * this does <b>NOT</b> cancel the listener, and if a prompt is currently active
+     * the listener will still listen for and record a response if one is possible.
+     */
+    public void deleteCurrentMessage() {
+        message.delete().block();
     }
 
     /**
@@ -300,6 +325,7 @@ public abstract class InputListener {
 
     /**
      * Cancels the current {@link #prompt(WizardState)} and ends the {@code WizardState}.
+     * If there is no active prompt for this listener, this method does nothing.
      */
     public void cancel() {
         if (recentState != null) {

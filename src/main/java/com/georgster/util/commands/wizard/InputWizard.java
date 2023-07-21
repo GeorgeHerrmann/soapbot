@@ -95,8 +95,9 @@ public abstract class InputWizard {
      * 
      * @param methodName The name of the method which will run the next window in this {@code InputWizard}.
      * @param parameters The parameters for said method.
+     * @throws IllegalArgumentException If a method with the provided name and paramaters was not found.
      */
-    protected void nextWindow(String methodName, Object... parameters) {
+    protected void nextWindow(String methodName, Object... parameters) throws IllegalArgumentException {
         try {
             activeFunctions.push(getMethod(methodName, parameters));
             activeFunctionParams.push(parameters);
@@ -106,6 +107,7 @@ public abstract class InputWizard {
             invokeCurrentMethod();
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
@@ -207,6 +209,19 @@ public abstract class InputWizard {
     public abstract void begin();
 
     /**
+     * Begins the wizard starting from the provided method window name and its paramaters (if any).
+     * Using this method instead of {@link #begin()} requires knowledge of the method names of the
+     * InputWizard being used and does NOT begin from the wizard's configurated initial window.
+     * 
+     * @param startingMethod The method name to begin the wizard from.
+     * @param parameters The paramaters required (if any) to run said method.
+     * @throws IllegalArgumentException If a method with the provided name and paramaters was not found.
+     */
+    public void begin(String startingMethod, Object... parameters) throws IllegalArgumentException {
+        nextWindow(startingMethod, parameters);
+    }
+
+    /**
      * Returns whether the wizard is active.
      * 
      * @return Whether the wizard is active.
@@ -221,7 +236,11 @@ public abstract class InputWizard {
     public void end() {
         isActive = false;
         listener.editCurrentMessageContent("Wizard ended.");
-        
+    }
+
+    public void delete() {
+        listener.cancel();
+        listener.deleteCurrentMessage();
     }
 
     /**
@@ -266,6 +285,11 @@ public abstract class InputWizard {
         return handler.getActiveChannel();
     }
 
+    /**
+     * Returns this wizard's default {@link InputListener}.
+     * 
+     * @return this wizard's default {@link InputListener}.
+     */
     public InputListener getInputListener() {
         return listener;
     }

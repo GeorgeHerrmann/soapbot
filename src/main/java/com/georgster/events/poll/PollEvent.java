@@ -181,6 +181,17 @@ public class PollEvent extends TimedEvent implements SoapEvent {
     }
 
     /**
+     * Returns true if this poll is a "quick poll", meaning it has only two options
+     * which are "yes" and "no", false otherwise.
+     * 
+     * @return True if this poll is a quick poll, false otherwise.
+     */
+    public boolean isQuickPoll() {
+        List<String> opts = getOptions();
+        return opts.size() == 2 && opts.contains("yes") && opts.contains("no");
+    }
+
+    /**
      * {@inheritDoc}
      */
     public String getIdentifier() {

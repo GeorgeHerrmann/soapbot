@@ -49,6 +49,11 @@ public class InputListenerBuilder {
         return this;
     }
 
+    public InputListenerBuilder withPromptMessages(boolean setting) {
+        listener.sendPromptMessage(setting);
+        return this;
+    }
+
     /**
      * Sets the duration before this listener times out (in ms).
      * 
