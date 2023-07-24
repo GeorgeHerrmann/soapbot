@@ -63,7 +63,8 @@ public class ReserveEventCommand implements ParseableCommand {
                     if (reserve.isTimeless()) {
                         response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
                     } else {
-                        response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
+                        response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved at " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n" +
+                                        "\tReserved on " + reserve.getFormattedDate() + "\n");
                     }
                 }
                 response.append("Type !events [NAME] for more information about a specific reserve event");
