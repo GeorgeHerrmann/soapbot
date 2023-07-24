@@ -103,12 +103,31 @@ public class ReserveEventCommand implements ParseableCommand {
 
                 logger.append("Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
-                String[] output = SoapUtility.splitFirst(reserve.toString());
+                StringBuilder response = new StringBuilder();
+                response.append("Event: " + reserve.getIdentifier() + "\n");
+                response.append("- Reserved: " + reserve.getReserved() + "\n");
+                if (reserve.isUnlimited()) {
+                    response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
+                } else {
+                    response.append("- Needed: " + reserve.getNumPeople() + "\n");
+                }
+                if (reserve.isTimeless()) {
+                    response.append("- This event has no associated time\n");
+                    response.append("\t- This event will pop once the needed number of people have reserved to it");
+                } else {
+                    response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
+                    response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
+                }
+                response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
+                response.append("\nReserved users:\n");
+                reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMember(user).getMention() + "\n"));
+
+                String[] output = SoapUtility.splitFirst(response.toString());
                 handler.sendText(output[1], output[0]);
-            } else {
-                handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
+                } else {
+                    handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
+                }
             }
-        }
     }
 
     /**

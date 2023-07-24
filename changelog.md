@@ -165,3 +165,7 @@
 2.381-BETA
     - Fixed an issue where SOAP Bot could vote on quick polls
     - Fixed an issue where a wizard's primary user would not update on unlocked Reaction Listeners
+
+2.382-BETA
+    - Added forgotten dates to !events 'NAME' response
+    - Replaced tags with mentions on !events 'name' response
