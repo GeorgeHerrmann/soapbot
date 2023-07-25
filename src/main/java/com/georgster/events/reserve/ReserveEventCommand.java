@@ -53,20 +53,31 @@ public class ReserveEventCommand implements ParseableCommand {
             logger.append("Showing all reserve events in a text channel", LogDestination.API);
 
             StringBuilder response = new StringBuilder();
-            if (eventManager.hasAny(TYPE)) {
+            if (eventManager.hasAny(TYPE)) { // michael says hi
                 logger.append("- Showing the user a list of reserve events\n", LogDestination.NONAPI);
                 response.append("All reserve events:\n");
                 List<SoapEvent> events = eventManager.getAll(TYPE);
                 for (int i = 0; i < events.size(); i++) {
                     /* The EventManager will ensure we get events of the correct type, so casting is safe */
                     ReserveEvent reserve = (ReserveEvent) events.get(i);
+                    String user = event.getDiscordEvent().getAuthorAsMember().getTag();
                     if (reserve.isTimeless()) {
-                        response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
+                        if (reserve.alreadyReserved(user)) {
+                            response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved**\n");
+                        } else {
+                            response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
+                        }
                     } else {
-                        response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
+                        if (reserve.alreadyReserved(user)) {
+                            response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
+                                        "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "**\n");
+                        } else {
+                            response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
                                         "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "\n");
+                        }
                     }
                 }
+                response.append(event.getDiscordEvent().getAuthorAsMember().getMention() + " has reserved to the **bolded events**\n");
                 response.append("Type !events [NAME] for more information about a specific reserve event");
                 String[] output = SoapUtility.splitFirst(response.toString());
                 handler.sendText(output[1], output[0]);
