@@ -10,12 +10,21 @@ import com.georgster.events.SoapEventType;
 import com.georgster.events.poll.PollEvent;
 import com.georgster.util.commands.wizard.input.InputListenerFactory;
 
+/**
+ * A wizard designed to handle {@link PollEvent PollEvents} which are {@code QuickPolls}.
+ */
 public class QuickPollWizard extends InputWizard {
     private PollEvent event;
     private final SoapEventManager eventManager;
     private CommandExecutionEvent executionEvent;
     private static final SoapEventType TYPE = SoapEventType.POLL;
 
+    /**
+     * Creates a new QuickPollWizard with a ReactionListener as the way to vote for the poll.
+     * 
+     * @param executionEvent The event that prompted the wizard's creation.
+     * @param event The PollEvent (a quickpoll).
+     */
     public QuickPollWizard(CommandExecutionEvent executionEvent, PollEvent event) {
         super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier(), false).builder().withXReaction(false).withTimeoutDuration(120000).build());
         this.event = event;
@@ -23,16 +32,29 @@ public class QuickPollWizard extends InputWizard {
         this.executionEvent = executionEvent;
     }
 
+    /**
+     * Creates a new QuickPollWizard with a MenuMessageListener as a way to present all QuickPolls.
+     * 
+     * @param executionEvent The event that prompted the wizard's creation.
+     */
     public QuickPollWizard(CommandExecutionEvent executionEvent) {
         super(executionEvent, InputListenerFactory.createMenuMessageListener(executionEvent, "All Quick Polls"));
         this.eventManager = executionEvent.getEventManager();
         this.executionEvent = executionEvent;
     }
 
+    /**
+     * Begins the wizard with the quick poll voting page as the first window.
+     */
     public void begin() {
         nextWindow("voteForPoll");
     }
 
+    /**
+     * Window to vote for this wizard's PollEvent.
+     * 
+     * @throws IllegalStateException If this wizard's PollEvent is not a QuickPoll.
+     */
     protected void voteForPoll() throws IllegalStateException {
         if (!event.isQuickPoll()) {
             throw new IllegalStateException("Poll " + event.getIdentifier() + " is not a quick poll. For non-quick polls, use the PollEventWizard.");
@@ -40,7 +62,7 @@ public class QuickPollWizard extends InputWizard {
 
         final PollEvent localEvent = (PollEvent) eventManager.get(event.getIdentifier());
 
-        String prompt = localEvent.toString();
+        String prompt = localEvent.toString() + "\n*If this window stops working, type !poll present and select the poll's tite*";
 
         withResponse((response -> {
             
@@ -57,6 +79,9 @@ public class QuickPollWizard extends InputWizard {
         }), false, prompt, "U+2705", "U+274C");
     }
 
+    /**
+     * The present all quick polls window.
+     */
     protected void presentQuickPolls() {
         List<SoapEvent> allPolls = eventManager.getAll(TYPE);
         List<String> prompts = new ArrayList<>();

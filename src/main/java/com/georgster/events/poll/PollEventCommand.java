@@ -29,6 +29,11 @@ public class PollEventCommand implements ParseableCommand {
 
     private final SoapEventManager eventManager;
 
+    /**
+     * Creates a new PollEventCommand from the given context.
+     * 
+     * @param context The context of this command's SoapClient.
+     */
     public PollEventCommand(ClientContext context) {
         this.eventManager = context.getEventManager();
     }
