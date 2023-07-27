@@ -6,9 +6,11 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.DiscordEvent;
+import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.wizard.InputWizard;
@@ -28,6 +30,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class PollEventCommand implements ParseableCommand {
 
     private final SoapEventManager eventManager;
+    private static final SoapEventType TYPE = SoapEventType.POLL;
 
     /**
      * Creates a new PollEventCommand from the given context.
@@ -43,6 +46,7 @@ public class PollEventCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         DiscordEvent discordEvent = event.getDiscordEvent();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
         CommandParser parser = event.getCommandParser();
         MultiLogger logger = event.getLogger();
 
@@ -51,9 +55,28 @@ public class PollEventCommand implements ParseableCommand {
 
             InputWizard wizard = new PollEventWizard(event);
             wizard.begin();
-        } else if (parser.get(0).equals("present")) {
+        } else if (parser.get(0).equals("present") || parser.get(0).equals("quickpolls")) {
             InputWizard wizard = new QuickPollWizard(event);
             wizard.begin("presentQuickPolls");
+        } else if (parser.get(0).equals("vote")) {
+            if (eventManager.hasAny(TYPE)) {
+                logger.append("- Beginning the Poll Wizard from the Voting Screen\n", LogDestination.NONAPI);
+                new PollEventWizard(event).begin("pollVotingOptions");  
+            } else {
+                handler.sendText("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
+                logger.append("- No polls found in the event manager\n", LogDestination.NONAPI);
+            }
+        } else if (parser.get(0).equals("create")) {
+              logger.append("- Beginning the Poll Wizard from the Create a Poll Screen\n", LogDestination.NONAPI);
+              new PollEventWizard(event).begin("createPoll");
+        } else if (parser.get(0).equals("view")) {
+            if (eventManager.hasAny(TYPE)) {
+                logger.append("- Beginning the Poll Wizard from the Viewing Screen\n", LogDestination.NONAPI);
+                new PollEventWizard(event).begin("pollViewingOptions");
+            } else {
+                handler.sendText("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
+                logger.append("- No polls found in the event manager\n", LogDestination.NONAPI);
+            }
         } else {
             String title = parser.get(0);
             PollEvent pollEvent = new PollEvent(title, ((TextChannel) discordEvent.getChannel()).getName(), discordEvent.getAuthorAsMember().getTag());
@@ -72,7 +95,7 @@ public class PollEventCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new ParseBuilder("V|O").withIdentifiers("wizard", "present").build();
+        return new ParseBuilder("V|O").withIdentifiers("wizard", "present", "quickpolls", "create", "vote", "view").build();
     }
 
     /**
@@ -95,9 +118,12 @@ public class PollEventCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n- '!poll wizard' to bring up the Poll Wizard capable of handling all types of polls" +
+        "\n- '!poll wizard' to bring up the fulll Poll Wizard capable of handling all types of polls" +
         "\n - '!poll [PROMPT]' to create a quick poll for one hour with 'yes' and 'no' as the options" +
-        "\n - '!poll present' to bring up and present quick poll voting for a quick poll";
+        "\n - '!poll present' or '!poll quickpolls' to bring up and present quick poll voting for a quick poll" +
+        "\n - '!poll vote' to vote for a pre-existing poll" +
+        "\n - '!poll view' to view a pre-existing poll" +
+        "\n - '!poll create' to custom create a poll";
     }
 
     /**
@@ -116,7 +142,7 @@ public class PollEventCommand implements ParseableCommand {
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("option")
-                        .description("Bring up the wizard or present a quick poll")
+                        .description("Subcommands for handling polls")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false)
                         .addChoice(ApplicationCommandOptionChoiceData.builder()
@@ -126,6 +152,18 @@ public class PollEventCommand implements ParseableCommand {
                         .addChoice(ApplicationCommandOptionChoiceData.builder()
                                 .name("present")
                                 .value("present")
+                                .build())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                                .name("create")
+                                .value("create")
+                                .build())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                                .name("view")
+                                .value("view")
+                                .build())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                                .name("vote")
+                                .value("vote")
                                 .build())
                         .build())
                 .build();

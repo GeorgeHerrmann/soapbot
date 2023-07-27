@@ -111,6 +111,13 @@ public class PollEvent extends TimedEvent implements SoapEvent {
         return false;
     }
 
+    /**
+     * Returns if a member has voted for the specified option.
+     * 
+     * @param option The poll option to check for.
+     * @param voter The voter to check for.
+     * @return True if they voted for the specified option, false otherwise.
+     */
     public boolean votedFor(String option, String voter) {
         List<String> voters = options.get(option);
 

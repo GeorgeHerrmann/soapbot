@@ -220,6 +220,7 @@ public abstract class InputWizard {
      */
     public void begin(String startingMethod, Object... parameters) throws IllegalArgumentException {
         nextWindow(startingMethod, parameters);
+        end();
     }
 
     /**
@@ -378,9 +379,14 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponseBack(Consumer<String> withResponse, String message, String... options) {
-        String[] optionsWithBack = new String[options.length + 1];
-        System.arraycopy(options, 0, optionsWithBack, 0, options.length);
-        optionsWithBack[options.length] = "back";
+        String[] optionsWithBack;
+        if (activeFunctions.size() > 1) {
+            optionsWithBack = new String[options.length + 1];
+            System.arraycopy(options, 0, optionsWithBack, 0, options.length);
+            optionsWithBack[options.length] = "back";
+        } else {
+            optionsWithBack = options;
+        }
         String response = prompt(message, optionsWithBack);
         if (response == null) {
             isActive = false;
@@ -417,9 +423,14 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponseBack(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
-        String[] optionsWithBack = new String[options.length + 1];
-        System.arraycopy(options, 0, optionsWithBack, 0, options.length);
-        optionsWithBack[options.length] = "back";
+       String[] optionsWithBack;
+        if (activeFunctions.size() > 1) {
+            optionsWithBack = new String[options.length + 1];
+            System.arraycopy(options, 0, optionsWithBack, 0, options.length);
+            optionsWithBack[options.length] = "back";
+        } else {
+            optionsWithBack = options;
+        }
         String response = prompt(newListener, message, optionsWithBack);
         if (response == null) {
             isActive = false;

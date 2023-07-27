@@ -34,7 +34,7 @@ public class SoapCommand implements Command {
             while (myReader.hasNextLine()) {
                 version = myReader.nextLine();
                 if (version.contains("<version>")) {
-                    version = version.substring(version.indexOf("<version>") + 9, version.indexOf("<version>") + 14);
+                    version = version.substring(version.indexOf("<version>") + 9, version.indexOf("</version>"));
                     break;
                 }
             }

@@ -156,13 +156,17 @@ public class PollEventWizard extends InputWizard {
         String prompt = "Please enter the prompt for the poll";
 
         withResponse((response -> {
-            if (!eventManager.exists(response, TYPE)) {
-                PollEvent event = new PollEvent(response, ((TextChannel) getChannel()).getName(), getUser().getTag());
-                nextWindow("setExpiration", event);
+            if (response.equals("cancel")) {
+                nextWindow("wizardOptions");
             } else {
-                sendMessage("A poll with that title already exists, please pick a new name", TITLE);
+                if (!eventManager.exists(response, TYPE)) {
+                    PollEvent event = new PollEvent(response, ((TextChannel) getChannel()).getName(), getUser().getTag());
+                    nextWindow("setExpiration", event);
+                } else {
+                    sendMessage("A poll with that title already exists, please pick a new name", TITLE);
+                }
             }
-        }), true, prompt);
+        }), true, prompt, "cancel");
     }
 
     /**

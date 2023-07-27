@@ -169,3 +169,10 @@
 2.382-BETA
     - Added forgotten dates to !events 'NAME' response
     - Replaced tags with mentions on !events 'name' response
+
+2.383-BETA
+    - Added shortcut !poll subcommands
+        - !poll create to go to the create a poll screen
+        - !poll view to view all polls
+        - !poll vote to vote for a poll
+    - Added !poll quickpolls in addition to !poll present to bring up quick poll voting
