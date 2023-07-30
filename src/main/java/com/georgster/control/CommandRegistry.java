@@ -8,6 +8,7 @@ import com.georgster.Command;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.dm.MessageCommand;
+import com.georgster.economy.BankCommand;
 import com.georgster.events.reserve.ReserveEventCommand;
 import com.georgster.events.poll.PollEventCommand;
 import com.georgster.events.reserve.ReserveCommand;
@@ -65,7 +66,8 @@ public class CommandRegistry {
             HelloWorldCommand.class,
             TheFinalShapeCommand.class,
             PollEventCommand.class,
-            GPTCommand.class
+            GPTCommand.class,
+            BankCommand.class
         ));
     }
 

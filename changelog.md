@@ -183,3 +183,12 @@
         - All previous chat completions have been wiped as a result.
     - Created the foundation for Manageable's to be added to a UserProfile
     - All UserProfiles will be kept up to date with MemberJoinEvents on new user join and GuildCreateEvents on guild joins
+
+2.340-BETA
+    - Added a basic economy system foundation, housed in UserProfiles.
+    - Updated PlinkoGames to give a coin-based reward
+        - Basic rewards (outer two) give 5 coins
+        - Advanced rewards (middle two) give 20 coins
+        - Legendary reward (inner one) gives 50 coins
+    - A basic coin balance can be viewed with !bank or !coins
+        - This system is in beta, more will be added to it in the future

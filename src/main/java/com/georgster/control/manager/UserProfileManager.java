@@ -8,8 +8,9 @@ import java.util.List;
 
 import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
-import com.georgster.database.UserProfile;
+import com.georgster.economy.CoinBank;
 import com.georgster.gpt.MemberChatCompletions;
+import com.georgster.profile.UserProfile;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
@@ -19,7 +20,7 @@ import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.object.entity.Member;
 
 /**
- * Manages all {@link UserProfile}s for a {@link com.georgster.control.SoapClient SoapClient}.
+ * Manages all {@link UserProfile UserProfiles} for a {@link com.georgster.control.SoapClient SoapClient}.
  */
 public class UserProfileManager extends SoapManager<UserProfile> {
 
@@ -55,12 +56,17 @@ public class UserProfileManager extends SoapManager<UserProfile> {
      */
     public void updateFromEvent(GuildCreateEvent event) {
         event.getGuild().getMembers().subscribe(member -> {
-            if (exists(member.getId().asString())) {
+            String id = member.getId().asString();
+            if (exists(id)) {
                 // All manageables must maintained.
-                MemberChatCompletions completions = get(member.getId().asString()).getCompletions();
-                update(new UserProfile(event.getGuild().getId().asString(), member.getId().asString(), member.getTag(), completions));
+                UserProfile profile = get(id);
+                MemberChatCompletions completions = profile.getCompletions();
+                if (completions == null) completions = new MemberChatCompletions(id);
+                CoinBank bank = profile.getBank();
+                if (bank == null) bank = new CoinBank(id);
+                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank));
             } else {
-                add(new UserProfile(event.getGuild().getId().asString(), member.getId().asString(), member.getTag(), new MemberChatCompletions(member.getId().asString())));
+                add(new UserProfile(event.getGuild().getId().asString(), id, member.getTag()));
             }
         });
     }
@@ -95,12 +101,10 @@ public class UserProfileManager extends SoapManager<UserProfile> {
      * prompt and returns the first response.
      * The response will be based on the previous ten chat completions for that member
      * in this manager. Uses OpenAI's gpt-3.5-turbo model.
-     * <p>
-     * <b>Note:</b> Only the first response will be saved in the member's chat completion log.
      * 
      * @param prompt The prompt from the user.
      * @param member The member who prompted the completion request.
-     * @return All responses from the AI.
+     * @return The first responses from the AI.
      */
     public String createCompletion(String prompt, Member member) {
         UserProfile profile = get(member.getId().asString());

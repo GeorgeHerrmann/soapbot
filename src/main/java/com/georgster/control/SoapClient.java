@@ -5,11 +5,10 @@ import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.SoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
-import com.georgster.database.UserProfile;
-import com.georgster.gpt.MemberChatCompletions;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
+import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 
@@ -22,7 +21,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 /**
  * An aggregation of all the shard-specific objects that SOAP Bot needs to run for
  * a single {@code Guild}. Each SoapClient handles all the events that occur in
- * its associated {@code Guild}, houses its {@code CommandRegistry} and has their own Set of {@link SoapManager}s.
+ * its associated {@code Guild}, houses its {@link CommandRegistry} and has their own Set of {@link SoapManager SoapManagers}.
  */
 public final class SoapClient {
     private final Snowflake flake;
@@ -74,8 +73,7 @@ public final class SoapClient {
         String guildId = flake.asString();
         String memberId = event.getMember().getId().asString();
         String username = event.getMember().getTag();
-        MemberChatCompletions completions = new MemberChatCompletions(memberId);
-        UserProfile profile = new UserProfile(guildId, memberId, username, completions);
+        UserProfile profile = new UserProfile(guildId, memberId, username);
         context.getUserProfileManager().add(profile);
     }
 

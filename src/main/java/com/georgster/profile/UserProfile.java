@@ -1,6 +1,7 @@
-package com.georgster.database;
+package com.georgster.profile;
 
 import com.georgster.control.manager.Manageable;
+import com.georgster.economy.CoinBank;
 import com.georgster.gpt.MemberChatCompletions;
 
 /**
@@ -11,6 +12,15 @@ public class UserProfile implements Manageable {
     private String memberId; //Snowflake member ID
     private String username; //User's discord username
     private MemberChatCompletions completions;
+    private CoinBank bank;
+
+    public UserProfile(String serverId, String userId, String user) {
+        this.guildId = serverId;
+        this.memberId = userId;
+        this.username = user;
+        this.completions = new MemberChatCompletions(userId);
+        this.bank = new CoinBank(userId);
+    }
 
     /**
      * Constructs a {@code Profile} for a specific {@code Member} inside of a {@code Guild}.
@@ -19,11 +29,12 @@ public class UserProfile implements Manageable {
      * @param userId the {@code Snowflake} ID of the {@code Member} this profile is for.
      * @param user the username of the user
      */
-    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions) {
+    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank) {
         this.guildId = serverId;
         this.memberId = userId;
         this.username = user;
         this.completions = completions;
+        this.bank = bank;
     }
 
     /**
@@ -62,5 +73,9 @@ public class UserProfile implements Manageable {
 
     public MemberChatCompletions getCompletions() {
         return completions;
+    }
+
+    public CoinBank getBank() {
+        return this.bank;
     }
 }

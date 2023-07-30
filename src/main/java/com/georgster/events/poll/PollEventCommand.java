@@ -118,7 +118,7 @@ public class PollEventCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n- '!poll wizard' to bring up the fulll Poll Wizard capable of handling all types of polls" +
+        "\n- '!poll wizard' to bring up the full Poll Wizard capable of handling all types of polls" +
         "\n - '!poll [PROMPT]' to create a quick poll for one hour with 'yes' and 'no' as the options" +
         "\n - '!poll present' or '!poll quickpolls' to bring up and present quick poll voting for a quick poll" +
         "\n - '!poll vote' to vote for a pre-existing poll" +

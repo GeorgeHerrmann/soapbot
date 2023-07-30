@@ -7,7 +7,9 @@ import java.time.Duration;
 import java.util.Random;
 
 import com.georgster.api.ActionWriter;
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildInteractionHandler;
 
 /**
@@ -23,6 +25,8 @@ public class PlinkoGame {
     private Channel channel; //The channel where the game existed
     private Random rand; //Keeps track of the random elements of the game
     private final GuildInteractionHandler handler;
+    private final UserProfileManager profileManager;
+    private final UserProfile profile;
     /*
      * A 2D array representation of the Plinko board. PlinkoGame
      * uses this array to quickly determine the next location of the chip,
@@ -48,17 +52,19 @@ public class PlinkoGame {
      * 
      * @param event The {@code MessageCreateEvent} that prompted the creation of this {@code PlinkoGame}.
      */
-    PlinkoGame(CommandExecutionEvent event) {
+    protected PlinkoGame(CommandExecutionEvent event) {
         guild = event.getDiscordEvent().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
         channel = event.getDiscordEvent().getChannel();
         rand = new Random();
         this.handler = event.getGuildInteractionHandler();
+        this.profileManager = event.getUserProfileManager();
+        this.profile = profileManager.get(event.getDiscordEvent().getAuthorAsMember().getId().asString());
     }
 
     /**
      * Simulates the {@code PlinkoGame} inside the {@code Channel} it was started.
      */
-    protected void play() {
+    protected long play() {
         ActionWriter.writeAction("Beginning setup of a PlinkoGame");
         int spot = rand.nextInt(2,14); //Initially, spot randomly generates the first location for the Plinko chip
 
@@ -97,7 +103,11 @@ public class PlinkoGame {
                 ActionWriter.writeAction("Determining the reward for a Plinko Game");
             }
         }
-
+        long reward = calculateReward(spot - 11);
+        handler.sendText("Your reward is " + reward + " coins", "Plinko");
+        profile.getBank().deposit(reward);
+        profileManager.update(profile);
+        return reward;
     }
     
     /**
@@ -135,7 +145,20 @@ public class PlinkoGame {
         return nextIndex + first;
     }
 
-    /* Shows a blank version of the Plinko Board. */
+    private long calculateReward(int finalIndex) throws IllegalArgumentException {
+        if (finalIndex == 1 || finalIndex == 9) {
+            return 5;
+        } else if (finalIndex == 3 || finalIndex == 7) {
+            return 20;
+        } else if (finalIndex == 5) {
+            return 50;
+        }
+        throw new IllegalArgumentException("Incorrect final index: " + finalIndex + ", current final indexes are 1, 3, 5, 7 & 9");
+    }
+
+    /**
+     * Shows a blank version of the Plinko Board.
+     */
     protected void showBoard() {
         StringBuilder sBoard = new StringBuilder();
         for (String[] x : board) {

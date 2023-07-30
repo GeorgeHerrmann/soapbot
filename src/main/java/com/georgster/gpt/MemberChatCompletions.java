@@ -89,7 +89,8 @@ public class MemberChatCompletions implements Manageable {
      * <p>
      * A new completion should only be added once OpenAI's API has responded with a
      * {@code response} from a {@code prompt}. This model <b>does not</b> send a completion
-     * request to the API, as that is done via {@link com.georgster.control.manager.ChatCompletionManager#createCompletion(String, discord4j.core.object.entity.Member)}.
+     * request to the API, as that is done via
+     * {@link com.georgster.control.manager.UserProfileManager#createCompletion(String, discord4j.core.object.entity.Member) UserProfileManager.createCompletion(Sting, Member)}.
      * 
      * @param prompt The prompt from the member.
      * @param response The response from the AI.
