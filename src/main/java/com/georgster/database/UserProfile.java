@@ -1,6 +1,7 @@
 package com.georgster.database;
 
 import com.georgster.control.manager.Manageable;
+import com.georgster.gpt.MemberChatCompletions;
 
 /**
  * A Profile holds data regarding a user's inside a specific Discord server.
@@ -9,6 +10,7 @@ public class UserProfile implements Manageable {
     private String guildId; //Snowflake Guild ID associated with this user's profile in a guild
     private String memberId; //Snowflake member ID
     private String username; //User's discord username
+    private MemberChatCompletions completions;
 
     /**
      * Constructs a {@code Profile} for a specific {@code Member} inside of a {@code Guild}.
@@ -17,10 +19,11 @@ public class UserProfile implements Manageable {
      * @param userId the {@code Snowflake} ID of the {@code Member} this profile is for.
      * @param user the username of the user
      */
-    public UserProfile(String serverId, String userId, String user) {
-        guildId = serverId;
-        memberId = userId;
-        username = user;
+    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions) {
+        this.guildId = serverId;
+        this.memberId = userId;
+        this.username = user;
+        this.completions = completions;
     }
 
     /**
@@ -55,5 +58,9 @@ public class UserProfile implements Manageable {
      */
     public String getUsername() {
         return username;
+    }
+
+    public MemberChatCompletions getCompletions() {
+        return completions;
     }
 }

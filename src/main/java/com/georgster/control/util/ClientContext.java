@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import com.georgster.control.CommandRegistry;
-import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.Manageable;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
@@ -100,15 +99,6 @@ public class ClientContext {
      */
     public PermissionsManager getPermissionsManager() {
         return (PermissionsManager) managers.stream().filter(PermissionsManager.class::isInstance).findFirst().orElse(null);
-    }
-
-    /**
-     * Returns the ChatCompletionManager.
-     * 
-     * @return the chat completion manager.
-     */
-    public ChatCompletionManager getChatCompletionManager() {
-        return (ChatCompletionManager) managers.stream().filter(ChatCompletionManager.class::isInstance).findFirst().orElse(null);
     }
 
     /**

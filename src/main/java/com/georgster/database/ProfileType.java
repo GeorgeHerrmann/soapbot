@@ -15,9 +15,5 @@ public enum ProfileType {
     /**
      * Represents a server's permissions profile.
      */
-    PERMISSIONS,
-    /**
-     * Represents a server's GPT Chat Completions profile.
-     */
-    COMPLETIONS
+    PERMISSIONS
 }

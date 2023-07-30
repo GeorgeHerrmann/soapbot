@@ -3,7 +3,7 @@ package com.georgster.gpt;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.control.manager.ChatCompletionManager;
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
@@ -22,7 +22,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class GPTCommand implements ParseableCommand {
 
-    private final ChatCompletionManager manager; //The chat completion manager.
+    private final UserProfileManager manager; //The chat completion manager.
 
     /**
      * Creates a GPTCommand from the given context.
@@ -30,7 +30,7 @@ public class GPTCommand implements ParseableCommand {
      * @param context The context of the SoapClient for this command.
      */
     public GPTCommand(ClientContext context) {
-        this.manager = context.getChatCompletionManager();
+        this.manager = context.getUserProfileManager();
     }
 
     /**

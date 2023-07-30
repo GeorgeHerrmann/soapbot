@@ -1,11 +1,12 @@
 package com.georgster.control;
 
-import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.SoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
+import com.georgster.database.UserProfile;
+import com.georgster.gpt.MemberChatCompletions;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
@@ -14,6 +15,7 @@ import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
@@ -36,7 +38,6 @@ public final class SoapClient {
         this.context.setAudioContext(new AudioContext());
         this.context.addManagers(new SoapEventManager(context),
                            new PermissionsManager(context),
-                           new ChatCompletionManager(context),
                            new UserProfileManager(context));
         this.context.setCommandRegistry(new CommandRegistry(context));
         this.context.getCommandRegistry().registerGlobalCommands();
@@ -56,9 +57,26 @@ public final class SoapClient {
         logger.append("Logging in to server: " + context.getGuild().getName() + "\n", LogDestination.NONAPI);
 
         this.context.forEachManager(SoapManager::load);
-        logger.append("- Initialized " + context.getGuild().getName() + "'s management system", LogDestination.NONAPI);
+        logger.append("- Initialized " + context.getGuild().getName() + "'s management system\n", LogDestination.NONAPI);
+
+        context.getUserProfileManager().updateFromEvent(event);
+        logger.append("- Updated all user profiles", LogDestination.NONAPI);
 
         logger.sendAll();
+    }
+
+    /**
+     * Defines SOAP Bot's actions when a MemberJoinEvent is fired.
+     * 
+     * @param event The MemberJoinEvent that was fired.
+     */
+    protected void onMemberJoin(MemberJoinEvent event) {
+        String guildId = flake.asString();
+        String memberId = event.getMember().getId().asString();
+        String username = event.getMember().getTag();
+        MemberChatCompletions completions = new MemberChatCompletions(memberId);
+        UserProfile profile = new UserProfile(guildId, memberId, username, completions);
+        context.getUserProfileManager().add(profile);
     }
 
     /**

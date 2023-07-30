@@ -176,3 +176,10 @@
         - !poll view to view all polls
         - !poll vote to vote for a poll
     - Added !poll quickpolls in addition to !poll present to bring up quick poll voting
+
+2.390
+    - Removed the ChatCompletionManager
+    - All MemberChatCompletions are now a part of the user's UserProfile.
+        - All previous chat completions have been wiped as a result.
+    - Created the foundation for Manageable's to be added to a UserProfile
+    - All UserProfiles will be kept up to date with MemberJoinEvents on new user join and GuildCreateEvents on guild joins

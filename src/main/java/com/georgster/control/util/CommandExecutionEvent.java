@@ -7,7 +7,6 @@ import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
 import com.georgster.control.SoapClient;
-import com.georgster.control.manager.ChatCompletionManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.UserProfileManager;
@@ -168,18 +167,9 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Returns the {@code ChatCompletionManager} for this SoapClient in this Event.
+     * Returns the {@code UserProfileManager} for the SoapClient in this Event.
      * 
-     * @return the {@code ChatCompletionManager} for this SoapClient in this Event.
-     */
-    public ChatCompletionManager getChatCompletionManager() {
-        return context.getChatCompletionManager();
-    }
-
-    /**
-     * Returns the {@code UserProfileManager} for this SoapClient in this Event.
-     * 
-     * @return the {@code UserProfileManager} for this SoapClient in this Event.
+     * @return the {@code UserProfileManager} for the SoapClient in this Event.
      */
     public UserProfileManager getUserProfileManager() {
         return context.getUserProfileManager();

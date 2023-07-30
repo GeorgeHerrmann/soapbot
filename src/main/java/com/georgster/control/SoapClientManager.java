@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.georgster.control.util.ClientContext;
+
 import com.georgster.logs.MultiLogger;
 
 import discord4j.common.util.Snowflake;
@@ -11,6 +12,7 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.gateway.intent.Intent;
@@ -84,6 +86,10 @@ public final class SoapClientManager {
         dispatcher.on(ChatInputInteractionEvent.class)
         .filter(message -> !testMode) //If test mode is enabled, commands must be sent with the !! notation, slash commands are not supported
         .subscribe(event -> clients.get(event.getInteraction().getGuildId().get()).onChatInputInteraction(event));
+
+        dispatcher.on(MemberJoinEvent.class)
+        .filter(event -> !event.getMember().isBot())
+        .subscribe(event -> clients.get(event.getGuildId()).onMemberJoin(event));
     }
 
     /**
