@@ -1,4 +1,4 @@
-package com.georgster.plinko;
+package com.georgster.game.plinko;
 
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.Message;
@@ -9,6 +9,7 @@ import java.util.Random;
 import com.georgster.api.ActionWriter;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.game.DiscordGame;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildInteractionHandler;
 
@@ -19,7 +20,7 @@ import com.georgster.util.GuildInteractionHandler;
  *  - The Channel the game was played in.
  *  - A PlinkoReward based on where the chip landed.
  */
-public class PlinkoGame {
+public class PlinkoGame extends DiscordGame {
 
     private String guild; //The ID of the guild the game was played in
     private Channel channel; //The channel where the game existed
@@ -53,6 +54,7 @@ public class PlinkoGame {
      * @param event The {@code MessageCreateEvent} that prompted the creation of this {@code PlinkoGame}.
      */
     protected PlinkoGame(CommandExecutionEvent event) {
+        super(event);
         guild = event.getDiscordEvent().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
         channel = event.getDiscordEvent().getChannel();
         rand = new Random();
@@ -64,7 +66,7 @@ public class PlinkoGame {
     /**
      * Simulates the {@code PlinkoGame} inside the {@code Channel} it was started.
      */
-    protected long play() {
+    protected void play() {
         ActionWriter.writeAction("Beginning setup of a PlinkoGame");
         int spot = rand.nextInt(2,14); //Initially, spot randomly generates the first location for the Plinko chip
 
@@ -107,7 +109,6 @@ public class PlinkoGame {
         handler.sendText("Your reward is " + reward + " coins", "Plinko");
         profile.getBank().deposit(reward);
         profileManager.update(profile);
-        return reward;
     }
     
     /**

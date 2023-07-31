@@ -192,3 +192,8 @@
         - Legendary reward (inner one) gives 50 coins
     - A basic coin balance can be viewed with !bank or !coins
         - This system is in beta, more will be added to it in the future
+
+2.341-BETA
+    - Created a basic framework for SOAP Bot Discord Games
+    - Placed channel restrictions on SOAP Bot Discord Games.
+        - Only one game can be played per text channel at a time

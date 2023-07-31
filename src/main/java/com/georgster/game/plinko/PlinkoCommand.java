@@ -1,4 +1,4 @@
-package com.georgster.plinko;
+package com.georgster.game.plinko;
 
 import java.util.List;
 
@@ -30,8 +30,12 @@ public class PlinkoCommand implements ParseableCommand {
 
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (parser.get(0).equals("play")) {
-            logger.append("- Beginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
-            game.play();
+            try {
+                logger.append("- Beginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
+                game.startGame();
+            } catch (IllegalStateException e) {
+                event.getGuildInteractionHandler().sendText(e.getMessage(), "Plinko");
+            }
         } else if (parser.get(0).equals("board")) {
             logger.append("- Showing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
             game.showBoard();
