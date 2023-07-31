@@ -31,7 +31,6 @@ public class PlinkoCommand implements ParseableCommand {
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (parser.get(0).equals("play")) {
             try {
-                logger.append("- Beginning the simulation of a plinko game", LogDestination.NONAPI, LogDestination.API);
                 game.startGame();
             } catch (IllegalStateException e) {
                 event.getGuildInteractionHandler().sendText(e.getMessage(), "Plinko");
