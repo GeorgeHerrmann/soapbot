@@ -17,21 +17,27 @@ import java.util.concurrent.Executors;
  */
 public class ThreadPoolManager {
     private String guildId; // The guild ID that this thread pool manager is for
+    private String guildName;
 
-    private static final ExecutorService GLOBAL_DISCORD_API_CALL_POOL = Executors.newSingleThreadExecutor(); // Responsible for all global Discord API calls
+    private static final ExecutorService GLOBAL_DISCORD_API_CALL_POOL = Executors.newSingleThreadExecutor(new GuildBasedThreadFactory("GLOBAL", "API-CALLS")); // Responsible for all global Discord API calls
 
-    private final ExecutorService generalThreadPool = Executors.newCachedThreadPool(); 
-    private final ExecutorService eventThreadPool = Executors.newFixedThreadPool(30); //Can schedule 30 events at once
-    private final ExecutorService commandThreadPool = Executors.newFixedThreadPool(30); // Can schedule 30 commands at once
-    private final ExecutorService voiceThreadPool = Executors.newSingleThreadExecutor(); // Can schedule 1 voice task at once
+    private final ExecutorService generalThreadPool; 
+    private final ExecutorService eventThreadPool; //Can schedule 30 events at once
+    private final ExecutorService commandThreadPool; // Can schedule 30 commands at once
+    private final ExecutorService voiceThreadPool; // Can schedule 1 voice task at once
 
     /**
      * Creates a new thread pool manager for the given guild ID.
      * 
      * @param guildId The guild ID to create a thread pool manager for
      */
-    protected ThreadPoolManager(String guildId) {
+    protected ThreadPoolManager(String guildId, String guildName) {
         this.guildId = guildId;
+        this.guildName = guildName;
+        generalThreadPool = Executors.newCachedThreadPool(new GuildBasedThreadFactory(guildName, "GENERAL")); 
+        eventThreadPool = Executors.newFixedThreadPool(30, new GuildBasedThreadFactory(guildName, "EVENTS"));
+        commandThreadPool = Executors.newFixedThreadPool(30, new GuildBasedThreadFactory(guildName, "COMMANDS"));
+        voiceThreadPool = Executors.newSingleThreadExecutor(new GuildBasedThreadFactory(guildName, "VOICE"));
     }
 
     /**
@@ -41,6 +47,10 @@ public class ThreadPoolManager {
      */
     protected String getGuildId() {
         return guildId;
+    }
+
+    protected String getGuildName() {
+        return guildName;
     }
 
     /**

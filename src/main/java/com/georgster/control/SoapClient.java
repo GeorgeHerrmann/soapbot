@@ -52,7 +52,7 @@ public final class SoapClient {
      * @param event The GuildCreateEvent that was fired.
      */
     protected void onGuildCreate(GuildCreateEvent event) {
-        ThreadPoolFactory.createThreadPoolManager(event.getGuild().getId());
+        ThreadPoolFactory.createThreadPoolManager(event.getGuild());
     
         MultiLogger logger = new MultiLogger(new GuildInteractionHandler(event.getGuild()), getClass());
         logger.append("Logging in to server: " + context.getGuild().getName() + "\n", LogDestination.NONAPI);
