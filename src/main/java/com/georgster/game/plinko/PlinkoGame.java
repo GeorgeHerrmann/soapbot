@@ -14,15 +14,10 @@ import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildInteractionHandler;
 
 /**
- * A PlinkoGame represents a game of plinko that is created on a "!plinko play:" command.
- * Each PlinkoGame is associated with the following:
- *  - The guild ID where the game existed.
- *  - The Channel the game was played in.
- *  - A PlinkoReward based on where the chip landed.
+ * A basic game of Plinko simulated in a {@code TextChannel}.
  */
 public class PlinkoGame extends DiscordGame {
 
-    private String guild; //The ID of the guild the game was played in
     private Channel channel; //The channel where the game existed
     private Random rand; //Keeps track of the random elements of the game
     private final GuildInteractionHandler handler;
@@ -49,13 +44,12 @@ public class PlinkoGame extends DiscordGame {
     };
 
     /**
-     * Creates a {@code PlinkoGame} where the {@code MessageCreateEvent} was fired.
+     * Creates a {@code PlinkoGame} in the {@link Channel} in the execution event.
      * 
-     * @param event The {@code MessageCreateEvent} that prompted the creation of this {@code PlinkoGame}.
+     * @param event The event that prompted the creation of this {@code PlinkoGame}.
      */
     protected PlinkoGame(CommandExecutionEvent event) {
         super(event);
-        guild = event.getDiscordEvent().getGuild().getId().asString(); //Translates the guild ID from a Snowflake to a string
         channel = event.getDiscordEvent().getChannel();
         rand = new Random();
         this.handler = event.getGuildInteractionHandler();
@@ -64,7 +58,7 @@ public class PlinkoGame extends DiscordGame {
     }
 
     /**
-     * Simulates the {@code PlinkoGame} inside the {@code Channel} it was started.
+     * {@inheritDoc}
      */
     protected void play() {
         ActionWriter.writeAction("Beginning setup of a PlinkoGame");
@@ -146,6 +140,13 @@ public class PlinkoGame extends DiscordGame {
         return nextIndex + first;
     }
 
+    /**
+     * Calculates and returns the proper reward amount based on the final x-index of the Plinko Chip.
+     * 
+     * @param finalIndex The final x-index of the Plinko Chip.
+     * @return The reward amount.
+     * @throws IllegalArgumentException If the final index is invalid.
+     */
     private long calculateReward(int finalIndex) throws IllegalArgumentException {
         if (finalIndex == 1 || finalIndex == 9) {
             return 5;
@@ -173,18 +174,7 @@ public class PlinkoGame extends DiscordGame {
     }
 
     /**
-     * Returns the guild ID where this {@code PlinkoGame} is active.
-     * Only classes within the plinko package should be able to access this.
-     * 
-     * @return A string containing the ID of the guild where this {@code PlinkoGame} is active.
-     */
-    protected String getGuild() {
-        return guild;
-    }
-
-    /**
      * Returns the channel where this {@code PlinkoGame} is active.
-     * Only classes within the plinko package should be able to access this.
      * 
      * @return The channel where this {@code PlinkoGame} is active.
      */

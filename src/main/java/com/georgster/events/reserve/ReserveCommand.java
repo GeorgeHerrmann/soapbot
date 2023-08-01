@@ -53,7 +53,7 @@ public class ReserveCommand implements ParseableCommand {
                 if (!reserve.isFull()) {
                     discordEvent.getAuthorOptionally().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
-                            handler.sendText("You have already reserved for this event, type !event " + reserve.getIdentifier() + " unreserve to unreserve");
+                            handler.sendText("You have already reserved for this event, type !unreserve " + reserve.getIdentifier() + " to unreserve");
                         } else {
                             logger.append("- Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
