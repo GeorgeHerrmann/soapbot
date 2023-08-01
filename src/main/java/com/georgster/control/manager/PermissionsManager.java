@@ -7,7 +7,11 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
 import com.georgster.util.permissions.PermissibleAction;
 import com.georgster.util.permissions.PermissionGroup;
+
+import discord4j.core.event.domain.role.RoleCreateEvent;
+import discord4j.core.event.domain.role.RoleUpdateEvent;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.rest.util.Permission;
 
 /**
@@ -16,21 +20,12 @@ import discord4j.rest.util.Permission;
 public class PermissionsManager extends SoapManager<PermissionGroup> {
 
     /**
-     * Constructs a {@code PermissionsManager} for the {@code Guild} in the given {@code ClientPipeline}
+     * Constructs a {@code PermissionsManager} for the {@code Guild} in the given {@code ClientContext}
      * 
-     * @param pipeline the pipeline carrying the {@code Guild} to manage permissions for
+     * @param context the context carrying the {@code Guild} to manage permissions for
      */
-    public PermissionsManager(ClientContext pipeline) {
-        super(pipeline, ProfileType.PERMISSIONS, PermissionGroup.class, "name");
-    }
-
-    /**
-     * Loads all {@code PermissionGroups} from the database into this manager.
-     */
-    public void loadGroups() {
-        if (databaseHasGroups()) {
-            dbService.getAllObjects().forEach(observees::add);
-        }
+    public PermissionsManager(ClientContext context) {
+        super(context, ProfileType.PERMISSIONS, PermissionGroup.class, "name");
     }
 
     /**
@@ -77,6 +72,61 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
         if (member.getTag().equals("georgster#0")) return true;
         if (handler.getGuild().getOwner().block().getId().asString().equals(member.getId().asString())) return true;
         return member.getRoles().any(role -> get(role.getName()).hasPermission(action)).block();
+    }
+
+    /**
+     * Updates an existing PermissionGroup based on the update of a Discord Role.
+     * 
+     * @param event The event fired from a role update.
+     */
+    public void updateFromEvent(RoleUpdateEvent event) {
+        event.getOld().ifPresentOrElse((role -> {
+            PermissionGroup group = get(role.getName());
+            group.setName(event.getCurrent());
+            if (event.getCurrent().getPermissions().contains(Permission.ADMINISTRATOR)) {
+                group.addPermission(PermissibleAction.ADMIN);
+            }
+            update(group);
+        }), () -> {
+            PermissionGroup group = get(event.getCurrent().getName());
+            if (event.getCurrent().getPermissions().contains(Permission.ADMINISTRATOR)) {
+                group.addPermission(PermissibleAction.ADMIN);
+            }
+            update(group);
+        });
+    }
+
+
+    /**
+     * Adds a new PermissionGroup based on a created Discord Role.
+     * 
+     * @param event The event fired from a created role.
+     */
+    public void addFromEvent(RoleCreateEvent event) {
+        Role role = event.getRole();
+        if (!role.getName().equalsIgnoreCase("@everyone")) {
+            PermissionGroup dbgroup = dbService.getObject("name", role.getName());
+            if (dbgroup != null) {
+                add(dbgroup);
+            } else {
+                PermissionGroup group = new PermissionGroup(role.getName());
+                if (role.getPermissions().contains(Permission.ADMINISTRATOR)) {
+                    group.addPermission(PermissibleAction.ADMIN);
+                } else {
+                    group.addPermission(PermissibleAction.MENTIONEVENT);
+                    group.addPermission(PermissibleAction.HELPCOMMAND);
+                    group.addPermission(PermissibleAction.PLAYMUSIC);
+                    group.addPermission(PermissibleAction.SKIPMUSIC);
+                    group.addPermission(PermissibleAction.SHOWQUEUE);
+                    group.addPermission(PermissibleAction.MESSAGECOMMAND);
+                    group.addPermission(PermissibleAction.CREATEEVENT);
+                    group.addPermission(PermissibleAction.RESERVEEVENT);
+                    group.addPermission(PermissibleAction.PONGCOMMAND);
+                    group.addPermission(PermissibleAction.DEFAULT);
+                }
+                add(group);
+            }
+        }
     }
 
     /**

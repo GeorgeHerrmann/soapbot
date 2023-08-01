@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
  * <p>Maximum concurrent tasks for each thread pool:</p>
  * <ul>
  *  <li>General: unlimited</li>
- *  <li>Event: 10</li>
- *  <li>Command: 10</li>
+ *  <li>Event: 30</li>
+ *  <li>Command: 30</li>
  *  <li>Voice: 1</li>
  *  <li>Global Discord API calls: 1</li>
  * </ul>
@@ -21,8 +21,8 @@ public class ThreadPoolManager {
     private static final ExecutorService GLOBAL_DISCORD_API_CALL_POOL = Executors.newSingleThreadExecutor(); // Responsible for all global Discord API calls
 
     private final ExecutorService generalThreadPool = Executors.newCachedThreadPool(); 
-    private final ExecutorService eventThreadPool = Executors.newFixedThreadPool(10); //Can schedule 10 events at once
-    private final ExecutorService commandThreadPool = Executors.newFixedThreadPool(10); // Can schedule 3 commands at once
+    private final ExecutorService eventThreadPool = Executors.newFixedThreadPool(30); //Can schedule 30 events at once
+    private final ExecutorService commandThreadPool = Executors.newFixedThreadPool(30); // Can schedule 30 commands at once
     private final ExecutorService voiceThreadPool = Executors.newSingleThreadExecutor(); // Can schedule 1 voice task at once
 
     /**

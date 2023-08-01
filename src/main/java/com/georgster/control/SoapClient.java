@@ -17,6 +17,8 @@ import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.role.RoleCreateEvent;
+import discord4j.core.event.domain.role.RoleUpdateEvent;
 
 /**
  * An aggregation of all the shard-specific objects that SOAP Bot needs to run for
@@ -86,6 +88,24 @@ public final class SoapClient {
      */
     protected void onMessageCreate(MessageCreateEvent event) {
         this.context.getCommandRegistry().getAndExecute(event);
+    }
+
+    /**
+     * Defines SOAP Bot's actions when a RoleUpdateEvent is fired.
+     * 
+     * @param event The RoleUpdateEvent that was fired.
+     */
+    protected void onRoleUpdate(RoleUpdateEvent event) {
+        this.context.getPermissionsManager().updateFromEvent(event);
+    }
+
+    /**
+     * Defines SOAP Bot's actions when a RoleCreateEvent is fired.
+     * 
+     * @param event The RoleCreateEvent that was fired.
+     */
+    protected void onRoleCreate(RoleCreateEvent event) {
+        this.context.getPermissionsManager().addFromEvent(event);
     }
 
     /**

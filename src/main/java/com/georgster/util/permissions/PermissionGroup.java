@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.georgster.control.manager.Manageable;
 
+import discord4j.core.object.entity.Role;
+
 /**
  * A {@code PermissionGroup} is a collection of {@code PermissibleActions} that
  * can be assigned to a group with an associated name. Generally, the name of
@@ -86,6 +88,15 @@ public class PermissionGroup implements Manageable {
         if (hasPermission(action)) {
             actions.remove(action);
         }
+    }
+
+    /**
+     * Sets the name of this group to be the name present in the provided role.
+     * 
+     * @param newRole The role to get the name from.
+     */
+    public void setName(Role newRole) {
+        this.name = newRole.getName();
     }
 
     /**

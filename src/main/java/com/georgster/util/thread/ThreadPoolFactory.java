@@ -11,8 +11,8 @@ import discord4j.common.util.Snowflake;
  * <p>Maximum concurrent tasks for each Guild's thread pools:</p>
  * <ul>
  *  <li>General: unlimited</li>
- *  <li>Event: 10</li>
- *  <li>Command: 10</li>
+ *  <li>Event: 30</li>
+ *  <li>Command: 30</li>
  *  <li>Voice: 1</li>
  *  <li>Global Discord API calls: 1</li>
  */
@@ -47,7 +47,7 @@ public class ThreadPoolFactory {
 
     /**
      * Schedules a task to be executed by the event thread pool manager for the given guild ID.
-     * Each Guild can schedule up to 10 events at a time.
+     * Each Guild can schedule up to 30 events at a time.
      * 
      * @param guildId The guild ID to schedule the task for
      * @param task  The task to be executed
@@ -58,7 +58,7 @@ public class ThreadPoolFactory {
 
     /**
      * Schedules a task to be executed by the command thread pool manager for the given guild ID.
-     * Each Guild can schedule up to 10 commands at a time.
+     * Each Guild can schedule up to 30 commands at a time.
      * 
      * @param guildId The guild ID to schedule the task for
      * @param task The task to be executed

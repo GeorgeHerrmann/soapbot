@@ -15,6 +15,8 @@ import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.role.RoleCreateEvent;
+import discord4j.core.event.domain.role.RoleUpdateEvent;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
 
@@ -90,6 +92,12 @@ public final class SoapClientManager {
         dispatcher.on(MemberJoinEvent.class)
         .filter(event -> !event.getMember().isBot())
         .subscribe(event -> clients.get(event.getGuildId()).onMemberJoin(event));
+
+        dispatcher.on(RoleUpdateEvent.class)
+        .subscribe(event -> clients.get(event.getCurrent().getGuild().block().getId()).onRoleUpdate(event));
+
+        dispatcher.on(RoleCreateEvent.class)
+        .subscribe(event -> clients.get(event.getGuildId()).onRoleCreate(event));
     }
 
     /**

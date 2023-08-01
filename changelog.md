@@ -197,3 +197,8 @@
     - Created a basic framework for SOAP Bot Discord Games
     - Placed channel restrictions on SOAP Bot Discord Games.
         - Only one game can be played per text channel at a time
+
+2.342-BETA
+    - Increased maximum thread counts for commands and events
+        - Both set to 30
+    - Fixed an issue where internal PermissionGroups would not be updated on role creation or update from Discord
