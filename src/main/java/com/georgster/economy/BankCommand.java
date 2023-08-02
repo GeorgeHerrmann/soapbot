@@ -10,6 +10,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.profile.UserProfile;
 
 import discord4j.core.object.entity.Member;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A {@link Command} for interacting with a user's CoinBank.
@@ -51,5 +52,16 @@ public class BankCommand implements Command {
         return "Aliases: " + getAliases().toString() +
         "\n- '!bank' to view your coin balance" +
         "\n*This feature is currently in beta*";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ApplicationCommandRequest getCommandApplicationInformation() {
+        return ApplicationCommandRequest.builder()
+                .name(getAliases().get(0))
+                .description("Show your Coin Bank information")
+                .build();
     }
 }

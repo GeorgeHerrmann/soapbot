@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
  */
 public class ThreadPoolManager {
     private String guildId; // The guild ID that this thread pool manager is for
-    private String guildName;
+    private String guildName; // The guild name this thread pool manager is for
 
     private static final ExecutorService GLOBAL_DISCORD_API_CALL_POOL = Executors.newSingleThreadExecutor(new GuildBasedThreadFactory("GLOBAL", "API-CALLS")); // Responsible for all global Discord API calls
 
@@ -27,9 +27,10 @@ public class ThreadPoolManager {
     private final ExecutorService voiceThreadPool; // Can schedule 1 voice task at once
 
     /**
-     * Creates a new thread pool manager for the given guild ID.
+     * Creates a new thread pool manager for the given guild ID and name.
      * 
      * @param guildId The guild ID to create a thread pool manager for
+     * @param guildName The guild name to create a thread pool manager for
      */
     protected ThreadPoolManager(String guildId, String guildName) {
         this.guildId = guildId;
@@ -49,6 +50,11 @@ public class ThreadPoolManager {
         return guildId;
     }
 
+    /**
+     * Returns the name of the guild this thread pool manager is for.
+     * 
+     * @return The name of the guild this thread pool manager is for.
+     */
     protected String getGuildName() {
         return guildName;
     }

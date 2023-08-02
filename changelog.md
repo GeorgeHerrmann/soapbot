@@ -202,3 +202,8 @@
     - Increased maximum thread counts for commands and events
         - Both set to 30
     - Fixed an issue where internal PermissionGroups would not be updated on role creation or update from Discord
+
+2.343-BETA
+    - Created the EchoCommand
+        - Allows users to have SOAP Bot say a message.
+            - Requires ECHOCOMMAND permission

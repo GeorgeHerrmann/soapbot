@@ -15,6 +15,7 @@ import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.game.plinko.PlinkoCommand;
 import com.georgster.gpt.GPTCommand;
+import com.georgster.misc.EchoCommand;
 import com.georgster.misc.HelloWorldCommand;
 import com.georgster.misc.HelpCommand;
 import com.georgster.misc.PongCommand;
@@ -67,7 +68,8 @@ public class CommandRegistry {
             TheFinalShapeCommand.class,
             PollEventCommand.class,
             GPTCommand.class,
-            BankCommand.class
+            BankCommand.class,
+            EchoCommand.class
         ));
     }
 
