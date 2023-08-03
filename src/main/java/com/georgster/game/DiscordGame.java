@@ -7,6 +7,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.Channel;
 
 /**
@@ -20,6 +21,9 @@ public abstract class DiscordGame {
     private static final List<Snowflake> ACTIVE_GAME_CHANNELS = new ArrayList<>(); // Channel IDs where a DiscordGame is active
     private final CommandExecutionEvent event; // The event that prompted the game's creation
 
+    private Member owner;
+    private boolean isActive;
+
     /**
      * Creates a new DiscordGame.
      * 
@@ -27,6 +31,8 @@ public abstract class DiscordGame {
      */
     protected DiscordGame(CommandExecutionEvent event) {
         this.event = event;
+        this.isActive = false;
+        this.owner = event.getDiscordEvent().getAuthorAsMember();
     }
 
     /**
@@ -46,11 +52,25 @@ public abstract class DiscordGame {
         if (!ACTIVE_GAME_CHANNELS.contains(channelId)) {
             ACTIVE_GAME_CHANNELS.add(channelId);
             event.getLogger().append("- Beginning a Discord Game in a text channel", LogDestination.NONAPI, LogDestination.API);
+            this.isActive = true;
             play();
+            this.isActive = false;
             ACTIVE_GAME_CHANNELS.remove(channelId);
         } else {
             event.getLogger().append("- A game is already active in the requested channel, cancelling the new game.", LogDestination.NONAPI);
             throw new IllegalStateException("Channel: " + event.getDiscordEvent().getChannel().getMention() + " already has a game active.");
         }
+    }
+
+    public Member getOwner() {
+        return owner;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void end() {
+        isActive = false;
     }
 }
