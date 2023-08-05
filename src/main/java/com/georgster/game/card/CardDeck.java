@@ -18,6 +18,7 @@ public abstract class CardDeck {
 
     protected CardDeck(PlayingCard... cards) {
         this.cards = new ArrayDeque<>(List.of(cards));
+        this.random = new Random();
     }
 
     public boolean hasCards() {
@@ -34,6 +35,10 @@ public abstract class CardDeck {
 
     public void placeOnTop(PlayingCard card) {
         cards.push(card);
+    }
+
+    public boolean containsValue(String value) {
+        return getCardList().stream().anyMatch(card -> card.getValue().equalsIgnoreCase(value));
     }
 
     public void shuffle() {
@@ -86,5 +91,12 @@ public abstract class CardDeck {
         for (int i = 0; i < this.size(); i++) {
             this.transferTopCardTo(otherDeck);
         }
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        cards.forEach(card -> sb.append(card.toString()+ " | "));
+
+        return sb.toString();
     }
 }

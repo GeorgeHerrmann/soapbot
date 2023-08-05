@@ -67,12 +67,17 @@ public final class SoapClientManager {
     }
 
     /**
-     * Begins listening to all Discord's events that SOAP Bot needs to handle.
+     * Begins listening to all Discord's events that SOAP Bot needs to handle
+     * with permanent listeners.
+     * <p>
      * These events are currently:
      * <ul>
-     * <li>GuildCreateEvent</li>
-     * <li>MessageCreateEvent</li>
-     * <li>ChatInputInteractionEvent</li>
+     * <li>{@link GuildCreateEvent}</li>
+     * <li>{@link MessageCreateEvent}</li>
+     * <li>{@link ChatInputInteractionEvent}</li>
+     * <li>{@link MemberJoinEvent}</li>
+     * <li>{@link RoleUpdateEvent}</li>
+     * <li>{@link RoleCreateEvent}</li>
      * </ul>
      */
     public void listenToEvents() {

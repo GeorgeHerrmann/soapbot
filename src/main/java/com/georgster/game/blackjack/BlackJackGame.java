@@ -7,10 +7,13 @@ import com.georgster.game.card.PlayingCard;
 
 public class BlackJackGame extends CardGame {
 
+    private BlackjackWizard wizard;
+
     private int dealerTotal;
     private int playerTotal;
 
     private boolean playerCanGo;
+    private boolean acesAreOne; // If false, aces are 11
 
     enum Move {
         HIT,
@@ -20,12 +23,21 @@ public class BlackJackGame extends CardGame {
     }
     
     public BlackJackGame(CommandExecutionEvent event) {
-        super(event, 2);
+        super(event, 2, true);
         addAutomatedPlayer(2, "Dealer");
 
         this.dealerTotal = 0;
         this.playerTotal = 0;
         this.playerCanGo = true;
+        this.acesAreOne = true;
+
+        this.wizard = new BlackjackWizard(event, this);
+    }
+
+    public Move[] getAvailablePlayerMoves() {
+        if (!playerCanGo) return new Move[0];
+
+        return new Move[] {Move.HIT, Move.STAND};
     }
 
     public CardDeck getDealerDeck() {
@@ -39,6 +51,15 @@ public class BlackJackGame extends CardGame {
     public void play() {
         getDealerDeck().getCard(0).show();
         getPlayerDeck(getOwner().getId().asString()).getCardList().forEach(PlayingCard::show);
+
+        if (getPlayerCards().containsValue("A")) {
+            wizard.promptAceSelection();
+        }
+
+        getDealerDeck().getCardStack().forEach(this::addCardValueDealer);
+        getPlayerCards().getCardStack().forEach(this::addCardValuePlayer);
+
+        wizard.begin();
     }
 
     public void processPlayerMove(Move move) {
@@ -47,6 +68,8 @@ public class BlackJackGame extends CardGame {
             deck.transferTopCardFrom(getGlobalDrawingDeck());
             PlayingCard newCard = deck.peekTopCard();
             newCard.show();
+            addCardValuePlayer(newCard);
+            if (playerBusted()) end();
         } else if (move == Move.STAND) {
             playerCanGo = false;
         }
@@ -55,13 +78,48 @@ public class BlackJackGame extends CardGame {
     public void processDealerTurn() {
         CardDeck deck = getDealerDeck();
         if (deck.size() == 2) deck.getCardList().forEach(PlayingCard::show);
-        if (!dealerBusted()) {
+        if (dealerCanGo()) {
             Move move = getDealerMove();
+            if (move == Move.HIT) {
+                deck.transferTopCardFrom(getGlobalDrawingDeck());
+                PlayingCard newCard = deck.peekTopCard();
+                newCard.show();
+                addCardValueDealer(newCard);
+                if (dealerBusted()) end();
+                System.out.println("New dealer total: " + dealerTotal);
+                if (dealerTotal >= 17) end();
+            }
+        }
+    }
+
+    /**
+     * Sets whether drawn aces by the player will be counted as a one (true),
+     * or an eleven (false).
+     * 
+     * @param ones True to count player-drawn aces as ones, false for elevens.
+     */
+    public void setPlayerAcesValue(boolean ones) {
+        this.acesAreOne = ones;
+    }
+
+    private void addCardValuePlayer(PlayingCard card) {
+        playerTotal += acesAreOne ? getCardValueAceOne(card) : getCardValueAceEleven(card);
+    }
+
+    private void addCardValueDealer(PlayingCard card) {
+        if (dealerTotal <= 10) {
+            dealerTotal += getCardValueAceEleven(card);
+        } else {
+            dealerTotal += getCardValueAceOne(card);
         }
     }
 
     public boolean playerCanGo() {
         return playerCanGo;
+    }
+
+    public boolean dealerCanGo() {
+        return getDealerTotal() < 17 && isActive();
     }
 
     public boolean dealerBusted() {
@@ -73,11 +131,31 @@ public class BlackJackGame extends CardGame {
     }
 
     public int getDealerTotal() {
-        return dealerTotal;
+        int total = dealerTotal;
+        for (PlayingCard card : getDealerDeck().getCardList()) {
+            if (card.isFaceDown()) {
+                if (total <= 10) {
+                    total -= getCardValueAceEleven(card);
+                } else {
+                    total -= getCardValueAceOne(card);
+                }
+            }
+        }
+        return total < 0 ? 0 : total;
     }
 
     public int getPlayerTotal() {
-        return playerTotal;
+        int total = playerTotal;
+        for (PlayingCard card : getPlayerCards().getCardList()) {
+            if (card.isFaceDown()) {
+                if (!acesAreOne) {
+                    total -= getCardValueAceEleven(card);
+                } else {
+                    total -= getCardValueAceOne(card);
+                }
+            }
+        }
+        return total < 0 ? 0 : total;
     }
 
     private Move getDealerMove() {
@@ -108,5 +186,24 @@ public class BlackJackGame extends CardGame {
         } else {
             return Integer.parseInt(value);
         }
+    }
+
+    public boolean playerWon() {
+        return (!playerBusted() && dealerBusted()) || ((playerTotal > dealerTotal) && !playerBusted());
+    }
+
+    public boolean dealerWon() {
+        return (playerBusted() && !dealerBusted()) || ((playerTotal < dealerTotal) && !dealerBusted());
+    }
+
+    public String getCardsAsString() {
+        StringBuilder sb = new StringBuilder("Dealer cards:\n");
+        getDealerDeck().getCardStack().forEach(card -> sb.append(card.isFaceDown() ? "F | " : card.getValue() + " | "));
+        sb.append("(" + getDealerTotal() + ")\n");
+        sb.append("Player cards:\n");
+        getPlayerCards().getCardStack().forEach(card -> sb.append(card.isFaceDown() ? "F | " : card.getValue() + " | "));
+        sb.append("(" + getPlayerTotal() + ")");
+
+        return sb.toString();
     }
 }

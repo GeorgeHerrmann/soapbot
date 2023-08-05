@@ -28,7 +28,7 @@ public class PlayingCard {
     }
 
     public void show() {
-        faceDown = true;
+        faceDown = false;
     }
 
     public boolean isFaceDown() {
@@ -41,6 +41,6 @@ public class PlayingCard {
 
     @Override
     public String toString() {
-        return value + " of " + suit.toString();
+        return faceDown ? "F" : value + " of " + suit.toString();
     }
 }

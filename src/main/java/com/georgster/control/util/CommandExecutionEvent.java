@@ -27,7 +27,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Message;
 
 /**
- * An Event fired upon the execution of a SOAPBot {@code Command}. This Event packages
+ * An Event fired upon the execution of a SOAPBot {@link Command}. This Event packages
  * the data from the Discord Event, as well as various objects a command might need.
  */
 public class CommandExecutionEvent {

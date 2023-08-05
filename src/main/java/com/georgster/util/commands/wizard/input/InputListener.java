@@ -232,6 +232,16 @@ public abstract class InputListener {
         message = handler.editMessageContent(message, newContent, title);
     }
 
+    public void editCurrentMessageContentDelay(String newContent, long millis) {
+        message = handler.editMessageContent(message, newContent, title);
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Deletes this listener's current presenting message. Note that
      * this does <b>NOT</b> cancel the listener, and if a prompt is currently active
@@ -268,7 +278,12 @@ public abstract class InputListener {
      * @param response
      */
     protected void setResponse(String response) {
-        List<String> options = List.of(recentState.getOptions());
+        List<String> options = new ArrayList<>(List.of(recentState.getOptions()));
+        
+        for (int i = 0; i < options.size(); i++) {
+            options.set(i, options.get(i).toLowerCase());
+        }
+
         response = response.toLowerCase();
         if (!mustMatchLenient && !mustMatchStrict) {
             this.responseContainer.append(response);

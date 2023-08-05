@@ -20,7 +20,7 @@ public class GlobalCardDeck extends CardDeck {
             }
         }
 
-        return deck.toArray(new PlayingCard[0]);
+        return deck.toArray(new PlayingCard[deck.size()]);
     }
 
     private static String[] getCardValues() {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.game.blackjack.BlackJackGame;
 import com.georgster.util.commands.CommandParser;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -12,13 +13,14 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements Command { 
-    private static final boolean ACTIVE = false;
+    private static final boolean ACTIVE = true;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        throw new UnsupportedOperationException("Test command is currently inactive");
+        //throw new UnsupportedOperationException("Test command is currently inactive");
+        new BlackJackGame(event).startGame();
     }
 
     /**
