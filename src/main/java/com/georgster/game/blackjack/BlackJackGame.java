@@ -86,7 +86,6 @@ public class BlackJackGame extends CardGame {
                 newCard.show();
                 addCardValueDealer(newCard);
                 if (dealerBusted()) end();
-                System.out.println("New dealer total: " + dealerTotal);
                 if (dealerTotal >= 17) end();
             }
         }
@@ -135,13 +134,13 @@ public class BlackJackGame extends CardGame {
         for (PlayingCard card : getDealerDeck().getCardList()) {
             if (card.isFaceDown()) {
                 if (total <= 10) {
-                    total -= getCardValueAceEleven(card);
-                } else {
                     total -= getCardValueAceOne(card);
+                } else {
+                    total -= getCardValueAceEleven(card);
                 }
             }
         }
-        return total < 0 ? 0 : total;
+        return total < 0 ? 0 : total; // Edge case where there are cards, but they haven't been added to the total yet
     }
 
     public int getPlayerTotal() {
@@ -155,7 +154,7 @@ public class BlackJackGame extends CardGame {
                 }
             }
         }
-        return total < 0 ? 0 : total;
+        return total < 0 ? 0 : total; // Edge case where there are cards, but they haven't been added to the total yet
     }
 
     private Move getDealerMove() {

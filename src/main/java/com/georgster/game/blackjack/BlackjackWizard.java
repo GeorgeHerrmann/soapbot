@@ -24,9 +24,8 @@ public class BlackjackWizard extends InputWizard {
     }
 
     public void playerTurn() {
-        System.out.println("Player can go: " + game.playerCanGo());
-        System.out.println("Game is active: " + game.isActive());
         if (game.isActive()) {
+            game.getDealerDeck().getCardStack().forEach(card -> System.out.println(card.getValue()));
             if (game.playerCanGo()) {
                 StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
                 prompt.append("What would you like to do");
@@ -39,7 +38,6 @@ public class BlackjackWizard extends InputWizard {
                     nextWindow("playerTurn");
                 }), false, prompt.toString(), options);
             } else {
-                System.out.println("Dealer turn");
                 dealerTurn();
             }
         } else {
@@ -64,7 +62,6 @@ public class BlackjackWizard extends InputWizard {
 
         StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
         if (game.dealerWon()) {
-            System.out.println(game.getDealerTotal() + " " + game.getPlayerTotal());
             prompt.append("Dealer wins");
         } else if (game.playerWon()) {
             prompt.append("You won!");

@@ -51,7 +51,7 @@ public abstract class DiscordGame {
         Snowflake channelId = event.getDiscordEvent().getChannel().getId();
         if (!ACTIVE_GAME_CHANNELS.contains(channelId)) {
             ACTIVE_GAME_CHANNELS.add(channelId);
-            event.getLogger().append("- Beginning a Discord Game in a text channel", LogDestination.NONAPI, LogDestination.API);
+            event.getLogger().append("- Beginning a Discord Game in a text channel\n", LogDestination.NONAPI, LogDestination.API);
             this.isActive = true;
             play();
             this.isActive = false;
