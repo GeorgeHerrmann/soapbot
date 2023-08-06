@@ -36,7 +36,7 @@ public class BlackjackCommand implements ParseableCommand {
                 try {
                     game.startGame();
                 } catch (IllegalStateException e) {
-                    event.getGuildInteractionHandler().sendText(e.getMessage(), "Plinko");
+                    event.getGuildInteractionHandler().sendText(e.getMessage(), "Blackjack");
                 }
             } else {
                 handler.sendText("You only have " + bank.getBalance() + " coins, wager of " + wagerAmount + " not placed.", "Blackjack");
