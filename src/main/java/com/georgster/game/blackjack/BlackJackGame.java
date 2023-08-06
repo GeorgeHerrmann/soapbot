@@ -22,8 +22,8 @@ public class BlackJackGame extends CardGame {
         SPLIT
     }
     
-    public BlackJackGame(CommandExecutionEvent event) {
-        super(event, 2, true);
+    public BlackJackGame(CommandExecutionEvent event, long entryAmount) {
+        super(event, 2, true, entryAmount);
         addAutomatedPlayer(2, "Dealer");
 
         this.dealerTotal = 0;
@@ -36,6 +36,10 @@ public class BlackJackGame extends CardGame {
 
     public Move[] getAvailablePlayerMoves() {
         if (!playerCanGo) return new Move[0];
+
+        if (getPlayerTotal() <= 11 && getOwnerProfile().getBank().hasBalance(getEntryAmount())) {
+            return new Move[] {Move.HIT, Move.STAND, Move.DOUBLE};
+        }
 
         return new Move[] {Move.HIT, Move.STAND};
     }
@@ -70,9 +74,22 @@ public class BlackJackGame extends CardGame {
             newCard.show();
             addCardValuePlayer(newCard);
             if (playerBusted()) end();
+        } else if (move == Move.DOUBLE) {
+            withdrawlEntryAmount(); // Withdrawls the old entry fee again (essentially doubling it)
+            setEntryAmount(getEntryAmount() * 2); // Updates the entry fee to double the old one
+
+            CardDeck deck = getPlayerCards();
+            deck.transferTopCardFrom(getGlobalDrawingDeck());
+            PlayingCard newCard = deck.peekTopCard();
+            newCard.show();
+            addCardValuePlayer(newCard);
+            if (playerBusted()) end();
+            playerCanGo = false; // Player only gets one more card on double
         } else if (move == Move.STAND) {
             playerCanGo = false;
         }
+
+        updateGameReward();
     }
 
     public void processDealerTurn() {
@@ -88,6 +105,22 @@ public class BlackJackGame extends CardGame {
                 if (dealerBusted()) end();
                 if (dealerTotal >= 17) end();
             }
+        }
+
+        updateGameReward();
+    }
+
+    private void updateGameReward() {
+        if (playerWon()) {
+            if (getPlayerTotal() == 21) {
+                setRewardAmount((long) (getEntryAmount() + (getEntryAmount() * 1.5)));
+            } else {
+                setRewardAmount(getEntryAmount() * 2);
+            }
+        } else if (dealerWon()) {
+            setRewardAmount(0);
+        } else {
+            setRewardAmount(getEntryAmount());
         }
     }
 
@@ -197,10 +230,10 @@ public class BlackJackGame extends CardGame {
 
     public String getCardsAsString() {
         StringBuilder sb = new StringBuilder("Dealer cards:\n");
-        getDealerDeck().getCardStack().forEach(card -> sb.append(card.isFaceDown() ? "F | " : card.getValue() + " | "));
+        getDealerDeck().getCardStack().forEach(card -> sb.append(card.isFaceDown() ? "**F** | " : "**" + card.getValue() + "** | "));
         sb.append("(" + getDealerTotal() + ")\n");
         sb.append("Player cards:\n");
-        getPlayerCards().getCardStack().forEach(card -> sb.append(card.isFaceDown() ? "F | " : card.getValue() + " | "));
+        getPlayerCards().getCardStack().forEach(card -> sb.append(card.isFaceDown() ? "**F** | " : "**" + card.getValue() + "** | "));
         sb.append("(" + getPlayerTotal() + ")");
 
         return sb.toString();

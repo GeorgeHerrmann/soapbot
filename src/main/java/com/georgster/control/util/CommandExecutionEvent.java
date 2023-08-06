@@ -86,10 +86,9 @@ public class CommandExecutionEvent {
                 for (StackTraceElement element : e.getStackTrace()) {
                     logger.append("\t" + element.toString() + "\n", LogDestination.FILE, LogDestination.SYSTEM);
                 }
-                String[] help = SoapUtility.splitFirst(command.help());
 
                 InputWizard helpWizard = new IterableStringWizard(this, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                Message msg = getGuildInteractionHandler().sendText(help[1], help[0]);
+                Message msg = getGuildInteractionHandler().sendText(command.help(), command.getClass().getSimpleName());
                 InputWizard switcher = new SwappingWizard(this, msg, helpWizard);
                 switcher.begin();
             }

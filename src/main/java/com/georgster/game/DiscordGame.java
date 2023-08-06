@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.economy.exception.InsufficientCoinsException;
 import com.georgster.logs.LogDestination;
+import com.georgster.profile.UserProfile;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
@@ -21,11 +23,14 @@ public abstract class DiscordGame {
     private static final List<Snowflake> ACTIVE_GAME_CHANNELS = new ArrayList<>(); // Channel IDs where a DiscordGame is active
     private final CommandExecutionEvent event; // The event that prompted the game's creation
 
+    private long entryAmount;
+    private long rewardAmount;
+
     private Member owner;
     private boolean isActive;
 
     /**
-     * Creates a new DiscordGame.
+     * Creates a new DiscordGame with no entry nor reward coin amount.
      * 
      * @param event The event that prompted the game's creation.
      */
@@ -33,6 +38,16 @@ public abstract class DiscordGame {
         this.event = event;
         this.isActive = false;
         this.owner = event.getDiscordEvent().getAuthorAsMember();
+        this.entryAmount = 0;
+        this.rewardAmount = 0;
+    }
+
+    protected DiscordGame(CommandExecutionEvent event, long entryAmount, long rewardAmount) {
+        this.event = event;
+        this.isActive = false;
+        this.owner = event.getDiscordEvent().getAuthorAsMember();
+        this.entryAmount = entryAmount;
+        this.rewardAmount = rewardAmount;
     }
 
     /**
@@ -52,14 +67,61 @@ public abstract class DiscordGame {
         if (!ACTIVE_GAME_CHANNELS.contains(channelId)) {
             ACTIVE_GAME_CHANNELS.add(channelId);
             event.getLogger().append("- Beginning a Discord Game in a text channel\n", LogDestination.NONAPI, LogDestination.API);
+
+            withdrawlEntryAmount();
+
             this.isActive = true;
             play();
             this.isActive = false;
+
+            depositRewardAmount();
             ACTIVE_GAME_CHANNELS.remove(channelId);
         } else {
             event.getLogger().append("- A game is already active in the requested channel, cancelling the new game.", LogDestination.NONAPI);
             throw new IllegalStateException("Channel: " + event.getDiscordEvent().getChannel().getMention() + " already has a game active.");
         }
+    }
+
+    public void withdrawlEntryAmount() throws InsufficientCoinsException {
+        UserProfile profile = event.getUserProfileManager().get(owner.getId().asString());
+        try {
+            profile.getBank().withdrawl(entryAmount);
+            event.getUserProfileManager().update(profile);
+        } catch (IllegalArgumentException e) {
+            throw new InsufficientCoinsException(profile.getBank(), entryAmount);
+        }
+    }
+
+    public UserProfile getOwnerProfile() {
+        return event.getUserProfileManager().get(owner.getId().asString());
+    }
+
+    private void depositRewardAmount() {
+        UserProfile profile = event.getUserProfileManager().get(owner.getId().asString());
+
+        profile.getBank().deposit(rewardAmount);
+        event.getUserProfileManager().update(profile);
+    }
+
+    public void setRewardAmount(long amount) {
+        this.rewardAmount = amount;
+    }
+
+    public void clearEntryRewardAmounts() {
+        this.entryAmount = 0;
+        this.rewardAmount = 0;
+    }
+
+    public void setEntryAmount(long amount) {
+        this.entryAmount = amount;
+    }
+
+    public long getEntryAmount() {
+        return entryAmount;
+    }
+
+    public long getRewardAmount() {
+        return rewardAmount;
     }
 
     public Member getOwner() {

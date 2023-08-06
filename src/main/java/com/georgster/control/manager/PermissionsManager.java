@@ -54,6 +54,8 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
                         group.addPermission(PermissibleAction.RESERVEEVENT);
                         group.addPermission(PermissibleAction.PONGCOMMAND);
                         group.addPermission(PermissibleAction.DEFAULT);
+                        group.addPermission(PermissibleAction.PLINKOGAME);
+                        group.addPermission(PermissibleAction.BLACKJACKGAME);
                     }
                     add(group);
                 }

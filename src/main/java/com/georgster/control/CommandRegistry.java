@@ -13,6 +13,7 @@ import com.georgster.events.reserve.ReserveEventCommand;
 import com.georgster.events.poll.PollEventCommand;
 import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
+import com.georgster.game.blackjack.BlackjackCommand;
 import com.georgster.game.plinko.PlinkoCommand;
 import com.georgster.gpt.GPTCommand;
 import com.georgster.misc.EchoCommand;
@@ -69,7 +70,8 @@ public class CommandRegistry {
             PollEventCommand.class,
             GPTCommand.class,
             BankCommand.class,
-            EchoCommand.class
+            EchoCommand.class,
+            BlackjackCommand.class
         ));
     }
 

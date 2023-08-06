@@ -38,7 +38,7 @@ public abstract class InputListener {
 
     // Configuration properties
     protected final String endString; // String to type to cancel the listener
-    protected final String title; // The title to attach to messages
+    protected String title; // The title to attach to messages
     private final EventDispatcher dispatcher; // Dispatcher sending events
     protected final GuildInteractionHandler handler; // Handler to interact with the Guild
     protected final Member user; // The user of the listener
@@ -240,6 +240,10 @@ public abstract class InputListener {
             Thread.currentThread().interrupt();
             e.printStackTrace();
         }
+    }
+
+    public void setTitle(String newTitle) {
+        this.title = newTitle;
     }
 
     /**

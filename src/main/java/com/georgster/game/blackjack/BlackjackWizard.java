@@ -8,14 +8,10 @@ import com.georgster.util.commands.wizard.input.InputListenerFactory;
 public class BlackjackWizard extends InputWizard {
 
     private BlackJackGame game;
-    
-    public BlackjackWizard(CommandExecutionEvent event) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, "Blackjack").builder().withXReaction(false).withTimeoutDuration(300000).build());
-        this.game = new BlackJackGame(event);
-    }
 
     public BlackjackWizard(CommandExecutionEvent event, BlackJackGame game) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, "Blackjack").builder().withXReaction(false).withTimeoutDuration(300000).build());
+        super(event,
+        InputListenerFactory.createButtonMessageListener(event, "Blackjack (" + game.getEntryAmount() + " coins)").builder().withXReaction(false).withTimeoutDuration(300000).requireMatch(true, true).build());
         this.game = game;
     }
 
@@ -25,7 +21,6 @@ public class BlackjackWizard extends InputWizard {
 
     public void playerTurn() {
         if (game.isActive()) {
-            game.getDealerDeck().getCardStack().forEach(card -> System.out.println(card.getValue()));
             if (game.playerCanGo()) {
                 StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
                 prompt.append("What would you like to do");
@@ -33,7 +28,11 @@ public class BlackjackWizard extends InputWizard {
                 String[] options = getAvailableMoveOptions();
 
                 withResponse((response -> {
-                    if (response.equalsIgnoreCase("hit")) processCardDrawAces();
+                    if (response.equalsIgnoreCase("double"))
+                        getInputListener().setTitle("Blackjack (" + (game.getEntryAmount() * 2) + " coins)");
+
+                    if (response.equalsIgnoreCase("hit") || response.equalsIgnoreCase("double"))
+                        processCardDrawAces();
                     game.processPlayerMove(Move.valueOf(response.toUpperCase()));
                     nextWindow("playerTurn");
                 }), false, prompt.toString(), options);
@@ -43,11 +42,11 @@ public class BlackjackWizard extends InputWizard {
         } else {
             StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
             if (game.dealerWon()) {
-                prompt.append("Dealer wins");
+                prompt.append("*Dealer wins, you lost your wager*");
             } else if (game.playerWon()) {
-                prompt.append("You won!");
+                prompt.append("*You won **" + game.getRewardAmount() + "** coins!*");
             } else {
-                prompt.append("Draw");
+                prompt.append("*Draw, your wager has been refunded*");
             }
             getInputListener().editCurrentMessageContent(prompt.toString());
             shutdown();
@@ -62,11 +61,11 @@ public class BlackjackWizard extends InputWizard {
 
         StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
         if (game.dealerWon()) {
-            prompt.append("Dealer wins");
+            prompt.append("*Dealer wins, you lost your wager*");
         } else if (game.playerWon()) {
-            prompt.append("You won!");
+            prompt.append("*You won **" + game.getRewardAmount() + "** coins!*");
         } else {
-            prompt.append("Draw");
+            prompt.append("*Draw, your wager has been refunded*");
         }
         getInputListener().editCurrentMessageContent(prompt.toString());
         shutdown();

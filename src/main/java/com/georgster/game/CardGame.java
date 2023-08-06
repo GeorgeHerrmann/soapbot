@@ -26,6 +26,15 @@ public abstract class CardGame extends DiscordGame {
         this.playerDecks.add(new PlayerCardDeck(startingCardAmount, globalDrawingDeck, event.getDiscordEvent().getAuthorAsMember()));
     }
 
+    protected CardGame(CommandExecutionEvent event, int startingCardAmount, boolean shuffleDrawingDeck, long entryAmount) {
+        super(event, entryAmount, 0);
+        this.globalDrawingDeck = new GlobalCardDeck(false);
+        this.globalDiscardDeck = new GlobalCardDeck(true);
+        if (shuffleDrawingDeck) globalDrawingDeck.shuffle();
+        this.playerDecks = new ArrayList<>();
+        this.playerDecks.add(new PlayerCardDeck(startingCardAmount, globalDrawingDeck, event.getDiscordEvent().getAuthorAsMember()));
+    }
+
     public void forEachPlayerCard(String playerId, Consumer<PlayingCard> consumer) {
         getPlayerDeck(playerId).getCardStack().forEach(consumer::accept);
     }
