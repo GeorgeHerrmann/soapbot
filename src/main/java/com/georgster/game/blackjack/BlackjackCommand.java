@@ -33,7 +33,11 @@ public class BlackjackCommand implements ParseableCommand {
             logger.append("- Wager of " + wagerAmount + " less than minimum of 50 coins\n" + LogDestination.NONAPI);
         } else {
             if (bank.hasBalance(wagerAmount)) {
-                game.startGame();
+                try {
+                    game.startGame();
+                } catch (IllegalStateException e) {
+                    event.getGuildInteractionHandler().sendText(e.getMessage(), "Plinko");
+                }
             } else {
                 handler.sendText("You only have " + bank.getBalance() + " coins, wager of " + wagerAmount + " not placed.", "Blackjack");
                 logger.append("- " + game.getOwner().getTag() + " has " + bank.getBalance() + " coins. Failed to place wager of " + wagerAmount + "\n", LogDestination.NONAPI);
