@@ -28,9 +28,9 @@ public class BlackjackCommand implements ParseableCommand {
 
         CoinBank bank = game.getOwnerProfile().getBank();
 
-        if (wagerAmount < 50) {
-            handler.sendText("You must wager at least *50 coins* in Blackjack", "Blackjack");
-            logger.append("- Wager of " + wagerAmount + " less than minimum of 50 coins\n" + LogDestination.NONAPI);
+        if (wagerAmount < 0) {
+            handler.sendText("You must wager at least *0 coins* in Blackjack", "Blackjack");
+            logger.append("- Wager of " + wagerAmount + " less than minimum of 0 coins\n" + LogDestination.NONAPI);
         } else {
             if (bank.hasBalance(wagerAmount)) {
                 try {

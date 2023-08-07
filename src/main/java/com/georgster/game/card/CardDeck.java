@@ -93,6 +93,25 @@ public abstract class CardDeck {
         }
     }
 
+    public boolean hasCardOfValue(String value) {
+        return cards.stream().anyMatch(card -> card.getValue().equalsIgnoreCase(value));
+    }
+
+    public CardDeck getSubDeck(int beginRange, int endRange) {
+        PlayingCard[] subdeck = new PlayingCard[cards.size() - beginRange - (cards.size() - endRange)];
+        List<PlayingCard> cardList = getCardList();
+
+        int cardIndex = 0;
+        for (int i = 0; i < cards.size(); i++) {
+            if (i >= beginRange && i < endRange) {
+                subdeck[cardIndex] = cardList.get(i);
+                cardIndex++;
+            }
+        }
+
+        return new CardDeck(subdeck) {};
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         cards.forEach(card -> sb.append(card.toString()+ " | "));
