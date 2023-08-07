@@ -137,12 +137,17 @@ public class BlackJackGame extends CardGame {
     }
 
     private void addCardValuePlayer(PlayingCard card) {
-        if ((!card.getValue().equalsIgnoreCase("A")) && (getPlayerCards().getSubDeck(1, getPlayerCards().size()).containsValue("A") && ((playerTotal + getCardValueAceOne(card) - 10) <= 21) && !adjustedAce)) {
+        if ((!card.getValue().equalsIgnoreCase("A"))
+            && (getPlayerCards().getSubDeck(1, getPlayerCards().size()).containsValue("A") && ((playerTotal + getCardValueAceOne(card) - 10) <= 21) && !adjustedAce)) {
             playerTotal -= 10;
             adjustedAce = true;
         }
 
-        playerTotal += acesAreOne ? getCardValueAceOne(card) : getCardValueAceEleven(card);
+        if (getPlayerTotal() > 10) {
+            playerTotal += getCardValueAceOne(card);
+        } else {
+            playerTotal += acesAreOne ? getCardValueAceOne(card) : getCardValueAceEleven(card);
+        }
     }
 
     private void addCardValueDealer(PlayingCard card) {
