@@ -293,7 +293,7 @@ public abstract class InputListener {
             this.responseContainer.append(response);
             return;
         }
-        if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) || mustMatchStrict)) {
+        if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) && !mustMatchStrict)) {
             this.responseContainer.append(response);
         }
     }
