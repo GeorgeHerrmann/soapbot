@@ -156,10 +156,10 @@ public class SoapUtility {
         StringBuilder lineSection = new StringBuilder();
         for (int i = 0; i < lines.length; i++) {
             if (i != 0 && i % lineNum == 0) {
-                output.add(lineSection.toString() + "\n");
+                output.add(lineSection.toString());
                 lineSection = new StringBuilder();
             }
-            lineSection.append(lines[i]);
+            lineSection.append(lines[i] + "\n");
         }
         if (!lineSection.isEmpty()) {
             output.add(lineSection.toString());
