@@ -76,6 +76,8 @@ public class BlackJackGame extends CardGame {
             newCard.show();
             addCardValuePlayer(newCard);
             if (playerBusted()) end();
+            if (getPlayerTotal() == 21 && getPlayerCards().size() == 2 && getDealerTotal() < 21)
+                end();
         } else if (move == Move.DOUBLE) {
             withdrawlEntryAmount(); // Withdrawls the old entry fee again (essentially doubling it)
             setEntryAmount(getEntryAmount() * 2); // Updates the entry fee to double the old one
