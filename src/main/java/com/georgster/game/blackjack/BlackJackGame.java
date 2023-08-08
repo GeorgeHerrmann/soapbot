@@ -117,6 +117,9 @@ public class BlackJackGame extends CardGame {
             if (getPlayerTotal() == 21 && getPlayerCards().size() == 2) {
                 setRewardAmount((long) (getEntryAmount() + (getEntryAmount() * 1.5)));
             } else {
+                if (getPlayerTotal() == 21 && getEntryAmount() == 0) {
+                    setRewardAmount(5);
+                }
                 setRewardAmount(getEntryAmount() * 2);
             }
         } else if (dealerWon()) {
