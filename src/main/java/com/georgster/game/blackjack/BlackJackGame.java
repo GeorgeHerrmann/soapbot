@@ -14,7 +14,7 @@ public class BlackJackGame extends CardGame {
 
     private boolean playerCanGo;
     private boolean acesAreOne; // If false, aces are 11
-    private boolean adjustedAce;
+    private boolean aceCanBeAdjusted;
 
     enum Move {
         HIT,
@@ -31,7 +31,7 @@ public class BlackJackGame extends CardGame {
         this.playerTotal = 0;
         this.playerCanGo = true;
         this.acesAreOne = true;
-        this.adjustedAce = false;
+        this.aceCanBeAdjusted = false;
 
         this.wizard = new BlackjackWizard(event, this);
     }
@@ -138,14 +138,18 @@ public class BlackJackGame extends CardGame {
 
     private void addCardValuePlayer(PlayingCard card) {
         if ((!card.getValue().equalsIgnoreCase("A"))
-            && (getPlayerCards().getSubDeck(1, getPlayerCards().size()).containsValue("A") && ((playerTotal + getCardValueAceOne(card) - 10) <= 21) && !adjustedAce)) {
+            && (getPlayerCards().getSubDeck(1, getPlayerCards().size()).containsValue("A") && ((playerTotal + getCardValueAceOne(card) - 10) <= 21) && aceCanBeAdjusted)) {
             playerTotal -= 10;
-            adjustedAce = true;
+            aceCanBeAdjusted = false;
         }
 
         if (getPlayerTotal() > 10) {
             playerTotal += getCardValueAceOne(card);
         } else {
+            if (card.getValue().equalsIgnoreCase("A") && !acesAreOne) {
+                aceCanBeAdjusted = true;
+            }
+
             playerTotal += acesAreOne ? getCardValueAceOne(card) : getCardValueAceEleven(card);
         }
     }
