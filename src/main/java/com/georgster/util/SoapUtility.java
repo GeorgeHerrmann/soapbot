@@ -145,6 +145,29 @@ public class SoapUtility {
         return lines;
     }
 
+    public static List<String> splitAtEvery(String input, int lineNum) {
+        if (lineNum <= 0) {
+            throw new IllegalArgumentException("lineNum must be a positive integer");
+        }
+
+        List<String> output = new ArrayList<>();
+
+        String[] lines = input.split("\n");
+        StringBuilder lineSection = new StringBuilder();
+        for (int i = 0; i < lines.length; i++) {
+            if (i != 0 && i % lineNum == 0) {
+                output.add(lineSection.toString());
+                lineSection = new StringBuilder();
+            }
+            lineSection.append(lines[i]);
+        }
+        if (!lineSection.isEmpty()) {
+            output.add(lineSection.toString());
+        }
+
+        return output;
+    }
+
     /**
      * Parses a String describing a month into an standardized Date string.
      * 
