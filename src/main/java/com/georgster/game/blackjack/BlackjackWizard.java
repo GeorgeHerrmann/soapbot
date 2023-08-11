@@ -5,23 +5,39 @@ import com.georgster.game.blackjack.BlackJackGame.Move;
 import com.georgster.util.commands.wizard.InputWizard;
 import com.georgster.util.commands.wizard.input.InputListenerFactory;
 
+/**
+ * A Wizard to handle the user-facing side of the {@link BlackJackGame}.
+ * This wizard effectively drives the {@link BlackJackGame}.
+ */
 public class BlackjackWizard extends InputWizard {
 
     private BlackJackGame game;
 
+    /**
+     * Creates a BlackjackWizard for the provided game.
+     * 
+     * @param event The event that prompted the wizard's creation.
+     * @param game The game this wizard will control.
+     */
     public BlackjackWizard(CommandExecutionEvent event, BlackJackGame game) {
         super(event,
         InputListenerFactory.createButtonMessageListener(event, "Blackjack (" + game.getEntryAmount() + " coins)").builder().withXReaction(false).withTimeoutDuration(300000).requireMatch(true, true).build());
         this.game = game;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         nextWindow("playerTurn");
     }
 
+    /**
+     * The window for the player's turn.
+     */
     public void playerTurn() {
-        if (game.isActive()) {
-            if (game.playerCanGo()) {
+        if (game.isActive()) { // Ensures the game is running
+            if (game.playerCanGo()) { // If the player can go, we run their turn.
                 StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
                 prompt.append("What would you like to do");
 
@@ -36,10 +52,10 @@ public class BlackjackWizard extends InputWizard {
                     game.processPlayerMove(Move.valueOf(response.toUpperCase()));
                     nextWindow("playerTurn");
                 }), false, prompt.toString(), options);
-            } else {
+            } else { // Otherwise its the dealers turn
                 dealerTurn();
             }
-        } else {
+        } else { // Otherwise we display the result
             StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
             if (game.dealerWon()) {
                 prompt.append("*Dealer wins, you lost your wager*");
@@ -53,8 +69,11 @@ public class BlackjackWizard extends InputWizard {
         }
     }
 
+    /**
+     * The window for a dealer's turn.
+     */
     public void dealerTurn() {
-        while (game.dealerCanGo()) {
+        while (game.dealerCanGo()) { // Runs the dealer's turn until they can no longer go.
             game.processDealerTurn();
             getInputListener().editCurrentMessageContentDelay(game.getCardsAsString(), 500);
         }
@@ -71,6 +90,10 @@ public class BlackjackWizard extends InputWizard {
         shutdown();
     }
 
+    /**
+     * Prompts the user to select a value for an Ace if the next card on the
+     * drawing deck is an ace.
+     */
     private void processCardDrawAces() {
         if (game.getGlobalDrawingDeck().peekTopCard().getValue().equalsIgnoreCase("A")) {
             if (game.getPlayerTotal() > 10) {
@@ -89,6 +112,9 @@ public class BlackjackWizard extends InputWizard {
         }
     }
 
+    /**
+     * Prompts the user to select a value for their ace unconditionally.
+     */
     public void promptAceSelection() {
         StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
         prompt.append("You have drawn an ace, would you like this to be a 1 or an 11");
@@ -101,6 +127,11 @@ public class BlackjackWizard extends InputWizard {
         }) , false, prompt.toString(), "1", "11");
     }
 
+    /**
+     * Returns the availble moves for the game as an array of strings.
+     * 
+     * @return The availble moves for the game as an array of strings.
+     */
     private String[] getAvailableMoveOptions() {
         Move[] moves = game.getAvailablePlayerMoves();
         String[] options = new String[moves.length];

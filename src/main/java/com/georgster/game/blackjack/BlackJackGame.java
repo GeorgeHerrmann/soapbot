@@ -5,6 +5,16 @@ import com.georgster.game.CardGame;
 import com.georgster.game.card.CardDeck;
 import com.georgster.game.card.PlayingCard;
 
+/**
+ * A {@link CardGame} representing logic for a standard game of blackjack.
+ * <p>
+ * <b>Rules:</b>
+ * <ul>
+ * <li>Dealer must draw until 17</li>
+ * <li>Can double for scores of 11 or under</li>
+ * <li>Aces will be adjusted (score of 11 -> 1) if busting can be prevented</li>
+ * </ul>
+ */
 public class BlackJackGame extends CardGame {
 
     private BlackjackWizard wizard;
@@ -16,6 +26,9 @@ public class BlackJackGame extends CardGame {
     private boolean acesAreOne; // If false, aces are 11
     private boolean aceCanBeAdjusted;
 
+    /**
+     * An Enumeration representing the moves of a game of Blackjack.
+     */
     enum Move {
         HIT,
         STAND,
@@ -23,6 +36,12 @@ public class BlackJackGame extends CardGame {
         SPLIT
     }
     
+    /**
+     * Creates a new BlackJack game with the provided entry amount as the wager.
+     * 
+     * @param event The event that prompted the game's creation.
+     * @param entryAmount The player's wager.
+     */
     public BlackJackGame(CommandExecutionEvent event, long entryAmount) {
         super(event, 2, true, entryAmount);
         addAutomatedPlayer(2, "Dealer");
@@ -36,6 +55,12 @@ public class BlackJackGame extends CardGame {
         this.wizard = new BlackjackWizard(event, this);
     }
 
+    /**
+     * Returns the available moves for the player
+     * in the current game state.
+     * 
+     * @return The current available player moves.
+     */
     public Move[] getAvailablePlayerMoves() {
         if (!playerCanGo) return new Move[0];
 
@@ -46,14 +71,27 @@ public class BlackJackGame extends CardGame {
         return new Move[] {Move.HIT, Move.STAND};
     }
 
+    /**
+     * Returns the dealer's deck of cards.
+     * 
+     * @return The dealer's deck of cards.
+     */
     public CardDeck getDealerDeck() {
         return getPlayerDeck("Dealer");
     }
 
+    /**
+     * Returns the player's deck of cards.
+     * 
+     * @return The player's deck of cards.
+     */
     public CardDeck getPlayerCards() {
         return getPlayerDeck(getOwner().getId().asString());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void play() {
         getDealerDeck().getCard(0).show();
         getPlayerDeck(getOwner().getId().asString()).getCardList().forEach(PlayingCard::show);
@@ -68,6 +106,12 @@ public class BlackJackGame extends CardGame {
         wizard.begin();
     }
 
+    /**
+     * Processes the provided move as the player's move
+     * and updates the game's state accordingly.
+     * 
+     * @param move The player's move.
+     */
     public void processPlayerMove(Move move) {
         if (move == Move.HIT) {
             CardDeck deck = getPlayerCards();
@@ -96,6 +140,9 @@ public class BlackJackGame extends CardGame {
         updateGameReward();
     }
 
+    /**
+     * Processes one turn of the dealer based on the current game state.
+     */
     public void processDealerTurn() {
         CardDeck deck = getDealerDeck();
         if (deck.size() == 2) deck.getCardList().forEach(PlayingCard::show);
@@ -114,6 +161,9 @@ public class BlackJackGame extends CardGame {
         updateGameReward();
     }
 
+    /**
+     * Updates the {@link DiscordGame} reward based on the current game state.
+     */
     private void updateGameReward() {
         if (playerWon()) {
             if (getPlayerTotal() == 21 && getPlayerCards().size() == 2) {
@@ -141,6 +191,12 @@ public class BlackJackGame extends CardGame {
         this.acesAreOne = ones;
     }
 
+    /**
+     * Adds the value of the card to the player's total,
+     * making any adjustments necessary.
+     * 
+     * @param card The card to add to the player's total.
+     */
     private void addCardValuePlayer(PlayingCard card) {
         if ((!card.getValue().equalsIgnoreCase("A"))
             && (getPlayerCards().getSubDeck(1, getPlayerCards().size()).containsValue("A") && ((playerTotal + getCardValueAceOne(card) - 10) <= 21) && aceCanBeAdjusted)) {
@@ -159,6 +215,12 @@ public class BlackJackGame extends CardGame {
         }
     }
 
+    /**
+     * Adds the value of the card to the dealer's total,
+     * making any adjustments necessary.
+     * 
+     * @param card The card to add to the dealer's total.
+     */
     private void addCardValueDealer(PlayingCard card) {
         if (dealerTotal <= 10) {
             dealerTotal += getCardValueAceEleven(card);
@@ -167,22 +229,47 @@ public class BlackJackGame extends CardGame {
         }
     }
 
+    /**
+     * Returns true if the player can currently go, false otherwise.
+     * 
+     * @return True if the player can currently go, false otherwise.
+     */
     public boolean playerCanGo() {
         return playerCanGo;
     }
 
+    /**
+     * Returns true if the dealer can currently go, false otherwise.
+     * 
+     * @return True if the dealer can currently go, false otherwise.
+     */
     public boolean dealerCanGo() {
         return getDealerTotal() < 17 && isActive();
     }
 
+    /**
+     * Returns true if the dealer has busted, false otherwise.
+     * 
+     * @return True if the dealer has busted, false otherwise.
+     */
     public boolean dealerBusted() {
         return dealerTotal > 21;
     }
 
+    /**
+     * Returns true if the player has busted, false otherwise.
+     * 
+     * @return True if the player has busted, false otherwise.
+     */
     public boolean playerBusted() {
         return playerTotal > 21;
     }
 
+    /**
+     * Returns the total of the dealer's shown cards.
+     * 
+     * @return The total of the dealer's shown cards.
+     */
     public int getDealerTotal() {
         int total = dealerTotal;
         for (PlayingCard card : getDealerDeck().getCardList()) {
@@ -197,6 +284,10 @@ public class BlackJackGame extends CardGame {
         return total < 0 ? 0 : total; // Edge case where there are cards, but they haven't been added to the total yet
     }
 
+    /**
+     * Returns the total of the player's shown cards.
+     * @return The total of the player's shown cards.
+     */
     public int getPlayerTotal() {
         int total = playerTotal;
         for (PlayingCard card : getPlayerCards().getCardList()) {
@@ -211,6 +302,11 @@ public class BlackJackGame extends CardGame {
         return total < 0 ? 0 : total; // Edge case where there are cards, but they haven't been added to the total yet
     }
 
+    /**
+     * Returns the correct move for the dealer based on the current game state.
+     * 
+     * @return The correct move for the dealer based on the current game state.
+     */
     private Move getDealerMove() {
         if (dealerTotal < 17) {
             return Move.HIT;
@@ -219,6 +315,12 @@ public class BlackJackGame extends CardGame {
         }
     }
 
+    /**
+     * Returns the value of the provided playing card if aces are treated as ones.
+     * 
+     * @param card The card to get the value of.
+     * @return The value of the card.
+     */
     public static int getCardValueAceOne(PlayingCard card) {
         String value = card.getValue();
         if (value.equalsIgnoreCase("J") || value.equalsIgnoreCase("Q") || value.equalsIgnoreCase("K")) {
@@ -230,6 +332,12 @@ public class BlackJackGame extends CardGame {
         }
     }
 
+    /**
+     * Returns the value of the provided playing card if aces are treated as elevens.
+     * 
+     * @param card The card to get the value of.
+     * @return The value of the card.
+     */
     public static int getCardValueAceEleven(PlayingCard card) {
         String value = card.getValue();
         if (value.equalsIgnoreCase("J") || value.equalsIgnoreCase("Q") || value.equalsIgnoreCase("K")) {
@@ -241,14 +349,29 @@ public class BlackJackGame extends CardGame {
         }
     }
 
+    /**
+     * Returns true if the player has won, false otherwise.
+     * 
+     * @return Returns true if the player has won, false otherwise.
+     */
     public boolean playerWon() {
         return (!playerBusted() && dealerBusted()) || ((playerTotal > dealerTotal) && !playerBusted());
     }
 
+    /**
+     * Returns true if the dealer has won, false otherwise.
+     * 
+     * @return Returns true if the dealer has won, false otherwise.
+     */
     public boolean dealerWon() {
         return (playerBusted() && !dealerBusted()) || ((playerTotal < dealerTotal) && !dealerBusted());
     }
 
+    /**
+     * Returns the cards of this game as a String.
+     * 
+     * @return The cards of this game as a String.
+     */
     public String getCardsAsString() {
         StringBuilder sb = new StringBuilder("Dealer cards:\n");
         getDealerDeck().getCardStack().forEach(card -> sb.append(card.isFaceDown() ? "**F** | " : "**" + card.getValue() + "** | "));

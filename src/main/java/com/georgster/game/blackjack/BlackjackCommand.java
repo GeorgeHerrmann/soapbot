@@ -16,8 +16,14 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
+/**
+ * A {@link ParseableCommand} to interact with the BlackJack {@link DiscordGame}.
+ */
 public class BlackjackCommand implements ParseableCommand {
 
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandExecutionEvent event) {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
@@ -45,10 +51,16 @@ public class BlackjackCommand implements ParseableCommand {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("blackjack", "bj");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public CommandParser getCommandParser() {
         return new CommandParser("1|R");
     }
@@ -70,6 +82,9 @@ public class BlackjackCommand implements ParseableCommand {
                 .build();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PermissibleAction getRequiredPermission(List<String> args) {
         if (args.isEmpty()) {
