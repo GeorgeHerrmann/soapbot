@@ -23,15 +23,15 @@ public class TheFinalShapeCommand implements Command {
     public void execute(CommandExecutionEvent event) {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
-        LocalDateTime finalShapeReleaseDate = LocalDateTime.of(2024, Month.of(2), 28, 12, 0);
+        LocalDateTime finalShapeReleaseDate = LocalDateTime.of(2023, Month.of(8), 22, 12, 0);
         LocalDateTime currentTime = LocalDateTime.now();
         int months = (int) currentTime.until(finalShapeReleaseDate, ChronoUnit.MONTHS);
         int days = (int) currentTime.until(finalShapeReleaseDate.minusMonths(months), ChronoUnit.DAYS);
         int hours = (int) currentTime.until(finalShapeReleaseDate.minusMonths(months).minusDays(days), ChronoUnit.HOURS);
         int minutes = (int) currentTime.until(finalShapeReleaseDate.minusMonths(months).minusDays(days).minusHours(hours), ChronoUnit.MINUTES);
 
-        handler.sendText("Destiny 2: The Final Shape drops in " + months + " months, " + days + " days, " + hours + " hours, " + minutes + " minutes.");
-        event.getLogger().append("- Showing how long until Destiny 2: The Final Shape drops", LogDestination.NONAPI, LogDestination.API);
+        handler.sendText("Destiny 2: The Final Shape showcase is in " + months + " months, " + days + " days, " + hours + " hours, " + minutes + " minutes.");
+        event.getLogger().append("- Showing how long until Destiny 2: The Final Shape showcase", LogDestination.NONAPI, LogDestination.API);
     }
 
     /**

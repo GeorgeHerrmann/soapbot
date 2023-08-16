@@ -11,7 +11,7 @@ import java.util.Random;
  * A deck of {@link PlayingCard PlayingCards}.
  * <p>
  * The cards are held by a stack, therefore {@link #placeOnTop(PlayingCard)} and {@link #takeTopCard()}
- * are the primary ways to add and take from the deck, unless {@link #getCardList()} is used.
+ * are the primary ways to add and take from the deck, representing Push and Pop procedures, unless {@link #getCardList()} is used.
  */
 public abstract class CardDeck {
     private Random random;
