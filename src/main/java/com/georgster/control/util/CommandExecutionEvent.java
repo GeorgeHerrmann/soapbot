@@ -72,6 +72,7 @@ public class CommandExecutionEvent {
      */
     public void executeCommand() {
         logger.append("**Executing: " + command.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+        logger.append("- Platform: " + discordEvent.getPlatform().toString() + "\n", LogDestination.NONAPI);
 
         List<String> args = null;
         if (command instanceof ParseableCommand) {
