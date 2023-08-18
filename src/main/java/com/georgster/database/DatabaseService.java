@@ -37,7 +37,7 @@ import static com.mongodb.client.model.Filters.eq;
  * find the object to update or delete. The identifier name is the name of the field in the
  * object to search for and the identifier value is the value of that field.</p>
  * 
- * @param <T> The type of object to store or retrieve.
+ * @param T The type of object to store or retrieve.
  */
 public class DatabaseService<T> {
 
