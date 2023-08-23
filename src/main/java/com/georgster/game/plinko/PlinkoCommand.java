@@ -6,7 +6,7 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -26,7 +26,7 @@ public class PlinkoCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         final MultiLogger logger = event.getLogger();
-        final CommandParser parser = event.getCommandParser();
+        final LegacyCommandParser parser = event.getCommandParser();
 
         PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
         if (parser.get(0).equals("play")) {
@@ -57,8 +57,8 @@ public class PlinkoCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     @Override
-    public CommandParser getCommandParser() {
-        return new CommandParser(PATTERN);
+    public LegacyCommandParser getCommandParser() {
+        return new LegacyCommandParser(PATTERN);
     }
 
     /**

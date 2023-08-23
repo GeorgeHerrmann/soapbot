@@ -14,13 +14,13 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.input.wizard.InputWizard;
+import com.georgster.input.wizard.IterableStringWizard;
+import com.georgster.input.wizard.SwappingWizard;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.commands.CommandParser;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.IterableStringWizard;
-import com.georgster.util.commands.wizard.SwappingWizard;
+import com.georgster.util.commands.LegacyCommandParser;
 
 /**
  * The HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
@@ -45,7 +45,7 @@ public class HelpCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        CommandParser parser = event.getCommandParser();
+        LegacyCommandParser parser = event.getCommandParser();
 
         for (Command command : register.getCommands()) {
             if (command.getAliases().contains(parser.get(0))) {
@@ -65,8 +65,8 @@ public class HelpCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     @Override
-    public CommandParser getCommandParser() {
-        return new CommandParser(PATTERN);
+    public LegacyCommandParser getCommandParser() {
+        return new LegacyCommandParser(PATTERN);
     }
 
     /**

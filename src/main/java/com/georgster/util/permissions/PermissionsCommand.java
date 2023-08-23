@@ -6,13 +6,13 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.input.wizard.InputWizard;
+import com.georgster.input.wizard.PermissionsWizard;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.commands.ParseBuilder;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.PermissionsWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -40,7 +40,7 @@ public class PermissionsCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         final GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        final CommandParser parser = event.getCommandParser();
+        final LegacyCommandParser parser = event.getCommandParser();
         final MultiLogger logger = event.getLogger();
 
         logger.append("- Parsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
@@ -94,7 +94,7 @@ public class PermissionsCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     @Override
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return new ParseBuilder(PATTERN).withIdentifiers("list", "manage", "addall", "removeall").build();
     }
     

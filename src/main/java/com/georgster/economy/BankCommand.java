@@ -9,14 +9,14 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.input.wizard.InputWizard;
+import com.georgster.input.wizard.IterableStringWizard;
 import com.georgster.logs.LogDestination;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.commands.ParseBuilder;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.IterableStringWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;
@@ -44,7 +44,7 @@ public class BankCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        CommandParser parser = event.getCommandParser();
+        LegacyCommandParser parser = event.getCommandParser();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
         if (parser.get(0).equals("leaderboard")) {
@@ -72,7 +72,7 @@ public class BankCommand implements ParseableCommand {
         }
     }
 
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return new ParseBuilder("1|O").withIdentifiers("balance", "bal", "leaderboard").build();
     }
 

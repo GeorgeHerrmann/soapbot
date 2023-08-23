@@ -7,7 +7,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.permissions.PermissibleAction;
 
@@ -35,7 +35,7 @@ public class EchoCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return new ParseBuilder("V|R").withoutAutoFormatting().build();
     }
 

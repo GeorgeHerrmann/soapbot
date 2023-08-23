@@ -19,11 +19,12 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
+import discord4j.core.object.entity.Guild;
 
 /**
  * An aggregation of all the shard-specific objects that SOAP Bot needs to run for
- * a single {@code Guild}. Each SoapClient handles all the events that occur in
- * its associated {@code Guild}, houses its {@link CommandRegistry} and has their own Set of {@link SoapManager SoapManagers}.
+ * a single {@link Guild}. Each SoapClient handles all the events that occur in
+ * its associated {@link Guild}, houses its {@link CommandRegistry} and has their own Set of {@link SoapManager SoapManagers}.
  */
 public final class SoapClient {
     private final Snowflake flake;
@@ -124,6 +125,15 @@ public final class SoapClient {
      */
     protected Snowflake getSnowflake() {
         return flake;
+    }
+
+    /**
+     * Convience method to get the {@link Guild} from this SoapClient's {@link ClientContext context}.
+     * 
+     * @return This client's {@link Guild}.
+     */
+    public Guild getGuild() {
+        return context.getGuild();
     }
 
     /**

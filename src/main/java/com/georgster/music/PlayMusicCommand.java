@@ -9,7 +9,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.permissions.PermissibleAction;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -54,7 +54,7 @@ public class PlayMusicCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         final GuildInteractionHandler handler = event.getGuildInteractionHandler();
         final MultiLogger logger = event.getLogger();
-        final CommandParser parser = event.getCommandParser();
+        final LegacyCommandParser parser = event.getCommandParser();
         final Member member = event.getDiscordEvent().getAuthorAsMember(); //Makes sure the member is valid
 
         if (member != null) {
@@ -102,7 +102,7 @@ public class PlayMusicCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     @Override
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return new ParseBuilder(PATTERN).withoutAutoFormatting().build();
     }
 

@@ -9,7 +9,7 @@ import com.georgster.game.DiscordGame;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -61,8 +61,8 @@ public class BlackjackCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public CommandParser getCommandParser() {
-        return new CommandParser("1|R");
+    public LegacyCommandParser getCommandParser() {
+        return new LegacyCommandParser("1|R");
     }
 
     /**

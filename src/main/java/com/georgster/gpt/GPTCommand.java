@@ -6,11 +6,11 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.input.wizard.IterableStringWizard;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
-import com.georgster.util.commands.wizard.IterableStringWizard;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -62,8 +62,8 @@ public class GPTCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public CommandParser getCommandParser() {
-        return new CommandParser("V|R");
+    public LegacyCommandParser getCommandParser() {
+        return new LegacyCommandParser("V|R");
     }
 
     /**

@@ -2,8 +2,8 @@ package com.georgster.game.blackjack;
 
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.game.blackjack.BlackJackGame.Move;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.input.InputListenerFactory;
+import com.georgster.input.wizard.InputWizard;
+import com.georgster.input.wizard.input.InputListenerFactory;
 
 /**
  * A Wizard to handle the user-facing side of the {@link BlackJackGame}.

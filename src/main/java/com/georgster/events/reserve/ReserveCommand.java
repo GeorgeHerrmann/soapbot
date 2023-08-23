@@ -12,7 +12,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.permissions.PermissibleAction;
 
@@ -93,7 +93,7 @@ public class ReserveCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     @Override
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return new ParseBuilder(PATTERN).withRules("X N|T N|T|D D").withIdentifiers("in").build();
     }
 
@@ -107,7 +107,7 @@ public class ReserveCommand implements ParseableCommand {
      */
     private ReserveEvent assignCorrectEvent(CommandExecutionEvent event) throws IllegalArgumentException {
         GuildInteractionHandler manager = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser();
+        LegacyCommandParser parser = event.getCommandParser();
 
         List<String> message = parser.getArguments();
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();

@@ -7,15 +7,15 @@ import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
+import com.georgster.input.wizard.InputWizard;
+import com.georgster.input.wizard.PollEventWizard;
+import com.georgster.input.wizard.QuickPollWizard;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.commands.ParseBuilder;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.PollEventWizard;
-import com.georgster.util.commands.wizard.QuickPollWizard;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -47,7 +47,7 @@ public class PollEventCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         DiscordEvent discordEvent = event.getDiscordEvent();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser();
+        LegacyCommandParser parser = event.getCommandParser();
         MultiLogger logger = event.getLogger();
 
         if (parser.get(0).equals("wizard")) {
@@ -94,7 +94,7 @@ public class PollEventCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      */
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return new ParseBuilder("V|O").withIdentifiers("wizard", "present", "quickpolls", "create", "vote", "view").build();
     }
 

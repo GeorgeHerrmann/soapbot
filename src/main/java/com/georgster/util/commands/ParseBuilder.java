@@ -4,7 +4,7 @@ package com.georgster.util.commands;
  * Builds a CommandParser object.
  */
 public class ParseBuilder {
-    private CommandParser parser; // The CommandParser object to be built.
+    private LegacyCommandParser parser; // The CommandParser object to be built.
 
     /**
      * Begins building a CommandParser. Since every CommandParser requires a pattern,
@@ -12,7 +12,7 @@ public class ParseBuilder {
      * @param pattern The pattern for the CommandParser to use
      */
     public ParseBuilder(String pattern) {
-        parser = new CommandParser(pattern);
+        parser = new LegacyCommandParser(pattern);
     }
 
     /**
@@ -52,7 +52,7 @@ public class ParseBuilder {
      * 
      * @return The built CommandParser
      */
-    public CommandParser build() {
+    public LegacyCommandParser build() {
         return parser;
     }
 

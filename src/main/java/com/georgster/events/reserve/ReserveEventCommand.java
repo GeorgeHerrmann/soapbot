@@ -8,14 +8,14 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
+import com.georgster.input.wizard.InputWizard;
+import com.georgster.input.wizard.ReserveEventWizard;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.commands.ParseBuilder;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.ReserveEventWizard;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -47,7 +47,7 @@ public class ReserveEventCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser();
+        LegacyCommandParser parser = event.getCommandParser();
 
         if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
             logger.append("Showing all reserve events in a text channel", LogDestination.API);
@@ -159,7 +159,7 @@ public class ReserveEventCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     @Override
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping", "manage").withRules("X I").build();
     }
 

@@ -180,10 +180,49 @@ public class GuildInteractionHandler {
     }
 
     /**
+     * Sends a text message to the active channel with the provided embed.
+     * If there is an active interaction, the handler will reply to the interaction instead.
+     * 
+     * @param text the message to send
+     * @return The created message.
+     * @throws IllegalStateException if the active channel is not a text channel
+     */
+    public Message sendText(EmbedCreateSpec embed) {
+        if (activeInteraction != null) {
+            try {
+                if (deferReply) {
+                    InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
+                    activeInteraction.editReply(spec).block();
+                    deferReply = false;
+                } else {
+                    InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                    activeInteraction.reply(spec).block();
+                }
+                Message message = activeInteraction.getReply().block();
+                killActiveInteraction();
+                return message;
+            } catch (Exception e) {
+                throw new IllegalStateException("There was an issue replying to the event.");
+            }
+        } else {
+            if (activeChannel != null) {
+                try {
+                    MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+                    return ((TextChannel) activeChannel).createMessage(spec).block();
+                } catch (NullPointerException e) {
+                    throw new IllegalStateException("There was an issue sending the message to the active channel.");
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sends a text message to the active channel with basic embed formatting.
      * If there is an active interaction, the handler will reply to the interaction instead.
      * 
      * @param text the message to send
+     * @return The created message.
      * @throws IllegalStateException if the active channel is not a text channel
      */
     public Message sendText(String text) throws IllegalStateException {
@@ -224,6 +263,7 @@ public class GuildInteractionHandler {
      * 
      * @param text the message to send
      * @param title the title of the message
+     * @return The created message.
      * @throws IllegalStateException if the active channel is not a text channel
      */
     public Message sendText(String text, String title) throws IllegalStateException {
@@ -265,6 +305,7 @@ public class GuildInteractionHandler {
      * @param text the message to send
      * @param title the title of the message
      * @param components the components to add to the message
+     * @return The created message.
      * @throws IllegalStateException if the active channel is not a text channel
      */
     public Message sendText(String text, String title, LayoutComponent... components) throws IllegalStateException {
@@ -299,12 +340,21 @@ public class GuildInteractionHandler {
         return null;
     }
 
+    public static EmbedCreateSpec.Builder getDefaultEmbedBuilder(String title, String description) {
+        return EmbedCreateSpec.builder().color(Color.BLUE).description(description).title(title);
+    }
+
+    public static EmbedCreateSpec.Builder getErrorEmbedBuilder(String title, String description) {
+        return EmbedCreateSpec.builder().color(Color.RED).description(description).title(title);
+    }
+
     /**
      * Edits a text message with basic embed formatting.
      * If this manager has an active select menu interaction, it will edit that instead.
      * 
      * @param message the message to send
      * @param text the message to send
+     * @return The edited message.
      */
     public Message editMessageContent(Message message, String text) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
@@ -328,6 +378,7 @@ public class GuildInteractionHandler {
      * @param message the message to send
      * @param text the message to send
      * @param title the title of the message
+     * @return The edited message.
      */
     public Message editMessageContent(Message message, String text, String title) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
@@ -352,6 +403,7 @@ public class GuildInteractionHandler {
      * @param text the message to send
      * @param title the title of the message
      * @param components the components to add to the message
+     * @return The edited message.
      */
     public Message editMessageContent(Message message, String text, String title, LayoutComponent... components) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
@@ -387,6 +439,7 @@ public class GuildInteractionHandler {
      * 
      * @param text the message to send
      * @param channel the channel to send the message to
+     * @return The created message.
      */
     public static Message sendText(String text, TextChannel channel) {
         if (channel != null) {
@@ -403,6 +456,7 @@ public class GuildInteractionHandler {
      * @param text the message to send
      * @param title the title of the message
      * @param channel the channel to send the message to
+     * @return The created message.
      */
     public static Message sendText(String text, String title, TextChannel channel) {
         if (channel != null) {
@@ -420,6 +474,7 @@ public class GuildInteractionHandler {
      * @param title the title of the message
      * @param component the component to add to the message
      * @param channel the channel to send the message to
+     * @return The created message.
      */
     public static Message sendText(String text, String title, LayoutComponent component, TextChannel channel) {
         if (channel != null) {

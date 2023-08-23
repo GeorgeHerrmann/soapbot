@@ -1,6 +1,6 @@
 package com.georgster;
 
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 
 /**
  * A Command that can be parsed by a {@code CommandParser}.
@@ -12,6 +12,6 @@ public interface ParseableCommand extends Command {
      * 
      * @return the CommandParser used to parse the arguments of this command.
      */
-    public CommandParser getCommandParser();
+    public LegacyCommandParser getCommandParser();
 
 }

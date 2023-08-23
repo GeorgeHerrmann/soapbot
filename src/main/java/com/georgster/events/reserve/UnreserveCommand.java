@@ -11,7 +11,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -42,7 +42,7 @@ public class UnreserveCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser();
+        LegacyCommandParser parser = event.getCommandParser();
         DiscordEvent discordEvent = event.getDiscordEvent();
 
         if (eventManager.exists(parser.get(0), TYPE)) {
@@ -122,7 +122,7 @@ public class UnreserveCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     @Override
-    public CommandParser getCommandParser() {
-        return new CommandParser(PATTERN);
+    public LegacyCommandParser getCommandParser() {
+        return new LegacyCommandParser(PATTERN);
     }
 }

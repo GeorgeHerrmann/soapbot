@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
@@ -24,8 +24,8 @@ public class TestCommand implements Command {
     /**
      * {@inheritDoc}
      */
-    public CommandParser getCommandParser() { // Useful when testing using user input arguments
-        return new CommandParser("V|R");
+    public LegacyCommandParser getCommandParser() { // Useful when testing using user input arguments
+        return new LegacyCommandParser("V|R");
     }
 
     /**

@@ -10,16 +10,16 @@ import com.georgster.control.SoapClient;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.UserProfileManager;
+import com.georgster.input.wizard.InputWizard;
+import com.georgster.input.wizard.IterableStringWizard;
+import com.georgster.input.wizard.SwappingWizard;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.commands.CommandParser;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.IterableStringWizard;
-import com.georgster.util.commands.wizard.SwappingWizard;
+import com.georgster.util.commands.LegacyCommandParser;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
@@ -37,7 +37,7 @@ public class CommandExecutionEvent {
     private DiscordEvent discordEvent; // A transformer used to extract data from the Discord Event that created this Event
     private ClientContext context; // The context of the SoapClient associated with the event.
     private GuildInteractionHandler handler;
-    private CommandParser parser;
+    private LegacyCommandParser parser;
 
     /**
      * Creates a new CommandExecutionEvent.
@@ -236,7 +236,7 @@ public class CommandExecutionEvent {
      * 
      * @return the {@code CommandParser} for the Command in this Event.
      */
-    public CommandParser getCommandParser() {
+    public LegacyCommandParser getCommandParser() {
         return parser;
     }
 

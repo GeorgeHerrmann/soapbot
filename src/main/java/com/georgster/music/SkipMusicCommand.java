@@ -9,7 +9,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildInteractionHandler;
-import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.LegacyCommandParser;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -39,7 +39,7 @@ public class SkipMusicCommand implements Command {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
         if (scheduler.isActive()) {
-            List<String> message = CommandParser.parseGeneric(event.getDiscordEvent().getFormattedMessage());
+            List<String> message = LegacyCommandParser.parseGeneric(event.getDiscordEvent().getFormattedMessage());
             if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
                 scheduler.clearQueue();
                 handler.sendText("Skipping all tracks in the queue");
