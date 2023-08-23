@@ -8,11 +8,13 @@ import com.georgster.game.card.PlayingCard;
 /**
  * A {@link CardGame} representing logic for a standard game of blackjack.
  * <p>
+ * Uses a {@link BlackjackWizard} for front-end user input.
+ * <p>
  * <b>Rules:</b>
  * <ul>
  * <li>Dealer must draw until 17</li>
  * <li>Can double for scores of 11 or under</li>
- * <li>Aces will be adjusted (score of 11 -> 1) if busting can be prevented</li>
+ * <li>Aces will be adjusted <i>(score of 11 -> 1)</i> if busting can be prevented</li>
  * </ul>
  */
 public class BlackJackGame extends CardGame {
@@ -25,6 +27,7 @@ public class BlackJackGame extends CardGame {
     private boolean playerCanGo;
     private boolean acesAreOne; // If false, aces are 11
     private boolean aceCanBeAdjusted;
+    private boolean dealerAceCanBeAdjusted;
 
     /**
      * An Enumeration representing the moves of a game of Blackjack.
@@ -51,6 +54,7 @@ public class BlackJackGame extends CardGame {
         this.playerCanGo = true;
         this.acesAreOne = true;
         this.aceCanBeAdjusted = false;
+        this.dealerAceCanBeAdjusted = false;
 
         this.wizard = new BlackjackWizard(event, this);
     }
@@ -222,7 +226,16 @@ public class BlackJackGame extends CardGame {
      * @param card The card to add to the dealer's total.
      */
     private void addCardValueDealer(PlayingCard card) {
+        if ((!card.getValue().equalsIgnoreCase("A"))
+            && (getDealerDeck().getSubDeck(1, getDealerDeck().size()).containsValue("A") && ((dealerTotal + getCardValueAceOne(card) - 10) <= 21) && dealerAceCanBeAdjusted)) {
+            dealerTotal -= 10;
+            dealerAceCanBeAdjusted = false;
+        }
+
         if (dealerTotal <= 10) {
+            if (card.getValue().equalsIgnoreCase("A")) {
+                dealerAceCanBeAdjusted = true;
+            }
             dealerTotal += getCardValueAceEleven(card);
         } else {
             dealerTotal += getCardValueAceOne(card);

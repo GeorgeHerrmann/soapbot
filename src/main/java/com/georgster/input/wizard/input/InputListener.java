@@ -232,6 +232,13 @@ public abstract class InputListener {
         message = handler.editMessageContent(message, newContent, title);
     }
 
+    /**
+     * Edits the content of this listener's active Message and then blocks the
+     * calling thread for {@code millis} milliseconds.
+     * 
+     * @param newContent The content to replace this listener's content with.
+     * @param millis How long to delay the calling thread.
+     */
     public void editCurrentMessageContentDelay(String newContent, long millis) {
         message = handler.editMessageContent(message, newContent, title);
         try {
@@ -242,6 +249,11 @@ public abstract class InputListener {
         }
     }
 
+    /**
+     * Replaces the Title of this Listener with the provided Title.
+     * 
+     * @param newTitle This listener's new title.
+     */
     public void setTitle(String newTitle) {
         this.title = newTitle;
     }
@@ -342,6 +354,11 @@ public abstract class InputListener {
         this.message = message;
     }
 
+    /**
+     * Sets the Member who can interact with this {@code InputListener}.
+     * 
+     * @param member The Member who can interact with this {@code InputListener}.
+     */
     public void setInteractingMember(Member member) {
         recentState.setMember(member);
     }
