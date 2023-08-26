@@ -28,7 +28,7 @@ public class SwappingWizard extends InputWizard {
      * @param wizard The Wizard to swap to and from.
      */
     public SwappingWizard(CommandExecutionEvent event, Message message, InputWizard wizard) { // No prompt messages sent with the reaction listener, so title is irrelevant
-        super(event, InputListenerFactory.createReactionListener(event, "", true).builder().withPromptMessages(false).withXReaction(false).build());
+        super(event, InputListenerFactory.createReactionListener(event, "").builder().withPromptMessages(false).withXReaction(false).build());
         this.event = event;
         this.message = message;
         this.wizard = wizard;

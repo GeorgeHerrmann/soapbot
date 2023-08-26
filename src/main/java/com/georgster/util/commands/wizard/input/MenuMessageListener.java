@@ -56,16 +56,14 @@ public class MenuMessageListener extends InputListener {
 
         // Create a listener that listens for the user's next message
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
-            .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
-            .subscribe(event -> setResponse(event.getMessage().getContent())));
+            .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
 
         // Create a listener that listens for the user to select an option
         createListener(dispatcher -> dispatcher.on(SelectMenuInteractionEvent.class)
-            .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().get().getId().asString().equals(message.getId().asString()))
             .subscribe(event -> {
-                setResponse(event.getValues().get(0));
+                setResponse(event.getValues().get(0), event.getInteraction().getUser());
                 handler.setActiveComponentInteraction(event);
             }));
 

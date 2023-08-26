@@ -247,6 +247,27 @@ public class DiscordEvent {
     }
 
     /**
+     * Attempts to get the user of the event as a {@code User}.
+     * Compatiable with the following Discord {@code Events}:
+     * <ul>
+     * <li>{@code MessageCreateEvent}</li>
+     * <li>{@code ChatInputInteractionEvent}</li>
+     * </ul>
+     * 
+     * @return the user of the event as a {@code User},
+     *        or {@code null} if the event does not have a user.
+     */
+    public User getUser() {
+        if (event instanceof MessageCreateEvent) {
+            return ((MessageCreateEvent) event).getMessage().getAuthor().orElse(null);
+        } else if (event instanceof ChatInputInteractionEvent) {
+            return ((ChatInputInteractionEvent) event).getInteraction().getUser();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Attempts to get the author of the event as a {@code Member}.
      * Compatiable with the following Discord {@code Events}:
      * <ul>
