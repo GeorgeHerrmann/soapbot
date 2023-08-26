@@ -71,14 +71,14 @@ public class ButtonMessageListener extends InputListener {
             .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().get().getId().asString().equals(message.getId().asString()))
             .subscribe(event -> {
-                setResponse(event.getCustomId().toLowerCase(), event.getInteraction().getUser());
+                setResponse(event.getCustomId().toLowerCase());
                 handler.setActiveComponentInteraction(event);
             }));
 
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
-            .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
+            .subscribe(event -> setResponse(event.getMessage().getContent())));
             
         return waitForResponse(inputState);
     }

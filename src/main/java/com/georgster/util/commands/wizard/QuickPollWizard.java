@@ -26,7 +26,7 @@ public class QuickPollWizard extends InputWizard {
      * @param event The PollEvent (a quickpoll).
      */
     public QuickPollWizard(CommandExecutionEvent executionEvent, PollEvent event) {
-        super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier()).builder().allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build());
+        super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier(), false).builder().withXReaction(false).withTimeoutDuration(120000).build());
         this.event = event;
         this.eventManager = executionEvent.getEventManager();
         this.executionEvent = executionEvent;
@@ -67,21 +67,15 @@ public class QuickPollWizard extends InputWizard {
 
         String prompt = localEvent.toString() + "\n*If this window stops working, type !poll present and select the poll's tite*";
 
-        withFullResponse((output -> {
-            String response = output.getResponse();
+        withResponse((response -> {
             
             if (response.equalsIgnoreCase("U+2705")) {
                 localEvent.removeVoter(user.getTag());
-                if (output.getNotes().equals("added")) {
-                    localEvent.addVoter("yes", user.getTag());
-                }
+                localEvent.addVoter("yes", user.getTag());
                 eventManager.update(localEvent);
-                System.out.println(output.getNotes());
             } else if (response.equalsIgnoreCase("U+274C")) {
                 localEvent.removeVoter(user.getTag());
-                if (output.getNotes().equals("added")) {
-                    localEvent.addVoter("no", user.getTag());
-                }
+                localEvent.addVoter("no", user.getTag());
                 eventManager.update(localEvent);
             }
             nextWindow("voteForPoll");

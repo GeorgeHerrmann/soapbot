@@ -15,7 +15,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import discord4j.voice.VoiceConnection;
 
 /**
- * Schedules tracks for an audio player and contains the queue of
+ * This class schedules tracks for the audio player. It contains the queue of
  * tracks that need to be played.
  */
 public final class TrackScheduler extends AudioEventAdapter implements AudioLoadResultHandler {

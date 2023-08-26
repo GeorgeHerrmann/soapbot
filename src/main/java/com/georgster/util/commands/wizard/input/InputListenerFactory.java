@@ -62,14 +62,17 @@ public class InputListenerFactory {
     /**
      * Creates a {@link ReactionListener} which will attach reaction emojis onto the current message
      * and record if any of them are clicked, returning the codepoint of the emoji in the reaction.
-     * <p>
      * The codepoint for the emoji should be provided as the listener's options.
+     * <p>
+     * Although Most listeners only allow its primary user to provide responses,
+     * this listener can be customized to allow anyone to provide reaction responses.
      * 
      * @param event Command execution event that triggered the wizard.
      * @param title Title of the wizard.
+     * @param lockUser True if only the primary user can provide reaction responses, false if anyone can.
      * @return {@link ReactionListener} that will send a message and record responses.
      */
-    public static InputListener createReactionListener(CommandExecutionEvent event, String title) {
-        return new ReactionListener(event, title);
+    public static InputListener createReactionListener(CommandExecutionEvent event, String title, boolean lockUser) {
+        return new ReactionListener(event, title, lockUser);
     }
 }

@@ -1,6 +1,6 @@
 package com.georgster.util.commands.wizard;
 
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Member;
 
 /**
  * A bridge between the {@link InputWizard} and the {@link com.georgster.util.commands.wizard.input.InputListener InputListener}.
@@ -8,9 +8,8 @@ import discord4j.core.object.entity.User;
 public class WizardState {
     private boolean hasEnded;
     private String message;
-    private String notes;
     private String[] options;
-    private User user;
+    private Member member;
 
     /**
      * Creates a new WizardState with the given message and options.
@@ -18,12 +17,11 @@ public class WizardState {
      * @param message Message to prompt the user with.
      * @param options Options to provide the user.
      */
-    protected WizardState(String message, User user, String... options) {
+    protected WizardState(String message, Member member, String... options) {
         this.hasEnded = false;
         this.message = message;
         this.options = options;
-        this.user = user;
-        this.notes = "";
+        this.member = member;
     }
 
     /**
@@ -63,18 +61,6 @@ public class WizardState {
         this.message = message;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public void addNote(String note) {
-        this.notes += "\n" + note;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
     /**
      * Returns the options to be sent to the user.
      * 
@@ -91,11 +77,11 @@ public class WizardState {
         hasEnded = true;
     }
 
-    public User getRecentUser() {
-        return user;
+    public Member getRecentMember() {
+        return member;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setMember(Member member) {
+        this.member = member;
     }
 }
