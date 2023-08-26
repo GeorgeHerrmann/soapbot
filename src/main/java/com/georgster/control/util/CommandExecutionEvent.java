@@ -27,7 +27,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Message;
 
 /**
- * An Event fired upon the execution of a SOAPBot {@code Command}. This Event packages
+ * An Event fired upon the execution of a SOAPBot {@link Command}. This Event packages
  * the data from the Discord Event, as well as various objects a command might need.
  */
 public class CommandExecutionEvent {
@@ -72,6 +72,7 @@ public class CommandExecutionEvent {
      */
     public void executeCommand() {
         logger.append("**Executing: " + command.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
+        logger.append("- Platform: " + discordEvent.getPlatform().toString() + "\n", LogDestination.NONAPI);
 
         List<String> args = null;
         if (command instanceof ParseableCommand) {
@@ -86,10 +87,9 @@ public class CommandExecutionEvent {
                 for (StackTraceElement element : e.getStackTrace()) {
                     logger.append("\t" + element.toString() + "\n", LogDestination.FILE, LogDestination.SYSTEM);
                 }
-                String[] help = SoapUtility.splitFirst(command.help());
 
                 InputWizard helpWizard = new IterableStringWizard(this, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                Message msg = getGuildInteractionHandler().sendText(help[1], help[0]);
+                Message msg = getGuildInteractionHandler().sendText(command.help(), command.getClass().getSimpleName());
                 InputWizard switcher = new SwappingWizard(this, msg, helpWizard);
                 switcher.begin();
             }

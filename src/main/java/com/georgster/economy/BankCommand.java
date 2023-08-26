@@ -1,21 +1,33 @@
 package com.georgster.economy;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.profile.UserProfile;
+import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.SoapUtility;
+import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.wizard.InputWizard;
+import com.georgster.util.commands.wizard.IterableStringWizard;
 
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A {@link Command} for interacting with a user's CoinBank.
  */
-public class BankCommand implements Command {
+public class BankCommand implements ParseableCommand {
 
     private final UserProfileManager manager;
     
@@ -32,10 +44,36 @@ public class BankCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        Member member = event.getDiscordEvent().getAuthorAsMember();
-        UserProfile profile = manager.get(member.getId().asString());
-        event.getGuildInteractionHandler().sendText("You have **" + profile.getBank().getBalance() + "** coins", member.getUsername() + "'s bank");
-        event.getLogger().append("- Displaying a user's coin balance", LogDestination.NONAPI, LogDestination.API);
+        CommandParser parser = event.getCommandParser();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
+
+        if (parser.get(0).equals("leaderboard")) {
+            List<UserProfile> profiles = manager.getAll();
+            StringBuilder sb = new StringBuilder();
+
+            // Sort profiles based on balance in descending order
+            Collections.sort(profiles, Comparator.comparingLong(profile -> -profile.getBank().getBalance()));
+            event.getLogger().append("- Sorting " + handler.getGuild().getName() + "'s profiles by CoinBank balance\n", LogDestination.NONAPI);
+            event.getLogger().append("Displaying a guild's balance leaderboard" + LogDestination.API);
+
+            // Build the formatted string
+            for (int i = 0; i < profiles.size(); i++) {
+                UserProfile profile = profiles.get(i);
+                sb.append(String.format("**%d) %s** : *%d*%n", i + 1, profile.getUsername(), profile.getBank().getBalance()));
+            }
+            List<String> leaderboard = SoapUtility.splitAtEvery(sb.toString(), 5);
+            InputWizard wizard = new IterableStringWizard(event, handler.getGuild().getName() + "'s Coin Leaderboard", leaderboard);
+            wizard.begin();
+        } else if (parser.get(0).equals("balance") || parser.get(0).equals("bal")) {
+            Member member = event.getDiscordEvent().getAuthorAsMember();
+            UserProfile profile = manager.get(member.getId().asString());
+            event.getGuildInteractionHandler().sendText("You have **" + profile.getBank().getBalance() + "** coins", member.getUsername() + "'s bank");
+            event.getLogger().append("- Displaying a user's coin balance", LogDestination.NONAPI, LogDestination.API);
+        }
+    }
+
+    public CommandParser getCommandParser() {
+        return new ParseBuilder("1|O").withIdentifiers("balance", "bal", "leaderboard").build();
     }
 
     /**
@@ -50,7 +88,8 @@ public class BankCommand implements Command {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n- '!bank' to view your coin balance" +
+        "\n- '!bank bal' to view your coin balance" +
+        "\n- '!bank leaderboard' to view this server's coin leaderboard" +
         "\n*This feature is currently in beta*";
     }
 
@@ -62,6 +101,20 @@ public class BankCommand implements Command {
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Show your Coin Bank information")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("option")
+                        .description("View balance or leaderboard")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                            .name("balance")
+                            .value("balance")
+                            .build())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                            .name("leaderboard")
+                            .value("leaderboard")
+                            .build())
+                        .required(true)
+                        .build())
                 .build();
     }
 }

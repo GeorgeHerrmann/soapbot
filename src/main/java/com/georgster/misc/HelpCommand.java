@@ -50,10 +50,9 @@ public class HelpCommand implements ParseableCommand {
         for (Command command : register.getCommands()) {
             if (command.getAliases().contains(parser.get(0))) {
                 logger.append("- Command found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
-                String[] help = SoapUtility.splitFirst(command.help());
 
                 InputWizard helpWizard = new IterableStringWizard(event, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                Message msg = event.getGuildInteractionHandler().sendText(help[1], help[0]);
+                Message msg = event.getGuildInteractionHandler().sendText(command.help(), command.getClass().getSimpleName());
                 InputWizard switcher = new SwappingWizard(event, msg, helpWizard);
                 switcher.begin();
                 break;

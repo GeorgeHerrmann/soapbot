@@ -1,6 +1,7 @@
 package com.georgster.game.plinko;
 
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.presence.Status.Platform;
 import discord4j.core.object.entity.Message;
 
 import java.time.Duration;
@@ -21,6 +22,7 @@ public class PlinkoGame extends DiscordGame {
     private Channel channel; //The channel where the game existed
     private Random rand; //Keeps track of the random elements of the game
     private final GuildInteractionHandler handler;
+    private final Platform platform;
     private final UserProfileManager profileManager;
     private final UserProfile profile;
     /*
@@ -52,6 +54,7 @@ public class PlinkoGame extends DiscordGame {
         super(event);
         channel = event.getDiscordEvent().getChannel();
         rand = new Random();
+        this.platform = event.getDiscordEvent().getPlatform();
         this.handler = event.getGuildInteractionHandler();
         this.profileManager = event.getUserProfileManager();
         this.profile = profileManager.get(event.getDiscordEvent().getAuthorAsMember().getId().asString());
@@ -73,7 +76,14 @@ public class PlinkoGame extends DiscordGame {
             sBoard.append("\n");
         }
         sBoard.setCharAt(spot, '0'); //Places the chip
-        Message message = handler.sendPlainText(sBoard.toString()); //Creates the initial message of the board state
+        Message message = null;
+        if (platform == Platform.MOBILE) {
+            String mobileOutput = "Playing a game of plinko...\n" + 0 + "/" + board.length + " Rows completed\n";
+            mobileOutput += "*The game is not shown because " + profile.getUsername() + " is using a mobile device*";
+            message = handler.sendPlainText(mobileOutput); //Creates the initial message of the board state
+        } else {
+            message = handler.sendPlainText(sBoard.toString()); //Creates the initial message of the board state
+        }
         /* The handling of the creation of the plinko game is different than updating it, therefore we do these updates outside the loop */
         sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
 
@@ -91,7 +101,15 @@ public class PlinkoGame extends DiscordGame {
         for (int i = 0; i < board.length; i++) {
             spot = nextIndex(i, spot - (i - 1));
             sBoard.setCharAt(spot + (i * board[i].length), '0'); //Note we don't multiply by board[i].length - 1 because we must include the \n character inside sBoard
-            message.edit().withContentOrNull(sBoard.toString()).delayElement(Duration.ofMillis(500)).block();
+
+            if (platform == Platform.MOBILE) {
+                String mobileOutput = "Playing a game of plinko...\n" + (i + 1) + "/" + board.length + " Rows completed\n";
+                mobileOutput += "*The game is not shown because " + profile.getUsername() + " is using a mobile device*";
+                message.edit().withContentOrNull(mobileOutput).delayElement(Duration.ofMillis(500)).block();
+            } else {
+                message.edit().withContentOrNull(sBoard.toString()).delayElement(Duration.ofMillis(500)).block();
+            }
+
             ActionWriter.writeAction("Updating the Plinko Board in a plinko game and sending the request to Discord's API");
             if (i != board.length - 1) { //We want to keep the chip in the final spot once the game is over
                 sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " "); //Easy way to find where the chip is in sBoard

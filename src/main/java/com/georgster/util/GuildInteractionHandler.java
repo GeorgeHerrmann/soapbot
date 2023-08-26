@@ -273,7 +273,7 @@ public class GuildInteractionHandler {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
                 if (deferReply) {
                     InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
-                    activeInteraction.editReply(spec);
+                    activeInteraction.editReply(spec).block();
                     deferReply = false;
                 } else {
                     InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();

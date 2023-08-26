@@ -60,6 +60,9 @@ public class QuickPollWizard extends InputWizard {
             throw new IllegalStateException("Poll " + event.getIdentifier() + " is not a quick poll. For non-quick polls, use the PollEventWizard.");
         }
 
+        if (!eventManager.exists(event.getIdentifier())) {
+            return;
+        }
         final PollEvent localEvent = (PollEvent) eventManager.get(event.getIdentifier());
 
         String prompt = localEvent.toString() + "\n*If this window stops working, type !poll present and select the poll's tite*";

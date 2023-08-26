@@ -38,7 +38,7 @@ public abstract class InputListener {
 
     // Configuration properties
     protected final String endString; // String to type to cancel the listener
-    protected final String title; // The title to attach to messages
+    protected String title; // The title to attach to messages
     private final EventDispatcher dispatcher; // Dispatcher sending events
     protected final GuildInteractionHandler handler; // Handler to interact with the Guild
     protected final Member user; // The user of the listener
@@ -232,6 +232,20 @@ public abstract class InputListener {
         message = handler.editMessageContent(message, newContent, title);
     }
 
+    public void editCurrentMessageContentDelay(String newContent, long millis) {
+        message = handler.editMessageContent(message, newContent, title);
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
+    }
+
+    public void setTitle(String newTitle) {
+        this.title = newTitle;
+    }
+
     /**
      * Deletes this listener's current presenting message. Note that
      * this does <b>NOT</b> cancel the listener, and if a prompt is currently active
@@ -268,13 +282,18 @@ public abstract class InputListener {
      * @param response
      */
     protected void setResponse(String response) {
-        List<String> options = List.of(recentState.getOptions());
+        List<String> options = new ArrayList<>(List.of(recentState.getOptions()));
+        
+        for (int i = 0; i < options.size(); i++) {
+            options.set(i, options.get(i).toLowerCase());
+        }
+
         response = response.toLowerCase();
         if (!mustMatchLenient && !mustMatchStrict) {
             this.responseContainer.append(response);
             return;
         }
-        if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) || mustMatchStrict)) {
+        if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) && !mustMatchStrict)) {
             this.responseContainer.append(response);
         }
     }

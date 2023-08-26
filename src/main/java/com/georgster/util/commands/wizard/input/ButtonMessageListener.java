@@ -71,7 +71,7 @@ public class ButtonMessageListener extends InputListener {
             .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().get().getId().asString().equals(message.getId().asString()))
             .subscribe(event -> {
-                setResponse(event.getCustomId());
+                setResponse(event.getCustomId().toLowerCase());
                 handler.setActiveComponentInteraction(event);
             }));
 

@@ -15,6 +15,9 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.presence.Presence;
+import discord4j.core.object.presence.Status;
+import discord4j.core.object.presence.Status.Platform;
 
 /**
  * A wrapper class for Discord {@code Events} that provides methods for extracting
@@ -167,6 +170,59 @@ public class DiscordEvent {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * Returns the primary {@link Platform} of the {@link Member} of this event.
+     * Compatiable with events supported by {@link #getAuthorAsMember()}.
+     * <p> </p>
+     * The {@link Platform} returned is determined by the following priority system:
+     * <p>
+     * {@link Platform#MOBILE} carries the highest priorty followed by {@link Platform#DESKTOP} and then {@link Platform#WEB}.
+     * <p>
+     * Based on the {@link Platform} with the highest priority, the first {@link Platform}
+     * which matches the following {@link Status} is returned, weighted in the following order.
+     * <p>
+     * - {@code ONLINE} <p>
+     * - {@code DO_NOT_DISTURB} or {@code IDLE} <p>
+     * - {@code INVISIBLE} <p>
+     * 
+     * If no matching Platform is found, or the Status is {@code UNKNOWN}, then null is returned.
+     * 
+     * @return The highest weighted {@link Platform}, or null if none was found.
+     */
+    public Platform getPlatform() {
+        Presence p = getAuthorAsMember().getPresence().block();
+
+        Status desktopStatus = p.getStatus(Platform.DESKTOP).orElse(Status.UNKNOWN);
+        Status mobileStatus = p.getStatus(Platform.MOBILE).orElse(Status.UNKNOWN);
+        Status webStatus = p.getStatus(Platform.WEB).orElse(Status.UNKNOWN);
+
+        if (mobileStatus == Status.ONLINE) {
+            return Platform.MOBILE;
+        } else if (desktopStatus == Status.ONLINE) {
+            return Platform.DESKTOP;
+        } else if (webStatus == Status.ONLINE) {
+            return Platform.WEB;
+        } else {
+            if (mobileStatus == Status.DO_NOT_DISTURB || mobileStatus == Status.IDLE) {
+                return Platform.MOBILE;
+            } else if (desktopStatus == Status.DO_NOT_DISTURB || desktopStatus == Status.IDLE) {
+                return Platform.DESKTOP;
+            } else if (webStatus == Status.DO_NOT_DISTURB || webStatus == Status.IDLE) {
+                return Platform.WEB;
+            } else {
+                if (mobileStatus == Status.INVISIBLE) {
+                    return Platform.MOBILE;
+                } else if (desktopStatus == Status.INVISIBLE) {
+                    return Platform.DESKTOP;
+                } else if (webStatus == Status.INVISIBLE) {
+                    return Platform.WEB;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -5,6 +5,7 @@ package com.georgster.util.permissions;
  * Any action not declared by a Command will be considered a {@link #DEFAULT} action.
  */
 public enum PermissibleAction {
+    BLACKJACKGAME,
     ECHOCOMMAND,
     GPTCOMMAND,
     MANAGEEVENTS,
