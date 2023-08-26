@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
+import com.georgster.util.DateTimed;
 import com.georgster.util.SoapUtility;
 
 /**
@@ -16,9 +17,7 @@ import com.georgster.util.SoapUtility;
  * <li>Adjusting dates and times to ensure they are not in the past</li>
  * </ul>
  */
-public abstract class TimedEvent {
-    protected String date;
-    protected String time;
+public abstract class TimedEvent extends DateTimed {
 
     /**
      * Creates a TimedEvent based on a time input. If the time is {@code 99:99},
@@ -52,22 +51,12 @@ public abstract class TimedEvent {
     }
 
     /**
-     * Returns whether or not this event's date is for today.
-     * 
-     * @return true if the event's date is for today, false otherwise.
-     */
-    public boolean isToday() {
-        LocalDate now = LocalDate.now(ZoneId.of("-05:00"));
-        LocalDate eventDate = LocalDate.parse(date);
-        return (now.getYear() == eventDate.getYear() && now.getDayOfYear() == (eventDate.getDayOfYear()));
-    }
-
-    /**
      * Returns how many seconds until this event's date and time is equal to the current date and time.
      * If this event has no time, this method fails.
      * 
      * @return the number of seconds until this event's date and time is equal to the current date and time.
      */
+    @Override
     public long until() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00"));
         String eventDateTimeString = date + "T" + time + ":00";
@@ -101,85 +90,11 @@ public abstract class TimedEvent {
      * @param time The new time.
      * @throws IllegalArgumentException If the time string is in an invalid format.
      */
+    @Override
     public void setTime(String time) throws IllegalArgumentException {
         this.time = SoapUtility.timeConverter(time);
         if (isToday()) {
             this.date = getCorrectDate(this.time); //Makes sure date time is not in the past
         }
-    }
-
-    /**
-     * Sets the date for the event. The date will be standardized, therefore any date standard
-     * accepted by {@link SoapUtility#convertDate(String)} will be accepted.
-     * 
-     * @param date The new date.
-     * @throws IllegalArgumentException If the date string is in an invalid format.
-     */
-    public void setDate(String date) throws IllegalArgumentException {
-        this.date = SoapUtility.convertDate(date);
-    }
-
-    /**
-     * Sets this event's date and time based on a String describing a timer based time.
-     * <p>
-     * For example:
-     * <ul>
-     * <li>5 days</li>
-     * <li>1 hour</li>
-     * <li>15 minutes</li>
-     * </ul>
-     * 
-     * @param increment The descriptive String.
-     * @throws IllegalArgumentException If the increment String is in a format not accepted by {@link SoapUtility#calculateFutureDateTime(String)}.
-     */
-    public void setDateTime(String increment) throws IllegalArgumentException {
-        String[] dateTimeString = SoapUtility.calculateFutureDateTime(increment).split("T");
-        this.date = dateTimeString[0];
-        this.time = dateTimeString[1].substring(0, 5);
-    }
-
-    /**
-     * Returns the standardized Date of this event.
-     * 
-     * @return The date of this event.
-     */
-    public String getDate() {
-        return date;
-    }
-
-    /**
-     * Returns the standardized Time of this event.
-     * 
-     * @return The time of this event.
-     */
-    public String getTime() {
-        return time;
-    }
-
-    /**
-     * Returns a formatted String representing the Date of this event.
-     * 
-     * @return A formatted date String.
-     */
-    public String getFormattedDate() {
-        return SoapUtility.formatDate(date);
-    }
-
-    /**
-     * Returns a formatted String representing the Time of this event.
-     * 
-     * @return A formatted time String.
-     */
-    public String getFormattedTime() {
-        return SoapUtility.convertToAmPm(time);
-    }
-
-    /**
-     * Returns a standardized String representing the date and time using the ISO 8601 format.
-     * 
-     * @return A String with this event's date and time using the ISO 8601 format.
-     */
-    public String getDateTime() {
-        return date + "T" + time + ":00";
     }
 }

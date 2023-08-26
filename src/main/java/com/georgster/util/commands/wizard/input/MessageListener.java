@@ -43,9 +43,8 @@ public class MessageListener extends InputListener {
         sendPromptMessage(prompt);
 
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
-            .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
-            .subscribe(event -> setResponse(event.getMessage().getContent())));
+            .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
             
         return waitForResponse(inputState);
     }

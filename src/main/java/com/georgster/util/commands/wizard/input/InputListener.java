@@ -12,8 +12,8 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.component.LayoutComponent;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
 import reactor.core.Disposable;
 
@@ -41,7 +41,7 @@ public abstract class InputListener {
     protected String title; // The title to attach to messages
     private final EventDispatcher dispatcher; // Dispatcher sending events
     protected final GuildInteractionHandler handler; // Handler to interact with the Guild
-    protected final Member user; // The user of the listener
+    protected final User user; // The initial user of the listener
     private final List<Disposable> listeners; // The Disposable listeners
 
     // Settings for this listener
@@ -49,6 +49,7 @@ public abstract class InputListener {
     private boolean mustMatchLenient; // If false, mustMatchStrict will always also be false
     private boolean mustMatchStrict; // If true, mustMatchLenient will always also be true
     private boolean sendPromptMessage; // If false (generally not reccomended), sendPromptMessage(String) does nothing
+    private boolean allowAllUsers; // If false, only user will be able to respond.
 
     /*
      * InputListeners work on a message to message basis.
@@ -71,13 +72,14 @@ public abstract class InputListener {
         this.title = title;
         this.dispatcher = event.getEventDispatcher();
         this.handler = event.getGuildInteractionHandler();
-        this.user = event.getDiscordEvent().getAuthorAsMember();
+        this.user = event.getDiscordEvent().getUser();
         this.listeners = new ArrayList<>();
         this.message = null;
         this.addXReaction = true;
         this.mustMatchLenient = true;
         this.mustMatchStrict = false;
         this.sendPromptMessage = true;
+        this.allowAllUsers = false;
         this.timeoutTime = 300;
         this.responseContainer = new StringBuilder();
     }
@@ -85,8 +87,8 @@ public abstract class InputListener {
     /**
      * Adds a new {@link Disposable} temporary listener to this InputListener.
      * <p>
-     * Listeners should verify the correct {@link Member}, {@link discord4j.core.object.entity.channel.Channel Channel},
-     * and {@link Message} are present, if applicable.
+     * Listeners should verify the correct {@link discord4j.core.object.entity.channel.Channel Channel}
+     * and {@link Message} are present, if applicable, along with any other properties.
      * <p>
      * If the Event that created the listener is a
      * {@link discord4j.core.event.domain.interaction.ComponentInteractionEvent ComponentInteractionEvent},
@@ -188,6 +190,10 @@ public abstract class InputListener {
         this.sendPromptMessage = setting;
     }
 
+    public void allowAllUsers(boolean setting) {
+        this.allowAllUsers = setting;
+    }
+
     /**
      * Sets the condition of the match condition and how strict it is.
      * <p>
@@ -281,7 +287,10 @@ public abstract class InputListener {
      * 
      * @param response
      */
-    protected void setResponse(String response) {
+    protected void setResponse(String response, User responder, String... notes) {
+        if (!allowAllUsers && !responder.equals(user)) {
+            return;
+        }
         List<String> options = new ArrayList<>(List.of(recentState.getOptions()));
         
         for (int i = 0; i < options.size(); i++) {
@@ -290,12 +299,18 @@ public abstract class InputListener {
 
         response = response.toLowerCase();
         if (!mustMatchLenient && !mustMatchStrict) {
+            this.recentState.setNotes(String.join("\n", notes));
             this.responseContainer.append(response);
             return;
         }
         if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) && !mustMatchStrict)) {
+            this.recentState.setNotes(String.join("\n", notes));
             this.responseContainer.append(response);
         }
+    }
+
+    protected void addNote(String note) {
+        this.recentState.addNote(note);
     }
 
     /**
@@ -342,8 +357,8 @@ public abstract class InputListener {
         this.message = message;
     }
 
-    public void setInteractingMember(Member member) {
-        recentState.setMember(member);
+    public void setInteractingMember(User user) {
+        recentState.setUser(user);
     }
 
     /**
