@@ -76,7 +76,6 @@ public class QuickPollWizard extends InputWizard {
                     localEvent.addVoter("yes", user.getTag());
                 }
                 eventManager.update(localEvent);
-                System.out.println(output.getNotes());
             } else if (response.equalsIgnoreCase("U+274C")) {
                 localEvent.removeVoter(user.getTag());
                 if (output.getNotes().equals("added")) {
