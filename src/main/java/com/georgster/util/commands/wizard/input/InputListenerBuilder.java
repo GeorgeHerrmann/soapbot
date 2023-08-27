@@ -49,6 +49,11 @@ public class InputListenerBuilder {
         return this;
     }
 
+    public InputListenerBuilder allowAllResponses(boolean setting) {
+        listener.allowAllUsers(setting);
+        return this;
+    }
+
     public InputListenerBuilder withPromptMessages(boolean setting) {
         listener.sendPromptMessage(setting);
         return this;

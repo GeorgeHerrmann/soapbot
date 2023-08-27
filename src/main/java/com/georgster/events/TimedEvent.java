@@ -56,7 +56,7 @@ public abstract class TimedEvent extends DateTimed {
      * 
      * @return the number of seconds until this event's date and time is equal to the current date and time.
      */
-@Override
+    @Override
     public long until() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00"));
         String eventDateTimeString = date + "T" + time + ":00";
@@ -90,7 +90,7 @@ public abstract class TimedEvent extends DateTimed {
      * @param time The new time.
      * @throws IllegalArgumentException If the time string is in an invalid format.
      */
-@Override
+    @Override
     public void setTime(String time) throws IllegalArgumentException {
         this.time = SoapUtility.timeConverter(time);
         if (isToday()) {

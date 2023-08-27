@@ -207,3 +207,27 @@
     - Created the EchoCommand
         - Allows users to have SOAP Bot say a message.
             - Requires ECHOCOMMAND permission
+
+2.400
+    - Added a basic reward structure to DiscordGames with entry and reward amounts
+    - Created a basic CardGame framework
+        - PlayingCards are objects for CardGames with a Suit and Value
+        - A CardDeck is a deck (internally a stack) of PlayingCards for a player
+        - CardGame is abstract and handles all PlayingCards and CardDecks in a DiscordGame
+        - A CardDeck is abstract and can either be a GlobalCardDeck or PlayerCardDeck
+            - GlobalCardDecks are usually drawing or discard decks
+    - Created a BlackjackGame which users can wage coins
+        - Uses a BlackjackWizard
+    - Added a leaderboard via !bank leaderboard to see rankings of coins in a Guild
+    - Modified how the InputWizard and InputListener handle responses and users
+        - The InputListener and InputWizard now use Users instead of Members, allowing for private channel wizards.
+        - The InputListener now can be customized to allow only the owner of the wizard to respond, or anybody
+        - The InputListener and InputWizard can now log notes about a prompt or response in their WizardState.
+        - The InputWizard can now return a WizardResponse, a more detailed object about a user's response from an InputListener
+        - A WizardResponse is DateTimed for the moment of the response, records which User responded, their message and any notes
+        - InputWizard implementations can request a WizardResponse instead of a basic String response with withFullResponse()
+        - ReactionListeners will now provide a note saying whether a reaction response was "added" or "removed"
+            - One example of this is the QuickPollWizard, which can use these features to more quickly assign votes based on QuickPoll reactions
+              removing various latency issues causing missed votes, and can also now remove votes when you un-react to a QuickPoll.
+    - Created a more generic date/time framework via DateTimed
+        - TimedEvents are now DateTimed
