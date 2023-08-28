@@ -69,7 +69,7 @@ public class ButtonMessageListener extends InputListener {
         // Create a listener that listens for the user to click a button
         createListener(dispatcher -> dispatcher.on(ButtonInteractionEvent.class)
             .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(user.getId().asString()))
-            .filter(event -> event.getMessage().get().getId().asString().equals(message.getId().asString()))
+            .filter(event -> event.getMessage().get().getId().asString().equals(message.getMessage().getId().asString()))
             .subscribe(event -> {
                 setResponse(event.getCustomId().toLowerCase(), event.getInteraction().getUser());
                 handler.setActiveComponentInteraction(event);
@@ -77,7 +77,7 @@ public class ButtonMessageListener extends InputListener {
 
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
-            .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
+            .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
             .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
             
         return waitForResponse(inputState);

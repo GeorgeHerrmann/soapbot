@@ -59,6 +59,11 @@ public class InputListenerBuilder {
         return this;
     }
 
+    public InputListenerBuilder withApiCallsOnSeparateThread(boolean setting) {
+        listener.apiCallsOnSeparateThread(setting);
+        return this;
+    }
+
     /**
      * Sets the duration before this listener times out (in ms).
      * 

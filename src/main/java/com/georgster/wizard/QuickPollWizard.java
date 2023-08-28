@@ -26,7 +26,7 @@ public class QuickPollWizard extends InputWizard {
      * @param event The PollEvent (a quickpoll).
      */
     public QuickPollWizard(CommandExecutionEvent executionEvent, PollEvent event) {
-        super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier()).builder().allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build());
+        super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier()).builder().withApiCallsOnSeparateThread(true).allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build());
         this.event = event;
         this.eventManager = executionEvent.getEventManager();
         this.executionEvent = executionEvent;

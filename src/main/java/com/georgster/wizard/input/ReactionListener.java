@@ -49,7 +49,7 @@ public class ReactionListener extends InputListener {
             ReactionEmoji emoji = ReactionEmoji.codepoints(option);
             emojis.add(emoji);
 
-            message.addReaction(emoji).block();
+            message.getMessage().addReaction(emoji).block();
         }
 
         createListener(dispatcher ->  dispatcher.on(ReactionAddEvent.class)

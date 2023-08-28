@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.WizardState;
 
@@ -50,13 +51,14 @@ public abstract class InputListener {
     private boolean mustMatchStrict; // If true, mustMatchLenient will always also be true
     private boolean sendPromptMessage; // If false (generally not reccomended), sendPromptMessage(String) does nothing
     private boolean allowAllUsers; // If false, only user will be able to respond.
+    private boolean apiCallOnSeparateThread; // If true, all API calls will be placed on a seperate general task thread
 
     /*
      * InputListeners work on a message to message basis.
      * These properties store the most recent data from the last prompt.
      * If there was no previous message, these will either be empty objects or null.
      */
-    protected Message message; // This listener's most recent message (to edit)
+    protected WizardMessage message; // This listener's most recent message (to edit)
     private WizardState recentState; // The most recent state of the communicating InputWizard
     private StringBuilder responseContainer; // The users most recent response
 
@@ -80,6 +82,7 @@ public abstract class InputListener {
         this.mustMatchStrict = false;
         this.sendPromptMessage = true;
         this.allowAllUsers = false;
+        this.apiCallOnSeparateThread = false;
         this.timeoutTime = 300;
         this.responseContainer = new StringBuilder();
     }
@@ -128,10 +131,14 @@ public abstract class InputListener {
         if (!sendPromptMessage) return;
 
         if (message == null) {
-            message = components.length == 0 ? handler.sendText(prompt, title) : handler.sendText(prompt, title, components);
+            message = new WizardMessage(components.length == 0 ? handler.sendText(prompt, title) : handler.sendText(prompt, title, components));
         } else {
             try {
-                message = components.length == 0 ? handler.editMessageContent(message, prompt, title) : handler.editMessageContent(message, prompt, title, components);
+                if (apiCallOnSeparateThread) {
+                    ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> message.setMessage(components.length == 0 ? handler.editMessageContent(message.getMessage(), prompt, title) : handler.editMessageContent(message.getMessage(), prompt, title, components)));
+                } else {
+                    message.setMessage(components.length == 0 ? handler.editMessageContent(message.getMessage(), prompt, title) : handler.editMessageContent(message.getMessage(), prompt, title, components));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -147,7 +154,7 @@ public abstract class InputListener {
      */
     private void addXEmojiListener() {
         if (recentState == null) {
-            this.message.addReaction(ReactionEmoji.unicode("❌")).block();
+            this.message.getMessage().addReaction(ReactionEmoji.unicode("❌")).block();
         }
         // Create a listener that listens for the user to end the wizard by reacting
         createListener(eventDispatcher -> eventDispatcher.on(ReactionAddEvent.class)
@@ -162,7 +169,7 @@ public abstract class InputListener {
     private void addEndMessageListener() {
         createListener(eventDispatcher -> dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
-            .filter(event -> event.getMessage().getChannelId().equals(message.getChannelId()))
+            .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
             .filter(event -> event.getMessage().getContent().toLowerCase().equals(endString))
             .subscribe(event -> recentState.end()));
     }
@@ -221,6 +228,15 @@ public abstract class InputListener {
     }
 
     /**
+     * If true, all Discord API call tasks will be placed on a {@code General Task Thread Pool}, if false, all tasks will be on one thread.
+     * 
+     * @param setting If true, api call tasks will be placed on a separate thread, if false, all tasks will be on one thread.
+     */
+    public void apiCallsOnSeparateThread(boolean setting) {
+        this.apiCallOnSeparateThread = setting;
+    }
+
+    /**
      * Sets the duration before this listener times out (in ms).
      * 
      * @param ms The duration in ms before this listener times out.
@@ -235,11 +251,11 @@ public abstract class InputListener {
      * @param newContent The string to replace the current Message's content with.
      */
     public void editCurrentMessageContent(String newContent) {
-        message = handler.editMessageContent(message, newContent, title);
+        message.setMessage(handler.editMessageContent(message.getMessage(), newContent, title));
     }
 
     public void editCurrentMessageContentDelay(String newContent, long millis) {
-        message = handler.editMessageContent(message, newContent, title);
+        message.setMessage(handler.editMessageContent(message.getMessage(), newContent, title));
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
@@ -258,7 +274,7 @@ public abstract class InputListener {
      * the listener will still listen for and record a response if one is possible.
      */
     public void deleteCurrentMessage() {
-        message.delete().block();
+        message.getMessage().delete().block();
     }
 
     /**
@@ -359,7 +375,7 @@ public abstract class InputListener {
      * @param message The new message.
      */
     public void setCurrentMessage(Message message) {
-        this.message = message;
+        this.message.setMessage(message);
     }
 
     public void setInteractingMember(User user) {
