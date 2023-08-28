@@ -231,3 +231,6 @@
               removing various latency issues causing missed votes, and can also now remove votes when you un-react to a QuickPoll.
     - Created a more generic date/time framework via DateTimed
         - TimedEvents are now DateTimed
+
+2.401
+    - Fixed an issue preventing users other than the user who started the Wizard from voting on Global Wizards (Wizards that allowAllUsers)

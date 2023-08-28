@@ -301,11 +301,13 @@ public abstract class InputListener {
         if (!mustMatchLenient && !mustMatchStrict) {
             this.recentState.setNotes(String.join("\n", notes));
             this.responseContainer.append(response);
+            this.recentState.setUser(responder);
             return;
         }
         if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) && !mustMatchStrict)) {
             this.recentState.setNotes(String.join("\n", notes));
             this.responseContainer.append(response);
+            this.recentState.setUser(responder);
         }
     }
 
