@@ -234,3 +234,4 @@
 
 2.401
     - Fixed an issue preventing users other than the user who started the Wizard from voting on Global Wizards (Wizards that allowAllUsers)
+    - Reworked package structure for Permissions and Wizards/Listeners out of util and into their own package

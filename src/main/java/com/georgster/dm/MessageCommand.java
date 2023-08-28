@@ -8,10 +8,10 @@ import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
+import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.permissions.PermissibleAction;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;

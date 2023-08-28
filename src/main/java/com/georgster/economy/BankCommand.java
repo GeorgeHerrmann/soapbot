@@ -15,8 +15,8 @@ import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.IterableStringWizard;
+import com.georgster.wizard.InputWizard;
+import com.georgster.wizard.IterableStringWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;

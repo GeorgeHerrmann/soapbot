@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
-import com.georgster.util.permissions.PermissibleAction;
-import com.georgster.util.permissions.PermissionGroup;
+import com.georgster.permissions.PermissibleAction;
+import com.georgster.permissions.PermissionGroup;
 
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;

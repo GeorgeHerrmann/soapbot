@@ -9,14 +9,14 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
+import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.PollEventWizard;
-import com.georgster.util.commands.wizard.QuickPollWizard;
-import com.georgster.util.permissions.PermissibleAction;
+import com.georgster.wizard.InputWizard;
+import com.georgster.wizard.PollEventWizard;
+import com.georgster.wizard.QuickPollWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.TextChannel;

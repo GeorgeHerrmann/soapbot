@@ -18,9 +18,9 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.IterableStringWizard;
-import com.georgster.util.commands.wizard.SwappingWizard;
+import com.georgster.wizard.InputWizard;
+import com.georgster.wizard.IterableStringWizard;
+import com.georgster.wizard.SwappingWizard;
 
 /**
  * The HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.

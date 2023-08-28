@@ -17,9 +17,9 @@ import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
-import com.georgster.util.commands.wizard.InputWizard;
-import com.georgster.util.commands.wizard.IterableStringWizard;
-import com.georgster.util.commands.wizard.SwappingWizard;
+import com.georgster.wizard.InputWizard;
+import com.georgster.wizard.IterableStringWizard;
+import com.georgster.wizard.SwappingWizard;
 
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;

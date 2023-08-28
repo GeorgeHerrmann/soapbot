@@ -3,7 +3,7 @@ package com.georgster;
 import java.util.List;
 
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.util.permissions.PermissibleAction;
+import com.georgster.permissions.PermissibleAction;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
