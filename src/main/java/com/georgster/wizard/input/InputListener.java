@@ -197,6 +197,15 @@ public abstract class InputListener {
         this.sendPromptMessage = setting;
     }
 
+    /**
+     * If true, all {@link User Users} will be allowed to record responses to this listener.
+     * If false, only the primary interacting User (owner) of this Listener can respond.
+     * <p>
+     * If no member was set with {@link #setInteractingMember(User)}, the primary interacting
+     * member is always the author of the {@link CommandExecutionEvent} that created this listener.
+     * 
+     * @param setting True if all users can respond, false if only the primary interacting member can.
+     */
     public void allowAllUsers(boolean setting) {
         this.allowAllUsers = setting;
     }
@@ -254,6 +263,16 @@ public abstract class InputListener {
         message.setMessage(handler.editMessageContent(message.getMessage(), newContent, title));
     }
 
+    /**
+     * Edits the current active Message's content to the provided String, then delays the
+     * calling thread by {@code millis} milliseconds. This is generally used in a pattern
+     * where rapid message edits are desired without overloading with Discord API calls.
+     * <p>
+     * Uses {@link GuildInteractionHandler#editMessageContent(Message, String, String)} for formatting.
+     * 
+     * @param newContent The new Message {@code content}.
+     * @param millis
+     */
     public void editCurrentMessageContentDelay(String newContent, long millis) {
         message.setMessage(handler.editMessageContent(message.getMessage(), newContent, title));
         try {
@@ -264,6 +283,11 @@ public abstract class InputListener {
         }
     }
 
+    /**
+     * Sets the title of the current {@link Message} for this Wizard.
+     * 
+     * @param newTitle The new title for the Message.
+     */
     public void setTitle(String newTitle) {
         this.title = newTitle;
     }
@@ -378,6 +402,13 @@ public abstract class InputListener {
         this.message.setMessage(message);
     }
 
+    /**
+     * Sets the primary interacting {@link User} for this listener.
+     * If {@link #allowAllUsers(boolean)} is false, only the interacting {@link User} will
+     * be able to respond. This {@link User} is considered the Owner of this listener.
+     * 
+     * @param user The new primary interacting {@link User} for this listener.
+     */
     public void setInteractingMember(User user) {
         recentState.setUser(user);
     }

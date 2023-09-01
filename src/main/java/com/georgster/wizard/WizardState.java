@@ -63,14 +63,32 @@ public class WizardState {
         this.message = message;
     }
 
+    /**
+     * Overwrites and sets the notes about the state of an {@link InputWizard}
+     * or a response from an {@link com.georgster.wizard.input.InputListener InputListener}.
+     * 
+     * @param notes The new notes.
+     */
     public void setNotes(String notes) {
         this.notes = notes;
     }
 
+    /**
+     * Adds a new line, followed by the {@code note} about the state of an {@link InputWizard}
+     * or a response from an {@link com.georgster.wizard.input.InputListener InputListener} to the current notes.
+     * 
+     * @param notes The new note.
+     */
     public void addNote(String note) {
         this.notes += "\n" + note;
     }
 
+    /**
+     * Returns any notes about the state of an {@link InputWizard}
+     * or a response from an {@link com.georgster.wizard.input.InputListener InputListener}
+     * 
+     * @return This state's notes.
+     */
     public String getNotes() {
         return notes;
     }
@@ -91,10 +109,20 @@ public class WizardState {
         hasEnded = true;
     }
 
+    /**
+     * Returns the {@link User} who was prompted or responded in a listener or wizard.
+     * 
+     * @return The {@link User} who was prompted or responded in a listener or wizard.
+     */
     public User getRecentUser() {
         return user;
     }
 
+    /**
+     * Sets the {@link User} who was prompted or responded in a listener or wizard.
+     * 
+     * @param user The {@link User} who was prompted or responded in a listener or wizard.
+     */
     public void setUser(User user) {
         this.user = user;
     }
