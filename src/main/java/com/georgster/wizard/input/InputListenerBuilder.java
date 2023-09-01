@@ -1,6 +1,10 @@
 package com.georgster.wizard.input;
 
+import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.wizard.WizardState;
+
+import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.entity.User;
 
 /**
  * Builder for {@link InputListener}s.
@@ -32,6 +36,7 @@ public class InputListenerBuilder {
      * 
      * @param setting Whether mustMatch is on or not.
      * @param strict True if mustMatch should be strict, false if lenient
+     * @return This Builder
      */
     public InputListenerBuilder requireMatch(boolean setting, boolean strict) {
         listener.mustMatch(setting, strict);
@@ -43,22 +48,49 @@ public class InputListenerBuilder {
      * to be able to stop the listener and end the {@link WizardState}.
      * 
      * @param setting True if the ❌ should be included, false otherwise.
+     * @return This Builder
      */
     public InputListenerBuilder withXReaction(boolean setting) {
         listener.hasXReaction(setting);
         return this;
     }
 
+    /**
+     * If true, all {@link User Users} will be allowed to record responses to this listener.
+     * If false, only the primary interacting User (owner) of this Listener can respond.
+     * <p>
+     * If no member was set with {@link #setInteractingMember(User)}, the primary interacting
+     * member is always the author of the {@link CommandExecutionEvent} that created this listener.
+     * 
+     * @param setting True if all users can respond, false if only the primary interacting member can.
+     * @return This Builder
+     */
     public InputListenerBuilder allowAllResponses(boolean setting) {
         listener.allowAllUsers(setting);
         return this;
     }
 
+    /**
+     * Sets whether this listener should send prompt messages on
+     * {@link #sendPromptMessage(String, LayoutComponent...)}. If disabled, this listener
+     * will NOT send any prompt message on {@link #prompt(WizardState)}, but will still listen to
+     * and record responses in accordance to all other listener settings. This is always enabled
+     * by default and is <b>not</b> reccomended to be disabled for most listeners.
+     * 
+     * @param setting True if prompt messages should be sent, false otherwise.
+     * @return This Builder
+     */
     public InputListenerBuilder withPromptMessages(boolean setting) {
         listener.sendPromptMessage(setting);
         return this;
     }
 
+    /**
+     * If true, all Discord API call tasks will be placed on a {@code General Task Thread Pool}, if false, all tasks will be on one thread.
+     * 
+     * @param setting If true, api call tasks will be placed on a separate thread, if false, all tasks will be on one thread.
+     * @return This Builder
+     */
     public InputListenerBuilder withApiCallsOnSeparateThread(boolean setting) {
         listener.apiCallsOnSeparateThread(setting);
         return this;
@@ -68,9 +100,10 @@ public class InputListenerBuilder {
      * Sets the duration before this listener times out (in ms).
      * 
      * @param ms The duration in ms before this listener times out.
+     * @return This Builder
      */
-    public InputListenerBuilder withTimeoutDuration(int timeout) {
-        listener.setTimeout(timeout);
+    public InputListenerBuilder withTimeoutDuration(int ms) {
+        listener.setTimeout(ms);
         return this;
     }
 
