@@ -8,6 +8,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.SubcommandSystem;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -26,19 +27,22 @@ public class PlinkoCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         final MultiLogger logger = event.getLogger();
-        final CommandParser parser = event.getCommandParser();
+        final SubcommandSystem subcommands = event.createSubcommandSystem();
 
-        PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
-        if (parser.get(0).equals("play")) {
+        PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame
+
+        subcommands.on(p -> {
             try {
                 game.startGame();
             } catch (IllegalStateException e) {
                 event.getGuildInteractionHandler().sendText(e.getMessage(), "Plinko");
             }
-        } else if (parser.get(0).equals("board")) {
+        }, "play");
+
+        subcommands.on(p -> {
             logger.append("- Showing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
             game.showBoard();
-        }
+        }, "board");
     }
 
     /**

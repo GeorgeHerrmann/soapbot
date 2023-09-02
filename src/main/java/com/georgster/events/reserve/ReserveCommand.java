@@ -107,7 +107,7 @@ public class ReserveCommand implements ParseableCommand {
      */
     private ReserveEvent assignCorrectEvent(CommandExecutionEvent event) throws IllegalArgumentException {
         GuildInteractionHandler manager = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser();
+        CommandParser parser = event.getCommandParser(); // Uses custom parsing algorithm to handle everything with the event, subcommandsystem not used here
 
         List<String> message = parser.getArguments();
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();

@@ -15,6 +15,7 @@ import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.ReserveEventWizard;
 
@@ -47,9 +48,9 @@ public class ReserveEventCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser();
+        SubcommandSystem subcommands = event.createSubcommandSystem();
 
-        if (parser.getMatchingRule("I").equals("list")) { //Shows the list of events
+        subcommands.on(p -> { //Shows the list of events
             logger.append("Showing all reserve events in a text channel", LogDestination.API);
 
             StringBuilder response = new StringBuilder();
@@ -85,7 +86,9 @@ public class ReserveEventCommand implements ParseableCommand {
                 logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
                 handler.sendText("There are no reserve events currently active");
             }
-        } else if (parser.getMatchingRule("I").equals("mention") || parser.getMatchingRule("I").equals("ping")) {
+        }, "list");
+        
+        subcommands.on(parser -> { 
             if (eventManager.exists(parser.get(0), TYPE)) {
                 logger.append("Mentioning all users that have reserved to an event", LogDestination.API);
                 ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
@@ -98,7 +101,9 @@ public class ReserveEventCommand implements ParseableCommand {
             } else {
                 handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
             }
-        } else if (parser.getMatchingRule("I").equals("manage")) {
+        }, "mention", "ping");
+
+        subcommands.on(p -> {
             if (eventManager.hasAny(TYPE)) {
                 InputWizard wizard = new ReserveEventWizard(event);
                 logger.append("- Beginning the reserve event wizard\n", LogDestination.NONAPI);
@@ -107,38 +112,40 @@ public class ReserveEventCommand implements ParseableCommand {
                 handler.sendText("There are no Reserve Events to manage.", "Reserve Event Wizard");
                 logger.append("- There are no reserve events to manage.", LogDestination.NONAPI);
             }
-        } else { //Shows information about an event
-            if (eventManager.exists(parser.get(0), TYPE)) {
-                logger.append("Showing information about a specific reserve event in a text channel", LogDestination.API);
-                ReserveEvent reserve = (ReserveEvent) eventManager.get(parser.get(0));
+        }, "manage");
 
-                logger.append("Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
+        subcommands.onIndexLast(eventName -> {
+            if (eventManager.exists(eventName, TYPE)) {
+            logger.append("Showing information about a specific reserve event in a text channel", LogDestination.API);
+            ReserveEvent reserve = (ReserveEvent) eventManager.get(eventName);
 
-                StringBuilder response = new StringBuilder();
-                response.append("Event: " + reserve.getIdentifier() + "\n");
-                response.append("- Reserved: " + reserve.getReserved() + "\n");
-                if (reserve.isUnlimited()) {
-                    response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
-                } else {
-                    response.append("- Needed: " + reserve.getNumPeople() + "\n");
-                }
-                if (reserve.isTimeless()) {
-                    response.append("- This event has no associated time\n");
-                    response.append("\t- This event will pop once the needed number of people have reserved to it");
-                } else {
-                    response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
-                    response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
-                }
-                response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
-                response.append("\nReserved users:\n");
-                reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMember(user).getMention() + "\n"));
+            logger.append("Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
-                String[] output = SoapUtility.splitFirst(response.toString());
-                handler.sendText(output[1], output[0]);
-                } else {
-                    handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
-                }
+            StringBuilder response = new StringBuilder();
+            response.append("Event: " + reserve.getIdentifier() + "\n");
+            response.append("- Reserved: " + reserve.getReserved() + "\n");
+            if (reserve.isUnlimited()) {
+                response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
+            } else {
+                response.append("- Needed: " + reserve.getNumPeople() + "\n");
             }
+            if (reserve.isTimeless()) {
+                response.append("- This event has no associated time\n");
+                response.append("\t- This event will pop once the needed number of people have reserved to it");
+            } else {
+                response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
+                response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
+            }
+            response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
+            response.append("\nReserved users:\n");
+            reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMember(user).getMention() + "\n"));
+
+            String[] output = SoapUtility.splitFirst(response.toString());
+            handler.sendText(output[1], output[0]);
+            } else {
+                handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
+            }
+        }, 0);
     }
 
     /**

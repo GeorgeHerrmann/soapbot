@@ -17,6 +17,7 @@ import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.SwappingWizard;
@@ -238,6 +239,20 @@ public class CommandExecutionEvent {
      */
     public CommandParser getCommandParser() {
         return parser;
+    }
+
+    /**
+     * Factory method for creating a {@link SubcommandSystem} if the {@link Command}
+     * in this event is a {@link ParseableCommand}, throwing an {@link UnsupportedOperationException} if not.
+     * 
+     * @return A {@link SubcommandSystem} equipped to make subcommands for the {@link ParseableCommand} in this event.
+     * @throws UnsupportedOperationException If this event's {@link Command} is not a {@link ParseableCommand}.
+     */
+    public SubcommandSystem createSubcommandSystem() {
+        if (command instanceof ParseableCommand) {
+            return new SubcommandSystem(this);
+        }
+        throw new UnsupportedOperationException(command.getClass().getSimpleName() + " is not a ParseableCommand");
     }
 
 }

@@ -15,6 +15,7 @@ import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 
@@ -44,10 +45,10 @@ public class BankCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        CommandParser parser = event.getCommandParser();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
+        SubcommandSystem subcommands = event.createSubcommandSystem();
 
-        if (parser.get(0).equals("leaderboard")) {
+        subcommands.on(p -> {
             List<UserProfile> profiles = manager.getAll();
             StringBuilder sb = new StringBuilder();
 
@@ -64,16 +65,18 @@ public class BankCommand implements ParseableCommand {
             List<String> leaderboard = SoapUtility.splitAtEvery(sb.toString(), 5);
             InputWizard wizard = new IterableStringWizard(event, handler.getGuild().getName() + "'s Coin Leaderboard", leaderboard);
             wizard.begin();
-        } else if (parser.get(0).equals("balance") || parser.get(0).equals("bal")) {
+        }, "leaderboard", "lb");
+
+        subcommands.on(p -> {
             Member member = event.getDiscordEvent().getAuthorAsMember();
             UserProfile profile = manager.get(member.getId().asString());
             event.getGuildInteractionHandler().sendText("You have **" + profile.getBank().getBalance() + "** coins", member.getUsername() + "'s bank");
             event.getLogger().append("- Displaying a user's coin balance", LogDestination.NONAPI, LogDestination.API);
-        }
+        }, "balance", "bal");
     }
 
     public CommandParser getCommandParser() {
-        return new ParseBuilder("1|O").withIdentifiers("balance", "bal", "leaderboard").build();
+        return new ParseBuilder("1|O").withIdentifiers("balance", "bal", "leaderboard", "lb").build();
     }
 
     /**

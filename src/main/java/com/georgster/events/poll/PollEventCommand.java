@@ -14,6 +14,7 @@ import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.PollEventWizard;
 import com.georgster.wizard.QuickPollWizard;
@@ -47,18 +48,22 @@ public class PollEventCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         DiscordEvent discordEvent = event.getDiscordEvent();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser();
         MultiLogger logger = event.getLogger();
+        SubcommandSystem subcommands = event.createSubcommandSystem();
 
-        if (parser.get(0).equals("wizard")) {
+        subcommands.on(p -> {
             logger.append("- Beginning the Poll Wizard\n", LogDestination.NONAPI);
 
             InputWizard wizard = new PollEventWizard(event);
             wizard.begin();
-        } else if (parser.get(0).equals("present") || parser.get(0).equals("quickpolls")) {
+        }, "wizard");
+
+        subcommands.on(p -> {
             InputWizard wizard = new QuickPollWizard(event);
             wizard.begin("presentQuickPolls");
-        } else if (parser.get(0).equals("vote")) {
+        }, "present", "quickpolls", "qp");
+
+        subcommands.on(p -> {
             if (eventManager.hasAny(TYPE)) {
                 logger.append("- Beginning the Poll Wizard from the Voting Screen\n", LogDestination.NONAPI);
                 new PollEventWizard(event).begin("pollVotingOptions");  
@@ -66,10 +71,14 @@ public class PollEventCommand implements ParseableCommand {
                 handler.sendText("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
                 logger.append("- No polls found in the event manager\n", LogDestination.NONAPI);
             }
-        } else if (parser.get(0).equals("create")) {
-              logger.append("- Beginning the Poll Wizard from the Create a Poll Screen\n", LogDestination.NONAPI);
+        }, "vote");
+
+        subcommands.on(p -> {
+            logger.append("- Beginning the Poll Wizard from the Create a Poll Screen\n", LogDestination.NONAPI);
               new PollEventWizard(event).begin("createPoll");
-        } else if (parser.get(0).equals("view")) {
+        }, "create");
+
+        subcommands.on(p -> {
             if (eventManager.hasAny(TYPE)) {
                 logger.append("- Beginning the Poll Wizard from the Viewing Screen\n", LogDestination.NONAPI);
                 new PollEventWizard(event).begin("pollViewingOptions");
@@ -77,8 +86,9 @@ public class PollEventCommand implements ParseableCommand {
                 handler.sendText("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
                 logger.append("- No polls found in the event manager\n", LogDestination.NONAPI);
             }
-        } else {
-            String title = parser.get(0);
+        }, "view");
+
+        subcommands.onIndexLast(title -> {
             PollEvent pollEvent = new PollEvent(title, ((TextChannel) discordEvent.getChannel()).getName(), discordEvent.getAuthorAsMember().getTag());
             pollEvent.setDateTime("1 hour");
             pollEvent.addOption("yes");
@@ -88,14 +98,14 @@ public class PollEventCommand implements ParseableCommand {
 
             InputWizard wizard = new QuickPollWizard(event, pollEvent);
             wizard.begin();
-        }
+        }, 0);
     }
 
     /**
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new ParseBuilder("V|O").withIdentifiers("wizard", "present", "quickpolls", "create", "vote", "view").build();
+        return new ParseBuilder("V|O").withIdentifiers("wizard", "present", "quickpolls", "qp", "create", "vote", "view").build();
     }
 
     /**
