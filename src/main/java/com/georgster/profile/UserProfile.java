@@ -1,13 +1,13 @@
 package com.georgster.profile;
 
-import com.georgster.control.manager.Manageable;
+import com.georgster.control.util.identify.util.MemberIdentified;
 import com.georgster.economy.CoinBank;
 import com.georgster.gpt.MemberChatCompletions;
 
 /**
  * A Profile holds data regarding a user's inside a specific Discord server.
  */
-public class UserProfile implements Manageable {
+public class UserProfile extends MemberIdentified {
     private String guildId; //Snowflake Guild ID associated with this user's profile in a guild
     private String memberId; //Snowflake member ID
     private String username; //User's discord username
@@ -15,6 +15,7 @@ public class UserProfile implements Manageable {
     private CoinBank bank;
 
     public UserProfile(String serverId, String userId, String user) {
+        super (userId);
         this.guildId = serverId;
         this.memberId = userId;
         this.username = user;
@@ -30,18 +31,12 @@ public class UserProfile implements Manageable {
      * @param user the username of the user
      */
     public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank) {
+        super(userId);
         this.guildId = serverId;
         this.memberId = userId;
         this.username = user;
         this.completions = completions;
         this.bank = bank;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getIdentifier() {
-        return getMemberId();
     }
 
     /**

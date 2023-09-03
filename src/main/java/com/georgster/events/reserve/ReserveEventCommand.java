@@ -119,7 +119,7 @@ public class ReserveEventCommand implements ParseableCommand {
             logger.append("Showing information about a specific reserve event in a text channel", LogDestination.API);
             ReserveEvent reserve = (ReserveEvent) eventManager.get(eventName);
 
-            logger.append("Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
+            logger.append("- Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
             StringBuilder response = new StringBuilder();
             response.append("Event: " + reserve.getIdentifier() + "\n");

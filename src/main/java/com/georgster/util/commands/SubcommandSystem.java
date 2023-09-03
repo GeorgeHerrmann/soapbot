@@ -152,4 +152,13 @@ public class SubcommandSystem {
             }
         }
     }
+
+    /**
+     * Returns true if this system has already executed at least one subcommand, false otherwise.
+     * 
+     * @return True if this system has already executed at least one subcommand, false otherwise.
+     */
+    public boolean hasExecuted() {
+        return hasExecuted;
+    }
 }
