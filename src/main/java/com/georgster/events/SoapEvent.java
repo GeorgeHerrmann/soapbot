@@ -8,7 +8,7 @@ import com.georgster.util.GuildInteractionHandler;
  * to schedule and fulfill said event. A SOAPEvent is scheduled upon
  * creation, and is fulfilled when the conditions to fulfill the event are met.
  */
-public interface SoapEvent extends Manageable {
+public interface SoapEvent extends Manageable  {
 
     /**
      * Returns the {@link SoapEventType} of the event.

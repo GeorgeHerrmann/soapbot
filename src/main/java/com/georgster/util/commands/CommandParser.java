@@ -250,7 +250,7 @@ public class CommandParser {
         loc = 0;
         holder = 0;
         
-        /*
+        /**
          * Now examine optional arguments, if any exist. If there is not enough room for optional arguments,
          * this step is effectively skipped. Instead of throwing an exception is no arguments satisfy the rule for
          * the part of the pattern, we just move on to the next part of the pattern. Since we have already filled

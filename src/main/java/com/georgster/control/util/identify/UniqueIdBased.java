@@ -10,6 +10,9 @@ public abstract class UniqueIdBased implements IdBased {
         this.id = id;
     }
 
+    /**
+     * Creates a new UniqueIdBased with a fresh, randomly generated ID.
+     */
     protected UniqueIdBased() {
         this.id = UniqueIdFactory.createId();
     }
