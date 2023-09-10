@@ -40,7 +40,7 @@ public class GPTCommand implements ParseableCommand {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
 
-        String prompt = event.getCommandParser().get(0);
+        String prompt = event.getParsedArguments().get(0);
         logger.append("- Sending a chat completion request to OpenAI\n", LogDestination.NONAPI, LogDestination.API);
         try {
             List<String> responses = manager.createCompletionGetAll(prompt, event.getDiscordEvent().getAuthorAsMember());
@@ -63,7 +63,7 @@ public class GPTCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new CommandParser("V|R");
+        return new CommandParser("VR");
     }
 
     /**

@@ -11,6 +11,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.PermissionsWizard;
 
@@ -22,7 +23,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the bot's actions following the !permissions command.
  */
 public class PermissionsCommand implements ParseableCommand {
-    private static final String PATTERN = "V|R 1|O";
 
     private PermissionsManager permissionsManager;
 
@@ -40,22 +40,24 @@ public class PermissionsCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         final GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        final CommandParser parser = event.getCommandParser();
+        final SubcommandSystem subcommands = event.createSubcommandSystem();
         final MultiLogger logger = event.getLogger();
 
-        logger.append("- Parsed: " + parser.getArguments().toString() + "\n", LogDestination.NONAPI);
-
-        if (parser.get(0).equals("list")) {
+        subcommands.on(p -> {
             StringBuilder response = new StringBuilder("Permission Groups:\n");
             permissionsManager.getAll().forEach(group -> response.append("\t" + group.getName() + "\n"));
             response.append("Use !permissions [group] to see the permissions for a group");
             handler.sendText(response.toString());
-        } else if (parser.get(0).equals("manage")) {
+        }, "list");
+
+        subcommands.on(p -> {
             InputWizard wizard = new PermissionsWizard(event);
             wizard.begin();
-        } else if (parser.get(0).equals("addall")) {
+        }, "manage");
+
+        subcommands.on(p -> {
             try {
-                PermissibleAction action = PermissionsManager.getAction(parser.get(1).toUpperCase());
+                PermissibleAction action = PermissionsManager.getAction(p.get(1).toUpperCase());
                 permissionsManager.getAll().forEach(group -> {
                     group.addPermission(action);
                     permissionsManager.update(group);
@@ -64,11 +66,13 @@ public class PermissionsCommand implements ParseableCommand {
                 logger.append("- Added " + action.toString() + " to all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
                 handler.sendText("That is not a valid action. Please try again");
-                logger.append("- Invalid action: " + parser.get(1), LogDestination.NONAPI);
+                logger.append("- Invalid action: " + p.get(1), LogDestination.NONAPI);
             }
-        } else if (parser.get(0).equals("removeall")) {
-              try {
-                PermissibleAction action = PermissionsManager.getAction(parser.get(1).toUpperCase());
+        }, "addall");
+
+        subcommands.on(p -> {
+            try {
+                PermissibleAction action = PermissionsManager.getAction(p.get(1).toUpperCase());
                 permissionsManager.getAll().forEach(group -> {
                     group.removePermission(action);
                     permissionsManager.update(group);
@@ -77,17 +81,18 @@ public class PermissionsCommand implements ParseableCommand {
                 logger.append("- Removed " + action.toString() + " from all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
                 handler.sendText("That is not a valid action. Please try again");
-                logger.append("- Invalid action: " + parser.get(1), LogDestination.NONAPI);
+                logger.append("- Invalid action: " + p.get(1), LogDestination.NONAPI);
             }
-        } else {
-            String group = parser.get(0);
+        }, "removeall");
+
+        subcommands.onIndexLast(group -> {
             if (permissionsManager.exists(group)) {
                 PermissionGroup permissionGroup = permissionsManager.get(group);
                 handler.sendText("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
             } else {
                 handler.sendText("That is not a valid group. Please try again");
             }
-        }
+        }, 0);
     }
 
     /**
@@ -95,7 +100,7 @@ public class PermissionsCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withIdentifiers("list", "manage", "addall", "removeall").build();
+        return new ParseBuilder("VR", "1O").withIdentifiers("list", "manage", "addall", "removeall").build();
     }
     
     /**

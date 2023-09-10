@@ -147,4 +147,21 @@ public class CommandRegistry {
         });
         return commandList;
     }
+
+    /**
+     * Returns the first Command with an alias matching the provided {@code alias}, ignoring case.
+     * 
+     * @param alias The Command alias to search for.
+     * @return The first {@link Command} with the matching alias.
+     * @throws IllegalArgumentException If no {@link Command} in this registry has a matching alias.
+     */
+    public Command getCommand(String alias) throws IllegalArgumentException {
+        alias = alias.toLowerCase();
+        for (Command command : getCommands()) {
+            if (command.getAliases().contains(alias)) {
+                return command;
+            }
+        }
+        throw new IllegalArgumentException("No Command found with alias: " + alias);
+    }
 }

@@ -2,7 +2,7 @@ package com.georgster.music;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
@@ -10,6 +10,8 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.SubcommandSystem;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -17,7 +19,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 /**
  * Represents the bot's actions following the !skip command.
  */
-public class SkipMusicCommand implements Command {
+public class SkipMusicCommand implements ParseableCommand {
     private AudioPlayer player;
     private TrackScheduler scheduler;
 
@@ -37,15 +39,18 @@ public class SkipMusicCommand implements Command {
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
+        SubcommandSystem subcommands = event.createSubcommandSystem();
 
         if (scheduler.isActive()) {
-            List<String> message = CommandParser.parseGeneric(event.getDiscordEvent().getFormattedMessage());
-            if (message.size() > 1 && message.get(1).equals("all")) { //Ensures we dont go OOB
+            subcommands.on(parser -> {
                 scheduler.clearQueue();
                 handler.sendText("Skipping all tracks in the queue");
-            } else {
-                handler.sendText("Skipping the currently playing track");
-            }
+            }, "all");
+
+            subcommands.on(() -> {
+                logger.append("- No tracks found in queue", LogDestination.NONAPI);
+                handler.sendText("No tracks are currently playing");
+            });
             player.stopTrack();
             logger.append("- Skipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
         } else {
@@ -59,6 +64,13 @@ public class SkipMusicCommand implements Command {
      */
     public List<String> getAliases() {
         return List.of("skip");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public CommandParser getCommandParser() {
+        return new ParseBuilder("1O").withIdentifiers("all").withRules("I").build();
     }
 
     /**

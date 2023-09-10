@@ -11,7 +11,7 @@ public class ParseBuilder {
      * one must be provided. 
      * @param pattern The pattern for the CommandParser to use
      */
-    public ParseBuilder(String pattern) {
+    public ParseBuilder(String... pattern) {
         parser = new CommandParser(pattern);
     }
 
@@ -32,7 +32,7 @@ public class ParseBuilder {
      * @param rules The rules to add
      * @return The active ParseBuilder
      */
-    public ParseBuilder withRules(String rules) {
+    public ParseBuilder withRules(String... rules) {
         parser.setRules(rules);
         return this;
     }

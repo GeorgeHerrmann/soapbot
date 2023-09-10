@@ -8,6 +8,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.SubcommandSystem;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -19,26 +20,27 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public class PlinkoCommand implements ParseableCommand {
 
-    private static final String PATTERN = "1|R 1|O";
-
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
         final MultiLogger logger = event.getLogger();
-        final CommandParser parser = event.getCommandParser();
+        final SubcommandSystem subcommands = event.createSubcommandSystem();
 
-        PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame, to do: Restructure and move this inside the play conditional
-        if (parser.get(0).equals("play")) {
+        PlinkoGame game = new PlinkoGame(event); //Creates a PlinkoGame
+
+        subcommands.on(() -> {
             try {
                 game.startGame();
             } catch (IllegalStateException e) {
                 event.getGuildInteractionHandler().sendText(e.getMessage(), "Plinko");
             }
-        } else if (parser.get(0).equals("board")) {
+        });
+
+        subcommands.on(p -> {
             logger.append("- Showing a blank Plinko Board", LogDestination.NONAPI, LogDestination.API);
             game.showBoard();
-        }
+        }, "board");
     }
 
     /**
@@ -46,7 +48,7 @@ public class PlinkoCommand implements ParseableCommand {
      */
     @Override
     public PermissibleAction getRequiredPermission(List<String> args) {
-        if (args.contains("play")) {
+        if (args.isEmpty()) {
             return PermissibleAction.PLINKOGAME;
         } else {
             return PermissibleAction.DEFAULT;
@@ -58,7 +60,7 @@ public class PlinkoCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new CommandParser(PATTERN);
+        return new CommandParser("1O");
     }
 
     /**
@@ -80,10 +82,7 @@ public class PlinkoCommand implements ParseableCommand {
                         .name("command")
                         .description("Play a game of Plinko!")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
-                        .addChoice(ApplicationCommandOptionChoiceData.builder()
-                                .name("play")
-                                .value("play")
-                                .build())
+                        .required(false)
                         .addChoice(ApplicationCommandOptionChoiceData.builder()
                                 .name("board")
                                 .value("board")
@@ -97,7 +96,7 @@ public class PlinkoCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n- '!plinko play' to simulate a game of plinko" +
+        "\n- '!plinko' to simulate a game of plinko" +
         "\n- '!plinko board' to show an empty plinko board";
     }
 

@@ -2,16 +2,17 @@ package com.georgster.test;
 
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.commands.CommandParser;
+
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * Used to test on going features. This command will be considered active if the
  * {@code ACTIVE} field is set to {@code true}.
  */
-public class TestCommand implements Command { 
+public class TestCommand implements ParseableCommand { 
     private static final boolean ACTIVE = false;
 
     /**
@@ -25,7 +26,7 @@ public class TestCommand implements Command {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() { // Useful when testing using user input arguments
-        return new CommandParser("V|R");
+        return new CommandParser("VR");
     }
 
     /**

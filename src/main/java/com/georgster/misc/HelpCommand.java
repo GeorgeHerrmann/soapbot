@@ -18,6 +18,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParsedArguments;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.SwappingWizard;
@@ -26,8 +27,6 @@ import com.georgster.wizard.SwappingWizard;
  * The HelpCommand exists to provide users information regarding usage for SOAP Bot's commands.
  */
 public class HelpCommand implements ParseableCommand {
-
-    private static final String PATTERN = "1|O"; //A regex pattern to parse the contents of a !help command request
     
     private CommandRegistry register; //SoapBot's Command Registry
 
@@ -45,7 +44,7 @@ public class HelpCommand implements ParseableCommand {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        CommandParser parser = event.getCommandParser();
+        ParsedArguments parser = event.getParsedArguments();
 
         for (Command command : register.getCommands()) {
             if (command.getAliases().contains(parser.get(0))) {
@@ -66,7 +65,7 @@ public class HelpCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new CommandParser(PATTERN);
+        return new CommandParser("1R");
     }
 
     /**

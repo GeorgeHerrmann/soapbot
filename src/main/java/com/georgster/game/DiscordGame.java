@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.control.util.identify.UniqueIdBased;
 import com.georgster.economy.exception.InsufficientCoinsException;
 import com.georgster.logs.LogDestination;
 import com.georgster.profile.UserProfile;
@@ -19,7 +20,7 @@ import discord4j.core.object.entity.channel.Channel;
  * <p>
  * Each {@link Channel} may only have one active DiscordGame.
  */
-public abstract class DiscordGame {
+public abstract class DiscordGame extends UniqueIdBased {
     private static final List<Snowflake> ACTIVE_GAME_CHANNELS = new ArrayList<>(); // Channel IDs where a DiscordGame is active
     private final CommandExecutionEvent event; // The event that prompted the game's creation
 
