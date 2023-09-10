@@ -23,7 +23,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the bot's actions following the !permissions command.
  */
 public class PermissionsCommand implements ParseableCommand {
-    private static final String PATTERN = "V|R 1|O";
 
     private PermissionsManager permissionsManager;
 
@@ -101,7 +100,7 @@ public class PermissionsCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withIdentifiers("list", "manage", "addall", "removeall").build();
+        return new ParseBuilder("VR", "1O").withIdentifiers("list", "manage", "addall", "removeall").build();
     }
     
     /**

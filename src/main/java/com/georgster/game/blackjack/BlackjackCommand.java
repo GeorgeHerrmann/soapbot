@@ -11,6 +11,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -28,7 +29,7 @@ public class BlackjackCommand implements ParseableCommand {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
         
-        long wagerAmount = Long.parseLong(event.getCommandParser().get(0));
+        long wagerAmount = Long.parseLong(event.getParsedArguments().get(0));
 
         DiscordGame game = new BlackJackGame(event, wagerAmount);
 
@@ -62,7 +63,7 @@ public class BlackjackCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new CommandParser("1|R");
+        return new ParseBuilder("1R").withRules("N").build();
     }
 
     /**

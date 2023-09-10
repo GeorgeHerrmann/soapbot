@@ -2,10 +2,10 @@ package com.georgster.util.commands.exception;
 
 import java.util.Arrays;
 
-import com.georgster.util.commands.NewCommandParser;
+import com.georgster.util.commands.CommandParser;
 
 /**
- * A {@link CommandParserException} thrown when a configuration for a {@link NewCommandParser CommandParser's} pattern or rules is in an invalid format.
+ * A {@link CommandParserException} thrown when a configuration for a {@link CommandParser CommandParser's} pattern or rules is in an invalid format.
  */
 public class ParserFormatException extends CommandParserException {
     /**

@@ -15,6 +15,7 @@ import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.ParsedArguments;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -25,7 +26,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the command for reserving to and creating events.
  */
 public class ReserveCommand implements ParseableCommand {
-    private static final String PATTERN = "V|R 1|O 1|O V|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
     
     private SoapEventManager eventManager;
@@ -94,7 +94,7 @@ public class ReserveCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withRules("X N|T N|T|D D").withIdentifiers("in").build();
+        return new ParseBuilder("VR", "1O", "1O", "VO").withRules("X", "N", "T", "D").build();
     }
 
 
@@ -107,45 +107,40 @@ public class ReserveCommand implements ParseableCommand {
      */
     private ReserveEvent assignCorrectEvent(CommandExecutionEvent event) throws IllegalArgumentException {
         GuildInteractionHandler manager = event.getGuildInteractionHandler();
-        CommandParser parser = event.getCommandParser(); // Uses custom parsing algorithm to handle everything with the event, subcommandsystem not used here
+        ParsedArguments parser = event.getParsedArguments(); // Uses custom parsing algorithm to handle everything with the event, subcommandsystem not used here
 
-        List<String> message = parser.getArguments();
         String channelName = ((TextChannel) manager.getActiveChannel()).getName();
 
-        if (message.size() == 1) { //Means the user is trying to reserve to an event that already exists
-            if (eventManager.exists(message.get(0), TYPE)) { //If the event exists, we get the event and return it
-                return (ReserveEvent) eventManager.get(message.get(0));
+        if (parser.size() == 1) { //Means the user is trying to reserve to an event that already exists
+            if (eventManager.exists(parser.get(0), TYPE)) { //If the event exists, we get the event and return it
+                return (ReserveEvent) eventManager.get(parser.get(0));
             } else {
                 throw new IllegalArgumentException("This event doesn't exist. Type !help reserve to see how to make a new event.");
             }
-        } else if (message.size() == 2 && !eventManager.exists(message.get(0), TYPE)) { //Creating an event that is either Unlimited or Timeless
+        } else if (parser.size() == 2 && !eventManager.exists(parser.get(0), TYPE)) { //Creating an event that is either Unlimited or Timeless
             try {
-                if (Integer.parseInt(message.get(1)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
-                return new ReserveEvent(message.get(0), Integer.parseInt(message.get(1)), channelName); //If the user only inputs a number, the event is Timeless
+                if (Integer.parseInt(parser.get(1)) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
+                return new ReserveEvent(parser.get(0), Integer.parseInt(parser.get(1)), channelName); //If the user only inputs a number, the event is Timeless
             } catch (NumberFormatException e) { //If it is not a number, it is a time
                 try {
-                    return new ReserveEvent(message.get(0), SoapUtility.timeConverter(message.get(1)), channelName); //Creates an Unlimited event
+                    return new ReserveEvent(parser.get(0), SoapUtility.timeConverter(parser.get(1)), channelName); //Creates an Unlimited event
                 } catch (IllegalArgumentException e2) { //If both of these fail, the user's command message is in the wrong format
                     throw new IllegalArgumentException(e2.getMessage());
                 }
             }
-        } else if (message.size() == 3 && !eventManager.exists(message.get(0), TYPE)) { //Creates a new event that has a number of slots and a time
+        } else if (parser.size() == 3 && !eventManager.exists(parser.get(0), TYPE)) { //Creates a new event that has a number of slots and a time
             try { //If the event doesn't already exist, we can attempt to create a new one
-                if (Integer.parseInt(parser.getMatchingRule("N")) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
+                int numPeople = Integer.parseInt(parser.get(1));
+                if (numPeople < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
                 //Should be in the format !reserve [EVENTNAME] [NUMPEOPLE] [TIME]
-                List<String> temp = parser.getMatchingRules("N");
-                int numPeople = Integer.parseInt(temp.get(temp.size() - 1));
-                temp = parser.getMatchingRules("T");
-                String time = temp.get(temp.size() - 1);
-                return new ReserveEvent(message.get(0), numPeople, time, channelName);
+                String time = parser.get(2);
+                return new ReserveEvent(parser.get(0), numPeople, time, channelName);
             } catch (Exception ex) {
                 try {
                     //Should be in the format !reserve [EVENTNAME] [TIME] [DATE]
-                    List<String> temp = parser.getMatchingRules("T");
-                    String time = temp.get(temp.size() - 1);
-                    temp = parser.getMatchingRules("D");
-                    String date = temp.get(temp.size() - 1);
-                    return new ReserveEvent(message.get(0), time, channelName, date);
+                    String time = parser.get(1);
+                    String date = parser.get(2);
+                    return new ReserveEvent(parser.get(0), time, channelName, date);
                 } catch (NumberFormatException e) { //If the user's command is in the wrong format
                     throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
                 } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
@@ -155,17 +150,14 @@ public class ReserveCommand implements ParseableCommand {
                     "\n\t- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
                 }
             }
-        } else if (message.size() == 4 && !eventManager.exists(message.get(0), TYPE)) {
+        } else if (parser.size() == 4 && !eventManager.exists(parser.get(0), TYPE)) {
             //Should be in the format !reserve [EVENTNAME] [NUMPEOPLE] [TIME] [DATE]
             try {
-                if (Integer.parseInt(parser.getMatchingRule("N")) < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
-                List<String> temp = parser.getMatchingRules("N");
-                int numPeople = Integer.parseInt(temp.get(temp.size() - 1));
-                temp = parser.getMatchingRules("T");
-                String time = temp.get(temp.size() - 1);
-                temp = parser.getMatchingRules("D");
-                String date = temp.get(temp.size() - 1);
-                return new ReserveEvent(message.get(0), numPeople, time, channelName, date);
+                int numPeople = Integer.parseInt(parser.get(1));
+                if (numPeople < 1) throw new IllegalArgumentException("Number of people must be greater than 0");
+                String time = parser.get(2);
+                String date = parser.get(3);
+                return new ReserveEvent(parser.get(0), numPeople, time, channelName, date);
             } catch (NumberFormatException e) { //If the user's command is in the wrong format
                 throw new IllegalArgumentException("Incorrect reserve event format, type !help reserve to see how to make a new event.");
             } catch (IllegalArgumentException e) { //TimeConverter throws an IllegalArgumentException if the time is in the wrong format
@@ -252,6 +244,6 @@ public class ReserveCommand implements ParseableCommand {
         "\n\t - This event will pop when the specified time hits" +
         "\n- '!reserve [EVENTNAME]' to reserve to an event that already exists" +
         "\n - !events for information about the event command" +
-        "\n*Note: Time and Date formats should be one word, ex: Dec8, Dec8,2024, or in3days*";
+        "\n*Note: If including a date, it should generally be last as to not interfere with the event name*";
     }
 }

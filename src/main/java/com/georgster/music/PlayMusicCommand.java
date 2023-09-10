@@ -12,6 +12,7 @@ import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.ParsedArguments;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
@@ -33,7 +34,6 @@ public class PlayMusicCommand implements ParseableCommand {
     private AudioPlayerManager playerManager;
     private AudioPlayer player;
     private TrackScheduler scheduler;
-    private static final String PATTERN = "1|R";
 
     /**
      * Creates a new PlayMusicCommand from the given {@code ClientContext}.
@@ -54,7 +54,7 @@ public class PlayMusicCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         final GuildInteractionHandler handler = event.getGuildInteractionHandler();
         final MultiLogger logger = event.getLogger();
-        final CommandParser parser = event.getCommandParser();
+        final ParsedArguments parser = event.getParsedArguments();
         final Member member = event.getDiscordEvent().getAuthorAsMember(); //Makes sure the member is valid
 
         if (member != null) {
@@ -103,7 +103,7 @@ public class PlayMusicCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withoutAutoFormatting().build();
+        return new ParseBuilder("1R").withoutAutoFormatting().build();
     }
 
     /**

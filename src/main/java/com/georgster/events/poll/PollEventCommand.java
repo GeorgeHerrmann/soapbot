@@ -51,12 +51,12 @@ public class PollEventCommand implements ParseableCommand {
         MultiLogger logger = event.getLogger();
         SubcommandSystem subcommands = event.createSubcommandSystem();
 
-        subcommands.on(p -> {
+        subcommands.on(() -> {
             logger.append("- Beginning the Poll Wizard\n", LogDestination.NONAPI);
 
             InputWizard wizard = new PollEventWizard(event);
             wizard.begin();
-        }, "wizard");
+        });
 
         subcommands.on(p -> {
             InputWizard wizard = new QuickPollWizard(event);
@@ -89,15 +89,19 @@ public class PollEventCommand implements ParseableCommand {
         }, "view");
 
         subcommands.onIndexLast(title -> {
-            PollEvent pollEvent = new PollEvent(title, ((TextChannel) discordEvent.getChannel()).getName(), discordEvent.getAuthorAsMember().getTag());
-            pollEvent.setDateTime("1 hour");
-            pollEvent.addOption("yes");
-            pollEvent.addOption("no");
+            if (!eventManager.exists(title, TYPE)) {
+                PollEvent pollEvent = new PollEvent(title, ((TextChannel) discordEvent.getChannel()).getName(), discordEvent.getAuthorAsMember().getTag());
+                pollEvent.setDateTime("1 hour");
+                pollEvent.addOption("yes");
+                pollEvent.addOption("no");
 
-            eventManager.add(pollEvent);
+                eventManager.add(pollEvent);
 
-            InputWizard wizard = new QuickPollWizard(event, pollEvent);
-            wizard.begin();
+                InputWizard wizard = new QuickPollWizard(event, pollEvent);
+                wizard.begin();
+            } else {
+                handler.sendText("This poll already exists, try a different title", "Polls");
+            }
         }, 0);
     }
 
@@ -105,7 +109,7 @@ public class PollEventCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new ParseBuilder("V|O").withIdentifiers("wizard", "present", "quickpolls", "qp", "create", "vote", "view").build();
+        return new ParseBuilder("VO").withIdentifiers("present", "quickpolls", "qp", "create", "vote", "view").build();
     }
 
     /**
@@ -128,7 +132,7 @@ public class PollEventCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n- '!poll wizard' to bring up the full Poll Wizard capable of handling all types of polls" +
+        "\n- '!poll' to bring up the full Poll Wizard capable of handling all types of polls" +
         "\n - '!poll [PROMPT]' to create a quick poll for one hour with 'yes' and 'no' as the options" +
         "\n - '!poll present' or '!poll quickpolls' to bring up and present quick poll voting for a quick poll" +
         "\n - '!poll vote' to vote for a pre-existing poll" +

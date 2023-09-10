@@ -23,7 +23,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the command for unreserving to a {@code ReserveEvent}.
  */
 public class UnreserveCommand implements ParseableCommand {
-    private static final String PATTERN = "V|R";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
     private SoapEventManager eventManager;
@@ -126,6 +125,6 @@ public class UnreserveCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new CommandParser(PATTERN);
+        return new CommandParser("VR");
     }
 }

@@ -235,3 +235,24 @@
 2.401
     - Fixed an issue preventing users other than the user who started the Wizard from voting on Global Wizards (Wizards that allowAllUsers)
     - Reworked package structure for Permissions and Wizards/Listeners out of util and into their own package
+
+2.500
+    - Completely rewrote the CommandParser system.
+        - The CommandParser features completely redesigned logic
+        - A ParsedArguments object now represents the arguments parsed by a command parser
+          and is included in the CommandExecutionEvent.
+        - A SubcommandSystem can be used by commands to easily created subcommands
+        - Many subcommand arguments can now be input in any order and still work
+    - Switched all commands and systems to the new parsing system.
+    - Fixed a bug where certain commands would not execute properly if no arguments were given
+        - The BankCommand now displays balance on !bank or !bal
+            - !bank balance subcommand removed
+        - The PollCommand now brings up the full PollEventWizard on !poll
+            - !poll wizard subcommand removed
+        - The PlinkoCommand now simulates a PlinkoGame on !plinko
+            - !plinko play subcommand removed
+    - Fixed a bug where the ReserveCommand would not recognize date inputs unless they were one word
+    - Fixed a bug where ReserveCommand arguments had to be placed in a specific order when creating a new event
+        - Note: There should still be some argument between the event name and date to prevent overlapping.
+            - Example: !r new event december 11 9pm 5 - May not work
+                       !r new event 9pm december 11 5 - Will work, since '9pm' separates 'new event' and 'december 11'

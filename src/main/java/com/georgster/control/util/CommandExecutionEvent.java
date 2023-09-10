@@ -17,6 +17,7 @@ import com.georgster.util.DiscordEvent;
 import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
@@ -38,6 +39,7 @@ public class CommandExecutionEvent {
     private DiscordEvent discordEvent; // A transformer used to extract data from the Discord Event that created this Event
     private ClientContext context; // The context of the SoapClient associated with the event.
     private GuildInteractionHandler handler;
+    private ParsedArguments parsedArguments;
     private CommandParser parser;
 
     /**
@@ -60,7 +62,7 @@ public class CommandExecutionEvent {
         this.logger = new MultiLogger(handler, command.getClass()); // Used to log messages about the Event
 
         if (command instanceof ParseableCommand) { // If the Command is parseable, it gets a CommandParser
-            parser = ((ParseableCommand) command).getCommandParser();
+            this.parser = ((ParseableCommand) command).getCommandParser();
         }
     }
 
@@ -78,8 +80,9 @@ public class CommandExecutionEvent {
         List<String> args = null;
         if (command instanceof ParseableCommand) {
             try {
-                args = parser.parse(discordEvent.getFormattedMessage());
-                logger.append("- Arguments found: " + parser.getArguments().toString() + "\n",LogDestination.NONAPI);
+                parsedArguments = parser.parse(discordEvent.getFormattedMessage());
+                args = parsedArguments.getArguments();
+                logger.append("- Arguments found: " + args.toString() + "\n",LogDestination.NONAPI);
                 deferIfNecessary();
                 executeIfPermission(args);
             } catch (Exception e) {
@@ -229,6 +232,15 @@ public class CommandExecutionEvent {
      */
     public GuildInteractionHandler getGuildInteractionHandler() {
         return handler;
+    }
+
+    /**
+     * Returns the {@link ParsedArguments} for this event.
+     * 
+     * @return The {@link ParsedArguments} for this event.
+     */
+    public ParsedArguments getParsedArguments() {
+        return parsedArguments;
     }
 
     /**

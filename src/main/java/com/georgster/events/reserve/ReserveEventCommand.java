@@ -28,7 +28,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Represents the command for managing reserve events.
  */
 public class ReserveEventCommand implements ParseableCommand {
-    private static final String PATTERN = "V|R 1|O";
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
     private SoapEventManager eventManager;
@@ -167,7 +166,7 @@ public class ReserveEventCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder(PATTERN).withIdentifiers("list", "mention", "ping", "manage").withRules("X I").build();
+        return new ParseBuilder("VR", "1O").withIdentifiers("list", "mention", "ping", "manage").withRules("X", "I").build();
     }
 
     /**

@@ -9,7 +9,6 @@ import com.georgster.gpt.MemberChatCompletions;
  */
 public class UserProfile extends MemberIdentified {
     private String guildId; //Snowflake Guild ID associated with this user's profile in a guild
-    private String memberId; //Snowflake member ID
     private String username; //User's discord username
     private MemberChatCompletions completions;
     private CoinBank bank;
@@ -17,7 +16,6 @@ public class UserProfile extends MemberIdentified {
     public UserProfile(String serverId, String userId, String user) {
         super (userId);
         this.guildId = serverId;
-        this.memberId = userId;
         this.username = user;
         this.completions = new MemberChatCompletions(userId);
         this.bank = new CoinBank(userId);
@@ -33,7 +31,6 @@ public class UserProfile extends MemberIdentified {
     public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank) {
         super(userId);
         this.guildId = serverId;
-        this.memberId = userId;
         this.username = user;
         this.completions = completions;
         this.bank = bank;
@@ -54,7 +51,7 @@ public class UserProfile extends MemberIdentified {
      * @return the ID of the Member associated with this profile.
      */
     public String getMemberId() {
-        return memberId;
+        return getId();
     }
     
     /**

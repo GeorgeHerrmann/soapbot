@@ -67,16 +67,16 @@ public class BankCommand implements ParseableCommand {
             wizard.begin();
         }, "leaderboard", "lb");
 
-        subcommands.on(p -> {
+        subcommands.on(() -> {
             Member member = event.getDiscordEvent().getAuthorAsMember();
             UserProfile profile = manager.get(member.getId().asString());
             event.getGuildInteractionHandler().sendText("You have **" + profile.getBank().getBalance() + "** coins", member.getUsername() + "'s bank");
             event.getLogger().append("- Displaying a user's coin balance", LogDestination.NONAPI, LogDestination.API);
-        }, "balance", "bal");
+        });
     }
 
     public CommandParser getCommandParser() {
-        return new ParseBuilder("1|O").withIdentifiers("balance", "bal", "leaderboard", "lb").build();
+        return new ParseBuilder("1O").withIdentifiers("leaderboard", "lb").build();
     }
 
     /**
@@ -109,14 +109,10 @@ public class BankCommand implements ParseableCommand {
                         .description("View balance or leaderboard")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .addChoice(ApplicationCommandOptionChoiceData.builder()
-                            .name("balance")
-                            .value("balance")
-                            .build())
-                        .addChoice(ApplicationCommandOptionChoiceData.builder()
                             .name("leaderboard")
                             .value("leaderboard")
                             .build())
-                        .required(true)
+                        .required(false)
                         .build())
                 .build();
     }

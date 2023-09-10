@@ -26,7 +26,7 @@ public class EchoCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
-        String message = event.getCommandParser().get(0);
+        String message = event.getParsedArguments().get(0);
 
         logger.append("- Echoing a message in a TextChannel", LogDestination.NONAPI, LogDestination.API);
         handler.sendPlainText(message);
@@ -36,7 +36,7 @@ public class EchoCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new ParseBuilder("V|R").withoutAutoFormatting().build();
+        return new ParseBuilder("VR").withoutAutoFormatting().build();
     }
 
     /**
