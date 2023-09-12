@@ -37,9 +37,11 @@ public class MultiLogger {
      */
     public MultiLogger(GuildInteractionHandler handler, Class<?> source) {
         logs = new EnumMap<>(LogDestination.class);
-        this.handler = handler;
+        this.handler = new GuildInteractionHandler(handler.getGuild()); // New handler created as to not interfere with any other one
         this.source = source;
-        getLoggingChannel().ifPresent(handler::setActiveMessageChannel);
+        if (canLog()) {
+            getLoggingChannel().ifPresent(this.handler::setActiveMessageChannel);
+        }
     }
 
     /**

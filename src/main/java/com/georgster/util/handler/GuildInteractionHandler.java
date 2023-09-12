@@ -21,7 +21,6 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.InteractionReplyEditSpec;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 
 public final class GuildInteractionHandler implements InteractionHandler {
@@ -162,7 +161,7 @@ public final class GuildInteractionHandler implements InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(channel.createMessage(text).block())));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendPlainMessage(channel, text))));
 
         return message.getObject();
     }
@@ -181,11 +180,7 @@ public final class GuildInteractionHandler implements InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
-            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
-            activeChannel.ifPresent(channel -> message.setObject(channel.createMessage(spec).block()));
-        });
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text))));
 
         return message.getObject();
     }
@@ -204,11 +199,7 @@ public final class GuildInteractionHandler implements InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
-            activeChannel.ifPresent(channel -> message.setObject(channel.createMessage(spec).block()));
-        });
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title))));
         return message.getObject();
     }
 
@@ -226,11 +217,7 @@ public final class GuildInteractionHandler implements InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-            MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
-            activeChannel.ifPresent(channel -> message.setObject(channel.createMessage(spec).block()));
-        });
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, components))));
         return message.getObject();
     }
 
