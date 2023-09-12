@@ -7,13 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumMap;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.georgster.api.ActionWriter;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.handler.GuildInteractionHandler;
+
+import discord4j.core.object.entity.channel.GuildMessageChannel;
 
 /**
  * Logs information to {@code LogDestinations} about SOAP Bot's systems.
@@ -36,6 +39,7 @@ public class MultiLogger {
         logs = new EnumMap<>(LogDestination.class);
         this.handler = handler;
         this.source = source;
+        getLoggingChannel().ifPresent(handler::setActiveMessageChannel);
     }
 
     /**
@@ -126,7 +130,7 @@ public class MultiLogger {
     public void logDiscord(String discord) {
         if (canLog() && !discord.isEmpty()) {
             String[] output = SoapUtility.splitFirst(discord);
-            GuildInteractionHandler.sendText(output[1], output[0], handler.getTextChannel("bot-logs"));
+            handler.sendMessage(output[1], output[0]);
         }
     }
 
@@ -177,7 +181,11 @@ public class MultiLogger {
      * @return {@code true} if the bot-logs channel can be logged to, {@code false} otherwise.
      */
     private boolean canLog() {
-        return (handler.getTextChannel("bot-logs") != null);
+        return (handler.getMessageChannel("bot-logs") != null);
+    }
+
+    public Optional<GuildMessageChannel> getLoggingChannel() {
+        return Optional.of(handler.getMessageChannel("bot-logs"));
     }
 
     /**

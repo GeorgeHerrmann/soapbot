@@ -15,6 +15,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
 import com.georgster.database.adapter.DatabaseObjectClassAdapter;
+import com.georgster.util.Unwrapper;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -169,7 +170,7 @@ public class DatabaseService<T> {
      * @return The object found by the given identifier name and value.
      */
     public T getObject(String identifierName, String identifierValue) {
-        DBObject<T> object = new DBObject<>();
+        Unwrapper<T> object = new Unwrapper<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson query = eq(identifierName, identifierValue);
@@ -195,7 +196,7 @@ public class DatabaseService<T> {
      * @return The object found by the given identifier name and value of the class type specified by the given deserializer.
      */
     public T getObject(String identifierName, String identifierValue, DatabaseObjectClassAdapter<T> deserializer) {
-        DBObject<T> object = new DBObject<>();
+        Unwrapper<T> object = new Unwrapper<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson query = eq(identifierName, identifierValue);
@@ -220,7 +221,7 @@ public class DatabaseService<T> {
      * @return All objects in the database for this service's {@code ProfileType}.
      */
     public List<T> getAllObjects() {
-        DBObject<List<T>> objects = new DBObject<>();
+        Unwrapper<List<T>> objects = new Unwrapper<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             List<T> list = new ArrayList<>();
@@ -239,7 +240,7 @@ public class DatabaseService<T> {
      * @return All objects in the database for this service's {@code ProfileType} of the class type specified by the given deserializer.
      */
     public List<T> getAllObjects(DatabaseObjectClassAdapter<T> deserializer) {
-        DBObject<List<T>> objects = new DBObject<>();
+        Unwrapper<List<T>> objects = new Unwrapper<>();
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             List<T> list = new ArrayList<>();

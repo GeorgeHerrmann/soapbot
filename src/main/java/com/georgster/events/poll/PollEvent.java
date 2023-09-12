@@ -10,8 +10,8 @@ import java.util.TreeMap;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.TimedEvent;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 /**
  * A {@link SoapEvent} that has a prompt and a List of options users can vote for.
@@ -93,7 +93,7 @@ public class PollEvent extends TimedEvent implements SoapEvent {
         Map<String, Integer> voteTally = getVoteTally();
         voteTally.forEach((option, votes) -> sb.append("- " + option + ": " + votes + " votes\n"));
 
-        handler.sendText(sb.toString(), "Poll " + getIdentifier() + " concluded!");
+        handler.sendMessage(sb.toString(), "Poll " + getIdentifier() + " concluded!");
     }
 
     /**

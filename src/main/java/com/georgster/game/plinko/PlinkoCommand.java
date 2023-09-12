@@ -33,7 +33,7 @@ public class PlinkoCommand implements ParseableCommand {
             try {
                 game.startGame();
             } catch (IllegalStateException e) {
-                event.getGuildInteractionHandler().sendText(e.getMessage(), "Plinko");
+                event.getGuildInteractionHandler().sendMessage(e.getMessage(), "Plinko");
             }
         });
 

@@ -9,7 +9,7 @@ import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -39,11 +39,11 @@ public class SoapCommand implements Command {
                 }
             }
             myReader.close();
-            handler.sendText("Version: " + version +
+            handler.sendMessage("Version: " + version +
             "\nView my repository and source code at: https://github.com/GeorgeHerrmann/soapbot", "SOAP Bot");
         } catch (FileNotFoundException e) { //Should only be thrown if there is an issue with the pom.xml file
             logger.append("- Couldn't find the version file", LogDestination.NONAPI);
-            handler.sendText("Couldn't find version file");
+            handler.sendMessage("Couldn't find version file");
             e.printStackTrace();
         }
         logger.append("- Showing information about SOAP Bot in a text channel", LogDestination.API);

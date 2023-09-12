@@ -11,11 +11,11 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.ParsedArguments;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -53,17 +53,17 @@ public class ReserveCommand implements ParseableCommand {
                 if (!reserve.isFull()) {
                     discordEvent.getAuthorOptionally().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getTag())) {
-                            handler.sendText("You have already reserved for this event, type !unreserve " + reserve.getIdentifier() + " to unreserve");
+                            handler.sendMessage("You have already reserved for this event, type !unreserve " + reserve.getIdentifier() + " to unreserve");
                         } else {
                             logger.append("- Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getTag());
                             eventManager.update(reserve);
-                            handler.sendText(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
+                            handler.sendMessage(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
                             reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
                         }
                     });
                 } else {
-                    handler.sendText("Event " + reserve.getIdentifier() + " is full");
+                    handler.sendMessage("Event " + reserve.getIdentifier() + " is full");
                 }
             } else {
                 logger.append("- Creating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
@@ -81,10 +81,10 @@ public class ReserveCommand implements ParseableCommand {
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 }
                 messageString += "\n- Scheduled for: " + SoapUtility.formatDate(reserve.getDate());
-                handler.sendText(messageString, reserve.getIdentifier() + " event created");
+                handler.sendMessage(messageString, reserve.getIdentifier() + " event created");
             }
         } catch (IllegalArgumentException e) { // assignCorrectEvent will send custom error messages, all other exceptions are handled by the CommandExecutionEvent
-            handler.sendText(e.getMessage());
+            handler.sendMessage(e.getMessage());
         }
 
     }
@@ -109,7 +109,7 @@ public class ReserveCommand implements ParseableCommand {
         GuildInteractionHandler manager = event.getGuildInteractionHandler();
         ParsedArguments parser = event.getParsedArguments(); // Uses custom parsing algorithm to handle everything with the event, subcommandsystem not used here
 
-        String channelName = ((TextChannel) manager.getActiveChannel()).getName();
+        String channelName = ((TextChannel) manager.getActiveMessageChannel()).getName();
 
         if (parser.size() == 1) { //Means the user is trying to reserve to an event that already exists
             if (eventManager.exists(parser.get(0), TYPE)) { //If the event exists, we get the event and return it

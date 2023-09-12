@@ -14,11 +14,11 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.SwappingWizard;
@@ -27,6 +27,7 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.GuildMessageChannel;
 
 /**
  * An Event fired upon the execution of a SOAPBot {@link Command}. This Event packages
@@ -54,9 +55,9 @@ public class CommandExecutionEvent {
         this.context = context;
         this.command = command;
         this.handler = new GuildInteractionHandler(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
-        handler.setActiveChannel(discordEvent.getChannel());
+        handler.setActiveMessageChannel((GuildMessageChannel) discordEvent.getChannel());
         if (discordEvent.isChatInteraction()) { // If the Event was fired from a slash command
-            handler.setActiveInteraction((ChatInputInteractionEvent) discordEvent.getEvent());
+            handler.setActiveCommandInteraction((ChatInputInteractionEvent) discordEvent.getEvent());
         }
 
         this.logger = new MultiLogger(handler, command.getClass()); // Used to log messages about the Event
@@ -93,7 +94,7 @@ public class CommandExecutionEvent {
                 }
 
                 InputWizard helpWizard = new IterableStringWizard(this, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                Message msg = getGuildInteractionHandler().sendText(command.help(), command.getClass().getSimpleName());
+                Message msg = getGuildInteractionHandler().sendMessage(command.help(), command.getClass().getSimpleName());
                 InputWizard switcher = new SwappingWizard(this, msg, helpWizard);
                 switcher.begin();
             }
@@ -128,7 +129,7 @@ public class CommandExecutionEvent {
         if (hasPermission(args)) {
             command.execute(this);
         } else {
-            handler.sendText("You need " + command.getRequiredPermission(args) + " to use this command.");
+            handler.sendMessage("You need " + command.getRequiredPermission(args) + " to use this command.");
             logger.append("- User is missing permission: " + command.getRequiredPermission(args) + " to use this command.", LogDestination.NONAPI);
         }
     }

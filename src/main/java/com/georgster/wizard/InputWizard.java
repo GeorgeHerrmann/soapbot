@@ -9,14 +9,15 @@ import java.util.function.Consumer;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.MessageChannel;
 
 /**
  * Abstract class for creating a wizard that prompts the user for input and records the response.
@@ -67,7 +68,7 @@ public abstract class InputWizard {
     protected User user;
     private boolean isActive;
     private boolean awaitingResponse;
-    protected final GuildInteractionHandler handler;
+    protected final InteractionHandler handler;
     private final InputListener listener;
     protected final MultiLogger logger;
 
@@ -323,8 +324,8 @@ public abstract class InputWizard {
      * 
      * @return The channel of the wizard.
      */
-    public Channel getChannel() {
-        return handler.getActiveChannel();
+    public MessageChannel getChannel() {
+        return handler.getActiveMessageChannel();
     }
 
     /**
@@ -629,14 +630,14 @@ public abstract class InputWizard {
     /**
      * Sends a message in this wizard's active text channel that will self-delete in five seconds.
      * <p>
-     * Invokes {@link GuildInteractionHandler#sendText(String, String)} for message sending.
+     * Invokes {@link GuildInteractionHandler#sendMessage(String, String)} for message sending.
      * 
      * @param text The body of the message.
      * @param title The title of the message.
      */
     protected void sendMessage(String text, String title) {
         ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> {
-            Message message = handler.sendText(text, title);
+            Message message = handler.sendMessage(text, title);
             try {
                 Thread.sleep(5000);
                 message.delete().block();

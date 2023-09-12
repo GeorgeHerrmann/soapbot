@@ -8,10 +8,10 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.PermissionsWizard;
 
@@ -47,7 +47,7 @@ public class PermissionsCommand implements ParseableCommand {
             StringBuilder response = new StringBuilder("Permission Groups:\n");
             permissionsManager.getAll().forEach(group -> response.append("\t" + group.getName() + "\n"));
             response.append("Use !permissions [group] to see the permissions for a group");
-            handler.sendText(response.toString());
+            handler.sendMessage(response.toString());
         }, "list");
 
         subcommands.on(p -> {
@@ -62,10 +62,10 @@ public class PermissionsCommand implements ParseableCommand {
                     group.addPermission(action);
                     permissionsManager.update(group);
                 });
-                handler.sendText("Added " + action.toString() + " to all groups");
+                handler.sendMessage("Added " + action.toString() + " to all groups");
                 logger.append("- Added " + action.toString() + " to all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
-                handler.sendText("That is not a valid action. Please try again");
+                handler.sendMessage("That is not a valid action. Please try again");
                 logger.append("- Invalid action: " + p.get(1), LogDestination.NONAPI);
             }
         }, "addall");
@@ -77,10 +77,10 @@ public class PermissionsCommand implements ParseableCommand {
                     group.removePermission(action);
                     permissionsManager.update(group);
                 });
-                handler.sendText("Removed " + action.toString() + " from all groups");
+                handler.sendMessage("Removed " + action.toString() + " from all groups");
                 logger.append("- Removed " + action.toString() + " from all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
-                handler.sendText("That is not a valid action. Please try again");
+                handler.sendMessage("That is not a valid action. Please try again");
                 logger.append("- Invalid action: " + p.get(1), LogDestination.NONAPI);
             }
         }, "removeall");
@@ -88,9 +88,9 @@ public class PermissionsCommand implements ParseableCommand {
         subcommands.onIndexLast(group -> {
             if (permissionsManager.exists(group)) {
                 PermissionGroup permissionGroup = permissionsManager.get(group);
-                handler.sendText("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
+                handler.sendMessage("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
             } else {
-                handler.sendText("That is not a valid group. Please try again");
+                handler.sendMessage("That is not a valid group. Please try again");
             }
         }, 0);
     }

@@ -11,11 +11,11 @@ import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.ReserveEventWizard;
 
@@ -80,10 +80,10 @@ public class ReserveEventCommand implements ParseableCommand {
                 response.append(event.getDiscordEvent().getAuthorAsMember().getMention() + " has reserved to the **bolded events**\n");
                 response.append("Type !events [NAME] for more information about a specific reserve event");
                 String[] output = SoapUtility.splitFirst(response.toString());
-                handler.sendText(output[1], output[0]);
+                handler.sendMessage(output[1], output[0]);
             } else {
                 logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
-                handler.sendText("There are no reserve events currently active");
+                handler.sendMessage("There are no reserve events currently active");
             }
         }, "list");
         
@@ -95,10 +95,10 @@ public class ReserveEventCommand implements ParseableCommand {
                 logger.append("- Mentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                 StringBuilder response = new StringBuilder();
-                reserve.getReservedUsers().forEach(user -> response.append(handler.getMember(user).getMention() + " "));
-                handler.sendPlainText(response.toString()); //If sendText is used, the embed will prevent users from being mentioned
+                reserve.getReservedUsers().forEach(user -> response.append(handler.getMemberByTag(user).getMention() + " "));
+                handler.sendPlainMessage(response.toString()); //If sendMessage is used, the embed will prevent users from being mentioned
             } else {
-                handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
+                handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events");
             }
         }, "mention", "ping");
 
@@ -108,7 +108,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 logger.append("- Beginning the reserve event wizard\n", LogDestination.NONAPI);
                 wizard.begin();
             } else {
-                handler.sendText("There are no Reserve Events to manage.", "Reserve Event Wizard");
+                handler.sendMessage("There are no Reserve Events to manage.", "Reserve Event Wizard");
                 logger.append("- There are no reserve events to manage.", LogDestination.NONAPI);
             }
         }, "manage");
@@ -137,12 +137,12 @@ public class ReserveEventCommand implements ParseableCommand {
             }
             response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
             response.append("\nReserved users:\n");
-            reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMember(user).getMention() + "\n"));
+            reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberByTag(user).getMention() + "\n"));
 
             String[] output = SoapUtility.splitFirst(response.toString());
-            handler.sendText(output[1], output[0]);
+            handler.sendMessage(output[1], output[0]);
             } else {
-                handler.sendText("This reserve event does not exist, type !events list for a list of all active events");
+                handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events");
             }
         }, 0);
     }

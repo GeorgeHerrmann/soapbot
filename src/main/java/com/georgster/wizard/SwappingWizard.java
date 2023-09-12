@@ -54,7 +54,7 @@ public class SwappingWizard extends InputWizard {
         if (Boolean.TRUE.equals(onWizard)) {
             ThreadPoolFactory.scheduleGeneralTask(event.getGuildInteractionHandler().getGuild().getId().asString(), wizard::restart);
         } else {
-            messageTitle.ifPresentOrElse(title -> handler.editMessageContent(message, messageContent, title), () -> handler.editMessageContent(message, messageContent));
+            messageTitle.ifPresentOrElse(title -> handler.editMessage(message, messageContent, title), () -> handler.editMessage(message, messageContent));
         }
 
         withResponse((response -> {

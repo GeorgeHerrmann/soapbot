@@ -1,6 +1,6 @@
 package com.georgster.events;
 import com.georgster.control.manager.SoapEventManager;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 /**
  * Utility class for handling reserve events.
@@ -27,11 +27,11 @@ public class SoapEventHandler {
     public static void scheduleEvent(SoapEvent event, SoapEventManager eventManager) {
         GuildInteractionHandler handler = new GuildInteractionHandler(eventManager.getGuild());
         if (eventManager.exists(event.getIdentifier())) {
-            handler.setActiveChannel(handler.getTextChannel(event.getChannel()));
+            handler.setActiveMessageChannel(handler.getMessageChannel(event.getChannel()));
             if (validateSoapEvent(event, eventManager)) {
                 event.onFulfill(handler);
             } else {
-                handler.sendText("Event " + event.getIdentifier() + " has been cancelled");
+                handler.sendMessage("Event " + event.getIdentifier() + " has been cancelled");
             }
             if (eventManager.exists(event.getIdentifier())) {
                 eventManager.remove(event);

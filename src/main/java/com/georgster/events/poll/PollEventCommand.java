@@ -11,10 +11,10 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.PollEventWizard;
 import com.georgster.wizard.QuickPollWizard;
@@ -68,7 +68,7 @@ public class PollEventCommand implements ParseableCommand {
                 logger.append("- Beginning the Poll Wizard from the Voting Screen\n", LogDestination.NONAPI);
                 new PollEventWizard(event).begin("pollVotingOptions");  
             } else {
-                handler.sendText("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
+                handler.sendMessage("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
                 logger.append("- No polls found in the event manager\n", LogDestination.NONAPI);
             }
         }, "vote");
@@ -83,7 +83,7 @@ public class PollEventCommand implements ParseableCommand {
                 logger.append("- Beginning the Poll Wizard from the Viewing Screen\n", LogDestination.NONAPI);
                 new PollEventWizard(event).begin("pollViewingOptions");
             } else {
-                handler.sendText("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
+                handler.sendMessage("There are no polls to vote for, type !poll create to custom create a poll, or !poll [PROMPT] to create a QuickPoll.", "No Polls Available");
                 logger.append("- No polls found in the event manager\n", LogDestination.NONAPI);
             }
         }, "view");
@@ -100,7 +100,7 @@ public class PollEventCommand implements ParseableCommand {
                 InputWizard wizard = new QuickPollWizard(event, pollEvent);
                 wizard.begin();
             } else {
-                handler.sendText("This poll already exists, try a different title", "Polls");
+                handler.sendMessage("This poll already exists, try a different title", "Polls");
             }
         }, 0);
     }

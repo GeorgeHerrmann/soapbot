@@ -51,7 +51,7 @@ public class HelpCommand implements ParseableCommand {
                 logger.append("- Command found: " + command.getClass().getSimpleName() + "\n", LogDestination.NONAPI);
 
                 InputWizard helpWizard = new IterableStringWizard(event, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                Message msg = event.getGuildInteractionHandler().sendText(command.help(), command.getClass().getSimpleName());
+                Message msg = event.getGuildInteractionHandler().sendMessage(command.help(), command.getClass().getSimpleName());
                 InputWizard switcher = new SwappingWizard(event, msg, helpWizard);
                 switcher.begin();
                 break;

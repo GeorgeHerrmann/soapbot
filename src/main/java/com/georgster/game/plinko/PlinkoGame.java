@@ -12,7 +12,7 @@ import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.game.DiscordGame;
 import com.georgster.profile.UserProfile;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 /**
  * A basic game of Plinko simulated in a {@code TextChannel}.
@@ -80,9 +80,9 @@ public class PlinkoGame extends DiscordGame {
         if (platform == Platform.MOBILE) {
             String mobileOutput = "Playing a game of plinko...\n" + 0 + "/" + board.length + " Rows completed\n";
             mobileOutput += "*The game is not shown because " + profile.getUsername() + " is using a mobile device*";
-            message = handler.sendPlainText(mobileOutput); //Creates the initial message of the board state
+            message = handler.sendPlainMessage(mobileOutput); //Creates the initial message of the board state
         } else {
-            message = handler.sendPlainText(sBoard.toString()); //Creates the initial message of the board state
+            message = handler.sendPlainMessage(sBoard.toString()); //Creates the initial message of the board state
         }
         /* The handling of the creation of the plinko game is different than updating it, therefore we do these updates outside the loop */
         sBoard.replace(sBoard.toString().indexOf("0"), sBoard.toString().indexOf("0") + 1, " ");
@@ -118,7 +118,7 @@ public class PlinkoGame extends DiscordGame {
             }
         }
         long reward = calculateReward(spot - 11);
-        handler.sendText("Your reward is " + reward + " coins", "Plinko");
+        handler.sendMessage("Your reward is " + reward + " coins", "Plinko");
         profile.getBank().deposit(reward);
         profileManager.update(profile);
     }
@@ -188,7 +188,7 @@ public class PlinkoGame extends DiscordGame {
             sBoard.append("\n");
         }
 
-        handler.sendPlainText(sBoard.toString());
+        handler.sendPlainMessage(sBoard.toString());
     }
 
     /**

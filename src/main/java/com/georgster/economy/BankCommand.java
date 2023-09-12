@@ -11,11 +11,11 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.profile.UserProfile;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 
@@ -70,7 +70,7 @@ public class BankCommand implements ParseableCommand {
         subcommands.on(() -> {
             Member member = event.getDiscordEvent().getAuthorAsMember();
             UserProfile profile = manager.get(member.getId().asString());
-            event.getGuildInteractionHandler().sendText("You have **" + profile.getBank().getBalance() + "** coins", member.getUsername() + "'s bank");
+            event.getGuildInteractionHandler().sendMessage("You have **" + profile.getBank().getBalance() + "** coins", member.getUsername() + "'s bank");
             event.getLogger().append("- Displaying a user's coin balance", LogDestination.NONAPI, LogDestination.API);
         });
     }
