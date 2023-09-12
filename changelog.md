@@ -256,3 +256,10 @@
         - Note: There should still be some argument between the event name and date to prevent overlapping.
             - Example: !r new event december 11 9pm 5 - May not work
                        !r new event 9pm december 11 5 - Will work, since '9pm' separates 'new event' and 'december 11'
+
+2.510
+    - Refactored GuildInteractionHandler
+        - Now implements the InteractionHandler, which will share logic between all handlers which interact directly with discord's API
+            - Not completely done, more refactoring required
+        - MultiLogger now uses a GuildInteractionHandler instance for discord logging
+    - ReserveEventCommand now displays the list of events on an empty input

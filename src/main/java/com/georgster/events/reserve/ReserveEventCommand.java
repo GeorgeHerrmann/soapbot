@@ -49,37 +49,25 @@ public class ReserveEventCommand implements ParseableCommand {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         SubcommandSystem subcommands = event.createSubcommandSystem();
 
+        subcommands.on(() -> {
+            logger.append("Showing all reserve events in a text channel", LogDestination.API);
+
+            if (eventManager.hasAny(TYPE)) { // michael says hi
+                logger.append("- Showing the user a list of reserve events\n", LogDestination.NONAPI);
+                String[] output = SoapUtility.splitFirst(getEventListString(event));
+                handler.sendMessage(output[1], output[0]);
+            } else {
+                logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
+                handler.sendMessage("There are no reserve events currently active");
+            }
+        });
+
         subcommands.on(p -> { //Shows the list of events
             logger.append("Showing all reserve events in a text channel", LogDestination.API);
 
-            StringBuilder response = new StringBuilder();
             if (eventManager.hasAny(TYPE)) { // michael says hi
                 logger.append("- Showing the user a list of reserve events\n", LogDestination.NONAPI);
-                response.append("All reserve events:\n");
-                List<SoapEvent> events = eventManager.getAll(TYPE);
-                for (int i = 0; i < events.size(); i++) {
-                    /* The EventManager will ensure we get events of the correct type, so casting is safe */
-                    ReserveEvent reserve = (ReserveEvent) events.get(i);
-                    String user = event.getDiscordEvent().getAuthorAsMember().getTag();
-                    if (reserve.isTimeless()) {
-                        if (reserve.alreadyReserved(user)) {
-                            response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved**\n");
-                        } else {
-                            response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
-                        }
-                    } else {
-                        if (reserve.alreadyReserved(user)) {
-                            response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
-                                        "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "**\n");
-                        } else {
-                            response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
-                                        "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "\n");
-                        }
-                    }
-                }
-                response.append(event.getDiscordEvent().getAuthorAsMember().getMention() + " has reserved to the **bolded events**\n");
-                response.append("Type !events [NAME] for more information about a specific reserve event");
-                String[] output = SoapUtility.splitFirst(response.toString());
+                String[] output = SoapUtility.splitFirst(getEventListString(event));
                 handler.sendMessage(output[1], output[0]);
             } else {
                 logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
@@ -148,6 +136,42 @@ public class ReserveEventCommand implements ParseableCommand {
     }
 
     /**
+     * Returns a String-based representation output of all {@link ReserveEvent ReserveEvents} when this command executes.
+     * 
+     * @param event The event that prompted command execution.
+     * @return A String-based representation output of all {@link ReserveEvent ReserveEvents}.
+     */
+    private String getEventListString(CommandExecutionEvent event) {
+        StringBuilder response = new StringBuilder();
+        response.append("All reserve events:\n");
+        List<SoapEvent> events = eventManager.getAll(TYPE);
+        for (int i = 0; i < events.size(); i++) {
+            /* The EventManager will ensure we get events of the correct type, so casting is safe */
+            ReserveEvent reserve = (ReserveEvent) events.get(i);
+            String user = event.getDiscordEvent().getAuthorAsMember().getTag();
+            if (reserve.isTimeless()) {
+                if (reserve.alreadyReserved(user)) {
+                    response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved**\n");
+                } else {
+                    response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved\n");
+                }
+            } else {
+                if (reserve.alreadyReserved(user)) {
+                    response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
+                                "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "**\n");
+                } else {
+                    response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
+                                "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "\n");
+                }
+            }
+        }
+        response.append(event.getDiscordEvent().getAuthorAsMember().getMention() + " has reserved to the **bolded events**\n");
+        response.append("Type !events [NAME] for more information about a specific reserve event");
+
+        return response.toString();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -166,7 +190,7 @@ public class ReserveEventCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder("VR", "1O").withIdentifiers("list", "mention", "ping", "manage").withRules("X", "I").build();
+        return new ParseBuilder("VO", "1O").withIdentifiers("list", "mention", "ping", "manage").withRules("X", "I").build();
     }
 
     /**
