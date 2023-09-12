@@ -11,9 +11,9 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.DiscordEvent;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -55,17 +55,17 @@ public class UnreserveCommand implements ParseableCommand {
                 if (reserve.getReserved() <= 0) {
                     eventManager.remove(reserve);
                     logger.append("\n- Removing event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
-                    handler.sendText("There are no more people reserved to this event, this event has been removed");
+                    handler.sendMessage("There are no more people reserved to this event, this event has been removed");
                 } else {
                     eventManager.update(reserve);
-                    handler.sendText("You have unreserved from " + reserve.getIdentifier());
+                    handler.sendMessage("You have unreserved from " + reserve.getIdentifier());
                 }
             } else {
-                handler.sendText("You are not reserved to " + reserve.getIdentifier());
+                handler.sendMessage("You are not reserved to " + reserve.getIdentifier());
             }
         } else {
             logger.append("\tEvent does not exist", LogDestination.NONAPI);
-            handler.sendText("Event " + eventName + " does not exist, type !events list to see all events");
+            handler.sendMessage("Event " + eventName + " does not exist, type !events list to see all events");
         }
         }, 0);
 

@@ -34,7 +34,7 @@ public class PollEventWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendText("Welcome to the poll event wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
+        handler.sendMessage("Welcome to the poll event wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         nextWindow("wizardOptions");
         end();
     }
@@ -83,7 +83,7 @@ public class PollEventWizard extends InputWizard {
 
         withResponse((response -> {
             PollEvent event = (PollEvent) eventManager.get(response);
-            handler.sendText(event.toString(), event.getIdentifier());
+            handler.sendMessage(event.toString(), event.getIdentifier());
         }), true, prompt, options);
     }
 
@@ -211,14 +211,14 @@ public class PollEventWizard extends InputWizard {
                 } else {
                     if (eventManager.exists(event, TYPE)) { // If reached by the "edit poll" window
                         eventManager.update(event);
-                        handler.sendText("Now has the following options:\n" + event.toString(), "Poll " + event.getIdentifier() + "updated");
+                        handler.sendMessage("Now has the following options:\n" + event.toString(), "Poll " + event.getIdentifier() + "updated");
                         goBack();
                     } else { // If reached by the "create poll" window
                         eventManager.add(event);
                         StringBuilder sb = new StringBuilder("A new poll " + event.getIdentifier() + " has been created with the following options:\n");
                         event.getOptions().forEach(option -> sb.append("- " + option + "\n"));
                         sb.append("This poll lasts for: " + SoapUtility.convertSecondsToHoursMinutes((int) event.until()) + ". Type !poll to vote!");
-                        handler.sendText(sb.toString(), "Poll Created");
+                        handler.sendMessage(sb.toString(), "Poll Created");
                         nextWindow("wizardOptions");
                     }
                 }
@@ -265,7 +265,7 @@ public class PollEventWizard extends InputWizard {
             event.removeVoter(voter);
             event.addVoter(response, voter);
             eventManager.update(event);
-            handler.sendText(getUser().getUsername() + " has voted for: " + response + ".\n Current votes are:\n" + event.toString(), event.getIdentifier());
+            handler.sendMessage(getUser().getUsername() + " has voted for: " + response + ".\n Current votes are:\n" + event.toString(), event.getIdentifier());
         }), true, prompt, optionsArr);
     }
 }

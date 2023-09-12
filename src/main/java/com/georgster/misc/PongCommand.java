@@ -7,7 +7,7 @@ import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -35,7 +35,7 @@ public class PongCommand implements Command {
             counter++;
         }
         logger.append("- Responding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
-        handler.sendText(fullMessage.toString().trim(), "You said ping " + counter + " times");
+        handler.sendMessage(fullMessage.toString().trim(), "You said ping " + counter + " times");
     }
 
     /**

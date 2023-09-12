@@ -586,7 +586,7 @@ public class CommandParser {
         for (int i = 0; i < all.size(); i++) {
             String checkedArg = currentParse.getCombined(i, i + requiredSpaces);
 
-            if (!currentParse.isAssigned(checkedArg)) {
+            if (!currentParse.isAssigned(checkedArg) && matchesRule(checkedArg, rulesList.get(index), currentParse)) {
                 currentParse.assign(checkedArg, index);
                 return true;
             }

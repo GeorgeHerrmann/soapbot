@@ -6,8 +6,8 @@ import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.TimedEvent;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 /**
  * A ReserveEvent object is created when a user uses the !reserve command
@@ -157,9 +157,9 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
         ActionWriter.writeAction("Starting event " + identifier);
         StringBuilder response = new StringBuilder("**" + reserved + "/" + numPeople + "** reserved with the following people:");
         for (String name : reservedUsers) { //We add the names of the people who reserved to the event
-            response.append("\n- " + handler.getMember(name).getMention());
+            response.append("\n- " + handler.getMemberByTag(name).getMention());
         }
-        handler.sendText(response.toString(), "Event " + identifier + " has started!");
+        handler.sendMessage(response.toString(), "Event " + identifier + " has started!");
     }
 
     /**

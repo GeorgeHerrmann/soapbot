@@ -1,7 +1,7 @@
 package com.georgster.events;
 
 import com.georgster.control.manager.Manageable;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 /**
  * A SOAPEvent is an object that holds information that will be used

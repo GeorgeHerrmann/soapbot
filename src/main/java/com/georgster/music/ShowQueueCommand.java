@@ -8,8 +8,8 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -47,12 +47,12 @@ public class ShowQueueCommand implements Command {
                 logger.append("- Queue too large, sending multiple responses to Discord", LogDestination.NONAPI);
 
                 String[] output = SoapUtility.splitFirst(response.toString());
-                handler.sendText(output[1], output[0]);
+                handler.sendMessage(output[1], output[0]);
                 response = new StringBuilder();
             }
             x++;
         }
-        handler.sendText(response.toString());
+        handler.sendMessage(response.toString());
     }
 
     /**

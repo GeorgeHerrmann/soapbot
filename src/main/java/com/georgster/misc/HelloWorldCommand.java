@@ -18,7 +18,7 @@ public class HelloWorldCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        event.getGuildInteractionHandler().sendText("Hello world!");
+        event.getGuildInteractionHandler().sendMessage("Hello world!");
         event.getLogger().append("- Responding to a !hello command request", LogDestination.API, LogDestination.NONAPI);
     }
 

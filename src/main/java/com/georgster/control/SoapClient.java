@@ -9,7 +9,7 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
 import com.georgster.profile.UserProfile;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.common.util.Snowflake;

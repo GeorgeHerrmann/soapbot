@@ -29,7 +29,7 @@ public class PermissionsWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendText("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
+        handler.sendMessage("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         nextWindow("managePermissions");
         end();
     }
@@ -60,7 +60,7 @@ public class PermissionsWizard extends InputWizard {
             } else if (response.equals("remove")) {
                 nextWindow("removePermission", group);
             } else if (response.equals("list")) {
-                handler.sendText("Permissions for " + group.getName() + ":\n" + group.getActions().toString(), TITLE);
+                handler.sendMessage("Permissions for " + group.getName() + ":\n" + group.getActions().toString(), TITLE);
             }
         }), true, "What would you like to do for " + group.getName() + "?", "add", "remove", "list");
     }

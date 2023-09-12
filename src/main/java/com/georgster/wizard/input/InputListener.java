@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.WizardState;
@@ -41,7 +42,7 @@ public abstract class InputListener {
     protected final String endString; // String to type to cancel the listener
     protected String title; // The title to attach to messages
     private final EventDispatcher dispatcher; // Dispatcher sending events
-    protected final GuildInteractionHandler handler; // Handler to interact with the Guild
+    protected final InteractionHandler handler; // Handler to interact with the Guild
     protected final User user; // The initial user of the listener
     private final List<Disposable> listeners; // The Disposable listeners
 
@@ -131,13 +132,13 @@ public abstract class InputListener {
         if (!sendPromptMessage) return;
 
         if (message == null) {
-            message = new WizardMessage(components.length == 0 ? handler.sendText(prompt, title) : handler.sendText(prompt, title, components));
+            message = new WizardMessage(components.length == 0 ? handler.sendMessage(prompt, title) : handler.sendMessage(prompt, title, components));
         } else {
             try {
                 if (apiCallOnSeparateThread) {
-                    ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> message.setMessage(components.length == 0 ? handler.editMessageContent(message.getMessage(), prompt, title) : handler.editMessageContent(message.getMessage(), prompt, title, components)));
+                    ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), prompt, title) : handler.editMessage(message.getMessage(), prompt, title, components)));
                 } else {
-                    message.setMessage(components.length == 0 ? handler.editMessageContent(message.getMessage(), prompt, title) : handler.editMessageContent(message.getMessage(), prompt, title, components));
+                    message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), prompt, title) : handler.editMessage(message.getMessage(), prompt, title, components));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -260,7 +261,7 @@ public abstract class InputListener {
      * @param newContent The string to replace the current Message's content with.
      */
     public void editCurrentMessageContent(String newContent) {
-        message.setMessage(handler.editMessageContent(message.getMessage(), newContent, title));
+        message.setMessage(handler.editMessage(message.getMessage(), newContent, title));
     }
 
     /**
@@ -274,7 +275,7 @@ public abstract class InputListener {
      * @param millis
      */
     public void editCurrentMessageContentDelay(String newContent, long millis) {
-        message.setMessage(handler.editMessageContent(message.getMessage(), newContent, title));
+        message.setMessage(handler.editMessage(message.getMessage(), newContent, title));
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {

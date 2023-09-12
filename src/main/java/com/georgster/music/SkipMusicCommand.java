@@ -8,10 +8,10 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.TrackScheduler;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -44,18 +44,18 @@ public class SkipMusicCommand implements ParseableCommand {
         if (scheduler.isActive()) {
             subcommands.on(parser -> {
                 scheduler.clearQueue();
-                handler.sendText("Skipping all tracks in the queue");
+                handler.sendMessage("Skipping all tracks in the queue");
             }, "all");
 
             subcommands.on(() -> {
                 logger.append("- No tracks found in queue", LogDestination.NONAPI);
-                handler.sendText("No tracks are currently playing");
+                handler.sendMessage("No tracks are currently playing");
             });
             player.stopTrack();
             logger.append("- Skipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
         } else {
             logger.append("- No tracks found in queue", LogDestination.NONAPI);
-            handler.sendText("No tracks are currently playing");
+            handler.sendMessage("No tracks are currently playing");
         }
     }
 

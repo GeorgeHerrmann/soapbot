@@ -9,7 +9,7 @@ import java.util.List;
 import com.georgster.Command;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
-import com.georgster.util.GuildInteractionHandler;
+import com.georgster.util.handler.GuildInteractionHandler;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -31,7 +31,7 @@ public class TheFinalShapeCommand implements Command {
         int hours = (int) currentTime.until(finalShapeReleaseDate.minusMonths(months).minusDays(days), ChronoUnit.HOURS);
         int minutes = (int) currentTime.until(finalShapeReleaseDate.minusMonths(months).minusDays(days).minusHours(hours), ChronoUnit.MINUTES);
 
-        handler.sendText("Destiny 2: The Final Shape drops in " + months + " months, " + days + " days, " + hours + " hours, " + minutes + " minutes.");
+        handler.sendMessage("Destiny 2: The Final Shape drops in " + months + " months, " + days + " days, " + hours + " hours, " + minutes + " minutes.");
         event.getLogger().append("- Showing how long until Destiny 2: The Final Shape", LogDestination.NONAPI, LogDestination.API);
     }
 

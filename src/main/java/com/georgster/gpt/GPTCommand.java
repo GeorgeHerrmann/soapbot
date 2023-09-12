@@ -9,8 +9,8 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
-import com.georgster.util.GuildInteractionHandler;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.IterableStringWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -47,14 +47,14 @@ public class GPTCommand implements ParseableCommand {
         
             if (responses.size() == 1) {
                 logger.append("- Only one response found, sending it in plain text", LogDestination.NONAPI);
-                handler.sendPlainText(responses.get(0));
+                handler.sendMessage(responses.get(0));
             } else if (responses.size() > 1) {
                 logger.append("- Multiple responses found, starting an iterable wizard to view them", LogDestination.NONAPI);
                 IterableStringWizard wizard = new IterableStringWizard(event, "Responses", responses);
                 wizard.begin();
             }
         } catch (RuntimeException e) {
-            handler.sendText("Sorry, I couldn't process this in time. Please try again");
+            handler.sendMessage("Sorry, I couldn't process this in time. Please try again");
             logger.append("- Request timed out", LogDestination.NONAPI);
         }
     }

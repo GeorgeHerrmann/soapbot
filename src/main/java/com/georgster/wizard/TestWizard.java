@@ -23,7 +23,7 @@ public class TestWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendText("Welcome to the test wizard. At any time you can react :x: to exit the wizard", TITLE);
+        handler.sendMessage("Welcome to the test wizard. At any time you can react :x: to exit the wizard", TITLE);
         nextWindow("windowOne");
         end();
     }
