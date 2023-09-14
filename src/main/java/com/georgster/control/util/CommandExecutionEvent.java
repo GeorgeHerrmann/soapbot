@@ -24,8 +24,8 @@ import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.SwappingWizard;
 
 import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 
@@ -108,15 +108,15 @@ public class CommandExecutionEvent {
 
     /**
      * Defers the reply of the inner {@code Event} in this event's {@link DiscordEvent} if
-     * necessary, and enables this event's {@link GuildInteractionHandler} reply deferring mode.
+     * the event can be deferred and this event's {@link Command} requests a deferral,
+     * enabling this event's {@link GuildInteractionHandler} reply deferral mode.
      * 
-     * @see GuildInteractionHandler#enableReplyDeferring()
+     * @see {@link GuildInteractionHandler#deferReply(DeferrableInteractionEvent)}
      */
     private void deferIfNecessary() {
-        if (discordEvent.getEvent() instanceof ApplicationCommandInteractionEvent && command.shouldDefer()) {
-            ApplicationCommandInteractionEvent event = (ApplicationCommandInteractionEvent) discordEvent.getEvent();
-            this.handler.enableReplyDeferring();
-            event.deferReply().block();
+        if (discordEvent.getEvent() instanceof DeferrableInteractionEvent && command.shouldDefer()) {
+            DeferrableInteractionEvent event = (DeferrableInteractionEvent) discordEvent.getEvent();
+            handler.deferReply(event);
         }
     }
 
