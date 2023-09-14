@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -13,12 +14,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements ParseableCommand { 
-    private static final boolean ACTIVE = false;
+    private static final boolean ACTIVE = true;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
+        event.getGuildInteractionHandler().sendMessage(SoapUtility.convertDate(event.getParsedArguments().get(0)));
         throw new UnsupportedOperationException("Test command is currently inactive");
     }
 

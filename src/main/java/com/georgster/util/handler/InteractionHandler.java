@@ -10,8 +10,24 @@ import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 
 public interface InteractionHandler {
+    /**
+     * Sends a {@link Message} with the provided {@code text} and no formatting based
+     * on this {@link InteractionHandler InteractionHandler's} configuration.
+     * 
+     * @param text The content for the message to send.
+     * @return The created {@link Message}.
+     */
     public Message sendPlainMessage(String text);
 
+    /**
+     * Sends a default formatted {@link Message} with the provided {@code text} based on this
+     * {@link InteractionHandler InteractionHandler's} configuration.
+     * <p>
+     * SOAP Bot's default formatting encapsulates the {@code text} in a {@code BLUE} embed.
+     * 
+     * @param text The content for the message to send.
+     * @return The created {@link Message}.
+     */
     public Message sendMessage(String text);
 
     public Message sendMessage(String text, String title);

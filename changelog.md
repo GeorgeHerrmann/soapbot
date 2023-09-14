@@ -263,3 +263,6 @@
             - Not completely done, more refactoring required
         - MultiLogger now uses a GuildInteractionHandler instance for discord logging
     - ReserveEventCommand now displays the list of events on an empty input
+
+2.511
+    - Fixed an issue where the String "cs2" was being forcefully considered a date by the CommandParser

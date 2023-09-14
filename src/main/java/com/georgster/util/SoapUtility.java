@@ -176,6 +176,9 @@ public class SoapUtility {
      * @throws IllegalArgumentException if the input date string is invalid
      */
     public static String convertDate(String inputDate) throws IllegalArgumentException {
+        if (inputDate.equalsIgnoreCase("cs2")) { // 
+            throw new IllegalArgumentException("Invalid date format, valid date formats are MMM dd, yyyy, MMM dd, yy, MMM dd, yyyy, tomorrow, and in x days");
+        }
         inputDate = insertSpaces(inputDate);
         LocalDate date = null;
         try {
