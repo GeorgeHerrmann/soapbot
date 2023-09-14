@@ -1,14 +1,12 @@
 package com.georgster.util.handler;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import com.georgster.util.Unwrapper;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
-import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -23,31 +21,46 @@ import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.InteractionReplyEditSpec;
 import discord4j.rest.util.Color;
 
-public final class GuildInteractionHandler implements InteractionHandler {
+/**
+ * An {@link InteractionHandler} for a Discord {@link Guild}.
+ * <p>
+ * A {@link GuildInteractionHandler}
+ * provides specific utility in getting information about a {@link Guild}, and will assist
+ * in replying to {@link ApplicationCommandInteractionEvent ApplicationCommandInteractionEvents}
+ * when set with {@link #setActiveCommandInteraction(ApplicationCommandInteractionEvent)}, and will
+ * work with reply deferrals when notified with {@link #enableReplyDeferring()}.
+ */
+public final class GuildInteractionHandler extends InteractionHandler {
     private Guild guild; // The guild being interacted with
-    private Optional<GuildMessageChannel> activeChannel; // The message channel this handler is working with
     private Optional<ApplicationCommandInteractionEvent> activeCommandInteraction;
-    private Optional<ComponentInteractionEvent> activeComponentInteraction;
 
     private boolean replyWasDeferred; // If a reply was deferred, requiring an edit on response.
 
+    /**
+     * Creates a new {@link GuildInteractionHandler} for the provided {@link Guild}.
+     * 
+     * @param guild The {@link Guild} to handle interactions for.
+     */
     public GuildInteractionHandler(Guild guild) {
+        super(guild.getId());
         this.guild = guild;
         this.replyWasDeferred = false;
 
-        this.activeChannel = Optional.empty();
         this.activeCommandInteraction = Optional.empty();
-        this.activeComponentInteraction = Optional.empty();
     }
 
     /**
-     * Switches this handler to reply deferring mode.
+     * Replies to the provided {@link DeferrableInteractionEvent} and
+     * switches this handler to reply deferral response mode.
      * <p>
-     * If reply deferring mode is on, this handler will edit replies from
+     * If reply deferral response mode is on, this handler will edit replies from
      * {@link ApplicationCommandInteractionEvent ApplicationCommandInteractionEvents},
      * and will automatically disable once a successful defer edit has been made.
+     * 
+     * @param event The {@link DeferrableInteractionEvent} to defer a reply to.
      */
-    public void enableReplyDeferring() {
+    public void deferReply(DeferrableInteractionEvent event) {
+        event.deferReply().block();
         this.replyWasDeferred = true;
     }
 
@@ -61,23 +74,19 @@ public final class GuildInteractionHandler implements InteractionHandler {
     }
 
     /**
-     * Updates this GuildInteractionHandler's {@link Guild} to the Updated {@link Guild}.
-     * 
-     * @param updatedGuild the updated {@link Guild} to replace the old {@link Guild}
-     */
-    public void setGuild(Guild guild) {
-        this.guild = Objects.requireNonNull(guild);
-    }
-
-    /**
-     * Sets the {@link GuildMessageChannel} this handler is actively performing actions in.
+     * {@inheritDoc}
      * <p>
-     * A {@link GuildInteractionHandler} will only perform channel-based actions in its {@code activeChannel}.
+     * A {@link GuildInteractionHandler} will only accept a {@link GuildMessageChannel}.
      * 
      * @param messageChannel The new {@code activeChannel}.
      */
-    public void setActiveMessageChannel(GuildMessageChannel messageChannel) {
-        this.activeChannel = Optional.of(messageChannel);
+    @Override
+    public void setActiveMessageChannel(MessageChannel messageChannel) {
+        if (messageChannel instanceof GuildMessageChannel) {
+            this.activeChannel = Optional.of(messageChannel);
+        } else {
+            throw new IllegalArgumentException("Only a GuildMessageChannel may be used for a GuildInteractionHandler");
+        }
     }
 
     /**
@@ -92,48 +101,12 @@ public final class GuildInteractionHandler implements InteractionHandler {
     }
 
     /**
-     * Sets the {@link ComponentInteractionEvent} that this handler is actively performing actions for.
-     * If there is an active {@link ComponentInteractionEvent}, the handler will edit the interaction instead
-     * of sending a message to the active channel on {@link #editMessageContent}.
-     * 
-     * @param interaction the new active select menu interaction event
-     */
-    public void setActiveComponentInteraction(ComponentInteractionEvent interaction) {
-        activeComponentInteraction = Optional.of(interaction);
-    }
-
-    /**
-     * Returns the {@link GuildMessageChannel} this handler is actively performing actions in, if present.
-     * 
-     * @return The {@link GuildMessageChannel} this handler is actively performing actions in, if present.
-     */
-    public Optional<GuildMessageChannel> getActiveGuildMessageChannel() {
-        return activeChannel;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public MessageChannel getActiveMessageChannel() {
-        return activeChannel.orElse(null);
-    }
-
-    /**
      * Returns the {@link ApplicationCommandInteractionEvent} this handler is actively performing actions for, if present.
      * 
      * @return The {@link ApplicationCommandInteractionEvent} this handler is actively performing actions for, if present.
      */
     public Optional<ApplicationCommandInteractionEvent> getActiveCommandInteraction() {
         return activeCommandInteraction;
-    }
-
-    /**
-     * Returns the {@link ComponentInteractionEvent} this handler is actively performing actions for, if present.
-     * 
-     * @return The {@link ComponentInteractionEvent} this handler is actively performing actions for, if present.
-     */
-    public Optional<ComponentInteractionEvent> getActiveComponentInteraction() {
-        return activeComponentInteraction;
     }
 
     /**
@@ -144,12 +117,12 @@ public final class GuildInteractionHandler implements InteractionHandler {
     }
 
     /**
-     * Kills the active {@link ComponentInteractionEvent}.
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
      */
-    public void killActiveComponentInteraction() {
-        this.activeComponentInteraction = Optional.empty();
-    }
-
+    @Override
     public Message sendPlainMessage(String text) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
@@ -166,6 +139,13 @@ public final class GuildInteractionHandler implements InteractionHandler {
         return message.getObject();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
     public Message sendMessage(String text) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
@@ -185,6 +165,13 @@ public final class GuildInteractionHandler implements InteractionHandler {
         return message.getObject();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
     public Message sendMessage(String text, String title) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
@@ -203,6 +190,13 @@ public final class GuildInteractionHandler implements InteractionHandler {
         return message.getObject();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
     public Message sendMessage(String text, String title, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
@@ -218,60 +212,6 @@ public final class GuildInteractionHandler implements InteractionHandler {
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
         }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, components))));
-        return message.getObject();
-    }
-
-    public Message editMessage(Message msg, String text) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
-
-        Unwrapper<Message> message = new Unwrapper<>();
-        activeComponentInteraction.ifPresentOrElse(interaction -> {
-            interaction.edit().withComponents().withEmbeds(embed).block();
-            Message returns = interaction.getReply().block();
-            killActiveComponentInteraction();
-            message.setObject(returns);
-        }, () -> message.setObject(msg.edit().withEmbeds(embed).withComponents().block()));
-
-        return message.getObject();
-    }
-
-    public Message editMessage(Message msg, String text, String title) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-
-        Unwrapper<Message> message = new Unwrapper<>();
-        activeComponentInteraction.ifPresentOrElse(interaction -> {
-            interaction.edit().withComponents().withEmbeds(embed).block();
-            Message returns = interaction.getReply().block();
-            killActiveComponentInteraction();
-            message.setObject(returns);
-        }, () -> message.setObject(msg.edit().withComponents().withEmbeds(embed).block()));
-
-        return message.getObject();
-    }
-
-    public Message editMessage(Message msg, String text, String title, LayoutComponent... components) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
-
-        Unwrapper<Message> message = new Unwrapper<>();
-        activeComponentInteraction.ifPresentOrElse(interaction -> {
-            interaction.edit().withEmbeds(embed).withComponents(components).block();
-            Message returns = interaction.getReply().block();
-            killActiveComponentInteraction();
-            message.setObject(returns);
-        }, () -> message.setObject(msg.edit().withEmbeds(embed).withComponents(components).block()));
-
-        return message.getObject();
-    }
-
-    public Message editPlainMessage(Message msg, String text) {
-        Unwrapper<Message> message = new Unwrapper<>();
-        activeComponentInteraction.ifPresentOrElse(interaction -> {
-            interaction.edit().withContent(text).block();
-            Message returns = interaction.getReply().block();
-            killActiveComponentInteraction();
-            message.setObject(returns);
-        }, () -> message.setObject(msg.edit().withContentOrNull(text).block()));
-
         return message.getObject();
     }
 
@@ -321,28 +261,10 @@ public final class GuildInteractionHandler implements InteractionHandler {
     }
 
     /**
-     * Returns the {@link Snowflake} ID of the guild as a String.
-     *  
-     * @return the {@link Snowflake} ID of the guild as a String.
-     */
-    public String getId() {
-        return guild.getId().asString();
-    }
-
-    /**
-     * Returns the {@link Snowflake} ID of the guild..
-     *  
-     * @return the {@link Snowflake} ID of the guild.
-     */
-    public Snowflake getIdFlake() {
-        return guild.getId();
-    }
-
-    /**
-     * Returns the {@code Member} in this {@code Guild} that has the given tag.
+     * Returns the {@link Member} in this {@link Guild} that has the given tag.
      * 
      * @param memberTag The tag of the member to get
-     * @return the {@code Member} in this {@code Guild} that has the given tag
+     * @return the {@link Member} in this {@link Guild} that has the given tag
      */
     public Member getMemberByTag(String memberTag) {
         for (Member member : getAllMembers()) {
@@ -353,10 +275,10 @@ public final class GuildInteractionHandler implements InteractionHandler {
     }
 
     /**
-     * Returns the {@code Member} in this {@code Guild} that has the given username.
+     * Returns the {@link Member} in this {@link Guild} that has the given username.
      * 
      * @param memberTag The username of the member to get
-     * @return the {@code Member} in this {@code Guild} that has the given username
+     * @return the {@link Member} in this {@link Guild} that has the given username
      */
     public Member getMemberByName(String memberName) {
         for (Member member : getAllMembers()) {
@@ -368,10 +290,10 @@ public final class GuildInteractionHandler implements InteractionHandler {
     }
 
     /**
-     * Returns the {@code Member} in this {@code Guild} that has the given id.
+     * Returns the {@link Member} in this {@link Guild} that has the given id.
      * 
      * @param memberTag The id of the member to get
-     * @return the {@code Member} in this {@code Guild} that has the given id
+     * @return the {@link Member} in this {@link Guild} that has the given id
      */
     public Member getMemberById(String id) {
         for (Member member : getAllMembers()) {
@@ -383,10 +305,10 @@ public final class GuildInteractionHandler implements InteractionHandler {
     }
 
     /**
-     * Returns the {@code Role} in this {@code Guild} that has the given name.
+     * Returns the {@link Role} in this {@link Guild} that has the given name.
      * 
      * @param roleName The name of the role to get
-     * @return the {@code Role} in this {@code Guild} that has the given name
+     * @return the {@link Role} in this {@link Guild} that has the given name
      */
     public Role getRole(String roleName) {
         for (Role role : getAllRoles()) {
