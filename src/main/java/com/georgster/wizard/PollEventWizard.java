@@ -160,7 +160,7 @@ public class PollEventWizard extends InputWizard {
                 nextWindow("wizardOptions");
             } else {
                 if (!eventManager.exists(response, TYPE)) {
-                    PollEvent event = new PollEvent(response, ((TextChannel) getChannel()).getName(), getUser().getTag());
+                    PollEvent event = new PollEvent(response, ((TextChannel) getChannel()).getName(), getUser().getId().asString());
                     nextWindow("setExpiration", event);
                 } else {
                     sendMessage("A poll with that title already exists, please pick a new name", TITLE);
@@ -252,7 +252,7 @@ public class PollEventWizard extends InputWizard {
      * @param event The PollEvent to vote for.
      */
     protected void pollVote(PollEvent event) {
-        String voter = getUser().getTag();
+        String voter = getUser().getId().asString();
 
         String prompt = "Please select an option to vote for.";
         List<String> options = event.getOptions();

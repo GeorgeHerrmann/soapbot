@@ -52,11 +52,11 @@ public class ReserveCommand implements ParseableCommand {
             if (eventManager.exists(reserve.getIdentifier(), TYPE)) {
                 if (!reserve.isFull()) {
                     discordEvent.getAuthorOptionally().ifPresent(user -> {
-                        if (reserve.alreadyReserved(user.getTag())) {
+                        if (reserve.alreadyReserved(user.getId().asString())) {
                             handler.sendMessage("You have already reserved for this event, type !unreserve " + reserve.getIdentifier() + " to unreserve");
                         } else {
                             logger.append("- Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
-                            reserve.addReserved(user.getTag());
+                            reserve.addReserved(user.getId().asString());
                             eventManager.update(reserve);
                             handler.sendMessage(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
                             reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
@@ -67,7 +67,7 @@ public class ReserveCommand implements ParseableCommand {
                 }
             } else {
                 logger.append("- Creating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
-                discordEvent.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getTag()));
+                discordEvent.getAuthorOptionally().ifPresent(user -> reserve.addReserved(user.getId().asString()));
                 eventManager.add(reserve);
                 String messageString = "";
                 if (reserve.isTimeless()) {

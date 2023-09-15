@@ -90,7 +90,7 @@ public class PollEventCommand implements ParseableCommand {
 
         subcommands.onIndexLast(title -> {
             if (!eventManager.exists(title, TYPE)) {
-                PollEvent pollEvent = new PollEvent(title, ((TextChannel) discordEvent.getChannel()).getName(), discordEvent.getAuthorAsMember().getTag());
+                PollEvent pollEvent = new PollEvent(title, ((TextChannel) discordEvent.getChannel()).getName(), discordEvent.getAuthorAsMember().getId().asString());
                 pollEvent.setDateTime("1 hour");
                 pollEvent.addOption("yes");
                 pollEvent.addOption("no");

@@ -47,26 +47,26 @@ public class UnreserveCommand implements ParseableCommand {
 
         subcommands.onIndex(eventName -> {
             if (eventManager.exists(eventName, TYPE)) {
-            ReserveEvent reserve = (ReserveEvent) eventManager.get(eventName);
-            if (reserve.alreadyReserved(discordEvent.getAuthorAsMember().getTag())) {
+                ReserveEvent reserve = (ReserveEvent) eventManager.get(eventName);
+                if (reserve.alreadyReserved(discordEvent.getAuthorAsMember().getId().asString())) {
 
-                logger.append("- Removing " + discordEvent.getAuthorAsMember().getTag() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
-                reserve.removeReserved(discordEvent.getAuthorAsMember().getTag());
-                if (reserve.getReserved() <= 0) {
-                    eventManager.remove(reserve);
-                    logger.append("\n- Removing event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
-                    handler.sendMessage("There are no more people reserved to this event, this event has been removed");
+                    logger.append("- Removing " + discordEvent.getAuthorAsMember().getUsername() + " from event " + reserve.getIdentifier(), LogDestination.NONAPI);
+                    reserve.removeReserved(discordEvent.getAuthorAsMember().getId().asString());
+                    if (reserve.getReserved() <= 0) {
+                        eventManager.remove(reserve);
+                        logger.append("\n- Removing event " + reserve.getIdentifier() + " from the list of events", LogDestination.NONAPI);
+                        handler.sendMessage("There are no more people reserved to this event, this event has been removed");
+                    } else {
+                        eventManager.update(reserve);
+                        handler.sendMessage("You have unreserved from " + reserve.getIdentifier());
+                    }
                 } else {
-                    eventManager.update(reserve);
-                    handler.sendMessage("You have unreserved from " + reserve.getIdentifier());
+                    handler.sendMessage("You are not reserved to " + reserve.getIdentifier());
                 }
             } else {
-                handler.sendMessage("You are not reserved to " + reserve.getIdentifier());
+                logger.append("\tEvent does not exist", LogDestination.NONAPI);
+                handler.sendMessage("Event " + eventName + " does not exist, type !events list to see all events");
             }
-        } else {
-            logger.append("\tEvent does not exist", LogDestination.NONAPI);
-            handler.sendMessage("Event " + eventName + " does not exist, type !events list to see all events");
-        }
         }, 0);
 
     }

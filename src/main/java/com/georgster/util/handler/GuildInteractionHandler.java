@@ -277,7 +277,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
     /**
      * Returns the {@link Member} in this {@link Guild} that has the given username.
      * 
-     * @param memberTag The username of the member to get
+     * @param memberName The username of the member to get
      * @return the {@link Member} in this {@link Guild} that has the given username
      */
     public Member getMemberByName(String memberName) {
@@ -292,7 +292,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
     /**
      * Returns the {@link Member} in this {@link Guild} that has the given id.
      * 
-     * @param memberTag The id of the member to get
+     * @param id The id of the member to get
      * @return the {@link Member} in this {@link Guild} that has the given id
      */
     public Member getMemberById(String id) {

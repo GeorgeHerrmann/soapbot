@@ -71,15 +71,15 @@ public class QuickPollWizard extends InputWizard {
             String response = output.getResponse();
             
             if (response.equalsIgnoreCase("U+2705")) {
-                localEvent.removeVoter(user.getTag());
+                localEvent.removeVoter(user.getId().asString());
                 if (output.getNotes().equals("added")) {
-                    localEvent.addVoter("yes", user.getTag());
+                    localEvent.addVoter("yes", user.getId().asString());
                 }
                 eventManager.update(localEvent);
             } else if (response.equalsIgnoreCase("U+274C")) {
-                localEvent.removeVoter(user.getTag());
+                localEvent.removeVoter(user.getId().asString());
                 if (output.getNotes().equals("added")) {
-                    localEvent.addVoter("no", user.getTag());
+                    localEvent.addVoter("no", user.getId().asString());
                 }
                 eventManager.update(localEvent);
             }

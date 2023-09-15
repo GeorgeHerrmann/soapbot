@@ -266,3 +266,7 @@
 
 2.511
     - Fixed an issue where the String "cs2" was being forcefully considered a date by the CommandParser
+
+2.522
+    - Slightly reworked InteractionHandler to have better logic control
+    - Updated all user-based Manageables to use Discord ID's instead of the old tags

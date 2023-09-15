@@ -83,7 +83,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 logger.append("- Mentioning all users that have reserved to event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
                 StringBuilder response = new StringBuilder();
-                reserve.getReservedUsers().forEach(user -> response.append(handler.getMemberByTag(user).getMention() + " "));
+                reserve.getReservedUsers().forEach(user -> response.append(handler.getMemberById(user).getMention() + " "));
                 handler.sendPlainMessage(response.toString()); //If sendMessage is used, the embed will prevent users from being mentioned
             } else {
                 handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events");
@@ -125,7 +125,7 @@ public class ReserveEventCommand implements ParseableCommand {
             }
             response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
             response.append("\nReserved users:\n");
-            reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberByTag(user).getMention() + "\n"));
+            reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberById(user).getMention() + "\n"));
 
             String[] output = SoapUtility.splitFirst(response.toString());
             handler.sendMessage(output[1], output[0]);
@@ -148,7 +148,7 @@ public class ReserveEventCommand implements ParseableCommand {
         for (int i = 0; i < events.size(); i++) {
             /* The EventManager will ensure we get events of the correct type, so casting is safe */
             ReserveEvent reserve = (ReserveEvent) events.get(i);
-            String user = event.getDiscordEvent().getAuthorAsMember().getTag();
+            String user = event.getDiscordEvent().getAuthorAsMember().getId().asString();
             if (reserve.isTimeless()) {
                 if (reserve.alreadyReserved(user)) {
                     response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved**\n");
