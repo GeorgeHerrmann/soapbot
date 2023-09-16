@@ -4,6 +4,7 @@ import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.permissions.PermissionGroup;
+import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 /**
@@ -54,6 +55,8 @@ public class PermissionsWizard extends InputWizard {
      * @param group The group to manage.
      */
     protected void groupOptions(PermissionGroup group) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         withResponse((response -> {
             if (response.equals("add")) {
                 nextWindow("addPermission", group);
@@ -62,7 +65,7 @@ public class PermissionsWizard extends InputWizard {
             } else if (response.equals("list")) {
                 handler.sendMessage("Permissions for " + group.getName() + ":\n" + group.getActions().toString(), TITLE);
             }
-        }), true, "What would you like to do for " + group.getName() + "?", "add", "remove", "list");
+        }), true, buttonListener, "What would you like to do for " + group.getName() + "?", "add", "remove", "list");
     }
 
     /**

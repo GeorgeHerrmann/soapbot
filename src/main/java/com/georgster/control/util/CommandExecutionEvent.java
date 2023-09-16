@@ -19,6 +19,7 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.UserInteractionHandler;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.SwappingWizard;
@@ -37,9 +38,10 @@ public class CommandExecutionEvent {
     
     private MultiLogger logger; // Used to log messages about the Event.
     private Command command; // The Command that is being executed
-    private DiscordEvent discordEvent; // A transformer used to extract data from the Discord Event that created this Event
+    private DiscordEvent discordEvent; // A wrapper used to extract data from the Discord Event that created this Event
     private ClientContext context; // The context of the SoapClient associated with the event.
     private GuildInteractionHandler handler;
+    private UserInteractionHandler userHandler;
     private ParsedArguments parsedArguments;
     private CommandParser parser;
 
@@ -56,6 +58,7 @@ public class CommandExecutionEvent {
         this.command = command;
         this.handler = new GuildInteractionHandler(discordEvent.getGuild()); // Used to manage the Command's interaction with the Guild
         handler.setActiveMessageChannel((GuildMessageChannel) discordEvent.getChannel());
+        this.userHandler = new UserInteractionHandler(discordEvent.getUser());
         if (discordEvent.isChatInteraction()) { // If the Event was fired from a slash command
             handler.setActiveCommandInteraction((ChatInputInteractionEvent) discordEvent.getEvent());
         }
@@ -68,11 +71,11 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Executes the {@code Command} in this Event on the calling thread.
+     * Executes the {@link Command} in this Event on the calling thread.
      * Prior to execution, the Command is checked for permission, and if the Command
-     * is a {@code ParseableCommand}, it is parsed for arguments.
-     * Messages are logged to the event's {@code MultiLogger}, and Guild interactions
-     * are handled by the event's {@code GuildManager}.
+     * is a {@link ParseableCommand}, it is parsed for arguments.
+     * Messages are logged to the event's {@link MultiLogger}, and Guild interactions
+     * are handled by the event's {@link GuildInteractionHandler}.
      */
     public void executeCommand() {
         logger.append("**Executing: " + command.getClass().getSimpleName() + "**\n", LogDestination.NONAPI);
@@ -107,7 +110,7 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Defers the reply of the inner {@code Event} in this event's {@link DiscordEvent} if
+     * Defers the reply of the inner {@link Event} in this event's {@link DiscordEvent} if
      * the event can be deferred and this event's {@link Command} requests a deferral,
      * enabling this event's {@link GuildInteractionHandler} reply deferral mode.
      * 
@@ -121,7 +124,7 @@ public class CommandExecutionEvent {
     }
 
    /**
-    * Executes the {@code Command} in this Event if the user has permission to do so.
+    * Executes the {@link Command} in this Event if the user has permission to do so.
     *
     * @param args the arguments for the Command
     */ 
@@ -145,54 +148,54 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Returns the {@code DiscordEvent} that triggered the firing of this Event.
+     * Returns the {@link DiscordEvent} that triggered the firing of this Event.
      * 
-     * @return the {@code DiscordEvent} that triggered the firing of this Event.
+     * @return the {@link DiscordEvent} that triggered the firing of this Event.
      */
     public DiscordEvent getDiscordEvent() {
         return discordEvent;
     }
 
     /**
-     * Returns the {@code PermissionsManager} for the SoapClient in this Event.
+     * Returns the {@link PermissionsManager} for the SoapClient in this Event.
      * 
-     * @return the {@code PermissionsManager} for the SoapClient in this Event.
+     * @return the {@link PermissionsManager} for the SoapClient in this Event.
      */
     public PermissionsManager getPermissionsManager() {
         return context.getPermissionsManager();
     }
 
     /**
-     * Returns the {@code SoapEventManager} for the SoapClient in this Event.
+     * Returns the {@link SoapEventManager} for the SoapClient in this Event.
      * 
-     * @return the {@code SoapEventManager} for the SoapClient in this Event.
+     * @return the {@link SoapEventManager} for the SoapClient in this Event.
      */
     public SoapEventManager getEventManager() {
         return context.getEventManager();
     }
 
     /**
-     * Returns the {@code UserProfileManager} for the SoapClient in this Event.
+     * Returns the {@link UserProfileManager} for the SoapClient in this Event.
      * 
-     * @return the {@code UserProfileManager} for the SoapClient in this Event.
+     * @return the {@link UserProfileManager} for the SoapClient in this Event.
      */
     public UserProfileManager getUserProfileManager() {
         return context.getUserProfileManager();
     }
 
     /**
-     * Returns the {@code CommandRegistry} for the SoapClient in this Event.
+     * Returns the {@link CommandRegistry} for the SoapClient in this Event.
      * 
-     * @return the {@code CommandRegistry} for the SoapClient in this Event.
+     * @return the {@link CommandRegistry} for the SoapClient in this Event.
      */
     public CommandRegistry getCommandRegistry() {
         return context.getCommandRegistry();
     }
 
     /**
-     * Returns the {@code AudioContext} for the SoapClient in this Event.
+     * Returns the {@link AudioContext} for the SoapClient in this Event.
      * 
-     * @return the {@code AudioContext} for the SoapClient in this Event.
+     * @return the {@link AudioContext} for the SoapClient in this Event.
      */
     public AudioContext getAudioContext() {
         return context.getAudioContext();
@@ -209,30 +212,39 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Returns the {@code EventDispatcher} that fired the Event in the Pipeline.
+     * Returns the {@link EventDispatcher} that fired the Event in the Pipeline.
      * 
-     * @return the {@code EventDispatcher} that fired the Event in the Pipeline.
+     * @return the {@link EventDispatcher} that fired the Event in the Pipeline.
      */
     public EventDispatcher getEventDispatcher() {
         return context.getDispatcher();
     }
 
     /**
-     * Returns the {@code MultiLogger} that is used to log messages about the Event.
+     * Returns the {@link MultiLogger} that is used to log messages about the Event.
      * 
-     * @return the {@code MultiLogger} that is used to log messages about the Event.
+     * @return the {@link MultiLogger} that is used to log messages about the Event.
      */
     public MultiLogger getLogger() {
         return logger;
     }
 
     /**
-     * Returns the {@code GuildInteractionHandler} that handles the Command's interaction with the Guild.
+     * Returns the {@link GuildInteractionHandler} that handles the Command's interaction with the Guild.
      * 
-     * @return the {@code GuildInteractionHandler} that handles the Command's interaction with the Guild.
+     * @return the {@link GuildInteractionHandler} that handles the Command's interaction with the Guild.
      */
     public GuildInteractionHandler getGuildInteractionHandler() {
         return handler;
+    }
+
+    /**
+     * Returns the {@link UserInteractionHandler} that handles the Command's interaction with the {@link User} who executed the command.
+     * 
+     * @return The {@link UserInteractionHandler} that handles the Command's interaction with the {@link User} who executed the command.
+     */
+    public UserInteractionHandler getUserInteractionHandler() {
+        return userHandler;
     }
 
     /**
@@ -245,10 +257,10 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Returns the {@code CommandParser} for the Command in this Event if
-     * the Command is a {@code ParseableCommand}.
+     * Returns the {@link CommandParser} for the Command in this Event if
+     * the Command is a {@link ParseableCommand}.
      * 
-     * @return the {@code CommandParser} for the Command in this Event.
+     * @return the {@link CommandParser} for the Command in this Event.
      */
     public CommandParser getCommandParser() {
         return parser;

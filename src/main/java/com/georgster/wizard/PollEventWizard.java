@@ -8,6 +8,7 @@ import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.poll.PollEvent;
 import com.georgster.util.SoapUtility;
+import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 import discord4j.core.object.entity.channel.TextChannel;
@@ -43,9 +44,13 @@ public class PollEventWizard extends InputWizard {
      * The main menu for the wizard.
      */
     protected void wizardOptions() {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(event, TITLE);
+
         String prompt = "What would you like to do?";
         String[] options = {"create a poll", "vote on a poll", "view a poll", "edit a poll"};
         withResponse((response -> {
+            loadDefaultListener(buttonListener); // Since we're using a different listener for the first window, we must load our default listener afterwards
+
             if (response.equals("create a poll")) {
                 nextWindow("createPoll");
             } else if (response.equals("vote on a poll")) {
@@ -67,7 +72,7 @@ public class PollEventWizard extends InputWizard {
                     nextWindow("pollEditOptions");
                 }
             }
-        }), false, prompt, options);
+        }), false, buttonListener, prompt, options);
     }
 
     /**
@@ -110,6 +115,8 @@ public class PollEventWizard extends InputWizard {
      * @param event The poll being edited.
      */
     protected void editPoll(PollEvent event) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "What would you like to edit about poll: " + event.getIdentifier() + "?";
         String[] options = {"add option", "remove option", "delete poll"};
 
@@ -122,7 +129,7 @@ public class PollEventWizard extends InputWizard {
                 eventManager.remove(event);
                 nextWindow("wizardOptions");
             }
-        }), true, prompt, options);
+        }), true, buttonListener, prompt, options);
     }
 
     /**
@@ -153,6 +160,8 @@ public class PollEventWizard extends InputWizard {
      * Window for creating the title for a poll.
      */
     protected void createPoll() {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "Please enter the prompt for the poll";
 
         withResponse((response -> {
@@ -166,7 +175,7 @@ public class PollEventWizard extends InputWizard {
                     sendMessage("A poll with that title already exists, please pick a new name", TITLE);
                 }
             }
-        }), true, prompt, "cancel");
+        }), true, buttonListener, prompt, "cancel");
     }
 
     /**
@@ -175,6 +184,8 @@ public class PollEventWizard extends InputWizard {
      * @param event The PollEvent that is being built.
      */
     protected void setExpiration(PollEvent event) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "Please type how long the poll should last for, or select use default setting.\n" +
                         "You can type things like: 10 days, 1 hour, 15 minutes";
         String[] options = {"use default setting"};
@@ -191,7 +202,7 @@ public class PollEventWizard extends InputWizard {
                     sendMessage(e.getMessage(), TITLE);
                 }
             }
-        }), true, prompt, options);
+        }), true, buttonListener, prompt, options);
 
     }
 
@@ -201,6 +212,8 @@ public class PollEventWizard extends InputWizard {
      * @param event The PollEvent that is being built.
      */
     protected void addOptions(PollEvent event) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "Please type the options for the poll, one at a time in their own messages, then click continue when complete.";
         String[] options = {"continue"};
 
@@ -226,7 +239,7 @@ public class PollEventWizard extends InputWizard {
                 event.addOption(response);
                 sendMessage("Added " + response + " to this event's options.", TITLE);
             }
-        }), true, prompt, options);
+        }), true, buttonListener, prompt, options);
     }
 
     /**

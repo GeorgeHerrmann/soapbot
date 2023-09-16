@@ -65,6 +65,7 @@ public abstract class InputWizard {
     private Deque<Method> activeFunctions; //Stack of methods that have been or are executing
     private Deque<Object[]> activeFunctionParams; //Stack of parameters for methods that have been or are executing
 
+    protected final CommandExecutionEvent event;
     protected User user;
     private boolean isActive;
     private boolean awaitingResponse;
@@ -88,6 +89,7 @@ public abstract class InputWizard {
         this.awaitingResponse = false;
         this.listener = listener;
         this.logger = event.getLogger();
+        this.event = event;
     }
 
     /**
@@ -548,6 +550,8 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponse(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
+        loadListener(newListener);
+
         String response = promptQuick(newListener, message, options);
         if (response == null) {
             isActive = false;
@@ -565,6 +569,8 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withFullResponse(Consumer<WizardResponse> withResponse, InputListener newListener, String message, String... options) {
+        loadListener(newListener);
+
         WizardResponse response = prompt(newListener, message, options);
         if (response == null) {
             isActive = false;
@@ -582,7 +588,9 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponseBack(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
-       String[] optionsWithBack;
+        loadListener(newListener);
+
+        String[] optionsWithBack;
         if (activeFunctions.size() > 1) {
             optionsWithBack = new String[options.length + 1];
             System.arraycopy(options, 0, optionsWithBack, 0, options.length);
@@ -609,7 +617,9 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withFullResponseBack(Consumer<WizardResponse> withResponse, InputListener newListener, String message, String... options) {
-       String[] optionsWithBack;
+        loadListener(newListener);
+
+        String[] optionsWithBack;
         if (activeFunctions.size() > 1) {
             optionsWithBack = new String[options.length + 1];
             System.arraycopy(options, 0, optionsWithBack, 0, options.length);
@@ -646,5 +656,29 @@ public abstract class InputWizard {
                 e.printStackTrace();
             }
         });
+    }
+
+    /**
+     * Loads the properties from this listener's default {@link InputListener}
+     * into the provided {@code newListener}.
+     * 
+     * @param newListener The new {@link InputListener} to load properties to.
+     */
+    private void loadListener(InputListener newListener) {
+        newListener.setCurrentMessage(listener.getCurrentMessage());
+        newListener.setTitle(listener.getTitle());
+        newListener.setInteractingMember(listener.getInteractingUser());
+    }
+
+    /**
+     * Loads the properties from the provided {@code newListener} into
+     * this listener's default {@link InputListener}.
+     * 
+     * @param newListener The new {@link InputListener} to load properties from.
+     */
+    protected void loadDefaultListener(InputListener newListener) {
+        listener.setCurrentMessage(newListener.getCurrentMessage());
+        listener.setTitle(newListener.getTitle());
+        listener.setInteractingMember(newListener.getInteractingUser());
     }
 }

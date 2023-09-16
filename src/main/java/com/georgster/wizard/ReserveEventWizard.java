@@ -8,6 +8,7 @@ import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.reserve.ReserveEvent;
 import com.georgster.util.SoapUtility;
+import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 /**
@@ -61,6 +62,8 @@ public class ReserveEventWizard extends InputWizard {
      * @param event The ReserveEvent to manage
      */
     protected void manageEvent(ReserveEvent event) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "What would you like to edit about reserve event " + event.getIdentifier() + " ?";
         String[] options = {"number of people", "time", "date", "delete event"};
         withResponse((response -> {
@@ -75,7 +78,7 @@ public class ReserveEventWizard extends InputWizard {
                 sendMessage("Removed reserve event " + event.getIdentifier(), TITLE);
                 nextWindow("manageEvents");
             }
-        }), true, prompt, options);
+        }), true, buttonListener, prompt, options);
     }
 
     /**
@@ -84,6 +87,8 @@ public class ReserveEventWizard extends InputWizard {
      * @param event The ReserveEvent to manage
      */
     protected void editNumPeople(ReserveEvent event) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "Current max number of reservees: " + event.getNumPeople() + "\n" + 
                     "Please enter the new maximum number of people that can reserve to " + event.getIdentifier();
 
@@ -97,7 +102,7 @@ public class ReserveEventWizard extends InputWizard {
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
             }
-        }), true, prompt);
+        }), true, buttonListener, prompt);
     }
 
     /**
@@ -106,6 +111,8 @@ public class ReserveEventWizard extends InputWizard {
      * @param event The ReserveEvent to manage
      */
     protected void editTime(ReserveEvent event) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "Current time: " + SoapUtility.convertToAmPm(event.getTime()) + "\n" + 
                     "Please enter the new time for " + event.getIdentifier();
 
@@ -118,7 +125,7 @@ public class ReserveEventWizard extends InputWizard {
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
             }
-        }), true, prompt);
+        }), true, buttonListener, prompt);
     }
 
     /**
@@ -127,6 +134,8 @@ public class ReserveEventWizard extends InputWizard {
      * @param event The ReserveEvent to manage
      */
     protected void editDate(ReserveEvent event) {
+        InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
+
         String prompt = "Current date: " + SoapUtility.formatDate(event.getDate()) + "\n" + 
                     "Please enter the new date for " + event.getIdentifier();
 
@@ -138,6 +147,6 @@ public class ReserveEventWizard extends InputWizard {
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
             }
-        }), true, prompt);
+        }), true, buttonListener, prompt);
     }
 }

@@ -337,39 +337,39 @@ public class CommandParser {
             return true;
         }
 
-        if (rule.contains("N") && !ParserRulesLogic.isNumber(arg)) {
+        if (rule.contains("N") && !ParserRulesAdvice.isNumber(arg)) {
             return false;
         }
 
-        if (rule.contains("T") && !ParserRulesLogic.isTime(arg)) {
+        if (rule.contains("T") && !ParserRulesAdvice.isTime(arg)) {
             return false;
         }
 
-        if (rule.contains("D") && !ParserRulesLogic.isDate(arg)) {
+        if (rule.contains("D") && !ParserRulesAdvice.isDate(arg)) {
             return false;
         }
 
-        if (rule.contains("Z") && !ParserRulesLogic.isFutureTimeIncrement(arg)) {
+        if (rule.contains("Z") && !ParserRulesAdvice.isFutureTimeIncrement(arg)) {
             return false;
         }
 
-        if (rule.contains("C") && !ParserRulesLogic.hasCharacter(arg)) {
+        if (rule.contains("C") && !ParserRulesAdvice.hasCharacter(arg)) {
             return false;
         }
 
-        if (rule.contains("S") && !ParserRulesLogic.isOnlyCharacters(arg)) {
+        if (rule.contains("S") && !ParserRulesAdvice.isOnlyCharacters(arg)) {
             return false;
         }
 
-        if (rule.contains("F") && !ParserRulesLogic.isFirst(arg, currentParse)) {
+        if (rule.contains("F") && !ParserRulesAdvice.isFirst(arg, currentParse)) {
             return false;
         }
 
-        if (rule.contains("L") && !ParserRulesLogic.isLast(arg, currentParse)) {
+        if (rule.contains("L") && !ParserRulesAdvice.isLast(arg, currentParse)) {
             return false;
         }
 
-        if (rule.contains("M") && !ParserRulesLogic.isMiddle(arg, currentParse)) {
+        if (rule.contains("M") && !ParserRulesAdvice.isMiddle(arg, currentParse)) {
             return false;
         }
 
@@ -377,11 +377,11 @@ public class CommandParser {
             return false;
         }
 
-        if (rule.contains("<") && !ParserRulesLogic.isBeforeIdentifier(arg, currentParse, identifiers)) {
+        if (rule.contains("<") && !ParserRulesAdvice.isBeforeIdentifier(arg, currentParse, identifiers)) {
             return false;
         }
 
-        if (rule.contains(">") && !ParserRulesLogic.isAfterIdentifier(arg, currentParse, identifiers)) {
+        if (rule.contains(">") && !ParserRulesAdvice.isAfterIdentifier(arg, currentParse, identifiers)) {
             return false;
         }
 

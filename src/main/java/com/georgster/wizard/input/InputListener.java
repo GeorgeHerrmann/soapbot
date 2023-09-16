@@ -43,7 +43,7 @@ public abstract class InputListener {
     protected String title; // The title to attach to messages
     private final EventDispatcher dispatcher; // Dispatcher sending events
     protected final InteractionHandler handler; // Handler to interact with the Guild
-    protected final User user; // The initial user of the listener
+    protected User user; // The initial user of the listener
     private final List<Disposable> listeners; // The Disposable listeners
 
     // Settings for this listener
@@ -131,7 +131,7 @@ public abstract class InputListener {
     protected void sendPromptMessage(String prompt, LayoutComponent... components) {
         if (!sendPromptMessage) return;
 
-        if (message == null) {
+        if (message == null || message.getMessage() == null) {
             message = new WizardMessage(components.length == 0 ? handler.sendMessage(prompt, title) : handler.sendMessage(prompt, title, components));
         } else {
             try {
@@ -400,7 +400,11 @@ public abstract class InputListener {
      * @param message The new message.
      */
     public void setCurrentMessage(Message message) {
-        this.message.setMessage(message);
+        if (this.message != null) {
+            this.message.setMessage(message);
+        } else {
+            this.message = new WizardMessage(message);
+        }
     }
 
     /**
@@ -411,7 +415,10 @@ public abstract class InputListener {
      * @param user The new primary interacting {@link User} for this listener.
      */
     public void setInteractingMember(User user) {
-        recentState.setUser(user);
+        this.user = user;
+        if (recentState != null) {
+            recentState.setUser(user);
+        }
     }
 
     /**
@@ -431,5 +438,36 @@ public abstract class InputListener {
      */
     public InputListenerBuilder builder() {
         return new InputListenerBuilder(this);
+    }
+
+    /**
+     * Returns the current interacting {@link User} for this listener.
+     * 
+     * @return The current interacting {@link User} for this listener.
+     */
+    public User getInteractingUser() {
+        return user;
+    }
+
+    /**
+     * Returns the Title of this listener.
+     * 
+     * @return The Title of this listener.
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Returns the current {@link Message} of this listener.
+     * 
+     * @return The current {@link Message} of this listener.
+     */
+    public Message getCurrentMessage() {
+        if (message != null) {
+            return message.getMessage();
+        } else {
+            return null;
+        }
     }
 }

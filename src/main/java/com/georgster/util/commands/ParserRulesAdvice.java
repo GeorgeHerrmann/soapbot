@@ -5,9 +5,12 @@ import java.util.List;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser.ParseContext;
 
-public class ParserRulesLogic {
+/**
+ * Advice for determining matching of a CommandParser rule.
+ */
+public class ParserRulesAdvice {
     
-    private ParserRulesLogic() {
+    private ParserRulesAdvice() {
         throw new UnsupportedOperationException("Utility class for a CommandParser");
     }
 

@@ -267,6 +267,13 @@
 2.511
     - Fixed an issue where the String "cs2" was being forcefully considered a date by the CommandParser
 
-2.522
+2.512
     - Slightly reworked InteractionHandler to have better logic control
     - Updated all user-based Manageables to use Discord ID's instead of the old tags
+
+2.513
+    - Created functionality for InputListener's to "copy" their critical properties between eachother
+        - Allows for InputWizard's to have different InputListener's for different windows.
+    - Updated the ReserveEventWizard, PollEventWizard and PermissionsWizard to have ButtonMessageListeners for
+      certain windows, making them easier to navigate and understand.
+    - Created a UserInteractionHandler, which will handler interactions between SOAP Bot and a User.

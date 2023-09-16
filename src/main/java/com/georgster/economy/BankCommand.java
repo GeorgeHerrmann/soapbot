@@ -75,6 +75,9 @@ public class BankCommand implements ParseableCommand {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public CommandParser getCommandParser() {
         return new ParseBuilder("1O").withIdentifiers("leaderboard", "lb").build();
     }
