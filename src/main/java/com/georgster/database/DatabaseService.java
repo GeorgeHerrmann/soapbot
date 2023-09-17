@@ -14,9 +14,9 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
+import com.georgster.control.manager.Manageable;
 import com.georgster.database.adapter.DatabaseObjectClassAdapter;
 import com.georgster.util.Unwrapper;
-import com.google.gson.Gson;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -40,7 +40,7 @@ import static com.mongodb.client.model.Filters.eq;
  * 
  * @param T The type of object to store or retrieve.
  */
-public class DatabaseService<T> {
+public class DatabaseService<T extends Manageable> {
 
     private static final CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
     private static final CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
@@ -98,10 +98,9 @@ public class DatabaseService<T> {
      */
     public void addObject(T object) {
         withDatabase(database -> {
-            Gson gson = new Gson();
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             
-            Document document = Document.parse(gson.toJson(object));
+            Document document = Document.parse(object.deserialize());
             collection.insertOne(document);
         });
     }
@@ -115,11 +114,10 @@ public class DatabaseService<T> {
      */
     public void updateObject(String identifierName, String identifierValue, T object) {
         withDatabase(database -> {
-            Gson gson = new Gson();
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             Bson filter = eq(identifierName, identifierValue);
 
-            Document document = Document.parse(gson.toJson(object));
+            Document document = Document.parse(object.deserialize());
             collection.replaceOne(filter, document);
         });
     }
@@ -176,9 +174,8 @@ public class DatabaseService<T> {
             Bson query = eq(identifierName, identifierValue);
             Bson projection = Projections.fields(Projections.excludeId());
             
-            Gson gson = new Gson();
             try {
-                object.setObject(gson.fromJson(collection.find(query).projection(projection).first().toJson(), classType));
+                object.setObject(Manageable.serialize(collection.find(query).projection(projection).first().toJson(), classType));
             } catch (Exception e) {
                 object.setObject(null);
             }
@@ -202,11 +199,10 @@ public class DatabaseService<T> {
             Bson query = eq(identifierName, identifierValue);
             Bson projection = Projections.fields(Projections.excludeId());
             
-            Gson gson = new Gson();
 
             try {
                 String json = collection.find(query).projection(projection).first().toJson();
-                object.setObject(gson.fromJson(json, deserializer.getClass(json)));
+                object.setObject(Manageable.serialize(json, deserializer.getClass(json)));
             } catch (Exception e) {
                 object.setObject(null);
             }
@@ -225,8 +221,7 @@ public class DatabaseService<T> {
         withDatabase(database -> {
             MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
             List<T> list = new ArrayList<>();
-            Gson gson = new Gson();
-            collection.find().forEach((Consumer<Document>) document -> list.add(gson.fromJson(document.toJson(), classType)));
+            collection.find().forEach((Consumer<Document>) document -> list.add(Manageable.serialize(document.toJson(), classType)));
             objects.setObject(list);
         });
         if (objects.getObject() == null) return Collections.emptyList();
@@ -246,10 +241,9 @@ public class DatabaseService<T> {
             List<T> list = new ArrayList<>();
             collection.find().forEach((Consumer<Document>) document -> {
                 
-                Gson gson = new Gson();
                 String json = document.toJson();
                 if (!json.isEmpty()) {
-                    list.add(gson.fromJson(json, deserializer.getClass(json)));
+                    list.add(Manageable.serialize(json, deserializer.getClass(json)));
                 }
             });
             objects.setObject(list);
