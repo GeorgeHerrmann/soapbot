@@ -50,7 +50,7 @@ public class UserProfileManager extends SoapManager<UserProfile> {
     }
 
     /**
-     * Updates all user profiles information with the data in the {@code GuildCreateEvent}.
+     * Updates all user profiles information with the data in the {@link GuildCreateEvent}.
      * 
      * @param event The event with all member information.
      */
@@ -72,10 +72,13 @@ public class UserProfileManager extends SoapManager<UserProfile> {
     }
 
     /**
-     * Creates a new ChatCompletion for the provided {@code Member} based on the given
+     * Creates a new ChatCompletion for the provided {@link Member} based on the given
      * prompt and returns all responses.
+     * <p>
      * The response will be based on the previous ten chat completions for that member
-     * in this manager. Uses OpenAI's gpt-3.5-turbo model.
+     * in this manager.
+     * <p>
+     * Uses OpenAI's gpt-3.5-turbo model.
      * <p>
      * <b>Note:</b> Only the first response will be saved in the member's chat completion log.
      * 
@@ -97,7 +100,7 @@ public class UserProfileManager extends SoapManager<UserProfile> {
     }
 
     /**
-     * Creates a new ChatCompletion for the provided {@code Member} based on the given
+     * Creates a new ChatCompletion for the provided {@link Member} based on the given
      * prompt and returns the first response.
      * The response will be based on the previous ten chat completions for that member
      * in this manager. Uses OpenAI's gpt-3.5-turbo model.

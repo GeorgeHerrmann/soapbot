@@ -12,16 +12,15 @@ import com.georgster.events.SoapEventType;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 /**
- * Manages all {@code SoapEvents} for a given {@code SoapClient} and
- * handles the scheduling of events through the {@code SoapEventHandler}.
+ * Manages all {@link SoapEvent SoapEvents} for a given {@code SoapClient} and
+ * handles the scheduling of events through the {@link SoapEventHandler}.
  */
 public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
 
     /**
-     * Constructs a {@code SoapEventManager} for the given {@code Guild}
-     * controlled by a {@code SoapClient}.
+     * Constructs a {@link SoapEventManager} for the given {@code ClientContext}.
      * 
-     * @param context the context of the client controlling the guild
+     * @param context The context of the client controlling the guild
      */
     public SoapEventManager(ClientContext context) {
         super(context, ProfileType.EVENTS, SoapEvent.class, "identifier", new SoapEventClassAdapter());

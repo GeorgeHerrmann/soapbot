@@ -23,7 +23,7 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
- * Represents the command for reserving to and creating events.
+ * Represents the command for reserving to and creating reserve events.
  */
 public class ReserveCommand implements ParseableCommand {
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
@@ -31,9 +31,9 @@ public class ReserveCommand implements ParseableCommand {
     private SoapEventManager eventManager;
 
     /**
-     * Creates a new {@code ReserveCommand} with the given {@code ClientContext}.
+     * Creates a new {@link ReserveCommand} with the given {@link ClientContext}.
      * 
-     * @param context The context to get the {@code EventManager} from
+     * @param context The context to get the {@link SoapEventManager} from
      */
     public ReserveCommand(ClientContext context) {
         this.eventManager = context.getEventManager();

@@ -29,8 +29,8 @@ public class ClientContext {
     private RestClient restClient;
 
     /**
-     * Creates a new ClientContext with the given {@code EventDispatcher} and
-     * {@code Guild}.
+     * Creates a new ClientContext with the given {@link EventDispatcher} and
+     * {@link Guild}.
      * 
      * @param dispatcher the event dispatcher
      * @param guild     the guild
@@ -42,8 +42,8 @@ public class ClientContext {
     }
 
     /**
-     * Creates a new ClientContext with the given {@code EventDispatcher},
-     * {@code Guild}, and {@code RestClient}.
+     * Creates a new ClientContext with the given {@link EventDispatcher},
+     * {@link Guild}, and {@link RestClient}.
      * 
      * @param dispatcher    the event dispatcher
      * @param guild        the guild

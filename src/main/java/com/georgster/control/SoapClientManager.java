@@ -21,17 +21,13 @@ import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
 
 /**
- * Manages all {@code SoapClient}s for each {@code Guild} SOAP Bot is in.
+ * Manages all {@link SoapClient SoapClients} for each {@code Guild} SOAP Bot is in.
  * Each {@code Guild} gets a SoapClient which this manager will
- * distribute events to. This manager also houses the {@code GatewayDiscordClient},
+ * distribute events to. This manager also houses the {@link GatewayDiscordClient},
  * maintaining the active connection to Discord's API.
  */
 public final class SoapClientManager {
-    /*
-     * Using a Map means each Guild will have, at most, one SoapClient, 
-     * which is easily accessible by its unique Snowflake (containing the Guild's ID). 
-     */
-    private final Map<Snowflake, SoapClient> clients;
+    private final Map<Snowflake, SoapClient> clients; // Maps each Guild's Snowflake ID to its client
     private final GatewayDiscordClient discordClient; //Maintains the connection to Discord
     private final EventDispatcher dispatcher;
     private boolean testMode;
@@ -58,7 +54,7 @@ public final class SoapClientManager {
 
     /**
      * Finalizes the login process to discord by blocking the current thread until the
-     * {@code GatewayDiscordClient} disconnects. This method should be called last after this manager
+     * {@link GatewayDiscordClient} disconnects. This method should be called last after this manager
      * has been set up. Until this method is called, SOAP Bot is not fully logged in.
      */
     public void start() {
@@ -106,14 +102,14 @@ public final class SoapClientManager {
     }
 
     /**
-     * Creates a new {@code SoapClient} for the associated {@code Guild} in the
-     * {@code GuildCreateEvent} and distributes the event to the new client.
-     * 
-     * The {@code GuildCreateEvent} is fired each time SOAP Bot "logs in" to a {@code Guild},
+     * Creates a new {@link SoapClient} for the associated {@code Guild} in the
+     * {@link GuildCreateEvent} and distributes the event to the new client.
+     * <p>
+     * The {@link GuildCreateEvent} is fired each time SOAP Bot "logs in" to a {@code Guild},
      * either upon program start, when it is added to a new {@code Guild}, or upon reconnection
-     * if the {@code GatewayDiscordClient}'s connection was dropped.
+     * if the {@link GatewayDiscordClient}'s connection was dropped.
      * 
-     * @param event The GuildCreateEvent that was fired.
+     * @param event The {@link GuildCreateEvent} that was fired.
      */
     private void distributeClient(GuildCreateEvent event) {
         Snowflake flake = event.getGuild().getId();
@@ -123,7 +119,7 @@ public final class SoapClientManager {
 
     /**
      * Enables test mode for all SoapClients. If test mode is enabled, all SoapClients will
-     * only respond to commands via a {@code MessageCreateEvent} if they begin with an additional {@code !}.
+     * only respond to commands via a {@link MessageCreateEvent} if they begin with an additional {@code !}.
      */
     public void enableTestMode() {
         this.testMode = true;

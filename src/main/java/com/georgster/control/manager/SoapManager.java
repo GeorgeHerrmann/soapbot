@@ -12,6 +12,8 @@ import discord4j.core.object.entity.Guild;
 
 /**
  * A framework for managing non-extending nor implementing objects that are stored in SOAPBot's database.
+ * 
+ * @see {@link AbstractSoapManager} for a framework for managing extending or implementing objects.
  */
 public abstract class SoapManager<T extends Manageable> {
     protected String identifierName; // The name of the identifier field in the database.

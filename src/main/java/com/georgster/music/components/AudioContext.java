@@ -10,7 +10,7 @@ import discord4j.voice.AudioProvider;
 
 /**
  * An aggregation of all the objects SOAP Bot uses to play audio in a single
- * {@code Guild}. Each {@code SoapClient} has its own {@code AudioContext}.
+ * {@code Guild}. Each {@code SoapClient} has its own {@link AudioContext}.
  */
 public class AudioContext {
     private final AudioPlayerManager playerManager;
@@ -19,7 +19,7 @@ public class AudioContext {
     private final AudioProvider provider;
 
     /**
-     * Creates a new {@code AudioContext}.
+     * Creates a new {@ AudioContext}.
      */
     public AudioContext() {
         playerManager = new DefaultAudioPlayerManager();
@@ -32,36 +32,36 @@ public class AudioContext {
     }
 
     /**
-     * Returns the {@code AudioPlayerManager} used by this {@code AudioContext}.
+     * Returns the {@link AudioPlayerManager} used by this {@link AudioContext}.
      * 
-     * @return the {@code AudioPlayerManager} used by this {@code AudioContext}
+     * @return the {@link AudioPlayerManager} used by this {@link AudioContext}
      */
     public AudioPlayerManager getPlayerManager() {
         return playerManager;
     }
 
     /**
-     * Returns the {@code AudioPlayer} used by this {@code AudioContext}.
+     * Returns the {@link AudioPlayer} used by this {@link AudioContext}.
      * 
-     * @return the {@code AudioPlayer} used by this {@code AudioContext}
+     * @return the {@link AudioPlayer} used by this {@link AudioContext}
      */
     public AudioPlayer getPlayer() {
         return player;
     }
 
     /**
-     * Returns the {@code TrackScheduler} used by this {@code AudioContext}.
+     * Returns the {@link TrackScheduler} used by this {@link AudioContext}.
      * 
-     * @return the {@code TrackScheduler} used by this {@code AudioContext}
+     * @return the {@link TrackScheduler} used by this {@link AudioContext}
      */
     public TrackScheduler getScheduler() {
         return scheduler;
     }
 
     /**
-     * Returns the {@code AudioProvider} used by this {@code AudioContext}.
+     * Returns the {@link AudioProvider} used by this {@link AudioContext}.
      * 
-     * @return the {@code AudioProvider} used by this {@code AudioContext}
+     * @return the {@link AudioProvider} used by this {@link AudioContext}
      */
     public AudioProvider getProvider() {
         return provider;

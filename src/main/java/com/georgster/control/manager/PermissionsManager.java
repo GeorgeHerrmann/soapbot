@@ -15,12 +15,12 @@ import discord4j.core.object.entity.Role;
 import discord4j.rest.util.Permission;
 
 /**
- * Manages all {@code PermissionGroups} for a given {@code SoapClient}.
+ * Manages all {@link PermissionGroup PermissionGroups} for a given {@code SoapClient}.
  */
 public class PermissionsManager extends SoapManager<PermissionGroup> {
 
     /**
-     * Constructs a {@code PermissionsManager} for the {@code Guild} in the given {@code ClientContext}
+     * Constructs a {@link PermissionsManager} for the given {@link ClientContext}
      * 
      * @param context the context carrying the {@code Guild} to manage permissions for
      */
@@ -29,7 +29,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     }
 
     /**
-     * Sets up a basic configuration for the {@code PermissionGroups} in this manager based on the roles in the guild
+     * Sets up a basic configuration for the {@link PermissionGroup PermissionGroups} in this manager based on the roles in the guild
      * if it does not already have a configuration and loads the groups that do into this manager.
      */
     @Override
@@ -64,11 +64,11 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     }
 
     /**
-     * Checks if a {@code Member} has a given {@code PermissibleAction} in any of their roles.
+     * Checks if a {@link Member} has a given {@link PermissibleAction} in any of their roles.
      * 
-     * @param member the {@code Member} to check
-     * @param action the {@code PermissibleAction} to check for
-     * @return whether or not the {@code Member} has the {@code PermissibleAction}
+     * @param member the {@link Member} to check
+     * @param action the {@link PermissibleAction} to check for
+     * @return True if the {@link Member} has the {@link PermissibleAction}, false otherwise.
      */
     public boolean hasPermission(Member member, PermissibleAction action) {
         if (member.getTag().equals("georgster#0")) return true;
@@ -77,7 +77,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     }
 
     /**
-     * Updates an existing PermissionGroup based on the update of a Discord Role.
+     * Updates an existing {@link PermissionGroup} based on the update of a Discord Role.
      * 
      * @param event The event fired from a role update.
      */
@@ -100,7 +100,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
 
 
     /**
-     * Adds a new PermissionGroup based on a created Discord Role.
+     * Adds a new {@link PermissionGroup} based on a created Discord Role.
      * 
      * @param event The event fired from a created role.
      */
@@ -132,28 +132,28 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     }
 
     /**
-     * Checks if a {@code PermissionGroup} exists in the database.
+     * Checks if a {@link PermissionGroup} exists in the database.
      * 
-     * @param group the {@code PermissionGroup} to check for
-     * @return whether or not the {@code PermissionGroup} exists in the database
+     * @param group the {@link PermissionGroup} to check for
+     * @return whether or not the {@link PermissionGroup} exists in the database
      */
     public boolean databaseHasGroup(PermissionGroup group) {
         return dbService.objectExists(identifierName, group.getName());
     }
 
     /**
-     * Returns whether or not the database has any {@code PermissionGroups} in it.
+     * Returns whether or not the database has any {@link PermissionGroup PermissionGroups} in it.
      * 
-     * @return whether or not the database has any {@code PermissionGroups} in it
+     * @return True if the database has any {@link PermissionGroup PermissionGroups} in it, false otherwise.
      */
     public boolean databaseHasGroups() {
         return !dbService.getAllObjects().isEmpty();
     }
 
     /**
-     * Returns all {@code PermissionGroups} in this manager as a list of their names.
+     * Returns all {@link PermissionGroup PermissionGroups} in this manager as a list of their names.
      * 
-     * @return all {@code PermissionGroups} in this manager as a list of their names
+     * @return All {@link PermissionGroup PermissionGroups} in this manager as a list of their names
      */
     public List<String> getGroupNames() {
         List<String> names = new ArrayList<>();
@@ -162,10 +162,10 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     }
 
     /**
-     * A utility method for get a {@code PermissibleAction} from a string.
+     * A utility method for get a {@link PermissibleAction} from a string.
      * 
-     * @param name the name of the {@code PermissibleAction} to get
-     * @return the {@code PermissibleAction} with the given name
+     * @param name the name of the {@link PermissibleAction} to get
+     * @return the {@link PermissibleAction} with the given name
      */
     public static PermissibleAction getAction(String name) {
         return PermissibleAction.valueOf(name);

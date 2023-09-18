@@ -30,8 +30,10 @@ public final class SoapClient {
     private final ClientContext context;
     
     /**
-     * Creates a new {@code SoapClient} for the associated {@code Guild} represented
-     * by its unique {@code Snowflake} and initializes its systems.
+     * Creates a new {@link SoapClient} for the associated {@code Guild} represented
+     * by its unique {@link Snowflake} and initializes its systems.
+     * 
+     * @param context The context of the {@link SoapClientManager} that created this {@link SoapClient}.
      */
     protected SoapClient(ClientContext context) {
         flake = context.getGuild().getId();
@@ -45,11 +47,13 @@ public final class SoapClient {
     }
 
     /**
-     * Defines SOAP Bot's actions when a GuildCreateEvent is fired.
-     * Here, we will check if the associated guild and all its members 
-     * have up to date profile schemes, and if not, we will create them.
+     * Defines SOAP Bot's actions when a {@link GuildCreateEvent} is fired.
+     * <p>
+     * Upon the firing of a {@link GuildCreateEvent}, SOAP Bot will initialize
+     * all its {@link SoapManager SoapManagers} and update all {@link UserProfile UserProfiles}
+     * for the {@code Guild} in the event.
      * 
-     * @param event The GuildCreateEvent that was fired.
+     * @param event The {@link GuildCreateEvent} that was fired.
      */
     protected void onGuildCreate(GuildCreateEvent event) {
         ThreadPoolFactory.createThreadPoolManager(event.getGuild());
@@ -67,7 +71,10 @@ public final class SoapClient {
     }
 
     /**
-     * Defines SOAP Bot's actions when a MemberJoinEvent is fired.
+     * Defines SOAP Bot's actions when a {@link MemberJoinEvent} is fired.
+     * <p>
+     * Upon the firing of a {@link MemberJoinEvent}, SOAP Bot will create a new
+     * {@link UserProfile} for the {@link discord4j.core.object.entity.Member Member}.
      * 
      * @param event The MemberJoinEvent that was fired.
      */
@@ -80,47 +87,57 @@ public final class SoapClient {
     }
 
     /**
-     * Defines SOAP Bot's actions when a MessageCreateEvent is fired.
-     * Here, we will send the message to the CommandRegistry to be parsed have it
-     * execute the associated command if it is a valid command.
+     * Defines SOAP Bot's actions when a {@link MessageCreateEvent} is fired.
+     * <p>
+     * Upon the firing of a {@link MessageCreateEvent}, SOAP Bot will distribute
+     * the event to its {@link CommandRegistry} to be handled.
      * 
-     * @param event The MessageCreateEvent that was fired.
+     * @param event The {@link MessageCreateEvent} that was fired.
      */
     protected void onMessageCreate(MessageCreateEvent event) {
         this.context.getCommandRegistry().getAndExecute(event);
     }
 
     /**
-     * Defines SOAP Bot's actions when a RoleUpdateEvent is fired.
+     * Defines SOAP Bot's actions when a {@link RoleUpdateEvent} is fired.
+     * <p>
+     * Upon the firing of a {@link RoleUpdateEvent}, SOAP Bot will update its
+     * {@link PermissionsManager} to reflect the changes made to the {@link discord4j.core.object.entity.Role Role}.
      * 
-     * @param event The RoleUpdateEvent that was fired.
+     * @param event The {@link RoleUpdateEvent} that was fired.
      */
     protected void onRoleUpdate(RoleUpdateEvent event) {
         this.context.getPermissionsManager().updateFromEvent(event);
     }
 
     /**
-     * Defines SOAP Bot's actions when a RoleCreateEvent is fired.
+     * Defines SOAP Bot's actions when a {@link RoleCreateEvent} is fired.
+     * <p>
+     * Upon the firing of a {@link RoleCreateEvent}, SOAP Bot will update its
+     * {@link PermissionsManager} with the new {@link discord4j.core.object.entity.Role Role}.
      * 
-     * @param event The RoleCreateEvent that was fired.
+     * @param event The {@link RoleCreateEvent} that was fired.
      */
     protected void onRoleCreate(RoleCreateEvent event) {
         this.context.getPermissionsManager().addFromEvent(event);
     }
 
     /**
-     * Defines SOAP Bot's actions when a ChatInputInteractionEvent is fired.
+     * Defines SOAP Bot's actions when a {@link ChatInputInteractionEvent} is fired.
+     * <p>
+     * Upon the firing of a {@link ChatInputInteractionEvent}, SOAP Bot will distribute
+     * the event to its {@link CommandRegistry} to be handled.
      * 
-     * @param event The ChatInputInteractionEvent that was fired.
+     * @param event The {@link ChatInputInteractionEvent} that was fired.
      */
     protected void onChatInputInteraction(ChatInputInteractionEvent event) {
         this.context.getCommandRegistry().getAndExecute(event);
     }
 
     /**
-     * Gets the {@code Snowflake} for the Guild this SoapClient is controlling.
+     * Gets the {@link Snowflake} for the Guild this {@link SoapClient} is associated with.
      * 
-     * @return the {@code Snowflake} for the Guild this SoapClient is controlling.
+     * @return the {@link Snowflake} for the Guild this {@link SoapClient} is associated with.
      */
     protected Snowflake getSnowflake() {
         return flake;

@@ -7,6 +7,8 @@ import com.georgster.util.commands.CommandParser;
  * <p>
  * A {@link ParseableCommand} follows all properties of a {@link Command}, but
  * also must additionaly define a {@link CommandParser} to parse arguments.
+ * 
+ * @see Command
  */
 public interface ParseableCommand extends Command {
 

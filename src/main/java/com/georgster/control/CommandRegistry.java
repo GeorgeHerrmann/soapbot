@@ -34,7 +34,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
- * The CommandRegistry is responsible for handling all of SOAP Bot's commands.
+ * The CommandRegistry is responsible for handling all of SOAP Bot's {@link Command Commands}.
  */
 public class CommandRegistry {
     
@@ -45,7 +45,7 @@ public class CommandRegistry {
      * Creates a Command Register for the associated SoapClient, 
      * registering all of SOAP Bot's pre-defined commands in it.
      * 
-     * @param context the ClientContext feeding this registry's commands.
+     * @param context the {@link ClientContext} feeding this registry's commands.
      */
     public CommandRegistry(ClientContext context) { //HelpCommand will be unique
         this.context = context;
@@ -76,12 +76,15 @@ public class CommandRegistry {
     }
 
     /**
-     * Attempts to execute a command based on the contents of a Discord {@code Event}.
-     * The event will be wrapped in a {@code DiscordEvent} object, therefore only events
-     * supported by the DiscordEvent class will be able to be executed.
+     * Attempts to execute a command based on the contents of a Discord {@link Event}.
+     * <p>
+     * The event will be wrapped in a {@link DiscordEvent}, which can only handle {@code ChatInputInteractionEvents}
+     * and/or {@code MessageCreateEvents}.
+     * <p>
+     * This method is also responsible for creating and firing the {@link CommandExecutionEvent} when the {@link Command}
+     * is found and executed.
      * 
-     * @param event the Event that prompted this call.
-     * @param client the SoapClient that received the event.
+     * @param event The {@link Event} that prompted this call.
      */
     public void getAndExecute(Event event) {
         DiscordEvent transformer = new DiscordEvent(event);
@@ -96,8 +99,8 @@ public class CommandRegistry {
 
     /**
      * Registers all of SOAP Bot's pre-defined commands as global commands to Discord
-     * if the command has a valid ApplicationCommandRequest, which they will if
-     * the command states it needs a new registration.
+     * if the command has a valid {@link ApplicationCommandRequest}, and updates
+     * all pre-existing definitions if they are out of date.
      */
     protected void registerGlobalCommands() {
         ThreadPoolFactory.scheduleGlobalDiscordApiTask(() -> { //These tasks are scheduled to run on the global Discord API thread.
@@ -128,9 +131,9 @@ public class CommandRegistry {
     }
 
     /**
-     * Instantiates and returns a list of all of SOAP Bot's pre-defined commands.
+     * Factory method which instantiates and returns a list of all of SOAP Bot's pre-defined {@link Command Commands} for a SoapClient.
      * 
-     * @return a list of all of SOAP Bot's pre-defined commands.
+     * @return A list of all of SOAP Bot's pre-defined {@link Command Commands} for a SoapClient.
      */
     public List<Command> getCommands() {
         List<Command> commandList = new ArrayList<>();
@@ -149,7 +152,7 @@ public class CommandRegistry {
     }
 
     /**
-     * Returns the first Command with an alias matching the provided {@code alias}, ignoring case.
+     * Factory method which returns the first {@link Command} with an alias matching the provided {@code alias}, ignoring case.
      * 
      * @param alias The Command alias to search for.
      * @return The first {@link Command} with the matching alias.

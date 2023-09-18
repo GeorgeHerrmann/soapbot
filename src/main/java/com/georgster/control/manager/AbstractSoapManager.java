@@ -9,13 +9,15 @@ import com.georgster.database.adapter.DatabaseObjectClassAdapter;
 import discord4j.core.object.entity.Guild;
 
 /**
- * A framework for managing extending or implementing objects that are stored in SOAPBot's database.
+ * A {@link SoapManager} which can manage extending or implementing objects that are stored in SOAPBot's database
+ * in the form of their parent class. A valid {@link DatabaseObjectClassAdapter} must be provided to convert the
+ * objects from the database to their appropriate type.
  */
 public abstract class AbstractSoapManager<T extends Manageable> extends SoapManager<T> {
     protected DatabaseObjectClassAdapter<T> adapter; // The adapter that will be used to convert the objects from the database.
 
     /**
-     * Creates a new AbstractSoapManager which will access the database using the given paramaters.
+     * Creates a new {@link AbstractSoapManager} which will access the database using the given paramaters.
      * 
      * @param context The context of the SOAPClient that is using this manager.
      * @param profileType The type of profile that this manager will be accessing.

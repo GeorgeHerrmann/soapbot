@@ -216,4 +216,16 @@ public class MultiLogger {
             }
         }
     }
+
+    /**
+     * Logs a message to the system's console from the specified class.
+     * 
+     * @param system The message to be logged.
+     * @param source The class of the object that is logging.
+     */
+    public static void logSystem(String system, Class<?> source) {
+        system = system.replace("- ", "\t");
+        Logger logger = LoggerFactory.getLogger(source);
+        logger.info(system);
+    }
 }
