@@ -14,9 +14,9 @@ public class App {
     public static void main(String[] args) {
       
         String token = "";
-        try {
+        try { // Gets the API key
           token = Files.readString( Path.of(System.getProperty("user.dir"), "key.txt") );
-        } catch (IOException e) {
+        } catch (IOException e) { // If the key file doesn't exist, the program will exit
           e.printStackTrace();
           System.exit(1);
         }

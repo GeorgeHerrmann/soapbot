@@ -110,7 +110,7 @@ public class CommandExecutionEvent {
     }
 
     /**
-     * Defers the reply of the inner {@link Event} in this event's {@link DiscordEvent} if
+     * Defers the reply of the inner {@code Event} in this event's {@link DiscordEvent} if
      * the event can be deferred and this event's {@link Command} requests a deferral,
      * enabling this event's {@link GuildInteractionHandler} reply deferral mode.
      * 
