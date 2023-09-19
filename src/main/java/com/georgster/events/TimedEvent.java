@@ -10,7 +10,7 @@ import com.georgster.util.DateTimed;
 import com.georgster.util.SoapUtility;
 
 /**
- * An event which has a future date and a time. The {@code TimedEvent} will handle
+ * A {@link DateTimed} event which has a future date and a time. The {@link TimedEvent} will handle
  * all logic involving dates and times including, but not limited to:
  * <ul>
  * <li>Standardizing date and time strings based on general inputs</li>

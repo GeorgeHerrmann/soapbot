@@ -32,7 +32,7 @@ import discord4j.core.object.entity.channel.GuildMessageChannel;
 
 /**
  * An Event fired upon the execution of a SOAPBot {@link Command}. This Event packages
- * the data from the Discord Event, as well as various objects a command might need.
+ * the data from the {@link DiscordEvent}, as well as various objects a command might need.
  */
 public class CommandExecutionEvent {
     
@@ -72,8 +72,10 @@ public class CommandExecutionEvent {
 
     /**
      * Executes the {@link Command} in this Event on the calling thread.
+     * <p>
      * Prior to execution, the Command is checked for permission, and if the Command
      * is a {@link ParseableCommand}, it is parsed for arguments.
+     * <p>
      * Messages are logged to the event's {@link MultiLogger}, and Guild interactions
      * are handled by the event's {@link GuildInteractionHandler}.
      */

@@ -18,7 +18,9 @@ import com.georgster.control.manager.Manageable;
  * deserialized.
  */
 public abstract class DateTimed {
+    /** The String-based representation of the date */
     protected String date;
+    /** The String-based representation of the time */
     protected String time;
 
     /**

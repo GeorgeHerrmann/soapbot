@@ -108,6 +108,23 @@ public abstract class InteractionHandler {
 
     /**
      * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
+     * provided text and title and default formatting and attaches an image of the provided url.
+     * <p>
+     * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
+     * 
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(String text, String title, String imageUrl) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl)));
+        return message.getObject();
+    }
+
+    /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
      * provided text, title and default formatting and attaches the provided {@link LayoutComponent LayoutComponents}.
      * <p>
      * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
@@ -120,6 +137,25 @@ public abstract class InteractionHandler {
     public Message sendMessage(String text, String title, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, components)));
+        return message.getObject();
+    }
+
+    /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
+     * provided text, title and default formatting and attaches the provided {@link LayoutComponent LayoutComponents}
+     * and an image of the provided url.
+     * <p>
+     * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
+     * 
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(String text, String title, String imageUrl, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, components)));
         return message.getObject();
     }
 
@@ -316,6 +352,24 @@ public abstract class InteractionHandler {
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
+
+    /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the
+     * provided text and title and default formatting and attaches an image of the provided url.
+     * <p>
+     * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).image(imageUrl).build();
+        MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+        return channel.createMessage(spec).block();
+    }
     
     /**
      * Sends a {@link Message} in the provided {@link MessageChannel} with the
@@ -331,6 +385,26 @@ public abstract class InteractionHandler {
      */
     public static Message sendMessage(MessageChannel channel, String text, String title, LayoutComponent... components) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+        MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
+        return channel.createMessage(spec).block();
+    }
+
+    /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the
+     * provided text, title and default formatting and attaches the provided {@link LayoutComponent LayoutComponents}
+     * and an image of the provided url.
+     * <p>
+     * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, LayoutComponent... components) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).image(imageUrl).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
         return channel.createMessage(spec).block();
     }

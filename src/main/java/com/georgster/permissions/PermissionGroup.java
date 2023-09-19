@@ -8,7 +8,7 @@ import com.georgster.control.manager.Manageable;
 import discord4j.core.object.entity.Role;
 
 /**
- * A {@code PermissionGroup} is a collection of {@code PermissibleActions} that
+ * A {@link PermissionGroup} is a collection of {@link PermissibleAction PermissibleActions} that
  * can be assigned to a group with an associated name. Generally, the name of
  * the group will be the name of the role that the group is assigned to.
  */
@@ -18,6 +18,8 @@ public class PermissionGroup implements Manageable {
 
     /**
      * Constructs a {@code PermissionGroup} with the given name and actions.
+     * <p>
+     * Generally used when loading a {@link PermissionGroup} from the database.
      * 
      * @param name    the name of the group
      * @param actions the actions the group has permission to perform

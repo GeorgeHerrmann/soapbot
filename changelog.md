@@ -277,3 +277,8 @@
     - Updated the ReserveEventWizard, PollEventWizard and PermissionsWizard to have ButtonMessageListeners for
       certain windows, making them easier to navigate and understand.
     - Created a UserInteractionHandler, which will handler interactions between SOAP Bot and a User.
+
+2.514
+    - Added Image attachment capabilities to InteractionHandlers
+        - Can only be attached to embed messaged with titles or titles and layout components
+            - Image links can simply be sent in plain messages, non-title embed would never need images
