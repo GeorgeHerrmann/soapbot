@@ -12,6 +12,7 @@ import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -54,7 +55,7 @@ public class MessageCommand implements Command {
             logger.append("\n- No users found, sending help message",
             LogDestination.NONAPI);
             String[] output = SoapUtility.splitFirst(help());
-            handler.sendMessage(output[1], output[0]);
+            handler.sendMessage(output[1], output[0], MessageFormatting.ERROR);
         }
     }
 

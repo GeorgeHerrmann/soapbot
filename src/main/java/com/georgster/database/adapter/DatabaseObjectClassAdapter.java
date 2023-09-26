@@ -3,9 +3,15 @@ package com.georgster.database.adapter;
 import com.google.gson.JsonParseException;
 
 /**
- * A facade for an adapter that allows for the deserialization of inherited
- * {@code DatabaseObject}s without knowing their type beyond the
+ * An adapter that allows for the deserialization of inherited
+ * {@link Manageable Manageables} without knowing their type beyond the
  * abstract class or interface they implement.
+ * <p>
+ * A {@link DatabaseObjectClassAdapter} is constructed with a list of unique
+ * identifiers for each type of object. When {@link #getClass(String)} is
+ * called, the {@link DatabaseObjectClassAdapter} will return the type of
+ * object that matches the given json by mapping a unique identifier to a
+ * type of the object.
  */
 public abstract class DatabaseObjectClassAdapter<T> {
 

@@ -14,7 +14,7 @@ import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.Color;
 
 /**
- * A handler for interactions between a {@link Snowflake} identified Discord objects and
+ * A handler for interactions between a {@link Snowflake} identified Discord object and
  * the Discord4J api. {@link InteractionHandler InteractionHandler's} generally provide a suite
  * of utility for performing actions for and/or communicating with the Discord4J API.
  * <p>
@@ -26,6 +26,30 @@ public abstract class InteractionHandler {
     protected Optional<MessageChannel> activeChannel;
     protected Optional<ComponentInteractionEvent> activeComponentInteraction;
     protected final Snowflake id;
+
+    /**
+     * An enum describing the formatting of a {@link Message} sent by an {@link InteractionHandler}.
+     */
+    public enum MessageFormatting {
+        /**
+         * The default formatting for SOAP Bot {@link Message Messages}.
+         * <p>
+         * Default formatting wraps the {@link Message} in a blue embed.
+         */
+        DEFAULT,
+        /**
+         * The error formatting for SOAP Bot {@link Message Messages}.
+         * <p>
+         * Error formatting wraps the {@link Message} in a red embed.
+         */
+        ERROR,
+        /**
+         * The info formatting for SOAP Bot {@link Message Messages}.
+         * <p>
+         * Info formatting wraps the {@link Message} in a grey-chateu embed.
+         */
+        INFO
+    }
 
     /**
      * Creates a new {@link InteractionHandler} for the Discord object
@@ -91,6 +115,20 @@ public abstract class InteractionHandler {
     }
 
     /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the provided text and formatting.
+     * 
+     * @param text The {@link Message} content.
+     * @param format The {@link MessageFormatting} to use.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(String text, MessageFormatting format) {
+        System.out.println("sendMessage(String text, MessageFormatting format) called");
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, format)));
+        return message.getObject();
+    }
+
+    /**
      * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
      * provided text and title and default formatting.
      * <p>
@@ -103,6 +141,21 @@ public abstract class InteractionHandler {
     public Message sendMessage(String text, String title) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title)));
+        return message.getObject();
+    }
+
+    /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
+     * provided text, title and formatting.
+     * 
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param format The {@link MessageFormatting} to use.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(String text, String title, MessageFormatting format) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format)));
         return message.getObject();
     }
 
@@ -125,6 +178,22 @@ public abstract class InteractionHandler {
 
     /**
      * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
+     * provided text, title and formatting and attaches an image of the provided url.
+     * 
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @param format The {@link MessageFormatting} to use.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format)));
+        return message.getObject();
+    }
+
+    /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
      * provided text, title and default formatting and attaches the provided {@link LayoutComponent LayoutComponents}.
      * <p>
      * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
@@ -137,6 +206,22 @@ public abstract class InteractionHandler {
     public Message sendMessage(String text, String title, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, components)));
+        return message.getObject();
+    }
+
+    /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
+     * provided text, title and formatting and attaches the provided {@link LayoutComponent LayoutComponents}.
+     * 
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @param format The {@link MessageFormatting} to use.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(String text, String title, MessageFormatting format, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format, components)));
         return message.getObject();
     }
 
@@ -160,6 +245,24 @@ public abstract class InteractionHandler {
     }
 
     /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the
+     * provided text, title and formatting and attaches the provided {@link LayoutComponent LayoutComponents}
+     * and an image of the provided url.
+     * 
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @param format The {@link MessageFormatting} to use.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format, components)));
+        return message.getObject();
+    }
+
+    /**
      * Edits the provided {@link Message} with the new provided body {@code text} and
      * default formatting.
      * <p>
@@ -173,7 +276,8 @@ public abstract class InteractionHandler {
      * @return The edited {@link Message}.
      */
     public Message editMessage(Message msg, String text) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+        Color color = msg.getEmbeds().isEmpty() ? Color.BLUE : msg.getEmbeds().get(0).getColor().orElse(Color.BLUE); // Attempts to copy the color if it exists
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).build();
 
         Unwrapper<Message> message = new Unwrapper<>();
         activeComponentInteraction.ifPresentOrElse(interaction -> {
@@ -201,7 +305,8 @@ public abstract class InteractionHandler {
      * @return The edited {@link Message}.
      */
     public Message editMessage(Message msg, String text, String title) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+        Color color = msg.getEmbeds().isEmpty() ? Color.BLUE : msg.getEmbeds().get(0).getColor().orElse(Color.BLUE); // Attempts to copy the color if it exists
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).build();
 
         Unwrapper<Message> message = new Unwrapper<>();
         activeComponentInteraction.ifPresentOrElse(interaction -> {
@@ -230,7 +335,8 @@ public abstract class InteractionHandler {
      * @return The edited {@link Message}.
      */
     public Message editMessage(Message msg, String text, String title, LayoutComponent... components) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+        Color color = msg.getEmbeds().isEmpty() ? Color.BLUE : msg.getEmbeds().get(0).getColor().orElse(Color.BLUE); // Attempts to copy the color if it exists
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).build();
 
         Unwrapper<Message> message = new Unwrapper<>();
         activeComponentInteraction.ifPresentOrElse(interaction -> {
@@ -337,6 +443,20 @@ public abstract class InteractionHandler {
     }
 
     /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the provided text and formatting.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param text The {@link Message} content.
+     * @param format The {@link MessageFormatting} to use.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, String text, MessageFormatting format) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).build();
+        MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+        return channel.createMessage(spec).block();
+    }
+
+    /**
      * Sends a {@link Message} in the provided {@link MessageChannel} with the
      * provided text and title and default formatting.
      * <p>
@@ -355,6 +475,22 @@ public abstract class InteractionHandler {
 
     /**
      * Sends a {@link Message} in the provided {@link MessageChannel} with the
+     * provided text, title and formatting.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param format The {@link MessageFormatting} to use.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, String text, String title, MessageFormatting format) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
+        MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+        return channel.createMessage(spec).block();
+    }
+
+    /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the
      * provided text and title and default formatting and attaches an image of the provided url.
      * <p>
      * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
@@ -367,6 +503,23 @@ public abstract class InteractionHandler {
      */
     public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).image(imageUrl).build();
+        MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
+        return channel.createMessage(spec).block();
+    }
+
+    /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the
+     * provided text, title and formatting and attaches an image of the provided url.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @param format The {@link MessageFormatting} to use.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, MessageFormatting format) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
@@ -391,6 +544,23 @@ public abstract class InteractionHandler {
 
     /**
      * Sends a {@link Message} in the provided {@link MessageChannel} with the
+     * provided text, title and formatting and attaches the provided {@link LayoutComponent LayoutComponents}.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param format The {@link MessageFormatting} to use.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, String text, String title, MessageFormatting format, LayoutComponent... components) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
+        MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
+        return channel.createMessage(spec).block();
+    }
+
+    /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the
      * provided text, title and default formatting and attaches the provided {@link LayoutComponent LayoutComponents}
      * and an image of the provided url.
      * <p>
@@ -405,6 +575,27 @@ public abstract class InteractionHandler {
      */
     public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, LayoutComponent... components) {
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).image(imageUrl).build();
+        MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
+        return channel.createMessage(spec).block();
+    }
+
+    /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the
+     * provided text, title and default formatting and attaches the provided {@link LayoutComponent LayoutComponents}
+     * and an image of the provided url.
+     * <p>
+     * SOAP Bot's default formatting wraps the {@code text} and {@code title} in a blue embed.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param text The {@link Message} content.
+     * @param title The {@link Message} title, present at the top of the embed.
+     * @param imageUrl The url of the image to attach to the {@link Message}.
+     * @param format The {@link MessageFormatting} to use.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, MessageFormatting format, LayoutComponent... components) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
         return channel.createMessage(spec).block();
     }
@@ -431,7 +622,9 @@ public abstract class InteractionHandler {
      * @return The edited {@link Message}.
      */
     public static Message modifyMessage(Message message, String text) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
+        Color color = message.getEmbeds().isEmpty() ? Color.BLUE : message.getEmbeds().get(0).getColor().orElse(Color.BLUE); // Attempts to copy the color if it exists
+
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).build();
         return message.edit().withEmbeds(embed).withComponents().block();
     }
 
@@ -447,7 +640,9 @@ public abstract class InteractionHandler {
      * @return The edited {@link Message}.
      */
     public static Message modifyMessage(Message message, String text, String title) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+        Color color = message.getEmbeds().isEmpty() ? Color.BLUE : message.getEmbeds().get(0).getColor().orElse(Color.BLUE); // Attempts to copy the color if it exists
+        
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).build();
         return message.edit().withComponents().withEmbeds(embed).block();
     }
 
@@ -464,7 +659,9 @@ public abstract class InteractionHandler {
      * @return The edited {@link Message}.
      */
     public static Message modifyMessage(Message message, String text, String title, LayoutComponent... components) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
+        Color color = message.getEmbeds().isEmpty() ? Color.BLUE : message.getEmbeds().get(0).getColor().orElse(Color.BLUE); // Attempts to copy the color if it exists
+
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).build();
         return message.edit().withEmbeds(embed).withComponents(components).block();
     }
 
@@ -478,5 +675,27 @@ public abstract class InteractionHandler {
      */
     public static Message modifyPlainMessage(Message message, String text) {
         return message.edit().withContentOrNull(text).block();
+    }
+
+    /**
+     * Returns the {@link Color} associated with the provided {@link MessageFormatting},
+     * or {@link Color#BLUE} if one does not exist.
+     * 
+     * @param format The {@link MessageFormatting} to get the {@link Color} for.
+     * @return The {@link Color} associated with the provided {@link MessageFormatting}.
+     */
+    protected static Color getColor(MessageFormatting format) {
+        switch (format) {
+            case DEFAULT:
+                System.out.println("Default input");
+                return Color.BLUE;
+            case ERROR:
+                return Color.RED;
+            case INFO:
+                return Color.GRAY_CHATEAU;
+            default:
+                System.out.println("defaulting");
+                return Color.BLUE;
+        }
     }
 }

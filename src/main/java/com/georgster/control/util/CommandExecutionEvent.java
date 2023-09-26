@@ -20,6 +20,7 @@ import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.handler.UserInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.SwappingWizard;
@@ -99,7 +100,7 @@ public class CommandExecutionEvent {
                 }
 
                 InputWizard helpWizard = new IterableStringWizard(this, command.getClass().getSimpleName(), SoapUtility.splitHelpString(command.help()));
-                Message msg = getGuildInteractionHandler().sendMessage(command.help(), command.getClass().getSimpleName());
+                Message msg = getGuildInteractionHandler().sendMessage(command.help(), command.getClass().getSimpleName(), MessageFormatting.ERROR);
                 InputWizard switcher = new SwappingWizard(this, msg, helpWizard);
                 switcher.begin();
             }

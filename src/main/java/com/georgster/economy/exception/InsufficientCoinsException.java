@@ -3,7 +3,7 @@ package com.georgster.economy.exception;
 import com.georgster.economy.CoinBank;
 
 /**
- * An exception thrown when coins are attempted to be withdrawn from a bank with insufficient funds.
+ * A {@link RuntimeException} thrown when coins are attempted to be withdrawn from a bank with insufficient funds.
  */
 public class InsufficientCoinsException extends RuntimeException {
     

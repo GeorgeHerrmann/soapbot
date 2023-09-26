@@ -16,6 +16,7 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -53,7 +54,7 @@ public class ReserveCommand implements ParseableCommand {
                 if (!reserve.isFull()) {
                     discordEvent.getAuthorOptionally().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getId().asString())) {
-                            handler.sendMessage("You have already reserved for this event, type !unreserve " + reserve.getIdentifier() + " to unreserve");
+                            handler.sendMessage("You have already reserved for this event, type !unreserve " + reserve.getIdentifier() + " to unreserve", MessageFormatting.ERROR);
                         } else {
                             logger.append("- Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getId().asString());
@@ -63,7 +64,7 @@ public class ReserveCommand implements ParseableCommand {
                         }
                     });
                 } else {
-                    handler.sendMessage("Event " + reserve.getIdentifier() + " is full");
+                    handler.sendMessage("Event " + reserve.getIdentifier() + " is full", MessageFormatting.INFO);
                 }
             } else {
                 logger.append("- Creating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
@@ -84,7 +85,7 @@ public class ReserveCommand implements ParseableCommand {
                 handler.sendMessage(messageString, reserve.getIdentifier() + " event created");
             }
         } catch (IllegalArgumentException e) { // assignCorrectEvent will send custom error messages, all other exceptions are handled by the CommandExecutionEvent
-            handler.sendMessage(e.getMessage());
+            handler.sendMessage(e.getMessage(), MessageFormatting.ERROR);
         }
 
     }

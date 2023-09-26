@@ -1,12 +1,13 @@
 package com.georgster.economy;
 
 import com.georgster.control.manager.Manageable;
+import com.georgster.economy.exception.InsufficientCoinsException;
 
 /**
  * A container for all the coins, called a balance, a {@code Member} has.
  * <p>
  * If withdrawls exceeding the balance of a {@link CoinBank} is requested,
- * an {@link IllegalArgumentException} is thrown.
+ * an {@link InsufficientCoinsException} is thrown.
  * <p>
  * This {@link Manageable Manageable's} identifier is the member's ID.
  */
@@ -79,9 +80,9 @@ public class CoinBank implements Manageable {
      * 
      * @param amount The amount to transfer.
      * @param transferBank The bank to transfer to.
-     * @throws IllegalArgumentException If this bank does not have sufficient balance.
+     * @throws InsufficientCoinsException If this bank does not have sufficient balance.
      */
-    public void transferTo(long amount, CoinBank transferBank) throws IllegalArgumentException {
+    public void transferTo(long amount, CoinBank transferBank) throws InsufficientCoinsException {
         this.withdrawl(amount);
         transferBank.deposit(amount);
     }
@@ -92,9 +93,9 @@ public class CoinBank implements Manageable {
      * 
      * @param amount The amount to transfer.
      * @param transferBank The bank to transfer from.
-     * @throws IllegalArgumentException If the provided bank does not have sufficient balance.
+     * @throws InsufficientCoinsException If the provided bank does not have sufficient balance.
      */
-    public void transferFrom(long amount, CoinBank transferBank) throws IllegalArgumentException {
+    public void transferFrom(long amount, CoinBank transferBank) throws InsufficientCoinsException {
         transferBank.withdrawl(amount);
         this.deposit(amount);
     }
@@ -112,13 +113,13 @@ public class CoinBank implements Manageable {
      * Withdrawls the provided amount from this bank unconditionally.
      * 
      * @param amount The amount to withdrawl.
-     * @throws IllegalArgumentException If this bank does not have enough balance for the withdrawl.
+     * @throws InsufficientCoinsException If this bank does not have enough balance for the withdrawl.
      */
-    public void withdrawl(long amount) throws IllegalArgumentException {
+    public void withdrawl(long amount) throws InsufficientCoinsException {
         if (hasBalance(amount)) {
             this.balance -= amount;
         } else {
-            throw new IllegalArgumentException("Balance of: " + balance + " insufficient for a withdrawl of: " + amount + ".");
+            throw new InsufficientCoinsException(this, amount);
         }
     }
 }
