@@ -282,3 +282,8 @@
     - Added Image attachment capabilities to InteractionHandlers
         - Can only be attached to embed messaged with titles or titles and layout components
             - Image links can simply be sent in plain messages, non-title embed would never need images
+
+2.555
+    - Fixed an issue where a user who had their Status set to invisible would not be able to execute commands
+        - Invisible users are now always treated as DESKTOP users.
+    - Fixed an issue where Reserve Events would not be executed

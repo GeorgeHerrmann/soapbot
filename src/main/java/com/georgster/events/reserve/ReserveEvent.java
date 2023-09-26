@@ -157,7 +157,7 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
         ActionWriter.writeAction("Starting event " + identifier);
         StringBuilder response = new StringBuilder("**" + reserved + "/" + numPeople + "** reserved with the following people:");
         for (String name : reservedUsers) { //We add the names of the people who reserved to the event
-            response.append("\n- " + handler.getMemberByTag(name).getMention());
+            response.append("\n- " + handler.getMemberById(name).getMention());
         }
         handler.sendMessage(response.toString(), "Event " + identifier + " has started!");
     }

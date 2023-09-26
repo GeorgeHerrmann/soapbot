@@ -187,7 +187,7 @@ public class DiscordEvent {
      * - {@code DO_NOT_DISTURB} or {@code IDLE} <p>
      * - {@code INVISIBLE} <p>
      * 
-     * If no matching Platform is found, or the Status is {@code UNKNOWN}, then null is returned.
+     * If no matching Platform is found, or the Status is {@code UNKNOWN}, then {@link Platform#DESKTOP} is returned.
      * 
      * @return The highest weighted {@link Platform}, or null if none was found.
      */
@@ -222,7 +222,7 @@ public class DiscordEvent {
             }
         }
 
-        return null;
+        return Platform.DESKTOP;
     }
 
     /**
