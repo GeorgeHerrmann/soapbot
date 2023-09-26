@@ -147,6 +147,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
      */
     @Override
     public Message sendMessage(String text) {
+        System.out.println("test");
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
             EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
@@ -161,6 +162,36 @@ public final class GuildInteractionHandler extends InteractionHandler {
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
         }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text))));
+
+        return message.getObject();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
+    public Message sendMessage(String text, MessageFormatting format) {
+        System.out.println("sendMessage(String text, MessageFormatting format) called");
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeCommandInteraction.ifPresentOrElse(interaction -> {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).build();
+            if (replyWasDeferred) {
+                InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
+                interaction.editReply(spec).block();
+                replyWasDeferred = false;
+            } else {
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                interaction.reply(spec).block();
+            }
+            message.setObject(interaction.getReply().block());
+            killActiveCommandInteraction();
+        }, () -> {
+            System.out.println("Sending format message static call");
+            activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, format)));
+        });
 
         return message.getObject();
     }
@@ -197,6 +228,31 @@ public final class GuildInteractionHandler extends InteractionHandler {
      * will reply to the event when sending the message instead.
      */
     @Override
+    public Message sendMessage(String text, String title, MessageFormatting format) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeCommandInteraction.ifPresentOrElse(interaction -> {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
+            if (replyWasDeferred) {
+                InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
+                interaction.editReply(spec).block();
+                replyWasDeferred = false;
+            } else {
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                interaction.reply(spec).block();
+            }
+            message.setObject(interaction.getReply().block());
+            killActiveCommandInteraction();
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format))));
+        return message.getObject();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
     public Message sendMessage(String text, String title, String imageUrl) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
@@ -212,6 +268,31 @@ public final class GuildInteractionHandler extends InteractionHandler {
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
         }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl))));
+        return message.getObject();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
+    public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeCommandInteraction.ifPresentOrElse(interaction -> {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
+            if (replyWasDeferred) {
+                InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
+                interaction.editReply(spec).block();
+                replyWasDeferred = false;
+            } else {
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).build();
+                interaction.reply(spec).block();
+            }
+            message.setObject(interaction.getReply().block());
+            killActiveCommandInteraction();
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format))));
         return message.getObject();
     }
 
@@ -247,6 +328,31 @@ public final class GuildInteractionHandler extends InteractionHandler {
      * will reply to the event when sending the message instead.
      */
     @Override
+    public Message sendMessage(String text, String title, MessageFormatting format, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeCommandInteraction.ifPresentOrElse(interaction -> {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
+            if (replyWasDeferred) {
+                InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
+                interaction.editReply(spec).block();
+                replyWasDeferred = false;
+            } else {
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
+                interaction.reply(spec).block();
+            }
+            message.setObject(interaction.getReply().block());
+            killActiveCommandInteraction();
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format, components))));
+        return message.getObject();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
     public Message sendMessage(String text, String title, String imageUrl, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
@@ -262,6 +368,31 @@ public final class GuildInteractionHandler extends InteractionHandler {
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
         }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, components))));
+        return message.getObject();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
+    public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeCommandInteraction.ifPresentOrElse(interaction -> {
+            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
+            if (replyWasDeferred) {
+                InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
+                interaction.editReply(spec).block();
+                replyWasDeferred = false;
+            } else {
+                InteractionApplicationCommandCallbackSpec spec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
+                interaction.reply(spec).block();
+            }
+            message.setObject(interaction.getReply().block());
+            killActiveCommandInteraction();
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format, components))));
         return message.getObject();
     }
 

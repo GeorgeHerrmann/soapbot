@@ -1,6 +1,7 @@
 package com.georgster.events;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 
 /**
  * Utility class for handling reserve events.
@@ -31,7 +32,7 @@ public class SoapEventHandler {
             if (validateSoapEvent(event, eventManager)) {
                 event.onFulfill(handler);
             } else {
-                handler.sendMessage("Event " + event.getIdentifier() + " has been cancelled");
+                handler.sendMessage("Event " + event.getIdentifier() + " has been cancelled", MessageFormatting.INFO);
             }
             if (eventManager.exists(event.getIdentifier())) {
                 eventManager.remove(event);

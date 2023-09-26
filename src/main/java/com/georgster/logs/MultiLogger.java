@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.georgster.api.ActionWriter;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 
@@ -132,7 +133,7 @@ public class MultiLogger {
     public void logDiscord(String discord) {
         if (canLog() && !discord.isEmpty()) {
             String[] output = SoapUtility.splitFirst(discord);
-            handler.sendMessage(output[1], output[0]);
+            handler.sendMessage(output[1], output[0], MessageFormatting.INFO);
         }
     }
 
@@ -186,6 +187,11 @@ public class MultiLogger {
         return (handler.getMessageChannel("bot-logs") != null);
     }
 
+    /**
+     * Returns the {@code Guild's} bot-logs channel, if present.
+     * 
+     * @return The {@code Guild's} bot-logs channel.
+     */
     public Optional<GuildMessageChannel> getLoggingChannel() {
         return Optional.of(handler.getMessageChannel("bot-logs"));
     }

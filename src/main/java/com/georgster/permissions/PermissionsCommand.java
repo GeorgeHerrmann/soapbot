@@ -12,6 +12,7 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.PermissionsWizard;
 
@@ -65,7 +66,7 @@ public class PermissionsCommand implements ParseableCommand {
                 handler.sendMessage("Added " + action.toString() + " to all groups");
                 logger.append("- Added " + action.toString() + " to all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
-                handler.sendMessage("That is not a valid action. Please try again");
+                handler.sendMessage("That is not a valid action. Please try again", MessageFormatting.ERROR);
                 logger.append("- Invalid action: " + p.get(1), LogDestination.NONAPI);
             }
         }, "addall");
@@ -80,7 +81,7 @@ public class PermissionsCommand implements ParseableCommand {
                 handler.sendMessage("Removed " + action.toString() + " from all groups");
                 logger.append("- Removed " + action.toString() + " from all groups", LogDestination.NONAPI);
             } catch (IllegalArgumentException e) {
-                handler.sendMessage("That is not a valid action. Please try again");
+                handler.sendMessage("That is not a valid action. Please try again", MessageFormatting.ERROR);
                 logger.append("- Invalid action: " + p.get(1), LogDestination.NONAPI);
             }
         }, "removeall");
@@ -90,7 +91,7 @@ public class PermissionsCommand implements ParseableCommand {
                 PermissionGroup permissionGroup = permissionsManager.get(group);
                 handler.sendMessage("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
             } else {
-                handler.sendMessage("That is not a valid group. Please try again");
+                handler.sendMessage("That is not a valid group. Please try again", MessageFormatting.ERROR);
             }
         }, 0);
     }

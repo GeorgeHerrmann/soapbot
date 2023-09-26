@@ -12,6 +12,7 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -55,7 +56,7 @@ public class SkipMusicCommand implements ParseableCommand {
             logger.append("- Skipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
         } else {
             logger.append("- No tracks found in queue", LogDestination.NONAPI);
-            handler.sendMessage("No tracks are currently playing");
+            handler.sendMessage("No tracks are currently playing", MessageFormatting.ERROR);
         }
     }
 

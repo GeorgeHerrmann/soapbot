@@ -282,3 +282,11 @@
     - Added Image attachment capabilities to InteractionHandlers
         - Can only be attached to embed messaged with titles or titles and layout components
             - Image links can simply be sent in plain messages, non-title embed would never need images
+
+2.515
+    - Added format control to InteractionHandlers
+        - Commands and various systems can now use MessageFormatting to determine how a sent Message looks
+    - Updated various systems to the new standards
+        - Commands that produce error message will use the ERROR formatting
+        - Commands that generate information and logs produced by the MultiLogger will use the INFO formatting
+        - All other formatting will be DEFAULT

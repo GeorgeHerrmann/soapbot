@@ -16,6 +16,7 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.ReserveEventWizard;
 
@@ -58,7 +59,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 handler.sendMessage(output[1], output[0]);
             } else {
                 logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
-                handler.sendMessage("There are no reserve events currently active");
+                handler.sendMessage("There are no reserve events currently active", MessageFormatting.ERROR);
             }
         });
 
@@ -71,7 +72,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 handler.sendMessage(output[1], output[0]);
             } else {
                 logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
-                handler.sendMessage("There are no reserve events currently active");
+                handler.sendMessage("There are no reserve events currently active", MessageFormatting.ERROR);
             }
         }, "list");
         
@@ -86,7 +87,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 reserve.getReservedUsers().forEach(user -> response.append(handler.getMemberById(user).getMention() + " "));
                 handler.sendPlainMessage(response.toString()); //If sendMessage is used, the embed will prevent users from being mentioned
             } else {
-                handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events");
+                handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events", MessageFormatting.ERROR);
             }
         }, "mention", "ping");
 
@@ -96,7 +97,7 @@ public class ReserveEventCommand implements ParseableCommand {
                 logger.append("- Beginning the reserve event wizard\n", LogDestination.NONAPI);
                 wizard.begin();
             } else {
-                handler.sendMessage("There are no Reserve Events to manage.", "Reserve Event Wizard");
+                handler.sendMessage("There are no Reserve Events to manage.", "Reserve Event Wizard", MessageFormatting.ERROR);
                 logger.append("- There are no reserve events to manage.", LogDestination.NONAPI);
             }
         }, "manage");
@@ -130,7 +131,8 @@ public class ReserveEventCommand implements ParseableCommand {
             String[] output = SoapUtility.splitFirst(response.toString());
             handler.sendMessage(output[1], output[0]);
             } else {
-                handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events");
+                System.out.println("being sent here");
+                handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events", MessageFormatting.ERROR);
             }
         }, 0);
     }

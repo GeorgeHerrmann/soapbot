@@ -9,6 +9,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -33,7 +34,7 @@ public class PlinkoCommand implements ParseableCommand {
             try {
                 game.startGame();
             } catch (IllegalStateException e) {
-                event.getGuildInteractionHandler().sendMessage(e.getMessage(), "Plinko");
+                event.getGuildInteractionHandler().sendMessage(e.getMessage(), "Plinko", MessageFormatting.ERROR);
             }
         });
 

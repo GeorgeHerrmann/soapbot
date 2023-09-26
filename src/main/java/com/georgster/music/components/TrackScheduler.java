@@ -3,6 +3,7 @@ package com.georgster.music.components;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.georgster.util.thread.ThreadPoolFactory;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -120,7 +121,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void noMatches() {
         ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> {
-            handler.sendMessage("Failed to grab audio from the provided arguments");
+            handler.sendMessage("Failed to grab audio from the provided arguments", MessageFormatting.ERROR);
             if (!isActive()) {
                 connection.disconnect().block(); //If the queue is empty, we will disconnect from the voice channel.
             }
@@ -133,7 +134,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void loadFailed(final FriendlyException exception) {
         ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> {
-            handler.sendMessage("Failed to load track: " + exception.getMessage());
+            handler.sendMessage("Failed to load track: " + exception.getMessage(), MessageFormatting.ERROR);
             if (!isActive()) {
                 connection.disconnect().block(); //If the queue is empty, we will disconnect from the voice channel.
             }
