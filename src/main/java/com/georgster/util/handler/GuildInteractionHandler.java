@@ -147,7 +147,6 @@ public final class GuildInteractionHandler extends InteractionHandler {
      */
     @Override
     public Message sendMessage(String text) {
-        System.out.println("test");
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
             EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
@@ -174,7 +173,6 @@ public final class GuildInteractionHandler extends InteractionHandler {
      */
     @Override
     public Message sendMessage(String text, MessageFormatting format) {
-        System.out.println("sendMessage(String text, MessageFormatting format) called");
         Unwrapper<Message> message = new Unwrapper<>();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
             EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).build();
@@ -188,10 +186,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> {
-            System.out.println("Sending format message static call");
-            activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, format)));
-        });
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, format))));
 
         return message.getObject();
     }

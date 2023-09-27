@@ -122,7 +122,6 @@ public abstract class InteractionHandler {
      * @return The created {@link Message}.
      */
     public Message sendMessage(String text, MessageFormatting format) {
-        System.out.println("sendMessage(String text, MessageFormatting format) called");
         Unwrapper<Message> message = new Unwrapper<>();
         activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, format)));
         return message.getObject();

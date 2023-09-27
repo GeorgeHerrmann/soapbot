@@ -290,3 +290,8 @@
         - Commands that produce error message will use the ERROR formatting
         - Commands that generate information and logs produced by the MultiLogger will use the INFO formatting
         - All other formatting will be DEFAULT
+
+2.516
+    - Fixed an issue where ReserveEvents would not be fired correctly when their fulfillment condition was met
+    - Fixed an issue where invisible users on all Platforms could not use SOAP Bot commands
+    - Removed old unnecessary logs from InteractionHandlers
