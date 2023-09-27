@@ -131,7 +131,6 @@ public class ReserveEventCommand implements ParseableCommand {
             String[] output = SoapUtility.splitFirst(response.toString());
             handler.sendMessage(output[1], output[0]);
             } else {
-                System.out.println("being sent here");
                 handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events", MessageFormatting.ERROR);
             }
         }, 0);

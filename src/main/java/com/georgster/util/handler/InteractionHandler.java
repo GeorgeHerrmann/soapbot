@@ -686,14 +686,12 @@ public abstract class InteractionHandler {
     protected static Color getColor(MessageFormatting format) {
         switch (format) {
             case DEFAULT:
-                System.out.println("Default input");
                 return Color.BLUE;
             case ERROR:
                 return Color.RED;
             case INFO:
                 return Color.GRAY_CHATEAU;
             default:
-                System.out.println("defaulting");
                 return Color.BLUE;
         }
     }
