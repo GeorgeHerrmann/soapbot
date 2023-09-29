@@ -295,3 +295,9 @@
     - Fixed an issue where ReserveEvents would not be fired correctly when their fulfillment condition was met
     - Fixed an issue where invisible users on all Platforms could not use SOAP Bot commands
     - Removed old unnecessary logs from InteractionHandlers
+
+2.517
+    - Fixed an issue where offline users could not execute commands
+    - Improved QuickPollWizard poll present
+        - The current wizard will immediately switch to the QuickPoll voting screen
+    - Updated MessageCommand to new Command systems

@@ -1,17 +1,19 @@
 package com.georgster.dm;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import com.georgster.Command;
+import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.util.handler.InteractionHandler;
+import com.georgster.util.handler.UserInteractionHandler;
 import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -23,7 +25,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 /**
  * A MessageCommand is represents the actions following a "!dm" command.
  */
-public class MessageCommand implements Command {
+public class MessageCommand implements ParseableCommand {
 
     /**
      * {@inheritDoc}
@@ -32,21 +34,20 @@ public class MessageCommand implements Command {
         MultiLogger logger = event.getLogger();
         DiscordEvent discordEvent = event.getDiscordEvent();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
-
-        List<String> contents = new ArrayList<>(Arrays.asList(discordEvent.getFormattedMessage().split(" ")));
-        contents.remove(0);
+        ParsedArguments args = event.getParsedArguments();
 
         StringBuilder response = new StringBuilder();
-        for (String i : contents) {
+        for (String i : args.getArguments()) {
             if (!i.contains(("@"))) {
                 response.append(i + " ");
             }
         }
         if (!discordEvent.getPresentUsers().isEmpty()) {
             for (User user : discordEvent.getPresentUsers()) {
+                InteractionHandler userHandler = new UserInteractionHandler(user);
                 logger.append("\n- Found User: " + user.getTag() + ", sending DM", LogDestination.NONAPI);
 
-                user.getPrivateChannel().block().createMessage(response.toString()).block();
+                userHandler.sendPlainMessage(response.toString());
                 if (discordEvent.isChatInteraction()) {
                     ((ChatInputInteractionEvent) discordEvent.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
                 }
@@ -57,6 +58,13 @@ public class MessageCommand implements Command {
             String[] output = SoapUtility.splitFirst(help());
             handler.sendMessage(output[1], output[0], MessageFormatting.ERROR);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public CommandParser getCommandParser() {
+        return new CommandParser("VR");
     }
 
     /**

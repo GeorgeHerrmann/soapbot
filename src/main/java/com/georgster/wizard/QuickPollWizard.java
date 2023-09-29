@@ -8,15 +8,15 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.poll.PollEvent;
+import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 /**
  * A wizard designed to handle {@link PollEvent PollEvents} which are {@code QuickPolls}.
  */
 public class QuickPollWizard extends InputWizard {
-    private PollEvent event;
+    private PollEvent pollEvent;
     private final SoapEventManager eventManager;
-    private CommandExecutionEvent executionEvent;
     private static final SoapEventType TYPE = SoapEventType.POLL;
 
     /**
@@ -27,9 +27,8 @@ public class QuickPollWizard extends InputWizard {
      */
     public QuickPollWizard(CommandExecutionEvent executionEvent, PollEvent event) {
         super(executionEvent, InputListenerFactory.createReactionListener(executionEvent, event.getIdentifier()).builder().withApiCallsOnSeparateThread(true).allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build());
-        this.event = event;
+        this.pollEvent = event;
         this.eventManager = executionEvent.getEventManager();
-        this.executionEvent = executionEvent;
     }
 
     /**
@@ -40,7 +39,6 @@ public class QuickPollWizard extends InputWizard {
     public QuickPollWizard(CommandExecutionEvent executionEvent) {
         super(executionEvent, InputListenerFactory.createMenuMessageListener(executionEvent, "All Quick Polls"));
         this.eventManager = executionEvent.getEventManager();
-        this.executionEvent = executionEvent;
     }
 
     /**
@@ -56,16 +54,18 @@ public class QuickPollWizard extends InputWizard {
      * @throws IllegalStateException If this wizard's PollEvent is not a QuickPoll.
      */
     protected void voteForPoll() throws IllegalStateException {
-        if (!event.isQuickPoll()) {
-            throw new IllegalStateException("Poll " + event.getIdentifier() + " is not a quick poll. For non-quick polls, use the PollEventWizard.");
+        if (!pollEvent.isQuickPoll()) {
+            throw new IllegalStateException("Poll " + pollEvent.getIdentifier() + " is not a quick poll. For non-quick polls, use the PollEventWizard.");
         }
 
-        if (!eventManager.exists(event.getIdentifier())) {
+        if (!eventManager.exists(pollEvent.getIdentifier())) {
             return;
         }
-        final PollEvent localEvent = (PollEvent) eventManager.get(event.getIdentifier());
+        final PollEvent localEvent = (PollEvent) eventManager.get(pollEvent.getIdentifier());
 
         String prompt = localEvent.toString() + "\n*If this window stops working, type !poll present and select the poll's tite*";
+
+        InputListener qpListener = InputListenerFactory.createReactionListener(event, pollEvent.getIdentifier()).builder().withApiCallsOnSeparateThread(true).allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build();
 
         withFullResponse((output -> {
             String response = output.getResponse();
@@ -84,7 +84,7 @@ public class QuickPollWizard extends InputWizard {
                 eventManager.update(localEvent);
             }
             nextWindow("voteForPoll");
-        }), false, prompt, "U+2705", "U+274C");
+        }), false, qpListener, prompt, "U+2705", "U+274C");
     }
 
     /**
@@ -107,9 +107,8 @@ public class QuickPollWizard extends InputWizard {
             end();
         } else {
             withResponse((response -> {
-                end();
-                event = (PollEvent) eventManager.get(response);
-                new QuickPollWizard(executionEvent, event).begin();
+                pollEvent = (PollEvent) eventManager.get(response);
+                nextWindow("voteForPoll");
             }), false, prompt, prompts.toArray(new String[prompts.size()]));
         }
 

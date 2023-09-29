@@ -192,37 +192,41 @@ public class DiscordEvent {
      * @return The highest weighted {@link Platform}, or null if none was found.
      */
     public Platform getPlatform() {
-        Presence p = getAuthorAsMember().getPresence().block();
+        try {
+            Presence p = getAuthorAsMember().getPresence().block();
 
-        Status desktopStatus = p.getStatus(Platform.DESKTOP).orElse(Status.UNKNOWN);
-        Status mobileStatus = p.getStatus(Platform.MOBILE).orElse(Status.UNKNOWN);
-        Status webStatus = p.getStatus(Platform.WEB).orElse(Status.UNKNOWN);
+            Status desktopStatus = p.getStatus(Platform.DESKTOP).orElse(Status.UNKNOWN);
+            Status mobileStatus = p.getStatus(Platform.MOBILE).orElse(Status.UNKNOWN);
+            Status webStatus = p.getStatus(Platform.WEB).orElse(Status.UNKNOWN);
 
-        if (mobileStatus == Status.ONLINE) {
-            return Platform.MOBILE;
-        } else if (desktopStatus == Status.ONLINE) {
-            return Platform.DESKTOP;
-        } else if (webStatus == Status.ONLINE) {
-            return Platform.WEB;
-        } else {
-            if (mobileStatus == Status.DO_NOT_DISTURB || mobileStatus == Status.IDLE) {
+            if (mobileStatus == Status.ONLINE) {
                 return Platform.MOBILE;
-            } else if (desktopStatus == Status.DO_NOT_DISTURB || desktopStatus == Status.IDLE) {
+            } else if (desktopStatus == Status.ONLINE) {
                 return Platform.DESKTOP;
-            } else if (webStatus == Status.DO_NOT_DISTURB || webStatus == Status.IDLE) {
+            } else if (webStatus == Status.ONLINE) {
                 return Platform.WEB;
             } else {
-                if (mobileStatus == Status.INVISIBLE) {
+                if (mobileStatus == Status.DO_NOT_DISTURB || mobileStatus == Status.IDLE) {
                     return Platform.MOBILE;
-                } else if (desktopStatus == Status.INVISIBLE) {
+                } else if (desktopStatus == Status.DO_NOT_DISTURB || desktopStatus == Status.IDLE) {
                     return Platform.DESKTOP;
-                } else if (webStatus == Status.INVISIBLE) {
+                } else if (webStatus == Status.DO_NOT_DISTURB || webStatus == Status.IDLE) {
                     return Platform.WEB;
+                } else {
+                    if (mobileStatus == Status.INVISIBLE) {
+                        return Platform.MOBILE;
+                    } else if (desktopStatus == Status.INVISIBLE) {
+                        return Platform.DESKTOP;
+                    } else if (webStatus == Status.INVISIBLE) {
+                        return Platform.WEB;
+                    }
                 }
             }
-        }
 
-        return Platform.DESKTOP;
+            return Platform.DESKTOP;
+        } catch (Exception e) {
+            return Platform.DESKTOP;
+        }
     }
 
     /**
