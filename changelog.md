@@ -301,3 +301,6 @@
     - Improved QuickPollWizard poll present
         - The current wizard will immediately switch to the QuickPoll voting screen
     - Updated MessageCommand to new Command systems
+
+2.518
+    - Fixed an issue where some QuickPolls would create a new Message on every vote

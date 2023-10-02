@@ -8,7 +8,6 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.poll.PollEvent;
-import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 /**
@@ -65,7 +64,7 @@ public class QuickPollWizard extends InputWizard {
 
         String prompt = localEvent.toString() + "\n*If this window stops working, type !poll present and select the poll's tite*";
 
-        InputListener qpListener = InputListenerFactory.createReactionListener(event, pollEvent.getIdentifier()).builder().withApiCallsOnSeparateThread(true).allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build();
+        setDefaultListener(InputListenerFactory.createReactionListener(event, pollEvent.getIdentifier()).builder().withApiCallsOnSeparateThread(true).allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build());
 
         withFullResponse((output -> {
             String response = output.getResponse();
@@ -83,8 +82,7 @@ public class QuickPollWizard extends InputWizard {
                 }
                 eventManager.update(localEvent);
             }
-            nextWindow("voteForPoll");
-        }), false, qpListener, prompt, "U+2705", "U+274C");
+        }), false, prompt, "U+2705", "U+274C");
     }
 
     /**

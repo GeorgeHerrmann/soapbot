@@ -70,7 +70,7 @@ public abstract class InputWizard {
     private boolean isActive;
     private boolean awaitingResponse;
     protected final InteractionHandler handler;
-    private final InputListener listener;
+    private InputListener listener;
     protected final MultiLogger logger;
 
     /**
@@ -680,5 +680,15 @@ public abstract class InputWizard {
         listener.setCurrentMessage(newListener.getCurrentMessage());
         listener.setTitle(newListener.getTitle());
         listener.setInteractingMember(newListener.getInteractingUser());
+    }
+
+    /**
+     * Sets the default {@link InputListener} for this wizard.
+     * 
+     * @param newListener The new {@link InputListener} to set as the default.
+     */
+    public void setDefaultListener(InputListener newListener) {
+        loadListener(newListener);
+        this.listener = newListener;
     }
 }
