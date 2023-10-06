@@ -132,17 +132,53 @@ public class CommandParser {
 
         /**
          * Returns if the {@code word} is part of an assigned argument in any way.
+         * If multiple duplicate words are present in the input String, this method
+         * will check how many of each word has been assigned.
+         * <p>
+         * For example, if the input String is "testing this system testing" and only
+         * one instance of "testing" has been assigned in the current arguments, this
+         * method will return false on "testing". However, if both instances of "testing"
+         * have been assigned, this method will return true on "testing".
          * 
          * @param word The word to check.
          * @return True if the word is part of an assigned argument, false otherwise.
          */
         protected boolean isPartOfAssigned(String word) {
-            for (String arg : currentArgs) {
-                if (arg.contains(word)) {
-                    return true;
+            int currentWordFrequency = getCurrentWordFrequency(word);
+            int inputWordFrequency = getInputWordFrequency(word);
+            return currentWordFrequency == inputWordFrequency;
+        }
+
+        /**
+         * Returns the frequency of the provided {@code word} in the input words list.
+         * 
+         * @param word The word to check.
+         * @return The frequency of the provided {@code word} in the input words list.
+         */
+        protected int getInputWordFrequency(String word) {
+            int count = 0;
+            for (String inputWord : inputWords) {
+                if (inputWord.equals(word)) {
+                    count++;
                 }
             }
-            return false;
+            return count;
+        }
+
+        /**
+         * Returns the frequency of the provided {@code word} in the current arguments list.
+         * 
+         * @param word The word to check.
+         * @return The frequency of the provided {@code word} in the current arguments list.
+         */
+        protected int getCurrentWordFrequency(String word) {
+            int count = 0;
+            for (String currentArg : currentArgs) {
+                if (currentArg.contains(word)) {
+                    count++;
+                }
+            }
+            return count;
         }
 
         /**

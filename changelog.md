@@ -304,3 +304,8 @@
 
 2.518
     - Fixed an issue where some QuickPolls would create a new Message on every vote
+
+2.519
+    - Fixed an issue where the CommandParser would ignore duplicate instances of the same "word" on some input configurations
+        - For example, attempting to create an event called "the end of the world" would previously only use "the end of" as the event name,
+          as two instances of "the" were present. This, however, has now been fixed to properly handle duplicate words.
