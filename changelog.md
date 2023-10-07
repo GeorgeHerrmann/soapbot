@@ -309,3 +309,7 @@
     - Fixed an issue where the CommandParser would ignore duplicate instances of the same "word" on some input configurations
         - For example, attempting to create an event called "the end of the world" would previously only use "the end of" as the event name,
           as two instances of "the" were present. This, however, has now been fixed to properly handle duplicate words.
+
+2.520
+    - Commands can now be executed with Messages starting with "/"
+        - Note that these commands will behave like using the "!" syntax, not like slash-commands via Discord ApplicationCommands
