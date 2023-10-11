@@ -15,5 +15,9 @@ public enum ProfileType {
     /**
      * Represents a guild's permissions profile.
      */
-    PERMISSIONS
+    PERMISSIONS,
+    /**
+     * Represents a guild's collectables profile.
+     */
+    COLLECTABLES
 }

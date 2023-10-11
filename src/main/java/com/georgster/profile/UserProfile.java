@@ -1,5 +1,9 @@
 package com.georgster.profile;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.georgster.collectable.Collected;
 import com.georgster.control.util.identify.util.MemberIdentified;
 import com.georgster.economy.CoinBank;
 import com.georgster.gpt.MemberChatCompletions;
@@ -17,6 +21,7 @@ public final class UserProfile extends MemberIdentified {
     private String username; //User's discord username
     private final MemberChatCompletions completions;
     private final CoinBank bank;
+    private final List<Collected> collecteds;
 
     /**
      * Creates a new {@link UserProfile} for a specific {@code Member} inside of a {@code Guild}.
@@ -31,6 +36,7 @@ public final class UserProfile extends MemberIdentified {
         this.username = user;
         this.completions = new MemberChatCompletions(userId);
         this.bank = new CoinBank(userId);
+        this.collecteds = new ArrayList<>();
     }
 
     /**
@@ -44,12 +50,13 @@ public final class UserProfile extends MemberIdentified {
      * @param completions The {@link MemberChatCompletions} of the user
      * @param bank The {@link CoinBank} of the user
      */
-    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank) {
+    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, List<Collected> collecteds) {
         super(userId);
         this.guildId = serverId;
         this.username = user;
         this.completions = completions;
         this.bank = bank;
+        this.collecteds = collecteds;
     }
 
     /**
@@ -86,6 +93,37 @@ public final class UserProfile extends MemberIdentified {
      */
     public MemberChatCompletions getCompletions() {
         return completions;
+    }
+
+    /**
+     * Gets the {@link Collected Collecteds} of the {@code Member} associated with this profile.
+     * 
+     * @return The {@link Collected Collecteds} of the Member associated with this profile.
+     */
+    public List<Collected> getCollecteds() {
+        return collecteds;
+    }
+
+    /**
+     * Adds a {@link Collected} to the {@code Member} associated with this profile.
+     * 
+     * @param collected The {@link Collected} to add to the Member associated with this profile.
+     */
+    public void addCollected(Collected collected) {
+        collecteds.add(collected);
+    }
+
+    /**
+     * Removes a {@link Collected} from the {@code Member} associated with this profile.
+     * 
+     * @param collected The {@link Collected} to remove from the Member associated with this profile.
+     */
+    public void removeCollected(Collected collected) {
+        collecteds.remove(collected);
+    }
+
+    public void removeCollected(String id) {
+        collecteds.removeIf(collected -> collected.getIdentifier().equals(id));
     }
 
     /**

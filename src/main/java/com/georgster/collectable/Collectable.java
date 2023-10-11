@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.control.util.identify.util.UniqueIdentified;
+import com.georgster.economy.exception.InsufficientCoinsException;
+import com.georgster.profile.UserProfile;
 
 public final class Collectable extends UniqueIdentified {
     private String name;
@@ -14,13 +16,13 @@ public final class Collectable extends UniqueIdentified {
     private final List<Collected> collecteds;
 
     // new
-    public Collectable(String name, String description, String imageUrl, long cost) {
+    public Collectable(String name, String description, String imageUrl, long initialCost) {
         super(name);
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.cost = cost;
-        this.initialCost = cost;
+        this.cost = initialCost;
+        this.initialCost = initialCost;
         this.collecteds = new ArrayList<>();
     }
 
@@ -51,16 +53,40 @@ public final class Collectable extends UniqueIdentified {
         return cost;
     }
 
+    public long getInitialCost() {
+        return initialCost;
+    }
+
     public List<Collected> getCollecteds() {
         return collecteds;
     }
 
-    public void addCollected(String memberId, long initialPurchasePrice) {
-        collecteds.add(new Collected(memberId, initialPurchasePrice, this));
+    public Collected getCollected(String id) {
+        return collecteds.stream().filter(collected -> collected.getIdentifier().equals(id)).findFirst().orElse(null);
+    }
+
+    public void purchaseCollected(UserProfile profile) throws InsufficientCoinsException {
+        profile.getBank().withdrawl(cost); // Throws InsufficientCoinsException if not enough coins
+        Collected collected = new Collected(profile.getMemberId(), cost, this);
+        profile.addCollected(collected);
+        collecteds.add(collected);
         this.cost /= 2;
     }
 
+    public void sellCollected(UserProfile profile, Collected collected) {
+        profile.getBank().deposit(collected.getRecentPurchasePrice());
+        profile.removeCollected(collected);
+        collecteds.remove(collected);
+        this.cost += collected.getRecentPurchasePrice();
+    }
 
-
+    public void sellCollected(UserProfile profile, String id) {
+        Collected collected = profile.getCollecteds().stream().filter(collected1 -> collected1.getIdentifier().equals(id)).findFirst().orElse(null);
+        if (collected == null) return;
+        profile.getBank().deposit(collected.getRecentPurchasePrice());
+        profile.removeCollected(collected);
+        collecteds.remove(collected);
+        this.cost += collected.getRecentPurchasePrice();
+    }
 
 }

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.collectable.Collected;
 import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
 import com.georgster.economy.CoinBank;
@@ -64,7 +65,10 @@ public class UserProfileManager extends SoapManager<UserProfile> {
                 if (completions == null) completions = new MemberChatCompletions(id);
                 CoinBank bank = profile.getBank();
                 if (bank == null) bank = new CoinBank(id);
-                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank));
+                List<Collected> collecteds = profile.getCollecteds();
+                if (collecteds == null) collecteds = new ArrayList<>();
+
+                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, collecteds));
             } else {
                 add(new UserProfile(event.getGuild().getId().asString(), id, member.getTag()));
             }
