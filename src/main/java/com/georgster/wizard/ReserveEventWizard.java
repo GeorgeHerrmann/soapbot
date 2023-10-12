@@ -35,7 +35,6 @@ public class ReserveEventWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendMessage("Welcome to the reserve event wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         nextWindow("manageEvents");
         end();
     }

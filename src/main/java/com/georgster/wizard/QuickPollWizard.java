@@ -64,8 +64,6 @@ public class QuickPollWizard extends InputWizard {
 
         String prompt = localEvent.toString() + "\n*If this window stops working, type !poll present and select the poll's tite*";
 
-        setDefaultListener(InputListenerFactory.createReactionListener(event, pollEvent.getIdentifier()).builder().withApiCallsOnSeparateThread(true).allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build());
-
         withFullResponse((output -> {
             String response = output.getResponse();
             
@@ -106,6 +104,7 @@ public class QuickPollWizard extends InputWizard {
         } else {
             withResponse((response -> {
                 pollEvent = (PollEvent) eventManager.get(response);
+                setDefaultListener(InputListenerFactory.createReactionListener(event, pollEvent.getIdentifier()).builder().withApiCallsOnSeparateThread(true).allowAllResponses(true).withXReaction(false).withTimeoutDuration(120000).build());
                 nextWindow("voteForPoll");
             }), false, prompt, prompts.toArray(new String[prompts.size()]));
         }

@@ -313,3 +313,7 @@
 2.520
     - Commands can now be executed with Messages starting with "/"
         - Note that these commands will behave like using the "!" syntax, not like slash-commands via Discord ApplicationCommands
+
+2.521
+    - Fixed an issue where some wizards which overrode their default listener on the first window would create duplicate Messages when switching windows
+    - Fixed an issue where the MessageCommand was not working

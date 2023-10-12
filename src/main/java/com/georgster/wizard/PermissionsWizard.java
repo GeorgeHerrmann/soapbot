@@ -30,7 +30,6 @@ public class PermissionsWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendMessage("Welcome to the permissions wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         nextWindow("managePermissions");
         end();
     }

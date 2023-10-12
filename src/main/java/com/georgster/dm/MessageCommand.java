@@ -37,7 +37,7 @@ public class MessageCommand implements ParseableCommand {
         ParsedArguments args = event.getParsedArguments();
 
         StringBuilder response = new StringBuilder();
-        for (String i : args.getArguments()) {
+        for (String i : args.getArguments().get(0).split(" ")) {
             if (!i.contains(("@"))) {
                 response.append(i + " ");
             }
@@ -48,6 +48,7 @@ public class MessageCommand implements ParseableCommand {
                 logger.append("\n- Found User: " + user.getTag() + ", sending DM", LogDestination.NONAPI);
 
                 userHandler.sendPlainMessage(response.toString());
+                logger.append("\n- Sent DM to " + user.getTag(), LogDestination.NONAPI);
                 if (discordEvent.isChatInteraction()) {
                     ((ChatInputInteractionEvent) discordEvent.getEvent()).reply("Message sent to " + user.getTag()).withEphemeral(true).block();
                 }
