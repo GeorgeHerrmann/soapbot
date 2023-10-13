@@ -80,7 +80,7 @@ public class DiscordEvent {
         if (event instanceof ChatInputInteractionEvent) {
             return ((ChatInputInteractionEvent) event).getCommandName();
         } else if (event instanceof MessageCreateEvent) {
-            return ((MessageCreateEvent) event).getMessage().getContent().split(" ")[0].replace("!", "");
+            return ((MessageCreateEvent) event).getMessage().getContent().split(" ")[0].replace("!", "").replace("/", "");
         } else {
             return null;
         }

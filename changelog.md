@@ -301,3 +301,19 @@
     - Improved QuickPollWizard poll present
         - The current wizard will immediately switch to the QuickPoll voting screen
     - Updated MessageCommand to new Command systems
+
+2.518
+    - Fixed an issue where some QuickPolls would create a new Message on every vote
+
+2.519
+    - Fixed an issue where the CommandParser would ignore duplicate instances of the same "word" on some input configurations
+        - For example, attempting to create an event called "the end of the world" would previously only use "the end of" as the event name,
+          as two instances of "the" were present. This, however, has now been fixed to properly handle duplicate words.
+
+2.520
+    - Commands can now be executed with Messages starting with "/"
+        - Note that these commands will behave like using the "!" syntax, not like slash-commands via Discord ApplicationCommands
+
+2.521
+    - Fixed an issue where some wizards which overrode their default listener on the first window would create duplicate Messages when switching windows
+    - Fixed an issue where the MessageCommand was not working

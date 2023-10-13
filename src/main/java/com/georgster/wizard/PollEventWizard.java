@@ -35,7 +35,6 @@ public class PollEventWizard extends InputWizard {
      * {@inheritDoc}
      */
     public void begin() {
-        handler.sendMessage("Welcome to the poll event wizard. At any time you can type \"stop\", or react :x: to exit the wizard", TITLE);
         nextWindow("wizardOptions");
         end();
     }

@@ -70,7 +70,7 @@ public abstract class InputWizard {
     private boolean isActive;
     private boolean awaitingResponse;
     protected final InteractionHandler handler;
-    private final InputListener listener;
+    private InputListener listener;
     protected final MultiLogger logger;
 
     /**
@@ -550,14 +550,20 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponse(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
-        loadListener(newListener);
+        if (activeFunctions.size() > 1) {
+            loadListener(newListener);
+        }
 
         String response = promptQuick(newListener, message, options);
+
+        loadDefaultListener(newListener);
+
         if (response == null) {
             isActive = false;
         } else {
             withResponse.accept(response);
         }
+
     }
 
     /**
@@ -569,9 +575,14 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withFullResponse(Consumer<WizardResponse> withResponse, InputListener newListener, String message, String... options) {
-        loadListener(newListener);
+        if (activeFunctions.size() > 1) {
+            loadListener(newListener);
+        }
 
         WizardResponse response = prompt(newListener, message, options);
+
+        loadDefaultListener(newListener);
+
         if (response == null) {
             isActive = false;
         } else {
@@ -588,7 +599,9 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponseBack(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
-        loadListener(newListener);
+        if (activeFunctions.size() > 1) {
+            loadListener(newListener);
+        }
 
         String[] optionsWithBack;
         if (activeFunctions.size() > 1) {
@@ -599,6 +612,9 @@ public abstract class InputWizard {
             optionsWithBack = options;
         }
         String response = promptQuick(newListener, message, optionsWithBack);
+
+        loadDefaultListener(newListener);
+
         if (response == null) {
             isActive = false;
         } else if (response.equalsIgnoreCase("back")) {
@@ -617,7 +633,9 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withFullResponseBack(Consumer<WizardResponse> withResponse, InputListener newListener, String message, String... options) {
-        loadListener(newListener);
+        if (activeFunctions.size() > 1) {
+            loadListener(newListener);
+        }
 
         String[] optionsWithBack;
         if (activeFunctions.size() > 1) {
@@ -628,6 +646,9 @@ public abstract class InputWizard {
             optionsWithBack = options;
         }
         WizardResponse response = prompt(newListener, message, optionsWithBack);
+
+        loadDefaultListener(newListener);
+
         if (response == null) {
             isActive = false;
         } else if (response.getResponse().equalsIgnoreCase("back")) {
@@ -680,5 +701,19 @@ public abstract class InputWizard {
         listener.setCurrentMessage(newListener.getCurrentMessage());
         listener.setTitle(newListener.getTitle());
         listener.setInteractingMember(newListener.getInteractingUser());
+    }
+
+    /**
+     * Sets the default {@link InputListener} for this wizard.
+     * 
+     * @param newListener The new {@link InputListener} to set as the default.
+     */
+    public void setDefaultListener(InputListener newListener) {
+        if (listener.getCurrentMessage() != null) {
+            loadListener(newListener);
+        } else {
+            loadDefaultListener(newListener);
+        }
+        this.listener = newListener;
     }
 }

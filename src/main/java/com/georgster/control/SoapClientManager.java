@@ -83,7 +83,7 @@ public final class SoapClientManager {
         dispatcher.on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
         .filter(message -> (testMode && message.getMessage().getContent().startsWith("!!")) || !testMode) //If test mode is enabled, commands must start with "!!"
-        .filter(message -> message.getMessage().getContent().startsWith("!")) //If test mode is disabled, commands must start with "!"
+        .filter(message -> message.getMessage().getContent().startsWith("!") || message.getMessage().getContent().startsWith("/")) //If test mode is disabled, commands must start with "!"
         .subscribe(event -> clients.get(event.getGuild().block().getId()).onMessageCreate(event)); //Executes onMessageCreate when a MessageCreateEvent is fired
 
         dispatcher.on(ChatInputInteractionEvent.class)
