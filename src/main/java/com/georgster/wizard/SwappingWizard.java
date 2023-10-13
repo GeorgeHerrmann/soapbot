@@ -9,12 +9,15 @@ import com.georgster.wizard.input.InputListenerFactory;
 import discord4j.core.object.entity.Message;
 
 /**
- * A high level, unique wizard which can swap between a {@link Message} and an {@link InputWizard}
- * with a reaction of ":repeat:".
+ * A high level, unique wizard which can swap between a {@link Message} and an {@link InputWizard} with a reaction of ":repeat:".
+ * <p>
+ * The {@link SwappingWizard} is very similar to the {@link AlternateWizard}, however features wizard-message swapping instead of wizard-wizard swapping.
+ * <p>
+ * This wizard will begin from the first window of the provided {@code wizard}, then switch to the first window of the other wizard on each "swap".
+ * @see {@link AlternateWizard} for wizard-wizard swapping.
  */
 public class SwappingWizard extends InputWizard {
 
-    private final CommandExecutionEvent event;
     private Message message;
     private Optional<String> messageTitle;
     private String messageContent;
@@ -29,7 +32,6 @@ public class SwappingWizard extends InputWizard {
      */
     public SwappingWizard(CommandExecutionEvent event, Message message, InputWizard wizard) { // No prompt messages sent with the reaction listener, so title is irrelevant
         super(event, InputListenerFactory.createReactionListener(event, "").builder().withPromptMessages(false).withXReaction(false).build());
-        this.event = event;
         this.message = message;
         this.wizard = wizard;
         this.messageTitle = message.getEmbeds().get(0).getTitle();
@@ -58,7 +60,7 @@ public class SwappingWizard extends InputWizard {
         }
 
         withResponse((response -> {
-            wizard.getInputListener().cancel();
+            wizard.cancelCurrentListener();
             wizard.shutdown();
             nextWindow("swap", !onWizard);
         }), false, "", "U+1F501");

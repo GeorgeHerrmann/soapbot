@@ -48,8 +48,6 @@ public class PollEventWizard extends InputWizard {
         String prompt = "What would you like to do?";
         String[] options = {"create a poll", "vote on a poll", "view a poll", "edit a poll"};
         withResponse((response -> {
-            loadDefaultListener(buttonListener); // Since we're using a different listener for the first window, we must load our default listener afterwards
-
             if (response.equals("create a poll")) {
                 nextWindow("createPoll");
             } else if (response.equals("vote on a poll")) {

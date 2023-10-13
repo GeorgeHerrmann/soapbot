@@ -71,7 +71,10 @@ public abstract class InputWizard {
     private boolean awaitingResponse;
     protected final InteractionHandler handler;
     private InputListener listener;
+    private InputListener currentlyActiveListener;
     protected final MultiLogger logger;
+
+    private boolean wasShutdown; // A Shutdown wizard will not perform any additional end() activities
 
     /**
      * Initializes the InputWizard engine.
@@ -87,6 +90,7 @@ public abstract class InputWizard {
         this.handler = event.getGuildInteractionHandler();
         this.isActive = true;
         this.awaitingResponse = false;
+        this.wasShutdown = false;
         this.listener = listener;
         this.logger = event.getLogger();
         this.event = event;
@@ -279,19 +283,29 @@ public abstract class InputWizard {
      * Ends the wizard.
      */
     public void end() {
-        isActive = false;
-        listener.editCurrentMessageContent("Wizard ended.");
+        if (!wasShutdown) {
+            isActive = false;
+            listener.editCurrentMessageContent("Wizard ended.");
+            awaitingResponse = false;
+        }
     }
 
+    /**
+     * Cancels the current {@link InputListener} and deletes the current message.
+     * <p>
+     * This effectively completely removes the existence of an {@link InputWizard} in a Discord {@link MessageChannel}.
+     */
     public void delete() {
+        awaitingResponse = false;
         listener.cancel();
         listener.deleteCurrentMessage();
     }
 
     /**
-     * Restarts this wizard and begins from the first window.
+     * Unconditionally restarts this wizard and begins from the first window.
      */
     public void restart() {
+        wasShutdown = false;
         isActive = true;
         begin();
     }
@@ -300,6 +314,8 @@ public abstract class InputWizard {
      * Turns off the wizard without performing additional {@link #end()} activities.
      */
     public void shutdown() {
+        wasShutdown = true;
+        awaitingResponse = false;
         isActive = false;
     }
 
@@ -360,6 +376,7 @@ public abstract class InputWizard {
      * @see InputListenerFactory
      */
     protected void withResponse(Consumer<String> withResponse, boolean backOption, String message, String... options) {
+        this.currentlyActiveListener = listener;
         if (backOption) {
             withResponseBack(withResponse, message, options);
         } else {
@@ -388,6 +405,7 @@ public abstract class InputWizard {
      * @see InputListenerFactory
      */
     protected void withFullResponse(Consumer<WizardResponse> withResponse, boolean backOption, String message, String... options) {
+        this.currentlyActiveListener = listener;
         if (backOption) {
             withFullResponseBack(withResponse, message, options);
         } else {
@@ -417,6 +435,7 @@ public abstract class InputWizard {
      * @see InputListenerFactory
      */
     protected void withResponse(Consumer<String> withResponse, boolean backOption, InputListener newListener, String message, String... options) {
+        this.currentlyActiveListener = newListener;
         if (backOption) {
             withResponseBack(withResponse, newListener, message, options);
         } else {
@@ -446,6 +465,7 @@ public abstract class InputWizard {
      * @see InputListenerFactory
      */
     protected void withFullResponse(Consumer<WizardResponse> withResponse, boolean backOption, InputListener newListener, String message, String... options) {
+        this.currentlyActiveListener = newListener;
         if (backOption) {
             withFullResponseBack(withResponse, newListener, message, options);
         } else {
@@ -550,7 +570,7 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponse(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
-        if (activeFunctions.size() > 1) {
+        if (activeFunctions.size() > 1 || newListener.getCurrentMessage() == null) {
             loadListener(newListener);
         }
 
@@ -575,7 +595,7 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withFullResponse(Consumer<WizardResponse> withResponse, InputListener newListener, String message, String... options) {
-        if (activeFunctions.size() > 1) {
+        if (activeFunctions.size() > 1 || newListener.getCurrentMessage() ==null) {
             loadListener(newListener);
         }
 
@@ -599,7 +619,7 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withResponseBack(Consumer<String> withResponse, InputListener newListener, String message, String... options) {
-        if (activeFunctions.size() > 1) {
+        if (activeFunctions.size() > 1 || newListener.getCurrentMessage() == null) {
             loadListener(newListener);
         }
 
@@ -633,7 +653,7 @@ public abstract class InputWizard {
      * @param options Options to provide the user.
      */
     private void withFullResponseBack(Consumer<WizardResponse> withResponse, InputListener newListener, String message, String... options) {
-        if (activeFunctions.size() > 1) {
+        if (activeFunctions.size() > 1 || newListener.getCurrentMessage() == null) {
             loadListener(newListener);
         }
 
@@ -715,5 +735,14 @@ public abstract class InputWizard {
             loadDefaultListener(newListener);
         }
         this.listener = newListener;
+    }
+
+    /**
+     * Cancels the currently active {@link InputListener} for this Wizard.
+     */
+    public void cancelCurrentListener() {
+        if (currentlyActiveListener != null) {
+            currentlyActiveListener.cancel();
+        }
     }
 }
