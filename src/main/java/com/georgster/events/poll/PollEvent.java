@@ -244,6 +244,37 @@ public class PollEvent extends TimedEvent implements SoapEvent {
             && channel.equals(compare.getChannel());
     }
 
+    public List<String> generateOptionsList(GuildInteractionHandler handler) {
+        List<String> result = new ArrayList<>();
+
+        if (options != null) {
+            for (Map.Entry<String, List<String>> entry : options.entrySet()) {
+                StringBuilder sb = new StringBuilder();
+                String option = entry.getKey();
+                List<String> voters = entry.getValue();
+
+                if (option != null && !option.isEmpty()) {
+                    sb.append("*" + option + "*\n");
+                }
+
+                if (voters != null && !voters.isEmpty()) {
+                    for (String voter : voters) {
+                        if (voter != null && !voter.isEmpty()) {
+                            sb.append("- " + handler.getMemberById(voter).getMention() + "\n");
+                        }
+                    }
+                } else {
+                    sb.append("- No votes\n");
+                }
+
+                sb.append("Active for another " + SoapUtility.convertSecondsToHoursMinutes((int) until()) + "");
+                result.add(sb.toString());
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Returns a String describing this {@code PollEvent}.
      * 

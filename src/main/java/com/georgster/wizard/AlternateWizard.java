@@ -1,6 +1,7 @@
 package com.georgster.wizard;
 
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.input.InputListenerFactory;
 
@@ -22,14 +23,32 @@ public final class AlternateWizard extends InputWizard {
      * Creates a new AlternateWizard from the provided event that prompted this wizard's creation and wizards that will be swapped.
      * <p>
      * The {@link AlternateWizard} will begin from the first window of {@code wizard1}.
-     * @param event
-     * @param wizard1
-     * @param wizard2
+     * @param event The event that prompted this wizard's creation.
+     * @param wizard1 The first wizard to swap to and from.
+     * @param wizard2 The second wizard to swap to and from.
      */
     public AlternateWizard(CommandExecutionEvent event, InputWizard wizard1, InputWizard wizard2) {
         super(event,  InputListenerFactory.createReactionListener(event, "").builder().withPromptMessages(false).withXReaction(false).withTimeoutDuration(120000).build());
         this.wizard1 = wizard1;
         this.wizard2 = wizard2;
+    }
+
+    /**
+     * Creates a new AlternateWizard from the provided event that prompted this wizard's creation and wizards that will be swapped, with the option to use a unique {@link InteractionHandler}.
+     * <p>
+     * The {@link AlternateWizard} will begin from the first window of {@code wizard1}.
+     * @param event The event that prompted this wizard's creation.
+     * @param wizard1 The first wizard to swap to and from.
+     * @param wizard2 The second wizard to swap to and from.
+     * @param uniqueHandler True if this wizard should use a unique {@link InteractionHandler}, rather than the one from the provided {@code event}.
+     */
+    public AlternateWizard(CommandExecutionEvent event, InputWizard wizard1, InputWizard wizard2, boolean uniqueHandler) {
+        super(event,  InputListenerFactory.createReactionListener(event, "").builder().withPromptMessages(false).withXReaction(false).withTimeoutDuration(120000).build());
+        this.wizard1 = wizard1;
+        this.wizard2 = wizard2;
+        if (uniqueHandler) {
+            this.handler = new GuildInteractionHandler(event.getGuildInteractionHandler().getGuild());
+        }
     }
 
     /**

@@ -8,9 +8,11 @@ import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.poll.PollEvent;
 import com.georgster.util.SoapUtility;
+import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
 /**
@@ -85,7 +87,12 @@ public class PollEventWizard extends InputWizard {
 
         withResponse((response -> {
             PollEvent event = (PollEvent) eventManager.get(response);
-            handler.sendMessage(event.toString(), event.getIdentifier());
+
+            Message msg = handler.sendMessage(event.toString(), event.getIdentifier());
+            
+            IterableStringWizard voterWizard = new IterableStringWizard(super.event, event.getIdentifier(), event.generateOptionsList(super.event.getGuildInteractionHandler()));
+            SwappingWizard wizard = new SwappingWizard(super.event, msg, voterWizard, true);
+            ThreadPoolFactory.scheduleGeneralTask(super.event.getGuildInteractionHandler().getId(), wizard::begin);
         }), true, prompt, options);
     }
 

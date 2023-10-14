@@ -69,7 +69,7 @@ public abstract class InputWizard {
     protected User user;
     private boolean isActive;
     private boolean awaitingResponse;
-    protected final InteractionHandler handler;
+    protected InteractionHandler handler;
     private InputListener listener;
     private InputListener currentlyActiveListener;
     protected final MultiLogger logger;
