@@ -12,7 +12,7 @@ public final class Collectable extends UniqueIdentified {
     private String description;
     private String imageUrl;
     private long cost;
-    private final long initialCost;
+    private long initialCost;
     private final List<Collected> collecteds;
 
     // new
@@ -63,6 +63,29 @@ public final class Collectable extends UniqueIdentified {
 
     public Collected getCollected(String id) {
         return collecteds.stream().filter(collected -> collected.getIdentifier().equals(id)).findFirst().orElse(null);
+    }
+
+    public static Collectable initialize(String name) {
+        return new Collectable(name, "", "", 0);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        if (description == null) return;
+        this.description = description;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        if (imageUrl == null) return;
+        this.imageUrl = imageUrl;
+    }
+
+    public void setInitialCost(long cost) {
+        this.cost = cost;
+        this.initialCost = cost;
     }
 
     public void purchaseCollected(UserProfile profile) throws InsufficientCoinsException {

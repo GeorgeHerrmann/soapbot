@@ -2,10 +2,11 @@ package com.georgster.test;
 
 import java.util.List;
 
+import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.wizard.CollectableWizard;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -13,15 +14,15 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Used to test on going features. This command will be considered active if the
  * {@code ACTIVE} field is set to {@code true}.
  */
-public class TestCommand implements ParseableCommand { 
+public class TestCommand implements Command { 
     private static final boolean ACTIVE = true;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        event.getGuildInteractionHandler().sendMessage(SoapUtility.convertDate(event.getParsedArguments().get(0)));
-        throw new UnsupportedOperationException("Test command is currently inactive");
+        new CollectableWizard(event).begin();
+        //throw new UnsupportedOperationException("Test command is currently inactive");
     }
 
     /**

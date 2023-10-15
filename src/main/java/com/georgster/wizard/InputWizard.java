@@ -700,6 +700,28 @@ public abstract class InputWizard {
     }
 
     /**
+     * Sends a message in this wizard's active text channel that will self-delete in five seconds.
+     * <p>
+     * Invokes {@link GuildInteractionHandler#sendMessage(String, String, String)} for message sending.
+     * 
+     * @param text The body of the message.
+     * @param title The title of the message.
+     * @param imageUrl The URL of the image to include in the message.
+     */
+    protected void sendMessage(String text, String title, String imageUrl) {
+        ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> {
+            Message message = handler.sendMessage(text, title, imageUrl);
+            try {
+                Thread.sleep(5000);
+                message.delete().block();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
      * Loads the properties from this listener's default {@link InputListener}
      * into the provided {@code newListener}.
      * 

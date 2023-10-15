@@ -53,6 +53,7 @@ public abstract class InputListener {
     private boolean sendPromptMessage; // If false (generally not reccomended), sendPromptMessage(String) does nothing
     private boolean allowAllUsers; // If false, only user will be able to respond.
     private boolean apiCallOnSeparateThread; // If true, all API calls will be placed on a seperate general task thread
+    private boolean autoFormat; // If true, all responses will be lowercase
 
     /*
      * InputListeners work on a message to message basis.
@@ -84,6 +85,7 @@ public abstract class InputListener {
         this.sendPromptMessage = true;
         this.allowAllUsers = false;
         this.apiCallOnSeparateThread = false;
+        this.autoFormat = true;
         this.timeoutTime = 300;
         this.responseContainer = new StringBuilder();
     }
@@ -247,6 +249,15 @@ public abstract class InputListener {
     }
 
     /**
+     * If true, all responses will be automatically formatted to lowercase.
+     * 
+     * @param setting If true, all responses will be automatically formatted to lowercase.
+     */
+    public void autoFormat(boolean setting) {
+        this.autoFormat = setting;
+    }
+
+    /**
      * Sets the duration before this listener times out (in ms).
      * 
      * @param ms The duration in ms before this listener times out.
@@ -338,16 +349,26 @@ public abstract class InputListener {
             options.set(i, options.get(i).toLowerCase());
         }
 
+        String fullResponse = response;
         response = response.toLowerCase();
+
         if (!mustMatchLenient && !mustMatchStrict) {
             this.recentState.setNotes(String.join("\n", notes));
-            this.responseContainer.append(response);
+            if (autoFormat) {
+                this.responseContainer.append(response);
+            } else {
+                this.responseContainer.append(fullResponse);
+            }
             this.recentState.setUser(responder);
             return;
         }
         if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) && !mustMatchStrict)) {
             this.recentState.setNotes(String.join("\n", notes));
-            this.responseContainer.append(response);
+            if (autoFormat) {
+                this.responseContainer.append(response);
+            } else {
+                this.responseContainer.append(fullResponse);
+            }
             this.recentState.setUser(responder);
         }
     }
