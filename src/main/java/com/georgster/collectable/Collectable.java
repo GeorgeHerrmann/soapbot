@@ -93,7 +93,9 @@ public final class Collectable extends UniqueIdentified {
         Collected collected = new Collected(profile.getMemberId(), cost, this);
         profile.addCollected(collected);
         collecteds.add(collected);
-        this.cost /= 2;
+        if (!collecteds.isEmpty()) {
+            this.cost /= 2;
+        }
     }
 
     public void sellCollected(UserProfile profile, Collected collected) {
