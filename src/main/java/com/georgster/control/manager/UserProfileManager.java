@@ -150,4 +150,14 @@ public class UserProfileManager extends SoapManager<UserProfile> {
 
        return aiService.createChatCompletion(request);
     }
+
+    /**
+     * Returns the total amount of coins for all users in this manager,
+     * that is, the total amount of coins for users in a Guild.
+     * 
+     * @return The total amount of coins for all users in this manager.
+     */
+    public long getTotalCoins() {
+        return getAll().stream().mapToLong(profile -> profile.getBank().getBalance()).sum();
+    }
 }

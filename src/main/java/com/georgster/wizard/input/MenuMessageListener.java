@@ -40,7 +40,7 @@ public class MenuMessageListener extends InputListener {
      * {@inheritDoc}
      */
     public WizardState prompt(WizardState inputState) {
-        String prompt = inputState.getMessage();
+        StringBuilder prompt = new StringBuilder(inputState.getMessage());
         String[] options = inputState.getOptions();
 
         SelectMenu.Option[] menuOptions = new SelectMenu.Option[options.length];
@@ -51,8 +51,12 @@ public class MenuMessageListener extends InputListener {
 
         SelectMenu menu = SelectMenu.of(title, menuOptions);
 
-        prompt += "\nYour options are: " + String.join(", ", options);
-        sendPromptMessage(prompt, ActionRow.of(menu));
+        prompt.append("\nYour options are: " + String.join(", ", options));
+
+        inputState.getEmbed().ifPresentOrElse(spec ->
+            sendPromptMessage(spec, ActionRow.of(menu)),
+        () ->
+            sendPromptMessage(prompt.toString(), ActionRow.of(menu)));
 
         // Create a listener that listens for the user's next message
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)

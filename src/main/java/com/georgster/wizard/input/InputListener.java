@@ -17,6 +17,7 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateSpec;
 import reactor.core.Disposable;
 
 /**
@@ -141,6 +142,38 @@ public abstract class InputListener {
                     ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), prompt, title) : handler.editMessage(message.getMessage(), prompt, title, components)));
                 } else {
                     message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), prompt, title) : handler.editMessage(message.getMessage(), prompt, title, components));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (addXReaction) {
+            addXEmojiListener();
+        }
+    }
+
+    /**
+     * Sends a message using the provided {@link EmbedCreateSpec} containing the content and a potential title, and the optional
+     * LayoutComponents attached.
+     * <p>
+     * If options are present, they should be included in the content of the EmbedCreateSpec.
+     * <p>
+     * This method does not use this listener's default title.
+     * 
+     * @param spec The EmbedCreateSpec to send.
+     * @param components The components to attach (optional).
+     */
+    protected void sendPromptMessage(EmbedCreateSpec spec, LayoutComponent... components) {
+        if (!sendPromptMessage) return;
+
+        if (message == null || message.getMessage() == null) {
+            message = new WizardMessage(components.length == 0 ? handler.sendMessage(spec) : handler.sendMessage(spec, components));
+        } else {
+            try {
+                if (apiCallOnSeparateThread) {
+                    ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), spec) : handler.editMessage(message.getMessage(), spec, components)));
+                } else {
+                    message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), spec) : handler.editMessage(message.getMessage(), spec, components));
                 }
             } catch (Exception e) {
                 e.printStackTrace();

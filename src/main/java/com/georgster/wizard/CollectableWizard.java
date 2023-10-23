@@ -24,19 +24,6 @@ public final class CollectableWizard extends InputWizard {
         end();
     }
 
-    protected void viewAllCollectables() {
-        String prompt = "Which card would you like to view?";
-        String[] cards = new String[manager.getCount() + 1];
-        for (int i = 0; i < cards.length; i++) {
-            cards[i] = manager.getAll().get(i).getName();
-        }
-        cards[manager.getCount()] = "";
-
-        withResponse(response -> {
-
-        }, true, null, cards);
-    }
-
     protected void createCollectable() {
         String prompt = "What is the name of the card? Please note that this cannot be changed upon creation.";
         withResponse(response -> {
@@ -80,8 +67,9 @@ public final class CollectableWizard extends InputWizard {
                 if (ownerProfile.getBank().hasBalance(cost)) {
                     current.setInitialCost(cost);
                     current.purchaseCollected(ownerProfile);
-                    manager.add(current);
+                    //manager.add(current);
                     sendMessage(current.getName() + " created successfully.", "Card created");
+                    nextWindow("viewCollectable", current);
                 } else {
                     sendMessage("You do not have enough money to create this card.", "Insufficient funds");
                 }

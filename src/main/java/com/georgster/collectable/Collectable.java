@@ -3,9 +3,12 @@ package com.georgster.collectable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.identify.util.UniqueIdentified;
 import com.georgster.economy.exception.InsufficientCoinsException;
 import com.georgster.profile.UserProfile;
+
+import discord4j.rest.util.Color;
 
 public final class Collectable extends UniqueIdentified {
     private String name;
@@ -14,6 +17,36 @@ public final class Collectable extends UniqueIdentified {
     private long cost;
     private long initialCost;
     private final List<Collected> collecteds;
+
+    /**
+     * A Rarity for a {@link Collectable}.
+     * <p>
+     * A {@link Collectable Collectable's} rarity is determined as a proportion of the current cost
+     * to the total amount of coins in the economy for a specific Guild (controlled by the UserProfileManager).
+     */
+    enum Rarity {
+        /**
+         * A {@link Collectable} which has a coin cost less than 1% of the total economy.
+         */
+        COMMON,
+        /**
+         * A {@link Collectable} which has a coin cost of at least 1% of the total economy.
+         */
+        UNCOMMON,
+        /**
+         * A {@link Collectable} which has a coin cost of at least 5% of the total economy.
+         */
+        RARE,
+        /**
+         * A {@link Collectable} which has a coin cost of at least 10% of the total economy.
+         */
+        LEGENDARY,
+        /**
+         * A {@link Collectable} which has a coin cost of at least 25% of the total economy.
+         * Unsuprisingly, there can be a maximum of four of these per Guild.
+         */
+        UNIQUE
+    }
 
     // new
     public Collectable(String name, String description, String imageUrl, long initialCost) {
@@ -112,6 +145,36 @@ public final class Collectable extends UniqueIdentified {
         profile.removeCollected(collected);
         collecteds.remove(collected);
         this.cost += collected.getRecentPurchasePrice();
+    }
+
+    public Rarity getRarity(UserProfileManager manager) {
+        long totalCoins = manager.getTotalCoins();
+        if (cost >= totalCoins * .25) {
+            return Rarity.UNIQUE;
+        } else if (cost >= totalCoins * .1) {
+            return Rarity.LEGENDARY;
+        } else if (cost >= totalCoins * .05) {
+            return Rarity.RARE;
+        } else if (cost >= totalCoins * .01) {
+            return Rarity.UNCOMMON;
+        } else {
+            return Rarity.COMMON;
+        }
+    }
+
+    public static Color getRarityColor(Rarity rarity) {
+        if (rarity == Rarity.COMMON) {
+            return Color.LIGHT_GRAY;
+        } else if (rarity == Rarity.UNCOMMON) {
+            return Color.GREEN;
+        } else if (rarity == Rarity.RARE) {
+            return Color.DEEP_SEA;
+        } else if (rarity == Rarity.LEGENDARY) {
+            return Color.VIVID_VIOLET;
+        } else if (rarity == Rarity.UNIQUE) {
+            return Color.ORANGE;
+        }
+        throw new IllegalArgumentException("Invalid rarity");
     }
 
 }

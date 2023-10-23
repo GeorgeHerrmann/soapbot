@@ -1,6 +1,9 @@
 package com.georgster.wizard;
 
+import java.util.Optional;
+
 import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateSpec;
 
 /**
  * A bridge between the {@link InputWizard} and the {@link com.georgster.wizard.input.InputListener InputListener}.
@@ -11,6 +14,7 @@ public class WizardState {
     private String notes;
     private String[] options;
     private User user;
+    private Optional<EmbedCreateSpec> embed;
 
     /**
      * Creates a new WizardState with the given message and options.
@@ -24,6 +28,26 @@ public class WizardState {
         this.options = options;
         this.user = user;
         this.notes = "";
+    }
+
+    /**
+     * Creates a new WizardState with the given {@link EmbedCreateSpec} and {@link User}.
+     * <p>
+     * This constructor is used to provide more control about how to send the message to the user.
+     * Using this constructor will initialize this state's message as empty, and the options
+     * may not be included as part of the prompt message, as the spec is sent as-is.
+     * 
+     * @param spec The {@link EmbedCreateSpec} to send to the user.
+     * @param user The {@link User} to send the message to.
+     * @param options Options to provide the user.
+     */
+    protected WizardState(EmbedCreateSpec spec, User user, String... options) {
+        this.user = user;
+        this.embed = Optional.of(spec);
+        this.hasEnded = false;
+        this.notes = "";
+        this.message = "";
+        this.options = options;
     }
 
     /**
@@ -42,6 +66,15 @@ public class WizardState {
      */
     public String getMessage() {
         return message;
+    }
+
+    /**
+     * Returns the {@link EmbedCreateSpec} to be sent to the user, if present.
+     * 
+     * @return The {@link EmbedCreateSpec} to be sent to the user, if present.
+     */
+    public Optional<EmbedCreateSpec> getEmbed() {
+        return embed;
     }
 
     /**

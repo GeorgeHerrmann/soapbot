@@ -33,14 +33,14 @@ public class MessageListener extends InputListener {
      * {@inheritDoc}
      */
     public WizardState prompt(WizardState inputState) {
-        String prompt = inputState.getMessage();
+        StringBuilder prompt = new StringBuilder(inputState.getMessage());
         String[] options = inputState.getOptions();
 
         if (options.length > 0) {
-            prompt += "\nYour options are: " + String.join(", ", options);
+            prompt.append("\nYour options are: " + String.join(", ", options));
         }
-
-        sendPromptMessage(prompt);
+        inputState.getEmbed().ifPresentOrElse(this::sendPromptMessage,
+        () -> sendPromptMessage(prompt.toString()));
 
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))

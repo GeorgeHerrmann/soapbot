@@ -262,6 +262,31 @@ public abstract class InteractionHandler {
     }
 
     /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the provided {@link Embed}.
+     * 
+     * @param spec The {@link EmbedCreateSpec} to use.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(EmbedCreateSpec spec) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, spec)));
+        return message.getObject();
+    }
+
+    /**
+     * Sends a {@link Message} in this handler's active {@link MessageChannel} with the provided {@link Embed} and {@link LayoutComponent LayoutComponents}.
+     * 
+     * @param spec The {@link EmbedCreateSpec} to use.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public Message sendMessage(EmbedCreateSpec spec, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, spec, components)));
+        return message.getObject();
+    }
+
+    /**
      * Edits the provided {@link Message} with the new provided body {@code text} and
      * default formatting.
      * <p>
@@ -344,6 +369,52 @@ public abstract class InteractionHandler {
             killActiveComponentInteraction();
             message.setObject(returns);
         }, () -> message.setObject(InteractionHandler.modifyMessage(msg, text, title, components)));
+
+        return message.getObject();
+    }
+
+    /**
+     * Edits the provided {@link Message} with the new provided {@link EmbedCreateSpec}.
+     * <p>
+     * If this {@link InteractionHandler} has an {@link #setActiveComponentInteraction(ComponentInteractionEvent) active Component Interaction},
+     * it will use the provided {@code msg} to reply to the interaction instead, killing the interaction once complete.
+     * 
+     * @param msg The {@link Message} to edit.
+     * @param spec The new {@link EmbedCreateSpec} for the {@link Message}.
+     * @return The edited {@link Message}.
+     */
+    public Message editMessage(Message msg, EmbedCreateSpec spec) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeComponentInteraction.ifPresentOrElse(interaction -> {
+            interaction.edit().withEmbeds(spec).block();
+            Message returns = interaction.getReply().block();
+            killActiveComponentInteraction();
+            message.setObject(returns);
+        }, () -> message.setObject(InteractionHandler.modifyMessage(msg, spec)));
+
+        return message.getObject();
+    }
+
+    /**
+     * Edits the provided {@link Message} with the new provided {@link EmbedCreateSpec}
+     * and {@link LayoutComponent LayoutComponents}.
+     * <p>
+     * If this {@link InteractionHandler} has an {@link #setActiveComponentInteraction(ComponentInteractionEvent) active Component Interaction},
+     * it will use the provided {@code msg} to reply to the interaction instead, killing the interaction once complete.
+     * 
+     * @param msg The {@link Message} to edit.
+     * @param spec The new {@link EmbedCreateSpec} for the {@link Message}.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The edited {@link Message}.
+     */
+    public Message editMessage(Message msg, EmbedCreateSpec spec, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeComponentInteraction.ifPresentOrElse(interaction -> {
+            interaction.edit().withEmbeds(spec).withComponents(components).block();
+            Message returns = interaction.getReply().block();
+            killActiveComponentInteraction();
+            message.setObject(returns);
+        }, () -> message.setObject(InteractionHandler.modifyMessage(msg, spec, components)));
 
         return message.getObject();
     }
@@ -600,6 +671,32 @@ public abstract class InteractionHandler {
     }
 
     /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the provided {@link EmbedCreateSpec}.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param spec The {@link EmbedCreateSpec} to use.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, EmbedCreateSpec spec) {
+        MessageCreateSpec message = MessageCreateSpec.create().withEmbeds(spec);
+        return channel.createMessage(message).block();
+    }
+
+    /**
+     * Sends a {@link Message} in the provided {@link MessageChannel} with the provided {@link EmbedCreateSpec}
+     * and {@link LayoutComponent LayoutComponents}.
+     * 
+     * @param channel The {@link MessageChannel} to send the message in.
+     * @param spec The {@link EmbedCreateSpec} to use.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The created {@link Message}.
+     */
+    public static Message sendMessage(MessageChannel channel, EmbedCreateSpec spec, LayoutComponent... components) {
+        MessageCreateSpec message = MessageCreateSpec.create().withEmbeds(spec).withComponents(components);
+        return channel.createMessage(message).block();
+    }
+
+    /**
      * Sends a {@link Message} in the provided {@link MessageChannel} with the provided text with no formatting.
      * 
      * @param channel The {@link MessageChannel} to send the message in.
@@ -662,6 +759,30 @@ public abstract class InteractionHandler {
 
         EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).build();
         return message.edit().withEmbeds(embed).withComponents(components).block();
+    }
+
+    /**
+     * Edits the provided {@link Message} with the new provided {@link EmbedCreateSpec}.
+     * 
+     * @param message The {@link Message} to edit.
+     * @param spec The {@link EmbedCreateSpec} to use.
+     * @return The edited {@link Message}.
+     */
+    public static Message modifyMessage(Message message, EmbedCreateSpec spec) {
+        return message.edit().withEmbeds(spec).withComponents().block();
+    }
+
+    /**
+     * Edits the provided {@link Message} with the new provided {@link EmbedCreateSpec}
+     * and {@link LayoutComponent LayoutComponents}.
+     * 
+     * @param message The {@link Message} to edit.
+     * @param spec The {@link EmbedCreateSpec} to use.
+     * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
+     * @return The edited {@link Message}.
+     */
+    public static Message modifyMessage(Message message, EmbedCreateSpec spec, LayoutComponent... components) {
+        return message.edit().withEmbeds(spec).withComponents(components).block();
     }
 
     /**

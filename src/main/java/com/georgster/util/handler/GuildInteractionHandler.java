@@ -392,6 +392,54 @@ public final class GuildInteractionHandler extends InteractionHandler {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
+    public Message sendMessage(EmbedCreateSpec spec) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeCommandInteraction.ifPresentOrElse(interaction -> {
+            if (replyWasDeferred) {
+                InteractionReplyEditSpec editSpec = InteractionReplyEditSpec.builder().addEmbed(spec).build();
+                interaction.editReply(editSpec).block();
+                replyWasDeferred = false;
+            } else {
+                InteractionApplicationCommandCallbackSpec replySpec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(spec).build();
+                interaction.reply(replySpec).block();
+            }
+            message.setObject(interaction.getReply().block());
+            killActiveCommandInteraction();
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, spec))));
+        return message.getObject();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * If this {@link GuildInteractionHandler} has an {@link #getActiveCommandInteraction() ActiveCommandInteraction}, it
+     * will reply to the event when sending the message instead.
+     */
+    @Override
+    public Message sendMessage(EmbedCreateSpec spec, LayoutComponent... components) {
+        Unwrapper<Message> message = new Unwrapper<>();
+        activeCommandInteraction.ifPresentOrElse(interaction -> {
+            if (replyWasDeferred) {
+                InteractionReplyEditSpec editSpec = InteractionReplyEditSpec.builder().addEmbed(spec).addAllComponents(List.of(components)).build();
+                interaction.editReply(editSpec).block();
+                replyWasDeferred = false;
+            } else {
+                InteractionApplicationCommandCallbackSpec replySpec = InteractionApplicationCommandCallbackSpec.builder().addEmbed(spec).addAllComponents(List.of(components)).build();
+                interaction.reply(replySpec).block();
+            }
+            message.setObject(interaction.getReply().block());
+            killActiveCommandInteraction();
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, spec, components))));
+        return message.getObject();
+    }
+
+    /**
      * Returns a list of all the channels in the guild.
      * 
      * @return a list of all the channels in the guild

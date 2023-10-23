@@ -63,8 +63,10 @@ public class ButtonMessageListener extends InputListener {
             }
         }
 
-        sendPromptMessage(prompt, getRowsFromButtons(buttons));
-        
+        inputState.getEmbed().ifPresentOrElse(spec ->
+            sendPromptMessage(spec, getRowsFromButtons(buttons)),
+        () -> 
+            sendPromptMessage(prompt, getRowsFromButtons(buttons)));
 
         // Create a listener that listens for the user to click a button
         createListener(dispatcher -> dispatcher.on(ButtonInteractionEvent.class)
