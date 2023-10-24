@@ -6,6 +6,8 @@ import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.wizard.CollectableViewWizard;
 import com.georgster.wizard.CollectableWizard;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -14,14 +16,22 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * Used to test on going features. This command will be considered active if the
  * {@code ACTIVE} field is set to {@code true}.
  */
-public class TestCommand implements Command { 
+public class TestCommand implements ParseableCommand { 
     private static final boolean ACTIVE = true;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        new CollectableWizard(event).begin();
+        SubcommandSystem sb = event.createSubcommandSystem();
+
+        sb.on((p) -> {
+            new CollectableWizard(event).begin();
+        }, "create");
+
+        sb.on(p -> {
+            new CollectableViewWizard(event, true).begin();
+        }, "view");
         //throw new UnsupportedOperationException("Test command is currently inactive");
     }
 

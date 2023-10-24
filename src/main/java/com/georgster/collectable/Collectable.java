@@ -11,11 +11,7 @@ import com.georgster.profile.UserProfile;
 import discord4j.rest.util.Color;
 
 public final class Collectable extends UniqueIdentified {
-    private String name;
-    private String description;
-    private String imageUrl;
-    private long cost;
-    private long initialCost;
+    private CollectableContext context;
     private final List<Collected> collecteds;
 
     /**
@@ -24,7 +20,7 @@ public final class Collectable extends UniqueIdentified {
      * A {@link Collectable Collectable's} rarity is determined as a proportion of the current cost
      * to the total amount of coins in the economy for a specific Guild (controlled by the UserProfileManager).
      */
-    enum Rarity {
+    public enum Rarity {
         /**
          * A {@link Collectable} which has a coin cost less than 1% of the total economy.
          */
@@ -49,45 +45,37 @@ public final class Collectable extends UniqueIdentified {
     }
 
     // new
-    public Collectable(String name, String description, String imageUrl, long initialCost) {
+    public Collectable(String name, String ownerId, String description, String imageUrl, long initialCost) {
         super(name);
-        this.name = name;
-        this.description = description;
-        this.imageUrl = imageUrl;
-        this.cost = initialCost;
-        this.initialCost = initialCost;
+        this.context = new CollectableContext(name, ownerId, description, imageUrl, initialCost);
         this.collecteds = new ArrayList<>();
     }
 
     // from database
-    public Collectable(String name, String description, String imageUrl, long cost, long initialCost, List<Collected> collecteds) {
+    public Collectable(String name, String ownerId, String description, String imageUrl, long cost, long initialCost, List<Collected> collecteds) {
         super(name);
-        this.name = name;
-        this.description = description;
-        this.imageUrl = imageUrl;
-        this.cost = cost;
-        this.initialCost = initialCost;
+        this.context = new CollectableContext(name, ownerId, description, imageUrl, cost, initialCost);
         this.collecteds = collecteds;
     }
 
     public String getName() {
-        return name;
+        return context.getName();
     }
 
     public String getDescription() {
-        return description;
+        return context.getDescription();
     }
 
     public String getImageUrl() {
-        return imageUrl;
+        return context.getImageUrl();
     }
 
     public long getCost() {
-        return cost;
+        return context.getCost();
     }
 
     public long getInitialCost() {
-        return initialCost;
+        return context.getInitialCost();
     }
 
     public List<Collected> getCollecteds() {
@@ -98,44 +86,42 @@ public final class Collectable extends UniqueIdentified {
         return collecteds.stream().filter(collected -> collected.getIdentifier().equals(id)).findFirst().orElse(null);
     }
 
-    public static Collectable initialize(String name) {
-        return new Collectable(name, "", "", 0);
+    public static Collectable initialize(String name, String ownerId) {
+        return new Collectable(name, ownerId, "", "", 0);
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.context.setName(name);
     }
 
     public void setDescription(String description) {
         if (description == null) return;
-        this.description = description;
+        this.context.setDescription(description);
     }
 
     public void setImageUrl(String imageUrl) {
         if (imageUrl == null) return;
-        this.imageUrl = imageUrl;
+        this.context.setImageUrl(imageUrl);
     }
 
     public void setInitialCost(long cost) {
-        this.cost = cost;
-        this.initialCost = cost;
+        this.context.setInitialCost(cost);
+        this.context.setCost(cost);
     }
 
     public void purchaseCollected(UserProfile profile) throws InsufficientCoinsException {
-        profile.getBank().withdrawl(cost); // Throws InsufficientCoinsException if not enough coins
-        Collected collected = new Collected(profile.getMemberId(), cost, this);
+        profile.getBank().withdrawl(getCost()); // Throws InsufficientCoinsException if not enough coins
+        Collected collected = new Collected(profile.getMemberId(), getCost(), context);
         profile.addCollected(collected);
+        this.context.setCost(getCost() / 2);
         collecteds.add(collected);
-        if (!collecteds.isEmpty()) {
-            this.cost /= 2;
-        }
     }
 
     public void sellCollected(UserProfile profile, Collected collected) {
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.remove(collected);
-        this.cost += collected.getRecentPurchasePrice();
+        context.setCost(context.getCost() + collected.getRecentPurchasePrice());
     }
 
     public void sellCollected(UserProfile profile, String id) {
@@ -144,18 +130,18 @@ public final class Collectable extends UniqueIdentified {
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.remove(collected);
-        this.cost += collected.getRecentPurchasePrice();
+        context.setCost(context.getCost() + collected.getRecentPurchasePrice());
     }
 
     public Rarity getRarity(UserProfileManager manager) {
         long totalCoins = manager.getTotalCoins();
-        if (cost >= totalCoins * .25) {
+        if (getCost() >= totalCoins * .25) {
             return Rarity.UNIQUE;
-        } else if (cost >= totalCoins * .1) {
+        } else if (getCost() >= totalCoins * .1) {
             return Rarity.LEGENDARY;
-        } else if (cost >= totalCoins * .05) {
+        } else if (getCost() >= totalCoins * .05) {
             return Rarity.RARE;
-        } else if (cost >= totalCoins * .01) {
+        } else if (getCost() >= totalCoins * .01) {
             return Rarity.UNCOMMON;
         } else {
             return Rarity.COMMON;
@@ -175,6 +161,29 @@ public final class Collectable extends UniqueIdentified {
             return Color.ORANGE;
         }
         throw new IllegalArgumentException("Invalid rarity");
+    }
+
+    public String getCreatorId() {
+        return context.getOwnerId();
+    }
+
+    public boolean owns(UserProfile profile) {
+        return profile.getCollecteds().stream().anyMatch(collected -> collected.getCollectable().equals(context));
+    }
+
+    public List<Collected> getUserCollecteds(UserProfile profile) {
+        return collecteds.stream().filter(c -> c.getMemberId().equals(profile.getMemberId())).toList();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("*" + getDescription() + "*\n");
+        sb.append("Cost: " + "*" + getCost() + "*\n");
+        sb.append("Initial Cost: " + "*" + getInitialCost() + "*");
+        
+        return sb.toString();
     }
 
 }

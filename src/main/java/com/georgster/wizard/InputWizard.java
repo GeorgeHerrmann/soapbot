@@ -11,10 +11,12 @@ import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.handler.InteractionHandler;
+import com.georgster.util.handler.UserInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -134,13 +136,13 @@ public abstract class InputWizard {
      * Runs the current method for as long as this {@code InputWizard} is active.
      */
     private void invokeCurrentMethod() {
-        while (isActive()) {
+        //while (isActive()) {
             try {
                 activeFunctions.peek().invoke(this, activeFunctionParams.peek());
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
-        }
+        //}
     }
 
     /**
@@ -1124,7 +1126,7 @@ public abstract class InputWizard {
      * @param title The title of the message.
      */
     protected void sendMessage(String text, String title) {
-        ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> {
+        ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> {
             Message message = handler.sendMessage(text, title);
             try {
                 Thread.sleep(5000);
@@ -1146,7 +1148,7 @@ public abstract class InputWizard {
      * @param imageUrl The URL of the image to include in the message.
      */
     protected void sendMessage(String text, String title, String imageUrl) {
-        ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> {
+        ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> {
             Message message = handler.sendMessage(text, title, imageUrl);
             try {
                 Thread.sleep(5000);
@@ -1168,6 +1170,7 @@ public abstract class InputWizard {
         newListener.setCurrentMessage(listener.getCurrentMessage());
         newListener.setTitle(listener.getTitle());
         newListener.setInteractingMember(listener.getInteractingUser());
+        newListener.setInteractionHandler(listener.getInteractionHandler());
     }
 
     /**
@@ -1180,6 +1183,7 @@ public abstract class InputWizard {
         listener.setCurrentMessage(newListener.getCurrentMessage());
         listener.setTitle(newListener.getTitle());
         listener.setInteractingMember(newListener.getInteractingUser());
+        listener.setInteractionHandler(newListener.getInteractionHandler());
     }
 
     /**
@@ -1203,5 +1207,36 @@ public abstract class InputWizard {
         if (currentlyActiveListener != null) {
             currentlyActiveListener.cancel();
         }
+    }
+
+    /**
+     * Switches this Wizard from the default Guild wizard to a {@link User} wizard
+     * for the current {@link User} of this Wizard.
+     */
+    public void switchToUserWizard() {
+        InteractionHandler newHandler = new UserInteractionHandler(this.user);
+        this.handler = newHandler;
+        this.listener.setInteractionHandler(newHandler);
+    }
+
+    /**
+     * Switches this Wizard from the default Guild wizard to a {@link User} wizard
+     * for the provided {@link User}.
+     * 
+     * @param user The {@link User} to switch to.
+     */
+    public void swtichToUserWizard(User user) {
+        InteractionHandler newHandler = new UserInteractionHandler(user);
+        this.handler = newHandler;
+        this.listener.setInteractionHandler(newHandler);
+    }
+
+    /**
+     * Returns the Guild this Wizard was started in.
+     * 
+     * @return The Guild this Wizard was started in.
+     */
+    public Guild getGuild() {
+        return event.getGuildInteractionHandler().getGuild();
     }
 }

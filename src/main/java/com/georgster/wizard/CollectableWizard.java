@@ -5,6 +5,7 @@ import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.profile.UserProfile;
+import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.input.InputListenerFactory;
 
 public final class CollectableWizard extends InputWizard {
@@ -27,7 +28,7 @@ public final class CollectableWizard extends InputWizard {
     protected void createCollectable() {
         String prompt = "What is the name of the card? Please note that this cannot be changed upon creation.";
         withResponse(response -> {
-            Collectable c = Collectable.initialize(response);
+            Collectable c = Collectable.initialize(response, user.getId().asString());
             nextWindow("collectableDescription", c);
         }, true, prompt);
     }
@@ -50,7 +51,6 @@ public final class CollectableWizard extends InputWizard {
 
         withResponse(response -> {
             try {
-                sendMessage("I found the following image", "Image found from URL", response);
                 current.setImageUrl(response);
                 nextWindow("collectableCost", current);
             } catch (Exception e) {
@@ -64,14 +64,20 @@ public final class CollectableWizard extends InputWizard {
         withResponse(response -> {
             try {
                 long cost = Long.parseLong(response);
-                if (ownerProfile.getBank().hasBalance(cost)) {
-                    current.setInitialCost(cost);
-                    current.purchaseCollected(ownerProfile);
-                    //manager.add(current);
-                    sendMessage(current.getName() + " created successfully.", "Card created");
-                    nextWindow("viewCollectable", current);
+
+                if (cost < 5) {
+                    sendMessage("Sorry, a card must have an initial cost of at least **5 coins**", "Invalid card cost");
                 } else {
-                    sendMessage("You do not have enough money to create this card.", "Insufficient funds");
+                    if (ownerProfile.getBank().hasBalance(cost)) {
+                        current.setInitialCost(cost);
+                        current.purchaseCollected(ownerProfile);
+                        manager.add(current);
+                        sendMessage(current.getName() + " created successfully.", "Card created");
+                        shutdown();
+                        ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new CollectableViewWizard(event, false).begin("viewCollectable", current));
+                    } else {
+                        sendMessage("You do not have enough money to create this card.", "Insufficient funds");
+                    }
                 }
             } catch (Exception e) {
                 sendMessage("Invalid cost. Please try again.", "Invalid cost");

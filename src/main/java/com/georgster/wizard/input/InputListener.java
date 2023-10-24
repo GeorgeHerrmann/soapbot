@@ -43,7 +43,7 @@ public abstract class InputListener {
     protected final String endString; // String to type to cancel the listener
     protected String title; // The title to attach to messages
     private final EventDispatcher dispatcher; // Dispatcher sending events
-    protected final InteractionHandler handler; // Handler to interact with the Guild
+    protected InteractionHandler handler; // Handler to interact with the Guild or User
     protected User user; // The initial user of the listener
     private final List<Disposable> listeners; // The Disposable listeners
 
@@ -523,5 +523,23 @@ public abstract class InputListener {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Sets the {@link InteractionHandler}, which will handle all interactions with discord.
+     * 
+     * @param handler The new {@link InteractionHandler}.
+     */
+    public void setInteractionHandler(InteractionHandler handler) {
+        this.handler = handler;
+    }
+
+    /**
+     * Returns the {@link InteractionHandler} for this listener, which will handle all interactions with discord.
+     * 
+     * @return The {@link InteractionHandler} for this listener.
+     */
+    public InteractionHandler getInteractionHandler() {
+        return handler;
     }
 }

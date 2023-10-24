@@ -70,7 +70,7 @@ public class ButtonMessageListener extends InputListener {
 
         // Create a listener that listens for the user to click a button
         createListener(dispatcher -> dispatcher.on(ButtonInteractionEvent.class)
-            .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(user.getId().asString()))
+            .filter(event -> event.getInteraction().getUser().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().get().getId().asString().equals(message.getMessage().getId().asString()))
             .subscribe(event -> {
                 setResponse(event.getCustomId().toLowerCase(), event.getInteraction().getUser());

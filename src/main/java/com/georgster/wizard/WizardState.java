@@ -26,6 +26,7 @@ public class WizardState {
         this.hasEnded = false;
         this.message = message;
         this.options = options;
+        this.embed = Optional.empty();
         this.user = user;
         this.notes = "";
     }

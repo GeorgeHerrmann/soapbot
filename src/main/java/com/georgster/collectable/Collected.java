@@ -9,10 +9,10 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
     private final String id;
     private String memberId;
     private long recentPurchasePrice;
-    private final Collectable collectable;
+    private final CollectableContext collectable;
 
     // new
-    public Collected(String memberId, long recentPurchasePrice, Collectable collectable) {
+    public Collected(String memberId, long recentPurchasePrice, CollectableContext collectable) {
         this.memberId = memberId;
         this.recentPurchasePrice = recentPurchasePrice;
         this.id = UniqueIdFactory.createId();
@@ -20,7 +20,7 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
     }
 
     // from database
-    public Collected(String memberId, String id, long recentPurchasePrice, Collectable collectable, String date, String time) {
+    public Collected(String memberId, String id, long recentPurchasePrice, CollectableContext collectable, String date, String time) {
         super(date, time);
         this.memberId = memberId;
         this.recentPurchasePrice = recentPurchasePrice;
@@ -40,7 +40,7 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         return recentPurchasePrice;
     }
 
-    public Collectable getCollectable() {
+    public CollectableContext getCollectable() {
         return collectable;
     }
 
@@ -48,5 +48,14 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         owner.removeCollected(this);
         reciever.addCollected(this);
         this.memberId = reciever.getMemberId();
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getCollectable().getName() + "\n");
+        sb.append("ID: " + getIdentifier() + "\n");
+        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate() + "\n");
+        sb.append("Purchased for " + getRecentPurchasePrice() + " coins");
+        return sb.toString();
     }
 }
