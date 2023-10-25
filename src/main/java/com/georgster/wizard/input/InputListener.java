@@ -194,7 +194,7 @@ public abstract class InputListener {
         }
         // Create a listener that listens for the user to end the wizard by reacting
         createListener(eventDispatcher -> eventDispatcher.on(ReactionAddEvent.class)
-            .filter(event -> event.getMember().get().getId().asString().equals(user.getId().asString()))
+            .filter(event -> event.getUser().block().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getEmoji().equals(ReactionEmoji.unicode("❌")))
             .subscribe(event -> recentState.end()));
     }

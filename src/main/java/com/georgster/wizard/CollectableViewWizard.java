@@ -70,7 +70,7 @@ public class CollectableViewWizard extends InputWizard {
 
         EmbedCreateSpec spec = EmbedCreateSpec.builder()
                 .title(owner.getDisplayName() + "'s " + collectable.getName())
-                .description(collected.toString() + "\n" + owner.getMention())
+                .description(collected.toString() + "\nOwned by: " + owner.getMention())
                 .image(collectable.getImageUrl())
                 .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
                 .build();
@@ -87,14 +87,14 @@ public class CollectableViewWizard extends InputWizard {
 
         withResponse(response -> {
             if (response.equals("back")) {
-                nextWindow("viewAllCollecteds", index - 1);
+                nextWindow("viewAllCollecteds", collectable, index - 1);
             } else if (response.equals("next")) {
-                nextWindow("viewAllCollecteds", index + 1);
+                nextWindow("viewAllCollecteds", collectable, index + 1);
             } else if (response.equals("card manager")) {
                 sendMessage("A Collectable Manager was started in your direct message channel", "Card Manager");
                 ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new ManageCollectableWizard(event, collectable, user).begin());
             }
-        }, true, spec, options);
+        }, false, spec, options);
     }
 
     protected void viewCollectable(Collectable collectable) {
@@ -110,10 +110,12 @@ public class CollectableViewWizard extends InputWizard {
         withFullResponse(fullResponse -> {
             String response = fullResponse.getResponse();
             if (response.equals("card manager")) {
-                sendMessage("A Collectable Manager was started in your direct message channel", fullResponse.getResponder().getUsername() + " Card Manager");
+                sendMessage("A Card Manager was started in your direct message channel", fullResponse.getResponder().getUsername() + "'s Card Manager");
                 ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new ManageCollectableWizard(event, collectable, fullResponse.getResponder()).begin());
+            } else if (response.equals("view cards")) {
+                nextWindow("viewAllCollecteds", collectable, 0);
             }
-        }, false, listener, spec, "Card Manager");
+        }, false, listener, spec, "Card Manager", "View Cards");
     }
 
 }

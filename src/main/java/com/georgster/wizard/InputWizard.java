@@ -136,13 +136,13 @@ public abstract class InputWizard {
      * Runs the current method for as long as this {@code InputWizard} is active.
      */
     private void invokeCurrentMethod() {
-        //while (isActive()) {
+        while (isActive()) {
             try {
                 activeFunctions.peek().invoke(this, activeFunctionParams.peek());
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
-        //}
+        }
     }
 
     /**

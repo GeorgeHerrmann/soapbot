@@ -144,6 +144,7 @@ public class CommandParser {
          * @return True if the word is part of an assigned argument, false otherwise.
          */
         protected boolean isPartOfAssigned(String word) {
+            System.out.println("For word: " + word + ", input words are: " + inputWords.toString() + " and current args are: " + currentArgs.toString() + ".");
             int currentWordFrequency = getCurrentWordFrequency(word);
             int inputWordFrequency = getInputWordFrequency(word);
             return currentWordFrequency == inputWordFrequency;
@@ -162,6 +163,7 @@ public class CommandParser {
                     count++;
                 }
             }
+            System.out.println("\tFound " + count + " instances of " + word + " in input words.");
             return count;
         }
 
@@ -174,10 +176,11 @@ public class CommandParser {
         protected int getCurrentWordFrequency(String word) {
             int count = 0;
             for (String currentArg : currentArgs) {
-                if (currentArg.contains(word)) {
+                if (List.of(currentArg.split(" ")).contains(word)) {
                     count++;
                 }
             }
+            System.out.println("\tFound " + count + " instances of " + word + " in current args.");
             return count;
         }
 

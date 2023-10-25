@@ -52,9 +52,9 @@ public final class Collectable extends UniqueIdentified {
     }
 
     // from database
-    public Collectable(String name, String ownerId, String description, String imageUrl, long cost, long initialCost, List<Collected> collecteds) {
-        super(name);
-        this.context = new CollectableContext(name, ownerId, description, imageUrl, cost, initialCost);
+    public Collectable(CollectableContext context, List<Collected> collecteds) {
+        super(context.getName());
+        this.context = context;
         this.collecteds = collecteds;
     }
 
@@ -120,8 +120,8 @@ public final class Collectable extends UniqueIdentified {
     public void sellCollected(UserProfile profile, Collected collected) {
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
-        collecteds.remove(collected);
-        context.setCost(context.getCost() + collected.getRecentPurchasePrice());
+        collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
+        context.setCost((long) (context.getCost() + (Math.ceil(collected.getRecentPurchasePrice() / 2.0))));
     }
 
     public void sellCollected(UserProfile profile, String id) {
@@ -129,8 +129,8 @@ public final class Collectable extends UniqueIdentified {
         if (collected == null) return;
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
-        collecteds.remove(collected);
-        context.setCost(context.getCost() + collected.getRecentPurchasePrice());
+        collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
+        context.setCost((long) (context.getCost() + (Math.ceil(collected.getRecentPurchasePrice() / 2.0))));
     }
 
     public Rarity getRarity(UserProfileManager manager) {
@@ -168,7 +168,7 @@ public final class Collectable extends UniqueIdentified {
     }
 
     public boolean owns(UserProfile profile) {
-        return profile.getCollecteds().stream().anyMatch(collected -> collected.getCollectable().equals(context));
+        return profile.getCollecteds().stream().anyMatch(collected -> collected.getCollectable().getName().equals(context.getName()));
     }
 
     public List<Collected> getUserCollecteds(UserProfile profile) {

@@ -119,7 +119,7 @@ public final class UserProfile extends MemberIdentified {
      * @param collected The {@link Collected} to remove from the Member associated with this profile.
      */
     public void removeCollected(Collected collected) {
-        collecteds.remove(collected);
+        collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
     }
 
     public void removeCollected(String id) {
