@@ -95,6 +95,7 @@ public abstract class InputWizard {
         this.awaitingResponse = false;
         this.wasShutdown = false;
         this.listener = listener;
+        this.currentlyActiveListener = listener;
         this.logger = event.getLogger();
         this.event = event;
     }
@@ -467,6 +468,15 @@ public abstract class InputWizard {
      */
     public InputListener getInputListener() {
         return listener;
+    }
+
+    /**
+     * Returns the currently active {@link InputListener}.
+     * 
+     * @return The currently active {@link InputListener}.
+     */
+    public InputListener getActiveListener() {
+        return currentlyActiveListener;
     }
 
     /**
@@ -1238,5 +1248,14 @@ public abstract class InputWizard {
      */
     public Guild getGuild() {
         return event.getGuildInteractionHandler().getGuild();
+    }
+
+    /**
+     * Returns if an {@link InputListener} has been started for this Wizard.
+     * 
+     * @return True if an {@link InputListener} has been started for this Wizard, false otherwise.
+     */
+    public boolean hasStarted() {
+        return listener.getCurrentMessage() != null || currentlyActiveListener.getCurrentMessage() != null;
     }
 }

@@ -7,8 +7,10 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.wizard.AlternateWizard;
 import com.georgster.wizard.CollectableViewWizard;
 import com.georgster.wizard.CollectableWizard;
+import com.georgster.wizard.InputWizard;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -30,7 +32,10 @@ public class TestCommand implements ParseableCommand {
         }, "create");
 
         sb.on(p -> {
-            new CollectableViewWizard(event, true).begin();
+            InputWizard wizard1 = new CollectableViewWizard(event, true);
+            InputWizard wizard2 = new CollectableViewWizard(event, false);
+            AlternateWizard wizard = new AlternateWizard(event, wizard1, wizard2, false);
+            wizard.begin();
         }, "view");
         //throw new UnsupportedOperationException("Test command is currently inactive");
     }

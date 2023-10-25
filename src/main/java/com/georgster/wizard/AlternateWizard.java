@@ -57,7 +57,7 @@ public final class AlternateWizard extends InputWizard {
     public void begin() {
         ThreadPoolFactory.scheduleGeneralTask(event.getGuildInteractionHandler().getGuild().getId().asString(), wizard1::begin);
         int timeout = 0;
-        while (wizard1.getInputListener().getCurrentMessage() == null) { // Our wizards run on their own threads, so we need to wait for them to start
+        while (!wizard1.hasStarted()) { // Our wizards run on their own threads, so we need to wait for them to start
             try {
                 timeout++;
                 Thread.sleep(100);
@@ -69,7 +69,7 @@ public final class AlternateWizard extends InputWizard {
                 throw new IllegalStateException("Wizard1 timed out before starting");
             }
         }
-        getInputListener().setCurrentMessage(wizard1.getInputListener().getCurrentMessage());
+        getInputListener().setCurrentMessage(wizard1.getActiveListener().getCurrentMessage());
         nextWindow("swap", true);
     }
 
@@ -86,8 +86,9 @@ public final class AlternateWizard extends InputWizard {
         }
 
         withResponse((response -> {
-            if (Boolean.TRUE.equals(onWizard1) && wizard2.getInputListener().getCurrentMessage() == null) {
-                wizard2.getInputListener().setCurrentMessage(wizard1.getInputListener().getCurrentMessage());
+            if (Boolean.TRUE.equals(onWizard1) && wizard2.getActiveListener().getCurrentMessage() == null) {
+                wizard2.getActiveListener().setCurrentMessage(wizard1.getActiveListener().getCurrentMessage());
+                wizard2.getInputListener().setCurrentMessage(wizard1.getActiveListener().getCurrentMessage());
             }
             wizard1.cancelCurrentListener();
             wizard1.shutdown();
