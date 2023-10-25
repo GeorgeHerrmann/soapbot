@@ -317,3 +317,10 @@
 2.521
     - Fixed an issue where some wizards which overrode their default listener on the first window would create duplicate Messages when switching windows
     - Fixed an issue where the MessageCommand was not working
+
+2.600-BETA
+    Command Parser
+        - Fixed an issue where the command parser would duplicate single-word arguments if that word was present in another argument
+        - Fixed an issue where the command parser would cut off some inputs if certain words were present multiple times in a single argument
+            - These issues were related to an issue with how the parser treated "variable" arguments by comparing words to substrings in other arguments
+        - Fixed an issue where the command parser would assume some input strings were date inputs if there was a number in them, even if the "in" keyword was not present

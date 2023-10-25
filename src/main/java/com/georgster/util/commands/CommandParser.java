@@ -174,7 +174,7 @@ public class CommandParser {
         protected int getCurrentWordFrequency(String word) {
             int count = 0;
             for (String currentArg : currentArgs) {
-                if (currentArg.contains(word)) {
+                if (List.of(currentArg.split(" ")).contains(word)) {
                     count++;
                 }
             }

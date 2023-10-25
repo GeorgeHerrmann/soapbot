@@ -76,6 +76,7 @@ public final class CollectableWizard extends InputWizard {
                         current.setInitialCost(cost);
                         current.purchaseCollected(ownerProfile);
                         manager.add(current);
+                        userManager.update(ownerProfile);
                         sendMessage(current.getName() + " created successfully.", "Card created");
                         shutdown();
                         ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new CollectableViewWizard(event, false).begin("viewCollectable", current));

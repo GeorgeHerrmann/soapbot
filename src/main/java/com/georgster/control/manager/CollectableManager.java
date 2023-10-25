@@ -14,6 +14,6 @@ public class CollectableManager extends SoapManager<Collectable> {
      * @param context the context carrying the {@code Guild} to manage collectables for
      */
     public CollectableManager(ClientContext context) {
-        super(context, ProfileType.COLLECTABLES, Collectable.class, "name");
+        super(context, ProfileType.COLLECTABLES, Collectable.class, "id");
     }
 }

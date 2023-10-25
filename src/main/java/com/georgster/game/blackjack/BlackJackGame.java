@@ -380,6 +380,13 @@ public class BlackJackGame extends CardGame {
     }
 
     /**
+     * Shows all of the dealer's cards.
+     */
+    public void showAllDealerCards() {
+        getDealerDeck().getCardList().forEach(PlayingCard::show);
+    }
+
+    /**
      * Returns the cards of this game as a String.
      * 
      * @return The cards of this game as a String.

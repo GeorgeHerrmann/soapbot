@@ -24,5 +24,6 @@ public enum PermissibleAction {
     PERMISSIONSCOMMAND,
     MENTIONEVENT,
     POLLCOMMAND,
+    TESTCOMMAND,
     DEFAULT
 }

@@ -2,9 +2,9 @@ package com.georgster.test;
 
 import java.util.List;
 
-import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.wizard.AlternateWizard;
@@ -27,9 +27,9 @@ public class TestCommand implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         SubcommandSystem sb = event.createSubcommandSystem();
 
-        sb.on((p) -> {
-            new CollectableWizard(event).begin();
-        }, "create");
+        sb.on(p -> 
+            new CollectableWizard(event).begin()
+        , "create");
 
         sb.on(p -> {
             InputWizard wizard1 = new CollectableViewWizard(event, true);
@@ -56,6 +56,14 @@ public class TestCommand implements ParseableCommand {
         } else { //if inactive, the registry will not be able to find this command using the aliases
             return List.of();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.TESTCOMMAND;
     }
 
     /**

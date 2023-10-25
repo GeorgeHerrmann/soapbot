@@ -73,8 +73,8 @@ public abstract class InputWizard {
     private boolean isActive;
     private boolean awaitingResponse;
     protected InteractionHandler handler;
-    private InputListener listener;
-    private InputListener currentlyActiveListener;
+    private InputListener listener; // The default listener for this wizard
+    private InputListener currentlyActiveListener; // The listener currently being used by the wizard
     protected final MultiLogger logger;
 
     private boolean wasShutdown; // A Shutdown wizard will not perform any additional end() activities
@@ -137,13 +137,13 @@ public abstract class InputWizard {
      * Runs the current method for as long as this {@code InputWizard} is active.
      */
     private void invokeCurrentMethod() {
-        //while (isActive()) {
+        while (isActive()) {
             try {
                 activeFunctions.peek().invoke(this, activeFunctionParams.peek());
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
-        //}
+        }
     }
 
     /**
