@@ -73,8 +73,8 @@ public abstract class InputWizard {
     private boolean isActive;
     private boolean awaitingResponse;
     protected InteractionHandler handler;
-    private InputListener listener;
-    private InputListener currentlyActiveListener;
+    private InputListener listener; // The default listener for this wizard
+    private InputListener currentlyActiveListener; // The listener currently being used by the wizard
     protected final MultiLogger logger;
 
     private boolean wasShutdown; // A Shutdown wizard will not perform any additional end() activities
