@@ -8,6 +8,8 @@ import com.georgster.util.DateTimed;
 public final class Collected extends DateTimed implements Manageable, Tradeable {
     private final String id;
     private String memberId;
+    private boolean isOnMarket; // Is on "collectable market" for a custom amount
+    private long currentMarketPrice; // Custom collectable market amount
     private long recentPurchasePrice;
     private final CollectableContext collectable;
 
@@ -17,15 +19,19 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         this.recentPurchasePrice = recentPurchasePrice;
         this.id = UniqueIdFactory.createId();
         this.collectable = collectable;
+        this.isOnMarket = false;
+        this.currentMarketPrice = collectable.getCost();
     }
 
     // from database
-    public Collected(String memberId, String id, long recentPurchasePrice, CollectableContext collectable, String date, String time) {
+    public Collected(String memberId, String id, long recentPurchasePrice, CollectableContext collectable, String date, String time, boolean isOnMarket, long currentMarketPrice) {
         super(date, time);
         this.memberId = memberId;
         this.recentPurchasePrice = recentPurchasePrice;
         this.id = id;
         this.collectable = collectable;
+        this.isOnMarket = isOnMarket;
+        this.currentMarketPrice = currentMarketPrice;
     }
 
     public String getIdentifier() {
@@ -42,6 +48,22 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
 
     public CollectableContext getCollectable() {
         return collectable;
+    }
+
+    public boolean isOnMarket() {
+        return isOnMarket;
+    }
+
+    public long getCurrentMarketPrice() {
+        return currentMarketPrice;
+    }
+
+    public void setOnMarket(boolean isOnMarket) {
+        this.isOnMarket = isOnMarket;
+    }
+
+    public void setCurrentMarketPrice(long currentMarketPrice) {
+        this.currentMarketPrice = currentMarketPrice;
     }
 
     public void trade(UserProfile owner, UserProfile reciever) {
