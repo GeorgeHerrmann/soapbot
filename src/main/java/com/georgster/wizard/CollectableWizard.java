@@ -28,8 +28,12 @@ public final class CollectableWizard extends InputWizard {
     protected void createCollectable() {
         String prompt = "What is the name of the card? Please note that this cannot be changed upon creation.";
         withResponse(response -> {
-            Collectable c = Collectable.initialize(response, user.getId().asString());
-            nextWindow("collectableDescription", c);
+            if (!manager.exists(response)) {
+                Collectable c = Collectable.initialize(response, user.getId().asString());
+                nextWindow("collectableDescription", c);
+            } else {
+                sendMessage("A card with that name already exists. Please try again.", "Card already exists");
+            }
         }, true, prompt);
     }
 
