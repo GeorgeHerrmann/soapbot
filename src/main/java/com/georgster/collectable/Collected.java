@@ -1,5 +1,6 @@
 package com.georgster.collectable;
 
+import com.georgster.collectable.trade.Tradeable;
 import com.georgster.control.manager.Manageable;
 import com.georgster.control.util.identify.UniqueIdFactory;
 import com.georgster.profile.UserProfile;

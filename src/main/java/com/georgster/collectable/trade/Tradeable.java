@@ -1,4 +1,4 @@
-package com.georgster.collectable;
+package com.georgster.collectable.trade;
 
 import com.georgster.profile.UserProfile;
 
