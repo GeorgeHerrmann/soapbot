@@ -14,4 +14,18 @@ public interface Tradeable {
      * @param reciever The {@link UserProfile} of the {@link UserProfile} who is recieving this {@link Tradeable}.
      */
     public void trade(UserProfile owner, UserProfile reciever);
+
+    /**
+     * Returns the unique ID of this {@link Tradeable}.
+     * 
+     * @return The unique ID of this {@link Tradeable}.
+     */
+    public String getId();
+
+    /**
+     * Returns the name of this {@link Tradeable}, may not be unique.
+     * 
+     * @return The name of this {@link Tradeable}, may not be unique.
+     */
+    public String getName();
 }

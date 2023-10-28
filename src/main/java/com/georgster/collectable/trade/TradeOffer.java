@@ -3,26 +3,43 @@ package com.georgster.collectable.trade;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.profile.UserProfile;
 import com.georgster.util.DateTimed;
 
 public final class TradeOffer extends DateTimed {
+    private UserProfile offerer;
+    private UserProfile reciever;
+
     private final List<Tradeable> offeredItems;
     private long offeredCoins;
     private final List<Tradeable> requestedItems;
     private long requestedCoins;
 
-    public TradeOffer(List<Tradeable> offeredItems, long offeredCoins, List<Tradeable> requestedItems, long requestedCoins) {
+    public TradeOffer(List<Tradeable> offeredItems, long offeredCoins, List<Tradeable> requestedItems, long requestedCoins, UserProfile offerer, UserProfile reciever) {
         this.offeredItems = offeredItems;
         this.offeredCoins = offeredCoins;
         this.requestedItems = requestedItems;
         this.requestedCoins = requestedCoins;
+        this.offerer = offerer;
+        this.reciever = reciever;
     }
 
-    public TradeOffer(List<Tradeable> offeredItems) {
+    public TradeOffer(List<Tradeable> offeredItems, UserProfile offerer, UserProfile reciever) {
         this.offeredItems = offeredItems;
         this.offeredCoins = 0;
         this.requestedItems = new ArrayList<>();
         this.requestedCoins = 0;
+        this.offerer = offerer;
+        this.reciever = reciever;
+    }
+
+    public TradeOffer(UserProfile offerer, UserProfile reciever) {
+        this.offeredItems = new ArrayList<>();
+        this.offeredCoins = 0;
+        this.requestedItems = new ArrayList<>();
+        this.requestedCoins = 0;
+        this.offerer = offerer;
+        this.reciever = reciever;
     }
 
     public List<Tradeable> getOfferedItems() {
@@ -73,5 +90,22 @@ public final class TradeOffer extends DateTimed {
 
     public void removeOfferedItem(Tradeable offeredItem) {
         this.offeredItems.remove(offeredItem);
+    }
+
+    public UserProfile getOfferer() {
+        return offerer;
+    }
+
+    public UserProfile getReciever() {
+        return reciever;
+    }
+
+    public void executeTrade() {
+        offeredItems.forEach(item -> item.trade(offerer, reciever));
+        requestedItems.forEach(item -> item.trade(reciever, offerer));
+        offerer.getBank().withdrawl(offeredCoins);
+        reciever.getBank().withdrawl(requestedCoins);
+        offerer.getBank().deposit(requestedCoins);
+        reciever.getBank().deposit(offeredCoins);
     }
 }

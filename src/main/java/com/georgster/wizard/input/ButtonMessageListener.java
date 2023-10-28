@@ -17,6 +17,9 @@ import discord4j.core.object.component.Button;
  * Users can respond by either clicking on the corresponding button, or by sending a message
  * containing a valid option.
  * <p>
+ * Buttons will be Primary buttons, unless the "back" option is present, in which case it will be
+ * a Secondary button, or if the option starts with a "!", it will be a danger button (The first ! is removed).
+ * <p>
  * This listener will timeout after 30s of inactivity following
  * {@link #prompt(WizardState)} being called.
  * <p>
@@ -58,6 +61,10 @@ public class ButtonMessageListener extends InputListener {
         for (int i = 0; i < options.length; i++) {
             if (options[i].equals("back")) {
                 buttons[i] = Button.secondary(options[i], options[i]);
+            } else if (options[i].startsWith("!"))  {
+                options[i] = options[i].substring(1);
+                inputState.getOptions()[i] = options[i];
+                buttons[i] = Button.danger(options[i], options[i]);
             } else {
                 buttons[i] = Button.primary(options[i], options[i]);
             }

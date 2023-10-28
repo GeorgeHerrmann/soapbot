@@ -2,6 +2,7 @@ package com.georgster.collectable;
 
 import com.georgster.collectable.trade.Tradeable;
 import com.georgster.control.manager.Manageable;
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.identify.UniqueIdFactory;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.DateTimed;
@@ -39,6 +40,10 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         return id;
     }
 
+    public String getId() {
+        return getIdentifier();
+    }
+
     public String getMemberId() {
         return memberId;
     }
@@ -73,12 +78,32 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         this.memberId = reciever.getMemberId();
     }
 
+    public String getName() {
+        return collectable.getName();
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getCollectable().getName() + "\n");
         sb.append("ID: " + getIdentifier() + "\n");
         sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate() + "\n");
         sb.append("Purchased for " + getRecentPurchasePrice() + " coins");
+        return sb.toString();
+    }
+
+    public String toDetailedString(UserProfileManager manager) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getCollectable().getName() + "\n");
+        sb.append("*" + getCollectable().getDescription() + "*\n");
+        sb.append("Rarity: " + collectable.getRarity(manager).toString() + "\n");
+        sb.append("ID: " + getIdentifier() + "\n");
+        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate() + "\n");
+        sb.append("Purchased for " + getRecentPurchasePrice() + " coins\n");
+        if (isOnMarket) {
+            sb.append("On market for **" + getCurrentMarketPrice() + "** coins");
+        } else {
+            sb.append("Not on market");
+        }
         return sb.toString();
     }
 }

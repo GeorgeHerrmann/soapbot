@@ -1,5 +1,8 @@
 package com.georgster.collectable;
 
+import com.georgster.collectable.Collectable.Rarity;
+import com.georgster.control.manager.UserProfileManager;
+
 public class CollectableContext {
     private String name;
     private final String ownerId;
@@ -72,5 +75,20 @@ public class CollectableContext {
 
     public static CollectableContext from(Collectable collectable) {
         return new CollectableContext(collectable.getName(), collectable.getCreatorId(), collectable.getDescription(), collectable.getImageUrl(), collectable.getInitialCost());
+    }
+
+    public Rarity getRarity(UserProfileManager manager) {
+        long totalCoins = manager.getTotalCoins();
+        if (getCost() >= totalCoins * .25) {
+            return Rarity.UNIQUE;
+        } else if (getCost() >= totalCoins * .1) {
+            return Rarity.LEGENDARY;
+        } else if (getCost() >= totalCoins * .05) {
+            return Rarity.RARE;
+        } else if (getCost() >= totalCoins * .01) {
+            return Rarity.UNCOMMON;
+        } else {
+            return Rarity.COMMON;
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.georgster.wizard;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -140,8 +139,10 @@ public abstract class InputWizard {
         while (isActive()) {
             try {
                 activeFunctions.peek().invoke(this, activeFunctionParams.peek());
-            } catch (IllegalAccessException | InvocationTargetException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+                logger.append("An error occurred while running the wizard: " + e.getMessage() + "\n", LogDestination.NONAPI);
+                shutdown();
             }
         }
     }
@@ -1237,6 +1238,7 @@ public abstract class InputWizard {
      */
     public void swtichToUserWizard(User user) {
         InteractionHandler newHandler = new UserInteractionHandler(user);
+        this.user = user;
         this.handler = newHandler;
         this.listener.setInteractionHandler(newHandler);
     }

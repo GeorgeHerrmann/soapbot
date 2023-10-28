@@ -160,4 +160,16 @@ public class UserProfileManager extends SoapManager<UserProfile> {
     public long getTotalCoins() {
         return getAll().stream().mapToLong(profile -> profile.getBank().getBalance()).sum();
     }
+
+    public void updateFromCollectables(CollectableManager manager) {
+        manager.getAll().forEach(collectable -> 
+            collectable.getCollecteds().forEach(collected -> {
+                UserProfile profile = get(collected.getMemberId());
+                List<Collected> collecteds = profile.getCollecteds();
+                collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
+                collecteds.add(collected);
+                update(profile);
+            })
+        );
+    }
 }

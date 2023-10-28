@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.collectable.Collected;
+import com.georgster.collectable.trade.Tradeable;
 import com.georgster.control.util.identify.util.MemberIdentified;
 import com.georgster.economy.CoinBank;
 import com.georgster.gpt.MemberChatCompletions;
@@ -142,5 +143,36 @@ public final class UserProfile extends MemberIdentified {
      */
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    /**
+     * Gets all {@link Tradeable Tradeables} associated with this profile.
+     * 
+     * @return All {@link Tradeable Tradeables} associated with this profile.
+     */
+    public List<Tradeable> getAllTradeables() {
+        List<Tradeable> tradeables = new ArrayList<>();
+        tradeables.addAll(collecteds);
+        return tradeables;
+    }
+
+    /**
+     * Gets a {@link Tradeable} by its unique ID.
+     * 
+     * @param id The unique ID of the {@link Tradeable} to get.
+     * @return The {@link Tradeable} with the specified ID, or {@code null} if no {@link Tradeable} with the specified ID exists.
+     */
+    public Tradeable getTradeableById(String id) {
+        return getAllTradeables().stream().filter(t -> t.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    /**
+     * Updates a {@link Collected} in this profile.
+     * 
+     * @param c The {@link Collected} to update.
+     */
+    public void updateCollected(Collected c) {
+        collecteds.removeIf(collected -> collected.getId().equals(c.getId()));
+        collecteds.add(c);
     }
 }

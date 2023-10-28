@@ -133,6 +133,10 @@ public final class Collectable extends UniqueIdentified {
         context.setCost((long) (context.getCost() + (Math.ceil(collected.getRecentPurchasePrice() / 2.0))));
     }
 
+    public void setContext(CollectableContext context) {
+        this.context = context;
+    }
+
     public Rarity getRarity(UserProfileManager manager) {
         long totalCoins = manager.getTotalCoins();
         if (getCost() >= totalCoins * .25) {
@@ -173,6 +177,11 @@ public final class Collectable extends UniqueIdentified {
 
     public List<Collected> getUserCollecteds(UserProfile profile) {
         return collecteds.stream().filter(c -> c.getMemberId().equals(profile.getMemberId())).toList();
+    }
+
+    public void updateCollected(Collected collected) {
+        collecteds.removeIf(c -> c.getId().equals(collected.getId()));
+        collecteds.add(collected);
     }
 
     @Override
