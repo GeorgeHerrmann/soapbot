@@ -6,11 +6,6 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.commands.CommandParser;
-import com.georgster.util.commands.SubcommandSystem;
-import com.georgster.wizard.AlternateWizard;
-import com.georgster.wizard.CollectableViewWizard;
-import com.georgster.wizard.CollectableWizard;
-import com.georgster.wizard.InputWizard;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -19,25 +14,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements ParseableCommand { 
-    private static final boolean ACTIVE = true;
+    private static final boolean ACTIVE = false;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        SubcommandSystem sb = event.createSubcommandSystem();
-
-        sb.on(p -> 
-            new CollectableWizard(event).begin()
-        , "create");
-
-        sb.on(p -> {
-            InputWizard wizard1 = new CollectableViewWizard(event, true);
-            InputWizard wizard2 = new CollectableViewWizard(event, false);
-            AlternateWizard wizard = new AlternateWizard(event, wizard1, wizard2, false);
-            wizard.begin();
-        }, "view");
-        //throw new UnsupportedOperationException("Test command is currently inactive");
+        throw new UnsupportedOperationException("Test command is currently inactive");
     }
 
     /**

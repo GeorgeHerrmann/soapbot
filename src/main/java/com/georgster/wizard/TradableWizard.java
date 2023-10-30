@@ -181,7 +181,10 @@ public final class TradableWizard extends InputWizard {
 
         withResponse(response -> {
             try {
-                long coins = Long.parseLong(response);
+                long coins = 0;
+                if (!response.equals("continue")) {
+                    coins = Long.parseLong(response);
+                }
                 if (coins < 0) {
                     sendMessage("Sorry, you must request at least **0** coins in a trade.", "Invalid Amount");
                 } else if (profile2.getBank().hasBalance(coins)) {

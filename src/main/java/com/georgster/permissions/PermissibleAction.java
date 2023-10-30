@@ -26,5 +26,6 @@ public enum PermissibleAction {
     POLLCOMMAND,
     TESTCOMMAND,
     TRADECOMMAND,
+    CARDCOMMAND,
     DEFAULT
 }

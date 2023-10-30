@@ -8,6 +8,7 @@ import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.profile.UserProfile;
+import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 import discord4j.core.object.entity.Member;
@@ -44,6 +45,8 @@ public final class CollectectedMarketWizard extends InputWizard {
     }
 
     protected void selectCollectedCreate() {
+        InputListener newListener = InputListenerFactory.createMenuMessageListener(event, "Card Market");
+        
         List<Collected> collecteds = profile.getCollecteds().stream().filter(c -> !c.isOnMarket()).toList();
         if (collecteds.isEmpty()) {
             sendMessage("You do not have any cards to sell.", "No cards to sell");
@@ -51,17 +54,19 @@ public final class CollectectedMarketWizard extends InputWizard {
         } else {
             String[] options = new String[collecteds.size()];
             for (int i = 0; i < options.length; i++) {
-                options[i] = collecteds.get(i).getName() + " - ID: " + collecteds.get(i).getId() + "\n";
+                options[i] = collecteds.get(i).getName() + " - ID: " + collecteds.get(i).getId();
             }
             withResponse(response -> {
                 String id = response.substring(response.indexOf("id: ") + 4);
                 Collected collected = collecteds.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
                 nextWindow("confirmCollectedSell", collected);
-            }, true, "Which card would you like to place for sale?", options);
+            }, true, newListener, "Which card would you like to place for sale?", options);
         }
     }
 
     protected void selectCollectedRemove() {
+        InputListener newListener = InputListenerFactory.createMenuMessageListener(event, "Card Market");
+
         List<Collected> collecteds = profile.getCollecteds().stream().filter(Collected::isOnMarket).toList();
         if (collecteds.isEmpty()) {
             sendMessage("You do not have any cards on the market.", "No cards on market");
@@ -69,7 +74,7 @@ public final class CollectectedMarketWizard extends InputWizard {
         } else {
             String[] options = new String[collecteds.size()];
             for (int i = 0; i < options.length; i++) {
-                options[i] = collecteds.get(i).getName() + " - ID: " + collecteds.get(i).getId() + "\n";
+                options[i] = collecteds.get(i).getName() + " - ID: " + collecteds.get(i).getId();
             }
             withResponse(response -> {
                 String id = response.substring(response.indexOf("id: ") + 4);
@@ -82,7 +87,7 @@ public final class CollectectedMarketWizard extends InputWizard {
                 userManager.update(profile);
                 sendMessage("You have removed your card with ID " + collected.getId() + " from the market.", "Card Removed from Market");
                 nextWindow("selectOption");
-            }, true, "Which card would you like to remove from the market?", options);
+            }, true, newListener, "Which card would you like to remove from the market?", options);
         }
     }
 
@@ -117,7 +122,7 @@ public final class CollectectedMarketWizard extends InputWizard {
 
         if (collecteds.isEmpty()) {
             sendMessage("There are no cards on the market.", "No cards on market");
-            return;
+            goBack();
         }
 
         Collected collected = collecteds.get(index);

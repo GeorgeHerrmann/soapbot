@@ -163,4 +163,37 @@ public class CollectableViewWizard extends InputWizard {
         }, false, listener, spec, "Card Manager", "View Cards");
     }
 
+    protected void viewCollected(Collected collected) {
+        Collectable collectable = manager.get(collected.getName());
+        Member owner = event.getGuildInteractionHandler().getMemberById(collected.getMemberId());
+
+        EmbedCreateSpec spec = EmbedCreateSpec.builder()
+                .title(owner.getDisplayName() + "'s " + collectable.getName())
+                .description(collected.toDetailedString(userManager))
+                .image(collectable.getImageUrl())
+                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
+                .build();
+        
+        String[] options;
+
+        if (collected.isOnMarket()) {
+            options = new String[]{"Card Manager", "View on Market"};
+        } else {
+            options = new String[]{"Card Manager", "Place on Market"};
+        }
+
+        withResponse(response -> {
+            if (response.equals("card manager")) {
+                sendMessage("A Collectable Manager was started in your direct message channel", "Card Manager");
+                ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new ManageCollectableWizard(event, collectable, user).begin());
+            } else if (response.equals("view on market")) {
+                end();
+                ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new CollectectedMarketWizard(event).begin("viewCollected", collected));
+            } else if (response.equals("place on market")) {
+                end();
+                ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new CollectectedMarketWizard(event).begin("confirmCollectedSell", collected));
+            }
+        }, true, spec, options);
+    }
+
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.collectable.CardCommand;
 import com.georgster.collectable.trade.TradeCommand;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
@@ -73,7 +74,8 @@ public class CommandRegistry {
             BankCommand.class,
             EchoCommand.class,
             BlackjackCommand.class,
-            TradeCommand.class
+            TradeCommand.class,
+            CardCommand.class
         ));
     }
 

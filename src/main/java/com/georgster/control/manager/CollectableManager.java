@@ -48,4 +48,23 @@ public class CollectableManager extends SoapManager<Collectable> {
         getAll().forEach(collectable -> returns.addAll(collectable.getCollecteds()));
         return returns;
     }
+
+    /**
+     * Returns if any {@link Collected Collecteds} in this manager are on the collectable market.
+     * 
+     * @return {@code true} if any {@code Collecteds} are on the market, {@code false} otherwise.
+     */
+    public boolean anyOnMarket() {
+        return getAllCollecteds().stream().anyMatch(Collected::isOnMarket);
+    }
+
+    /**
+     * Returns the {@link Collected} with the given id, or {@code null} if none exists.
+     * 
+     * @param id the id of the {@code Collected} to get.
+     * @return the {@code Collected} with the given id, or {@code null} if none exists.
+     */
+    public Collected getCollectedById(String id) {
+        return getAllCollecteds().stream().filter(collected -> collected.getId().equals(id)).findFirst().orElse(null);
+    }
 }
