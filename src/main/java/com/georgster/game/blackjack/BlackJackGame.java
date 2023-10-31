@@ -256,7 +256,9 @@ public class BlackJackGame extends CardGame {
      * @return True if the dealer can currently go, false otherwise.
      */
     public boolean dealerCanGo() {
-        return getDealerTotal() < 17 && isActive();
+        int dt = getDealerTotal();
+        int pt = getPlayerTotal();
+        return dt < 17 && isActive() && (dt <= pt) && !(dt == 16 && (dt == pt));
     }
 
     /**

@@ -115,7 +115,8 @@ public class CollectableViewWizard extends InputWizard {
 
         EmbedCreateSpec spec = EmbedCreateSpec.builder()
                 .title(owner.getDisplayName() + "'s " + collectable.getName())
-                .description(collected.toString() + "\nOwned by: " + owner.getMention())
+                .description(collected.toString() + "\nOwned by: " + owner.getMention() + "\nRarity: ***" + collectable.getRarity(userManager).toString() + "***")
+                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
                 .image(collectable.getImageUrl())
                 .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
                 .build();
@@ -170,6 +171,7 @@ public class CollectableViewWizard extends InputWizard {
         EmbedCreateSpec spec = EmbedCreateSpec.builder()
                 .title(owner.getDisplayName() + "'s " + collectable.getName())
                 .description(collected.toDetailedString(userManager))
+                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
                 .image(collectable.getImageUrl())
                 .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
                 .build();

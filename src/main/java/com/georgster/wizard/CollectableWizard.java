@@ -6,6 +6,7 @@ import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.thread.ThreadPoolFactory;
+import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 public final class CollectableWizard extends InputWizard {
@@ -26,6 +27,8 @@ public final class CollectableWizard extends InputWizard {
     }
 
     protected void createCollectable() {
+        InputListener newListener = InputListenerFactory.createButtonMessageListener(event, "Collectable Wizard").builder().requireMatch(false, false).build();
+
         String prompt = "What is the name of the card? Please note that this cannot be changed upon creation.";
         withResponse(response -> {
             if (!manager.exists(response)) {
@@ -34,7 +37,7 @@ public final class CollectableWizard extends InputWizard {
             } else {
                 sendMessage("A card with that name already exists. Please try again.", "Card already exists");
             }
-        }, true, prompt);
+        }, true, newListener, prompt);
     }
 
     protected void collectableDescription(Collectable current) {

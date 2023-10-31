@@ -11,6 +11,8 @@ import com.georgster.profile.UserProfile;
 import discord4j.rest.util.Color;
 
 public final class Collectable extends UniqueIdentified {
+    private static final String EDITION_ICON_URL = "https://static.thenounproject.com/png/5481694-200.png";
+
     private CollectableContext context;
     private final List<Collected> collecteds;
 
@@ -109,9 +111,13 @@ public final class Collectable extends UniqueIdentified {
         this.context.setCost(cost);
     }
 
+    public CollectableContext getContext() {
+        return context;
+    }
+
     public void purchaseCollected(UserProfile profile) throws InsufficientCoinsException {
         profile.getBank().withdrawl(getCost()); // Throws InsufficientCoinsException if not enough coins
-        Collected collected = new Collected(profile.getMemberId(), getCost(), context);
+        Collected collected = new Collected(profile.getMemberId(), getCost(), this);
         profile.addCollected(collected);
         this.context.setCost(getCost() / 2);
         collecteds.add(collected);
@@ -121,7 +127,7 @@ public final class Collectable extends UniqueIdentified {
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
-        context.setCost((long) (context.getCost() + (Math.ceil(collected.getRecentPurchasePrice() / 2.0))));
+        context.setCost(getCost() * 2);
     }
 
     public void sellCollected(UserProfile profile, String id) {
@@ -130,7 +136,11 @@ public final class Collectable extends UniqueIdentified {
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
-        context.setCost((long) (context.getCost() + (Math.ceil(collected.getRecentPurchasePrice() / 2.0))));
+        context.setCost(getCost() * 2);
+    }
+
+    public int numCards() {
+        return collecteds.size();
     }
 
     public void setContext(CollectableContext context) {
@@ -182,6 +192,10 @@ public final class Collectable extends UniqueIdentified {
     public void updateCollected(Collected collected) {
         collecteds.removeIf(c -> c.getId().equals(collected.getId()));
         collecteds.add(collected);
+    }
+
+    public static String editionIconUrl() {
+        return EDITION_ICON_URL;
     }
 
     @Override

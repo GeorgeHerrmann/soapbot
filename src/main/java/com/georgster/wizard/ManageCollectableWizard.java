@@ -21,7 +21,7 @@ public class ManageCollectableWizard extends InputWizard {
     private final UserProfile profile;
 
     public ManageCollectableWizard(CommandExecutionEvent event, Collectable collectable, User user) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, collectable.getName()));
+        super(event, InputListenerFactory.createButtonMessageListener(event, collectable.getName()).builder().withXReaction(false).build());
         this.collectable = collectable;
         this.manager = event.getCollectableManager();
         this.userManager = event.getUserProfileManager();
@@ -81,6 +81,14 @@ public class ManageCollectableWizard extends InputWizard {
         boolean hasPrevious = index != 0;
         boolean hasNext = index != collecteds.size() - 1;
 
+        EmbedCreateSpec spec = EmbedCreateSpec.builder()
+                .title("Select a " + collectable.getName() + " card to sell")
+                .description(collected.toDetailedString(userManager))
+                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
+                .image(collectable.getImageUrl())
+                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
+                .build();
+
         if (hasPrevious) {
             if (hasNext) {
                 options = new String[]{"confirm", "back", "next"};
@@ -103,7 +111,7 @@ public class ManageCollectableWizard extends InputWizard {
                 sendMessage("You have sold a card with ID " + collected.getIdentifier() + "\nThe new price is " + collectable.getCost(), "Card Sold");
                 nextWindow("viewCollectable");
             }
-        }, false, collected.toString(), options);
+        }, false, spec, options);
     }
 
     private String[] getOptions() {

@@ -324,3 +324,6 @@
         - Fixed an issue where the command parser would cut off some inputs if certain words were present multiple times in a single argument
             - These issues were related to an issue with how the parser treated "variable" arguments by comparing words to substrings in other arguments
         - Fixed an issue where the command parser would assume some input strings were date inputs if there was a number in them, even if the "in" keyword was not present
+    Blackjack
+        - The dealer will now automatically win if it has not busted and it has a greater score than the player
+        - The dealer will now draw with the user if both decks have a total of 16

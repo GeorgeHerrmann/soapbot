@@ -13,19 +13,32 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
     private boolean isOnMarket; // Is on "collectable market" for a custom amount
     private long currentMarketPrice; // Custom collectable market amount
     private long recentPurchasePrice;
+    private final int edition;
     private final CollectableContext collectable;
 
     // new
-    public Collected(String memberId, long recentPurchasePrice, CollectableContext collectable) {
+    public Collected(String memberId, long recentPurchasePrice, Collectable collectable) {
         this.memberId = memberId;
         this.recentPurchasePrice = recentPurchasePrice;
         this.id = UniqueIdFactory.createId();
-        this.collectable = collectable;
+        this.collectable = collectable.getContext();
         this.isOnMarket = false;
         this.currentMarketPrice = collectable.getCost();
+        this.edition = collectable.getCollecteds().size() + 1;
     }
 
     // from database
+    public Collected(String memberId, String id, long recentPurchasePrice, CollectableContext collectable, String date, String time, boolean isOnMarket, long currentMarketPrice, int edition) {
+        super(date, time);
+        this.memberId = memberId;
+        this.recentPurchasePrice = recentPurchasePrice;
+        this.id = id;
+        this.collectable = collectable;
+        this.isOnMarket = isOnMarket;
+        this.currentMarketPrice = currentMarketPrice;
+        this.edition = edition;
+    }
+
     public Collected(String memberId, String id, long recentPurchasePrice, CollectableContext collectable, String date, String time, boolean isOnMarket, long currentMarketPrice) {
         super(date, time);
         this.memberId = memberId;
@@ -34,6 +47,11 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         this.collectable = collectable;
         this.isOnMarket = isOnMarket;
         this.currentMarketPrice = currentMarketPrice;
+        this.edition = 1;
+    }
+
+    public int getEdition() {
+        return edition;
     }
 
     public String getIdentifier() {
@@ -78,6 +96,10 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         this.memberId = reciever.getMemberId();
     }
 
+    public void setRecentPurchasePrice(long recentPurchasePrice) {
+        this.recentPurchasePrice = recentPurchasePrice;
+    }
+
     public String getName() {
         return collectable.getName();
     }
@@ -97,7 +119,7 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         sb.append("*" + getCollectable().getDescription() + "*\n");
         sb.append("Rarity: " + collectable.getRarity(manager).toString() + "\n");
         sb.append("ID: " + getIdentifier() + "\n");
-        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate() + "\n");
+        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate());
         sb.append("Purchased for " + getRecentPurchasePrice() + " coins\n");
         if (isOnMarket) {
             sb.append("On market for **" + getCurrentMarketPrice() + "** coins");

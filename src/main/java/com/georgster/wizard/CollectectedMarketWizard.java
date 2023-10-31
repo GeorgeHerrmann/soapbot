@@ -123,6 +123,7 @@ public final class CollectectedMarketWizard extends InputWizard {
         if (collecteds.isEmpty()) {
             sendMessage("There are no cards on the market.", "No cards on market");
             goBack();
+            return;
         }
 
         Collected collected = collecteds.get(index);
@@ -134,6 +135,7 @@ public final class CollectectedMarketWizard extends InputWizard {
         EmbedCreateSpec spec = EmbedCreateSpec.builder()
                 .title(owner.getDisplayName() + "'s " + collectable.getName())
                 .description(collected.toString() + "\nOwned by: " + owner.getMention() + "\n\nAsking Price: " + collected.getCurrentMarketPrice() + " coins")
+                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
                 .image(collectable.getImageUrl())
                 .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
                 .build();
@@ -171,6 +173,7 @@ public final class CollectectedMarketWizard extends InputWizard {
         EmbedCreateSpec spec = EmbedCreateSpec.builder()
                 .title(owner.getDisplayName() + "'s " + collectable.getName())
                 .description(collected.toDetailedString(userManager))
+                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
                 .image(collectable.getImageUrl())
                 .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
                 .build();
@@ -194,6 +197,7 @@ public final class CollectectedMarketWizard extends InputWizard {
                 } else {
                     if (profile.getBank().hasBalance(collected.getCurrentMarketPrice())) {
                         UserProfile profile2 = userManager.get(collected.getMemberId());
+                        collected.setRecentPurchasePrice(collected.getCurrentMarketPrice());
                         collected.trade(profile2, profile);
                         collected.setOnMarket(false);
                         profile2.getBank().deposit(collected.getCurrentMarketPrice());
