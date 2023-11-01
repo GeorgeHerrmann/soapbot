@@ -1,5 +1,7 @@
 package com.georgster.collectable;
 
+import java.time.Instant;
+
 import com.georgster.collectable.trade.Tradeable;
 import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.Manageable;
@@ -111,25 +113,22 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getCollectable().getName() + "\n");
+        sb.append("*" + getCollectable().getDescription() + "*\n\n");
         sb.append("ID: " + getIdentifier() + "\n");
-        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate() + "\n");
-        sb.append("Purchased for " + getRecentPurchasePrice() + " coins");
+        sb.append("*Purchased for **" + getRecentPurchasePrice() + "** coins*");
         return sb.toString();
     }
 
     public String toDetailedString(UserProfileManager manager) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getCollectable().getName() + "\n");
-        sb.append("*" + getCollectable().getDescription() + "*\n");
-        sb.append("Rarity: " + collectable.getRarity(manager).toString() + "\n");
+        sb.append("*" + getCollectable().getDescription() + "*\n\n");
+        sb.append("Rarity: ***" + collectable.getRarity(manager).toString() + "***\n");
         sb.append("ID: " + getIdentifier() + "\n");
-        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate() + "\n");
-        sb.append("Purchased for " + getRecentPurchasePrice() + " coins\n");
+        sb.append("*Purchased for **" + getRecentPurchasePrice() + "** coins*\n");
         if (isOnMarket) {
-            sb.append("On market for **" + getCurrentMarketPrice() + "** coins");
+            sb.append("*On market for **" + getCurrentMarketPrice() + "** coins*");
         } else {
-            sb.append("Not on market");
+            sb.append("*Not on market*");
         }
         return sb.toString();
     }
@@ -139,9 +138,11 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         Member owner = new GuildInteractionHandler(manager.getGuild()).getMemberById(this.getMemberId());
 
         return EmbedCreateSpec.builder()
-                .title(owner.getDisplayName() + "'s " + collectable.getName())
+                //.title(owner.getDisplayName() + "'s " + collectable.getName())
                 .description(this.toDetailedString(userManager))
-                .footer(this.getEdition() + " of " + c.getCollecteds().size(), Collectable.editionIconUrl())
+                .timestamp(Instant.parse(getRawDateTime()))
+                .author(owner.getDisplayName() + "'s " + c.getName(), null, owner.getAvatarUrl())
+                .footer(this.getEdition() + " of " + c.getMaxEdition(), Collectable.editionIconUrl())
                 .image(collectable.getImageUrl())
                 .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
                 .build();
@@ -152,9 +153,11 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         Member owner = new GuildInteractionHandler(manager.getGuild()).getMemberById(this.getMemberId());
 
         return EmbedCreateSpec.builder()
-                .title(owner.getDisplayName() + "'s " + c.getName())
-                .description(this.toString() + "\nOwned by: " + owner.getMention() + "\nRarity: ***" + collectable.getRarity(userManager).toString() + "***")
-                .footer(this.getEdition() + " of " + c.getCollecteds().size(), Collectable.editionIconUrl())
+                //.title(owner.getDisplayName() + "'s " + c.getName())
+                .description(this.toString() + "\nRarity: ***" + collectable.getRarity(userManager).toString() + "***")
+                .timestamp(Instant.parse(getRawDateTime()))
+                .author(owner.getDisplayName() + "'s " + c.getName(), null, owner.getAvatarUrl())
+                .footer(this.getEdition() + " of " + c.getMaxEdition(), Collectable.editionIconUrl())
                 .image(collectable.getImageUrl())
                 .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
                 .build();

@@ -229,6 +229,13 @@ public final class Collectable extends UniqueIdentified {
         return highestEdition;
     }
 
+    public int getMaxEdition() {
+        int numCards = collecteds.size();
+        int highestEdition = getHighestEdition();
+
+        return Math.max(numCards, highestEdition);
+    }
+
     public EmbedCreateSpec getGeneralEmbed(UserProfileManager userManager) {
         GuildInteractionHandler guildHandler = new GuildInteractionHandler(userManager.getGuild());
         return EmbedCreateSpec.builder()
