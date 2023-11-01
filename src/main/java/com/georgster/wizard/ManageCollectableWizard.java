@@ -36,12 +36,7 @@ public class ManageCollectableWizard extends InputWizard {
     }
 
     protected void viewCollectable() {
-        EmbedCreateSpec spec = EmbedCreateSpec.builder()
-            .title(collectable.getName())
-            .description(collectable.toString() + "\nRarity: " + collectable.getRarity(userManager).toString())
-            .image(collectable.getImageUrl())
-            .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
-            .build();
+        EmbedCreateSpec spec = collectable.getGeneralEmbed(userManager);
             
         
         withResponse(response -> {
@@ -81,13 +76,7 @@ public class ManageCollectableWizard extends InputWizard {
         boolean hasPrevious = index != 0;
         boolean hasNext = index != collecteds.size() - 1;
 
-        EmbedCreateSpec spec = EmbedCreateSpec.builder()
-                .title("Select a " + collectable.getName() + " card to sell")
-                .description(collected.toDetailedString(userManager))
-                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
-                .image(collectable.getImageUrl())
-                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
-                .build();
+        EmbedCreateSpec spec = collected.getDetailedEmbed(userManager, manager);
 
         if (hasPrevious) {
             if (hasNext) {

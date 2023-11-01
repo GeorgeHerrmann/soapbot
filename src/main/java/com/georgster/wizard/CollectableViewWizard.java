@@ -12,7 +12,6 @@ import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
-import discord4j.core.object.entity.Member;
 import discord4j.core.spec.EmbedCreateSpec;
 
 public class CollectableViewWizard extends InputWizard {
@@ -66,12 +65,7 @@ public class CollectableViewWizard extends InputWizard {
         boolean hasPrevious = index != 0;
         boolean hasNext = index != collectables.size() - 1;
 
-        EmbedCreateSpec spec = EmbedCreateSpec.builder()
-            .title(collectable.getName())
-            .description(collectable.toString() + "\nRarity: ***" + collectable.getRarity(userManager).toString() + "***\nCreated by: " + guildHandler.getMemberById(collectable.getCreatorId()).getMention())
-            .image(collectable.getImageUrl())
-            .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
-            .build();
+        EmbedCreateSpec spec = collectable.getGeneralEmbed(userManager);
 
         if (hasPrevious) {
             if (hasNext) {
@@ -111,15 +105,7 @@ public class CollectableViewWizard extends InputWizard {
         boolean hasPrevious = index != 0;
         boolean hasNext = index != collecteds.size() - 1;
 
-        Member owner = guildHandler.getMemberById(collected.getMemberId());
-
-        EmbedCreateSpec spec = EmbedCreateSpec.builder()
-                .title(owner.getDisplayName() + "'s " + collectable.getName())
-                .description(collected.toString() + "\nOwned by: " + owner.getMention() + "\nRarity: ***" + collectable.getRarity(userManager).toString() + "***")
-                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
-                .image(collectable.getImageUrl())
-                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
-                .build();
+        EmbedCreateSpec spec = collected.getGeneralEmbed(userManager, manager);
 
         if (hasPrevious) {
             if (hasNext) {
@@ -166,15 +152,8 @@ public class CollectableViewWizard extends InputWizard {
 
     protected void viewCollected(Collected collected) {
         Collectable collectable = manager.get(collected.getName());
-        Member owner = event.getGuildInteractionHandler().getMemberById(collected.getMemberId());
-
-        EmbedCreateSpec spec = EmbedCreateSpec.builder()
-                .title(owner.getDisplayName() + "'s " + collectable.getName())
-                .description(collected.toDetailedString(userManager))
-                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
-                .image(collectable.getImageUrl())
-                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
-                .build();
+        
+        EmbedCreateSpec spec = collected.getDetailedEmbed(userManager, manager);
         
         String[] options;
 

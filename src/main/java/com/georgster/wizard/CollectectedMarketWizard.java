@@ -11,7 +11,6 @@ import com.georgster.profile.UserProfile;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
-import discord4j.core.object.entity.Member;
 import discord4j.core.spec.EmbedCreateSpec;
 
 public final class CollectectedMarketWizard extends InputWizard {
@@ -127,18 +126,9 @@ public final class CollectectedMarketWizard extends InputWizard {
         }
 
         Collected collected = collecteds.get(index);
-        Collectable collectable = manager.get(collected.getName());
-
-        Member owner = event.getGuildInteractionHandler().getMemberById(collected.getMemberId());
         String[] options = new String[]{"Buy", "View"};
 
-        EmbedCreateSpec spec = EmbedCreateSpec.builder()
-                .title(owner.getDisplayName() + "'s " + collectable.getName())
-                .description(collected.toString() + "\nOwned by: " + owner.getMention() + "\n\nAsking Price: " + collected.getCurrentMarketPrice() + " coins")
-                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
-                .image(collectable.getImageUrl())
-                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
-                .build();
+        EmbedCreateSpec spec = collected.getGeneralEmbed(userManager, manager);
         
         boolean hasPrevious = index != 0;
         boolean hasNext = index != collecteds.size() - 1;
@@ -167,16 +157,7 @@ public final class CollectectedMarketWizard extends InputWizard {
     }
 
     protected void viewCollected(Collected collected) {
-        Collectable collectable = manager.get(collected.getName());
-        Member owner = event.getGuildInteractionHandler().getMemberById(collected.getMemberId());
-
-        EmbedCreateSpec spec = EmbedCreateSpec.builder()
-                .title(owner.getDisplayName() + "'s " + collectable.getName())
-                .description(collected.toDetailedString(userManager))
-                .footer(collected.getEdition() + " of " + collectable.getCollecteds().size(), Collectable.editionIconUrl())
-                .image(collectable.getImageUrl())
-                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
-                .build();
+        EmbedCreateSpec spec = collected.getDetailedEmbed(userManager, manager);
 
         withResponse(response -> {
             if (response.equals("buy")) {

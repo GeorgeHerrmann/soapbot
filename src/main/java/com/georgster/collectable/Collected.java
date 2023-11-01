@@ -1,11 +1,16 @@
 package com.georgster.collectable;
 
 import com.georgster.collectable.trade.Tradeable;
+import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.Manageable;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.identify.UniqueIdFactory;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.DateTimed;
+import com.georgster.util.handler.GuildInteractionHandler;
+
+import discord4j.core.object.entity.Member;
+import discord4j.core.spec.EmbedCreateSpec;
 
 public final class Collected extends DateTimed implements Manageable, Tradeable {
     private final String id;
@@ -24,7 +29,7 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         this.collectable = collectable.getContext();
         this.isOnMarket = false;
         this.currentMarketPrice = collectable.getCost();
-        this.edition = collectable.getCollecteds().size() + 1;
+        this.edition = collectable.getNextEdition();
     }
 
     // from database
@@ -119,7 +124,7 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         sb.append("*" + getCollectable().getDescription() + "*\n");
         sb.append("Rarity: " + collectable.getRarity(manager).toString() + "\n");
         sb.append("ID: " + getIdentifier() + "\n");
-        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate());
+        sb.append("Bought at " + getFormattedTime() + " on " + getFormattedDate() + "\n");
         sb.append("Purchased for " + getRecentPurchasePrice() + " coins\n");
         if (isOnMarket) {
             sb.append("On market for **" + getCurrentMarketPrice() + "** coins");
@@ -127,5 +132,31 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
             sb.append("Not on market");
         }
         return sb.toString();
+    }
+
+    public EmbedCreateSpec getDetailedEmbed(UserProfileManager userManager, CollectableManager manager) {
+        Collectable c = manager.get(this.getName());
+        Member owner = new GuildInteractionHandler(manager.getGuild()).getMemberById(this.getMemberId());
+
+        return EmbedCreateSpec.builder()
+                .title(owner.getDisplayName() + "'s " + collectable.getName())
+                .description(this.toDetailedString(userManager))
+                .footer(this.getEdition() + " of " + c.getCollecteds().size(), Collectable.editionIconUrl())
+                .image(collectable.getImageUrl())
+                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
+                .build();
+    }
+
+    public EmbedCreateSpec getGeneralEmbed(UserProfileManager userManager, CollectableManager manager) {
+        Collectable c = manager.get(this.getName());
+        Member owner = new GuildInteractionHandler(manager.getGuild()).getMemberById(this.getMemberId());
+
+        return EmbedCreateSpec.builder()
+                .title(owner.getDisplayName() + "'s " + c.getName())
+                .description(this.toString() + "\nOwned by: " + owner.getMention() + "\nRarity: ***" + collectable.getRarity(userManager).toString() + "***")
+                .footer(this.getEdition() + " of " + c.getCollecteds().size(), Collectable.editionIconUrl())
+                .image(collectable.getImageUrl())
+                .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
+                .build();
     }
 }

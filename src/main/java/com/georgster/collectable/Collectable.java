@@ -1,13 +1,17 @@
 package com.georgster.collectable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.identify.util.UniqueIdentified;
 import com.georgster.economy.exception.InsufficientCoinsException;
 import com.georgster.profile.UserProfile;
+import com.georgster.util.handler.GuildInteractionHandler;
 
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 
 public final class Collectable extends UniqueIdentified {
@@ -196,6 +200,43 @@ public final class Collectable extends UniqueIdentified {
 
     public static String editionIconUrl() {
         return EDITION_ICON_URL;
+    }
+
+    public int getNextEdition() {
+        Set<Integer> occupiedEditions = new HashSet<>();
+        
+        for (Collected c : collecteds) {
+            occupiedEditions.add(c.getEdition());
+        }
+        
+        int edition = 1;
+        while (occupiedEditions.contains(edition)) {
+            edition++;
+        }
+        
+        return edition;
+    }
+
+    public int getHighestEdition() {
+        int highestEdition = 0;
+    
+        for (Collected c : collecteds) {
+            if (c.getEdition() > highestEdition) {
+                highestEdition = c.getEdition();
+            }
+        }
+    
+        return highestEdition;
+    }
+
+    public EmbedCreateSpec getGeneralEmbed(UserProfileManager userManager) {
+        GuildInteractionHandler guildHandler = new GuildInteractionHandler(userManager.getGuild());
+        return EmbedCreateSpec.builder()
+            .title(this.getName())
+            .description(this.toString() + "\nRarity: ***" + this.getRarity(userManager).toString() + "***\nCreated by: " + guildHandler.getMemberById(this.getCreatorId()).getMention())
+            .image(this.getImageUrl())
+            .color(Collectable.getRarityColor(this.getRarity(userManager)))
+            .build();
     }
 
     @Override
