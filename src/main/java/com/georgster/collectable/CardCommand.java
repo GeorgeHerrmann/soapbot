@@ -123,30 +123,30 @@ public final class CardCommand implements ParseableCommand {
             }
         }, "lb", "leaderboard");
 
-        sb.onIndexLast(arg -> {
-            logger.append("\n - Attempting to find a user with the name " + arg + "\n", LogDestination.NONAPI);
-            UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getPresentUsers().get(0).getId().asString());
-            logger.append(" - Showing " + profile.getUsername() + "'s cards\n", LogDestination.NONAPI);
-            new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
-        }, 0);
-
-        sb.onIndexLast(id -> {
-            if (!collectableManager.exists(id)) {
-                logger.append("\n - No trading card with the name " + id + ", attempting lookup by ID", LogDestination.NONAPI);
-                Collected c = collectableManager.getCollectedById(id);
-                if (c == null) {
-                    logger.append("\n - No trading card with the ID " + id + ", sending help message", LogDestination.NONAPI);
-                    handler.sendMessage("A trading card with that ID or name does not exist inside of " + event.getGuildInteractionHandler().getGuild().getName(), "Card not found");
-                } else {
-                    logger.append("\n - Found trading card with the ID " + id + ", beginning view wizard", LogDestination.NONAPI);
-                    InputWizard wizard = new CollectableViewWizard(event, false);
-                    wizard.begin("viewCollected", c);
-                }
-            } else {
+        sb.onIndexLast(id -> { // Fallback if identifiers were not used
+            if (collectableManager.exists(id)) {
                 logger.append("\n - Found trading card with the name " + id + ", beginning view wizard", LogDestination.NONAPI);
                 Collectable collectable = collectableManager.get(id);
                 InputWizard wizard = new CollectableViewWizard(event, false);
                 wizard.begin("viewCollectable", collectable);
+            } else {
+                try {
+                    logger.append("\n - Attempting to find a user with the name " + id + "\n", LogDestination.NONAPI);
+                    UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getPresentUsers().get(0).getId().asString());
+                    logger.append(" - Showing " + profile.getUsername() + "'s cards\n", LogDestination.NONAPI);
+                    new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
+                } catch (Exception e) {
+                    logger.append("\n - No trading card with the name " + id + ", attempting lookup by ID", LogDestination.NONAPI);
+                    Collected c = collectableManager.getCollectedById(id);
+                    if (c == null) {
+                        logger.append("\n - No trading card with the ID " + id + ", sending help message", LogDestination.NONAPI);
+                        handler.sendMessage("A trading card with that ID or name does not exist inside of " + event.getGuildInteractionHandler().getGuild().getName(), "Card not found");
+                    } else {
+                        logger.append("\n - Found trading card with the ID " + id + ", beginning view wizard", LogDestination.NONAPI);
+                        InputWizard wizard = new CollectableViewWizard(event, false);
+                        wizard.begin("viewCollected", c);
+                    }
+                }
             }
         }, 0);
 
