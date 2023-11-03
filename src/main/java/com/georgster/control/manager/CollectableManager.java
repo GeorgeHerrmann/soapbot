@@ -29,13 +29,31 @@ public class CollectableManager extends SoapManager<Collectable> {
      */
     public void updateFromProfiles(UserProfileManager manager) {
         manager.getAll().forEach(profile -> {
-            Unwrapper<Collectable> c = new Unwrapper<>();
-            profile.getCollecteds().forEach(collected -> {
-                c.setObject(get(collected.getName()));
-                c.getObject().setContext(collected.getCollectable());
-            });
-            update(c.getObject());
+            try {
+                Unwrapper<Collectable> c = new Unwrapper<>();
+                if (profile.getCollecteds() != null || !profile.getCollecteds().isEmpty()) {
+                    profile.getCollecteds().forEach(collected -> {
+                        c.setObject(get(collected.getName()));
+                        c.getObject().setContext(collected.getCollectable());
+                        if (collected.getName().equals(c.getObject().getName())) {
+                            c.getObject().updateCollected(collected);
+                        }
+                        update(c.getObject());
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
+    }
+
+    /**
+     * Returns the total amount of coins spent on all {@link Collected Collecteds} in this manager.
+     * 
+     * @return the total amount of coins spent on all {@code Collecteds} in this manager.
+     */
+    public long getTotalCoins() {
+        return getAllCollecteds().stream().mapToLong(c -> c.getRecentPurchasePrice()).sum();
     }
 
     /**

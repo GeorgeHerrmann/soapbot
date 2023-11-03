@@ -20,14 +20,25 @@ import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
+/**
+ * A {@link ParseableCommand} that handles all trading related commands.
+ */
 public final class TradeCommand implements ParseableCommand {
 
     private final UserProfileManager manager;
 
+    /**
+     * Constructs a {@link TradeCommand} for the given {@link ClientContext}.
+     * 
+     * @param context the context to construct for
+     */
     public TradeCommand(ClientContext context) {
         this.manager = context.getUserProfileManager();
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
         InteractionHandler handler = event.getGuildInteractionHandler();
@@ -45,10 +56,16 @@ public final class TradeCommand implements ParseableCommand {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public CommandParser getCommandParser() {
         return new CommandParser("1R");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\n - !trade @[USER]" +
@@ -56,10 +73,16 @@ public final class TradeCommand implements ParseableCommand {
         "\n*Note: You should either mention the user, or include their direct Username#Discriminator in the command, or use the slash command*";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("trade", "tr");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PermissibleAction getRequiredPermission(List<String> args) {
         return PermissibleAction.TRADECOMMAND;

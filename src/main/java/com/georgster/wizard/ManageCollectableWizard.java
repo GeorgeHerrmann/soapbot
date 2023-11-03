@@ -13,6 +13,9 @@ import com.georgster.wizard.input.InputListenerFactory;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateSpec;
 
+/**
+ * A {@link InputWizard} that handles managing a {@link Collectable} in a User's private message channel.
+ */
 public class ManageCollectableWizard extends InputWizard {
     
     private final CollectableManager manager;
@@ -20,8 +23,15 @@ public class ManageCollectableWizard extends InputWizard {
     private Collectable collectable;
     private final UserProfile profile;
 
+    /**
+     * Constructs a {@link ManageCollectableWizard} with the given parameters.
+     * 
+     * @param event the event to construct for
+     * @param collectable the {@code Collectable} to manage
+     * @param user the {@code User} to manage the {@code Collectable} for
+     */
     public ManageCollectableWizard(CommandExecutionEvent event, Collectable collectable, User user) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, collectable.getName()).builder().withXReaction(false).build());
+        super(event, InputListenerFactory.createButtonMessageListener(event, collectable.getName()).builder().withXReaction(false).requireMatch(false, false).build());
         this.collectable = collectable;
         this.manager = event.getCollectableManager();
         this.userManager = event.getUserProfileManager();
@@ -30,13 +40,19 @@ public class ManageCollectableWizard extends InputWizard {
         swtichToUserWizard(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         nextWindow("viewCollectable");
         end();
     }
 
+    /**
+     * The window that handles the viewing of the {@link Collectable}.
+     */
     protected void viewCollectable() {
-        EmbedCreateSpec spec = collectable.getGeneralEmbed(userManager);
+        EmbedCreateSpec spec = collectable.getGeneralEmbed(userManager, manager);
             
         
         withResponse(response -> {
@@ -46,10 +62,15 @@ public class ManageCollectableWizard extends InputWizard {
                 nextWindow("purchaseCollected");
             } else if (response.equals("view")) {
                 displayDetailedCollectable();
+            } else if (response.equals("inflate")) {
+                nextWindow("inflateCollectable");
             }
         }, false, spec, getOptions());
     }
 
+    /**
+     * The window that handles the purchasing of a new {@link Collected} of the {@link Collectable}.
+     */
     protected void purchaseCollected() {
         final String prompt = "Are you sure you want to purchase a " + collectable.getName() + " card for " + collectable.getCost() + " coins?";
         withResponse(response -> {
@@ -58,6 +79,7 @@ public class ManageCollectableWizard extends InputWizard {
                     collectable.purchaseCollected(profile);
                     manager.update(collectable);
                     userManager.update(profile);
+                    userManager.updateFromCollectables(manager); // update all profiles with that collectable
                     sendMessage("You have purchased a " + collectable.getName() + " card. You can view it with !cards in " + userManager.getGuild().getName(), "Card Purchased Successfully");
                     nextWindow("viewCollectable");
                 } else {
@@ -68,6 +90,11 @@ public class ManageCollectableWizard extends InputWizard {
         }, true, prompt, "Confirm");
     }
 
+    /**
+     * The window that confirms the selling of a {@link Collected} of the {@link Collectable}.
+     * 
+     * @param index the index of the {@code Collected} to sell
+     */
     protected void confirmCollectedSell(Integer index) {
         final List<Collected> collecteds = collectable.getUserCollecteds(profile);
         Collected collected = collecteds.get(index);
@@ -97,12 +124,18 @@ public class ManageCollectableWizard extends InputWizard {
                 collectable.sellCollected(profile, collected);
                 userManager.update(profile);
                 manager.update(collectable);
+                userManager.updateFromCollectables(manager); // update all profiles with that collectable
                 sendMessage("You have sold a card with ID " + collected.getIdentifier() + "\nThe new price is " + collectable.getCost(), "Card Sold");
                 nextWindow("viewCollectable");
             }
         }, false, spec, options);
     }
 
+    /**
+     * Returns the User's options for the {@link Collectable}.
+     * 
+     * @return the User's options for the {@code Collectable}.
+     */
     private String[] getOptions() {
         if (collectable.owns(profile)) {
             return new String[]{"Sell", "Buy", "View"};
@@ -111,10 +144,13 @@ public class ManageCollectableWizard extends InputWizard {
         }
     }
 
+    /**
+     * Displays the detailed information of the {@link Collectable} in a new Message.
+     */
     private void displayDetailedCollectable() {
         StringBuilder sb = new StringBuilder();
         sb.append("*" + collectable.getDescription() + "*\n");
-        sb.append("Rarity: " + collectable.getRarity(userManager).toString() + "\n");
+        sb.append("Rarity: ***" + collectable.getRarity(userManager, manager).toString() + "***\n");
         sb.append("Total Cards: " + collectable.getCollecteds().size() + "\n");
         sb.append("Current Cost: " + collectable.getCost() + "\n");
         sb.append("Initial Cost: " + collectable.getInitialCost() + "\n");
@@ -123,7 +159,7 @@ public class ManageCollectableWizard extends InputWizard {
             .title(collectable.getName())
             .description(sb.toString())
             .image(collectable.getImageUrl())
-            .color(Collectable.getRarityColor(collectable.getRarity(userManager)))
+            .color(Collectable.getRarityColor(collectable.getRarity(userManager, manager)))
             .build();
 
         handler.sendMessage(spec);

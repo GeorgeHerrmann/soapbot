@@ -526,6 +526,24 @@ public abstract class InputListener {
     }
 
     /**
+     * Returns the current {@link User} of this listener.
+     * 
+     * @param user The new user.
+     */
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    /**
+     * Returns the current {@link User} of this listener.
+     * 
+     * @return The current {@link User} of this listener.
+     */
+    public User getUser() {
+        return user;
+    }
+
+    /**
      * Sets the {@link InteractionHandler}, which will handle all interactions with discord.
      * 
      * @param handler The new {@link InteractionHandler}.

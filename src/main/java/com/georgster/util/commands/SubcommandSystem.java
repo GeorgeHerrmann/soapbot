@@ -8,7 +8,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 /**
  * A facade for commands to create argument-based subcommands with a {@link ParsedArguments}.
  */
-public class SubcommandSystem {
+public final class SubcommandSystem {
     private final ParsedArguments parser;
     private boolean hasExecuted;
 

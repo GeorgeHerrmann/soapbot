@@ -13,11 +13,19 @@ import com.georgster.wizard.input.InputListenerFactory;
 
 import discord4j.core.spec.EmbedCreateSpec;
 
+/**
+ * A {@link InputWizard} that handles the marketplace for {@link Collected Collecteds}.
+ */
 public final class CollectectedMarketWizard extends InputWizard {
     private final CollectableManager manager;
     private final UserProfileManager userManager;
     private final UserProfile profile;
 
+    /**
+     * Constructs a {@link CollectectedMarketWizard} with the given parameters.
+     * 
+     * @param event the event to construct for
+     */
     public CollectectedMarketWizard(CommandExecutionEvent event) {
         super(event, InputListenerFactory.createButtonMessageListener(event, "Card Market"));
         this.manager = event.getCollectableManager();
@@ -25,11 +33,17 @@ public final class CollectectedMarketWizard extends InputWizard {
         this.profile = userManager.get(user.getId().asString());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         nextWindow("selectOption");
         end();
     }
 
+    /**
+     * The window that handles the selection of an option.
+     */
     protected void selectOption() {
         final String prompt = "Welcome to the Card Marketplace! What would you like to do?";
         withResponse(response -> {
@@ -43,6 +57,9 @@ public final class CollectectedMarketWizard extends InputWizard {
         }, false, prompt, "View Market", "Create Listing", "Remove Listing");
     }
 
+    /**
+     * The window that handles the selection of a {@link Collected} to place on the market.
+     */
     protected void selectCollectedCreate() {
         InputListener newListener = InputListenerFactory.createMenuMessageListener(event, "Card Market");
         
@@ -63,6 +80,9 @@ public final class CollectectedMarketWizard extends InputWizard {
         }
     }
 
+    /**
+     * The window that handles the selection of a {@link Collected} to remove from the market.
+     */
     protected void selectCollectedRemove() {
         InputListener newListener = InputListenerFactory.createMenuMessageListener(event, "Card Market");
 
@@ -90,6 +110,11 @@ public final class CollectectedMarketWizard extends InputWizard {
         }
     }
 
+    /**
+     * The window that handles the confirmation of a {@link Collected} to place on the market.
+     * 
+     * @param collected the {@code Collected} to place on the market
+     */
     protected void confirmCollectedSell(Collected collected) {
         final String prompt = "How much should this card be sold for?";
         Collectable collectable = manager.get(collected.getName());
@@ -116,6 +141,9 @@ public final class CollectectedMarketWizard extends InputWizard {
         }, true, prompt);
     }
 
+    /**
+     * The window that handles the selection of a {@link Collected} to view.
+     */
     protected void viewAllCollecteds(Integer index) {
         List<Collected> collecteds = manager.getAllCollecteds().stream().filter(Collected::isOnMarket).toList();
 
@@ -156,6 +184,11 @@ public final class CollectectedMarketWizard extends InputWizard {
         }, false, spec, options);
     }
 
+    /**
+     * The window that handles the viewing of a {@link Collected}.
+     * 
+     * @param collected the {@code Collected} to view
+     */
     protected void viewCollected(Collected collected) {
         EmbedCreateSpec spec = collected.getDetailedEmbed(userManager, manager);
 
@@ -166,6 +199,11 @@ public final class CollectectedMarketWizard extends InputWizard {
         }, true, spec, "Buy");
     }
 
+    /**
+     * The window that handles the confirmation of a {@link Collected} to purchase.
+     * 
+     * @param collected the {@code Collected} to purchase
+     */
     protected void confirmCollectedBuy(Collected collected) {
         final Collectable collectable = manager.get(collected.getName());
 

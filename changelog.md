@@ -327,3 +327,36 @@
     Blackjack
         - The dealer will now automatically win if it has not busted and it has a greater score than the player
         - The dealer will now draw with the user if both decks have a total of 16
+    Trading Cards
+        - Created a new Trading Card System
+            - Cards can be created via !cards create
+            - Individual versions of cards can be bought and sold from SOAP Bot
+                - The price doubles on a sale, and halves on a purchase
+            - Cards can be viewed with !cards or !cards view
+            - Cards can be put on the marketplace for a specific price with !cards market
+            - You can view your own cards with !cards mine
+            - You can view another users cards with !cards @[USER]
+            - Cards can be traded between users with !trade @[USER]
+            - You can view all the cards ranked by their cost with !cards leaderboard
+            - Cards can be inflated in value
+                - Actual inflation cost is based on the number of cards in circulation
+            - Cards have rarities, determined by the number of coins total in a Guild and the cost of the card
+                - Can be COMMON, UNCOMMON, RARE, LEGENDARY or UNIQUE
+    Trading
+        - Coins and any Tradeable objects (including Cards) can be traded with !trade @[USER]
+            - You can create a trade offer, then send it to a User, who has 5 minutes to accept or reject
+    Interaction Handler
+        - Added the ability for Interaction Handlers to send messages with outside EmbedCreateSpecs
+    InputWizard
+        - Greatly enhanced InputWizard utility
+            - InputWizards can now send images or custom EmbedCreateSpecs in their Messages.
+            - InputWizards can now be switched to UserWizards, which will live in a User's private MessageChannel
+                - Note that these can only be interacted with via ComponentInteractions (Menus and Buttons)
+        - Fixed an issue where an InputWizard which failed to run properly would run in an infinite loop
+        - Added the new AlternateWizard, which can swap between two InputWizards with a reaction
+            - This is used with !cards view, for example, which switches between a menu or button based UI
+        - Various minor performance optimizations
+    InputListener
+        - Added the ability for ButtonMessageListeners to have Danger buttons by prepending a "!" to an option
+    General
+        - Fixed an issue where testMode was not behaving as intended

@@ -9,11 +9,19 @@ import com.georgster.util.thread.ThreadPoolFactory;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
+/**
+ * A {@link InputWizard} that handles the creation of a {@link Collectable}.
+ */
 public final class CollectableWizard extends InputWizard {
     private UserProfile ownerProfile;
     private final UserProfileManager userManager;
     private final CollectableManager manager;
 
+    /**
+     * Constructs a {@link CollectableWizard} with the given parameters.
+     * 
+     * @param event the event to construct for
+     */
     public CollectableWizard(CommandExecutionEvent event) {
         super(event, InputListenerFactory.createButtonMessageListener(event, "Collectable Wizard").builder().requireMatch(false, false).disableAutoFormatting().build());
         this.manager = event.getCollectableManager();
@@ -21,11 +29,17 @@ public final class CollectableWizard extends InputWizard {
         this.ownerProfile = userManager.get(event.getDiscordEvent().getAuthorAsMember().getId().asString());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         nextWindow("createCollectable");
         end();
     }
 
+    /**
+     * The window that handles the name input of the {@link Collectable}.
+     */
     protected void createCollectable() {
         InputListener newListener = InputListenerFactory.createButtonMessageListener(event, "Collectable Wizard").builder().requireMatch(false, false).build();
 
@@ -40,6 +54,11 @@ public final class CollectableWizard extends InputWizard {
         }, true, newListener, prompt);
     }
 
+    /**
+     * The window that handles the description input of the {@link Collectable}.
+     * 
+     * @param current the {@code Collectable} being created
+     */
     protected void collectableDescription(Collectable current) {
         String prompt = "What is the description of the card?";
         withResponse(response -> {
@@ -48,6 +67,12 @@ public final class CollectableWizard extends InputWizard {
         }, true, prompt);
     }
 
+    /**
+     * The window that handles the image url input of the {@link Collectable}.
+     * 
+     * @param current the {@code Collectable} being created
+     * @param retry   whether or not this is a retry
+     */
     protected void collectableImageUrl(Collectable current, Boolean retry) {
         String prompt = "";
         if (Boolean.TRUE.equals(retry)) {
@@ -66,6 +91,11 @@ public final class CollectableWizard extends InputWizard {
         }, true, prompt);
     }
 
+    /**
+     * The window that handles the cost input of the {@link Collectable}.
+     * 
+     * @param current the {@code Collectable} being created
+     */
     protected void collectableCost(Collectable current) {
         String prompt = "What is the cost of the card? Please note that this cannot be changed by you after creation.";
         withResponse(response -> {

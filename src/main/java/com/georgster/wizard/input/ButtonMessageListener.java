@@ -85,7 +85,7 @@ public class ButtonMessageListener extends InputListener {
             }));
 
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
-            .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
+            .filter(event -> event.getMessage().getAuthor().orElse(user).getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
             .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
             

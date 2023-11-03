@@ -9,6 +9,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.MultiLogger;
 import com.georgster.logs.LogDestination;
 import com.georgster.permissions.PermissibleAction;
+import com.georgster.profile.UserProfile;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.InteractionHandler;
@@ -23,14 +24,25 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
+/**
+ * A {@link ParseableCommand} that handles all trading card related commands.
+ */
 public final class CardCommand implements ParseableCommand {
 
     private final CollectableManager collectableManager;
 
+    /**
+     * Constructs a {@link CardCommand} for the given {@link ClientContext}.
+     * 
+     * @param context the context to construct for
+     */
     public CardCommand(ClientContext context) {
         this.collectableManager = context.getCollectableManager();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandExecutionEvent event) {
         InteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
@@ -71,7 +83,27 @@ public final class CardCommand implements ParseableCommand {
             logger.append("\n- Beginning the Collected Market Wizard\n", LogDestination.NONAPI);
             InputWizard wizard = new CollectectedMarketWizard(event);
             wizard.begin();
-        }, "market");
+        }, "market", "marketplace", "shop", "store");
+
+        sb.on(p -> {
+            UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getAuthorAsMember().getId().asString());
+            new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
+        }, "mine", "my", "self");
+
+        sb.on(p -> {
+            if (collectableManager.isEmpty()) {
+                handler.sendMessage("There are no trading cards to view", "Error", InteractionHandler.MessageFormatting.ERROR);
+                logger.append("\n- No trading cards found, sending help message", LogDestination.NONAPI);
+            } else {
+                logger.append("\n- Showing cards by value", LogDestination.NONAPI);
+                new CollectableViewWizard(event, false).begin("viewAllRankedCollecteds", 0);
+            }
+        }, "lb", "leaderboard");
+
+        sb.onIndexLast(arg -> {
+            UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getPresentUsers().get(0).getId().asString());
+            new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
+        }, 0);
 
         sb.onIndexLast(id -> {
             if (!collectableManager.exists(id)) {
@@ -92,8 +124,12 @@ public final class CardCommand implements ParseableCommand {
                 wizard.begin("viewCollectable", collectable);
             }
         }, 0);
+
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public CommandParser getCommandParser() {
         return new CommandParser("VO");
     }
@@ -108,9 +144,16 @@ public final class CardCommand implements ParseableCommand {
         "\n - '!cards market to open the card marketplace" +
         "\n - '!cards [ID] to view an individual trading card" +
         "\n - '!cards [NAME]' to view a trading card by name" +
-        "\n - '!trade @[USER]' to trade with another user";
+        "\n - '!cards mine' to view your own trading cards" +
+        "\n - '!cards leaderboard' or '!cards lb' to view the leaderboard of trading cards" +
+        "\n - '!cards @[USER]' to view another user's trading cards" +
+        "\n - '!trade @[USER]' to trade with another user" +
+        "\n - Visit https://tinyurl.com/soapbotcards for more information";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("cards", "card");
     }
@@ -132,9 +175,15 @@ public final class CardCommand implements ParseableCommand {
                 .name(getAliases().get(0))
                 .description("Interact with trading cards")
                 .addOption(ApplicationCommandOptionData.builder()
-                        .name("id or name")
-                        .description("Either a trading card ID or name to lookup")
+                        .name("id, name or 'mine'")
+                        .description("Either a trading card ID, name to lookup, or 'mine' for personal cards")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .required(false)
+                        .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("user")
+                        .description("A Member's card collection to view")
+                        .type(ApplicationCommandOption.Type.USER.getValue())
                         .required(false)
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()

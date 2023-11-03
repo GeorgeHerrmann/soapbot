@@ -1179,6 +1179,7 @@ public abstract class InputWizard {
      */
     private void loadListener(InputListener newListener) {
         newListener.setCurrentMessage(listener.getCurrentMessage());
+        newListener.setUser(listener.getUser());
         newListener.setTitle(listener.getTitle());
         newListener.setInteractingMember(listener.getInteractingUser());
         newListener.setInteractionHandler(listener.getInteractionHandler());
@@ -1192,6 +1193,7 @@ public abstract class InputWizard {
      */
     protected void loadDefaultListener(InputListener newListener) {
         listener.setCurrentMessage(newListener.getCurrentMessage());
+        listener.setUser(newListener.getUser());
         listener.setTitle(newListener.getTitle());
         listener.setInteractingMember(newListener.getInteractingUser());
         listener.setInteractionHandler(newListener.getInteractionHandler());
@@ -1239,6 +1241,8 @@ public abstract class InputWizard {
     public void swtichToUserWizard(User user) {
         InteractionHandler newHandler = new UserInteractionHandler(user);
         this.user = user;
+        this.listener.setUser(user);
+        this.currentlyActiveListener.setUser(user);
         this.handler = newHandler;
         this.listener.setInteractionHandler(newHandler);
     }

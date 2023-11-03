@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.identify.util.UniqueIdentified;
 import com.georgster.economy.exception.InsufficientCoinsException;
@@ -14,10 +15,19 @@ import com.georgster.util.handler.GuildInteractionHandler;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 
+/**
+ * A {@link UniqueIdentified} object that represents a unique item that can be purchased by a {@link UserProfile} and added to their collection.
+ * <p>
+ * A {@link Collectable} provides a definition for the general properties of a trading card, such as its name, description, and image,
+ * whereas {@link Collected Collecteds} are the actual cards that are purchased by a {@link UserProfile} and added to their collection.
+ * <p>
+ * A {@link Collectable} keeps track of all its {@link Collected Collecteds} and is defined by a {@link CollectableContext}.
+ */
 public final class Collectable extends UniqueIdentified {
     private static final String EDITION_ICON_URL = "https://static.thenounproject.com/png/5481694-200.png";
 
     private CollectableContext context;
+    private boolean adjustOnBuy;
     private final List<Collected> collecteds;
 
     /**
@@ -50,109 +60,274 @@ public final class Collectable extends UniqueIdentified {
         UNIQUE
     }
 
-    // new
+    /**
+     * Creates a new {@link Collectable} with the specified name, owner, description, image, and initial cost.
+     * 
+     * @param name The name of the {@link Collectable}.
+     * @param ownerId The id of the {@link UserProfile} that created the {@link Collectable}.
+     * @param description The description of the {@link Collectable}.
+     * @param imageUrl The image url of the {@link Collectable}.
+     * @param initialCost The initial cost of the {@link Collectable}.
+     */
     public Collectable(String name, String ownerId, String description, String imageUrl, long initialCost) {
         super(name);
         this.context = new CollectableContext(name, ownerId, description, imageUrl, initialCost);
+        this.adjustOnBuy = false;
         this.collecteds = new ArrayList<>();
     }
 
-    // from database
-    public Collectable(CollectableContext context, List<Collected> collecteds) {
+    /**
+     * Creates a new {@link Collectable} with the specified {@link CollectableContext} and {@link Collected Collecteds}.
+     * 
+     * @param context The {@link CollectableContext} of the {@link Collectable}.
+     * @param collecteds The {@link Collected Collecteds} of the {@link Collectable}.
+     * @param adjustOnBuy Whether or not the {@link Collectable} should adjust its cost on purchase.
+     */
+    public Collectable(CollectableContext context, List<Collected> collecteds, boolean adjustOnBuy) {
         super(context.getName());
         this.context = context;
+        this.adjustOnBuy = adjustOnBuy;
         this.collecteds = collecteds;
     }
 
+    /**
+     * Creates a new {@link Collectable} with the specified {@link CollectableContext} and {@link Collected Collecteds}.
+     * 
+     * @param context The {@link CollectableContext} of the {@link Collectable}.
+     * @param collecteds The {@link Collected Collecteds} of the {@link Collectable}.
+     */
+    public Collectable(CollectableContext context, List<Collected> collecteds) {
+        super(context.getName());
+        this.context = context;
+        this.adjustOnBuy = false;
+        this.collecteds = collecteds;
+    }
+
+    /**
+     * Returns the name of the {@link Collectable}.
+     * 
+     * @return the name of the {@code Collectable}.
+     */
     public String getName() {
         return context.getName();
     }
 
+    /**
+     * Returns the description of the {@link Collectable}.
+     * 
+     * @return the description of the {@code Collectable}.
+     */
     public String getDescription() {
         return context.getDescription();
     }
 
+    /**
+     * Returns the image url of the {@link Collectable}.
+     * 
+     * @return the image url of the {@code Collectable}.
+     */
     public String getImageUrl() {
         return context.getImageUrl();
     }
 
+    /**
+     * Returns the cost of the {@link Collectable}.
+     * 
+     * @return the cost of the {@code Collectable}.
+     */
     public long getCost() {
         return context.getCost();
     }
 
+    /**
+     * Returns the initial cost of the {@link Collectable}.
+     * 
+     * @return the initial cost of the {@code Collectable}.
+     */
     public long getInitialCost() {
         return context.getInitialCost();
     }
 
+    /**
+     * Returns the {@link Collected Collecteds} of the {@link Collectable}.
+     * 
+     * @return the {@code Collecteds} of the {@code Collectable}.
+     */
     public List<Collected> getCollecteds() {
         return collecteds;
     }
 
+    /**
+     * Returns the {@link Collected} with the given id, or {@code null} if none exists.
+     * 
+     * @param id the id of the {@code Collected} to get.
+     * @return the {@code Collected} with the given id, or {@code null} if none exists.
+     */
     public Collected getCollected(String id) {
         return collecteds.stream().filter(collected -> collected.getIdentifier().equals(id)).findFirst().orElse(null);
     }
 
+    /**
+     * Factory method for creating a new {@link Collectable} with the specified name and owner.
+     * 
+     * @param name The name of the {@link Collectable}.
+     * @param ownerId The id of the {@link UserProfile} that created the {@link Collectable}.
+     * @return a new {@code Collectable} with the specified name and owner.
+     */
     public static Collectable initialize(String name, String ownerId) {
         return new Collectable(name, ownerId, "", "", 0);
     }
 
+    /**
+     * Sets the name of the {@link Collectable}.
+     * 
+     * @param name the name of the {@code Collectable}.
+     */
     public void setName(String name) {
         this.context.setName(name);
     }
 
+    /**
+     * Sets the description of the {@link Collectable}.
+     * 
+     * @param description the description of the {@code Collectable}.
+     */
     public void setDescription(String description) {
         if (description == null) return;
         this.context.setDescription(description);
     }
 
+    /**
+     * Sets the image url of the {@link Collectable}.
+     * 
+     * @param imageUrl the image url of the {@code Collectable}.
+     */
     public void setImageUrl(String imageUrl) {
         if (imageUrl == null) return;
         this.context.setImageUrl(imageUrl);
     }
 
+    /**
+     * Sets the cost of the {@link Collectable}.
+     * 
+     * @param cost the cost of the {@code Collectable}.
+     */
     public void setInitialCost(long cost) {
         this.context.setInitialCost(cost);
         this.context.setCost(cost);
     }
 
+    /**
+     * Returns the {@link CollectableContext} of the {@link Collectable}.
+     * 
+     * @return the {@code CollectableContext} of the {@code Collectable}.
+     */
     public CollectableContext getContext() {
         return context;
     }
 
+    /**
+     * Purchases a {@link Collectable} for the specified {@link UserProfile}.
+     * 
+     * @param profile the {@code UserProfile} to purchase the {@code Collectable} for.
+     * @throws InsufficientCoinsException if the {@code UserProfile} does not have enough coins.
+     */
     public void purchaseCollected(UserProfile profile) throws InsufficientCoinsException {
         profile.getBank().withdrawl(getCost()); // Throws InsufficientCoinsException if not enough coins
         Collected collected = new Collected(profile.getMemberId(), getCost(), this);
         profile.addCollected(collected);
+
+        if (getCost() % 2 == 1) {
+            this.adjustOnBuy = true;
+        }
+
         this.context.setCost(getCost() / 2);
         collecteds.add(collected);
+        collecteds.forEach(c -> c.getCollectable().setCost(getCost()));
     }
 
+    /**
+     * Sells a {@link Collected} for the specified {@link UserProfile}.
+     * 
+     * @param profile the {@code UserProfile} to sell the {@code Collected} for.
+     * @param collected the {@code Collected} to sell.
+     */
     public void sellCollected(UserProfile profile, Collected collected) {
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
-        context.setCost(getCost() * 2);
+
+        if (adjustOnBuy) {
+            this.context.setCost(getCost() * 2 + 1);
+            adjustOnBuy = false;
+        } else {
+            this.context.setCost(getCost() * 2);
+        }
+        collecteds.forEach(c -> c.getCollectable().setCost(getCost()));
     }
 
+    /**
+     * Sells a {@link Collected} for the specified {@link UserProfile}.
+     * 
+     * @param profile the {@code UserProfile} to sell the {@code Collected} for.
+     * @param id the id of the {@code Collected} to sell.
+     */
     public void sellCollected(UserProfile profile, String id) {
         Collected collected = profile.getCollecteds().stream().filter(collected1 -> collected1.getIdentifier().equals(id)).findFirst().orElse(null);
         if (collected == null) return;
         profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
-        context.setCost(getCost() * 2);
+
+        if (adjustOnBuy) {
+            this.context.setCost(getCost() * 2 + 1);
+            adjustOnBuy = false;
+        } else {
+            this.context.setCost(getCost() * 2);
+        }
+        collecteds.forEach(c -> c.getCollectable().setCost(getCost()));
     }
 
+    /**
+     * Inflates the cost of the {@link Collectable} for the specified {@link UserProfile} by the specified amount.
+     * 
+     * @param profile the {@code UserProfile} to inflate the cost for.
+     * @param cost the amount to inflate the cost by.
+     * @throws InsufficientCoinsException if the {@code UserProfile} does not have enough coins.
+     */
+    public void inflateCost(UserProfile profile, long cost) throws InsufficientCoinsException {
+        this.context.setCost(getCost() + (cost / collecteds.size()));
+        collecteds.forEach(collected -> collected.getCollectable().setCost(getCost()));
+        profile.getBank().withdrawl(cost);
+    }
+
+    /**
+     * Returns the number of {@link Collected Collecteds} of the {@link Collectable}.
+     * 
+     * @return the number of {@code Collecteds} of the {@code Collectable}.
+     */
     public int numCards() {
         return collecteds.size();
     }
 
+    /**
+     * Sets the {@link CollectableContext} of the {@link Collectable}.
+     * 
+     * @param context the {@code CollectableContext} of the {@code Collectable}.
+     */
     public void setContext(CollectableContext context) {
         this.context = context;
     }
 
-    public Rarity getRarity(UserProfileManager manager) {
-        long totalCoins = manager.getTotalCoins();
+    /**
+     * Returns the {@link Rarity} of the {@link Collectable} for the specified {@link UserProfileManager} and {@link CollectableManager}.
+     * 
+     * @param manager the {@code UserProfileManager} to get the total coins from.
+     * @param collectableManager the {@code CollectableManager} to get the total coins from.
+     * @return the {@code Rarity} of the {@code Collectable} for the specified {@code UserProfileManager} and {@code CollectableManager}.
+     */
+    public Rarity getRarity(UserProfileManager manager, CollectableManager collectableManager) {
+        long totalCoins = manager.getTotalCoins() + collectableManager.getTotalCoins();
         if (getCost() >= totalCoins * .25) {
             return Rarity.UNIQUE;
         } else if (getCost() >= totalCoins * .1) {
@@ -166,6 +341,12 @@ public final class Collectable extends UniqueIdentified {
         }
     }
 
+    /**
+     * Returns the {@link Color} of the {@link Collectable} for the specified {@link Rarity}.
+     * 
+     * @param rarity the {@code Rarity} to get the {@code Color} for.
+     * @return the {@code Color} of the {@code Collectable} for the specified {@code Rarity}.
+     */
     public static Color getRarityColor(Rarity rarity) {
         if (rarity == Rarity.COMMON) {
             return Color.LIGHT_GRAY;
@@ -181,27 +362,59 @@ public final class Collectable extends UniqueIdentified {
         throw new IllegalArgumentException("Invalid rarity");
     }
 
+    /**
+     * Returns the id of the {@link UserProfile} that created the {@link Collectable}.
+     * 
+     * @return the id of the {@code UserProfile} that created the {@code Collectable}.
+     */
     public String getCreatorId() {
         return context.getOwnerId();
     }
 
+    /**
+     * Returns whether or not the {@link Collectable} is owned by the specified {@link UserProfile}.
+     * 
+     * @param profile the {@code UserProfile} to check.
+     * @return {@code true} if the {@code Collectable} is owned by the {@code UserProfile}, {@code false} otherwise.
+     */
     public boolean owns(UserProfile profile) {
         return profile.getCollecteds().stream().anyMatch(collected -> collected.getCollectable().getName().equals(context.getName()));
     }
 
+    /**
+     * Returns all {@link Collected Collecteds} of the {@link Collectable} owned by the specified {@link UserProfile}.
+     * 
+     * @param profile the {@code UserProfile} to get the {@code Collecteds} for.
+     * @return a list of all {@code Collecteds} of the {@code Collectable} owned by the {@code UserProfile}.
+     */
     public List<Collected> getUserCollecteds(UserProfile profile) {
         return collecteds.stream().filter(c -> c.getMemberId().equals(profile.getMemberId())).toList();
     }
 
+    /**
+     * Updates the {@link Collectable} with the specified {@link Collected}.
+     * 
+     * @param collected the {@code Collected} to update the {@code Collectable} with.
+     */
     public void updateCollected(Collected collected) {
         collecteds.removeIf(c -> c.getId().equals(collected.getId()));
         collecteds.add(collected);
     }
 
+    /**
+     * Returns the url of the edition icon.
+     * 
+     * @return the url of the edition icon.
+     */
     public static String editionIconUrl() {
         return EDITION_ICON_URL;
     }
 
+    /**
+     * Returns the next edition of the {@link Collectable}.
+     * 
+     * @return the next edition of the {@code Collectable}.
+     */
     public int getNextEdition() {
         Set<Integer> occupiedEditions = new HashSet<>();
         
@@ -217,6 +430,11 @@ public final class Collectable extends UniqueIdentified {
         return edition;
     }
 
+    /**
+     * Returns the highest edition of the {@link Collected Collecteds} of this {@link Collectable}.
+     * 
+     * @return the highest edition of the {@link Collected Collecteds} of this {@link Collectable}.
+     */
     public int getHighestEdition() {
         int highestEdition = 0;
     
@@ -229,6 +447,11 @@ public final class Collectable extends UniqueIdentified {
         return highestEdition;
     }
 
+    /**
+     * Returns the maximum edition of the {@link Collected Collecteds} of this {@link Collectable}.
+     * 
+     * @return the maximum edition of the {@link Collected Collecteds} of this {@link Collectable}.
+     */
     public int getMaxEdition() {
         int numCards = collecteds.size();
         int highestEdition = getHighestEdition();
@@ -236,21 +459,33 @@ public final class Collectable extends UniqueIdentified {
         return Math.max(numCards, highestEdition);
     }
 
-    public EmbedCreateSpec getGeneralEmbed(UserProfileManager userManager) {
+    /**
+     * Returns the general {@link EmbedCreateSpec} for the {@link Collectable}.
+     * 
+     * @param userManager the {@code UserProfileManager} to get the {@code UserProfile} from.
+     * @param collectableManager the {@code CollectableManager} to get the {@code Collectable} from.
+     * @return the general {@code EmbedCreateSpec} for the {@code Collectable}.
+     */
+    public EmbedCreateSpec getGeneralEmbed(UserProfileManager userManager, CollectableManager collectableManager) {
         GuildInteractionHandler guildHandler = new GuildInteractionHandler(userManager.getGuild());
         return EmbedCreateSpec.builder()
             .title(this.getName())
-            .description(this.toString() + "\nRarity: ***" + this.getRarity(userManager).toString() + "***\nCreated by: " + guildHandler.getMemberById(this.getCreatorId()).getMention())
+            .description(this.toString() + "\nRarity: ***" + this.getRarity(userManager, collectableManager).toString() + "***\nCreated by: " + guildHandler.getMemberById(this.getCreatorId()).getMention())
             .image(this.getImageUrl())
-            .color(Collectable.getRarityColor(this.getRarity(userManager)))
+            .color(Collectable.getRarityColor(this.getRarity(userManager, collectableManager)))
             .build();
     }
 
+    /**
+     * Returns a String representation of the {@link Collectable}.
+     * 
+     * @return a String representation of the {@code Collectable}.
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("*" + getDescription() + "*\n");
+        sb.append("*" + getDescription() + "*\n\n");
         sb.append("Cost: " + "*" + getCost() + "*\n");
         sb.append("Initial Cost: " + "*" + getInitialCost() + "*");
         
