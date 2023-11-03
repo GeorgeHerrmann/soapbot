@@ -156,7 +156,7 @@ public final class CollectectedMarketWizard extends InputWizard {
         Collected collected = collecteds.get(index);
         String[] options = new String[]{"Buy", "View"};
 
-        EmbedCreateSpec spec = collected.getGeneralEmbed(userManager, manager);
+        EmbedCreateSpec spec = collected.getDetailedEmbed(userManager, manager);
         
         boolean hasPrevious = index != 0;
         boolean hasNext = index != collecteds.size() - 1;
