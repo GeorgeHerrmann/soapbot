@@ -1,5 +1,8 @@
 package com.georgster.wizard;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.permissions.PermissibleAction;
@@ -15,7 +18,7 @@ public class PermissionsWizard extends InputWizard {
     private static final String TITLE = "Permissions Wizard";
 
     private PermissionsManager permissionsManager;
-    private final GuildInteractionHandler guildHandler; // To retrieve Role objects
+    private final GuildInteractionHandler guildHandler;
 
     /**
      * Creates a new permissions wizard.
@@ -41,14 +44,15 @@ public class PermissionsWizard extends InputWizard {
      * The main menu for the permissions wizard.
      */
     protected void managePermissions() {
-        String[] groups = new String[permissionsManager.getCount()];
-        for (int i = 0; i < groups.length; i++) {
-            groups[i] = permissionsManager.getAll().get(i).getName();
+        Set<String> groups = new HashSet<>();
+
+        for (int i = 0; i < permissionsManager.getCount(); i++) {
+            groups.add(permissionsManager.getAll().get(i).getName());
         }
         withResponse((response -> {
             PermissionGroup group = permissionsManager.get(guildHandler.getRole(response).getId().asString());
             nextWindow("groupOptions", group);
-        }), false, "Which Role would you like to manage?", groups);
+        }), false, "Which Role would you like to manage?", groups.toArray(new String[groups.size()]));
     }
 
     /**

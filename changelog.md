@@ -326,6 +326,8 @@
         - Fixed an issue where the command parser would assume some input strings were date inputs if there was a number in them, even if the "in" keyword was not present
     Permissions
         - Updated PermissionGroups to be identified by their Role id, rather than their name
+        - Fixed an issue where updating a Discord Role would cause a duplicate PermissionGroup to be made, resetting that group's permissions as the system fell back to a new default group
+        - Fixed an issue where moving users between Discord Roles could cause unintended behaviors with the Permissions System
     Blackjack
         - The dealer will now automatically win if it has not busted and it has a greater score than the player
         - The dealer will now draw with the user if both decks have a total of 16
