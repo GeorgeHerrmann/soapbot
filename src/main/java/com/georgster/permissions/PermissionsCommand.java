@@ -17,6 +17,7 @@ import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.PermissionsWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.entity.Role;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -87,8 +88,9 @@ public class PermissionsCommand implements ParseableCommand {
         }, "removeall");
 
         subcommands.onIndexLast(group -> {
-            if (permissionsManager.exists(group)) {
-                PermissionGroup permissionGroup = permissionsManager.get(group);
+            Role test = handler.getRole(group);
+            if (permissionsManager.exists(test.getId().asString())) {
+                PermissionGroup permissionGroup = permissionsManager.get(test.getId().asString());
                 handler.sendMessage("Permissions for " + permissionGroup.getName() + ":\n" + permissionGroup.getActions().toString());
             } else {
                 handler.sendMessage("That is not a valid group. Please try again", MessageFormatting.ERROR);

@@ -543,6 +543,20 @@ public final class GuildInteractionHandler extends InteractionHandler {
     }
 
     /**
+     * Returns the {@link Role} in this {@link Guild} that has the given id.
+     * 
+     * @param roleId The id of the role to get
+     * @return the {@link Role} in this {@link Guild} that has the given id
+     */
+    public Role getRoleById(String roleId) {
+        for (Role role : getAllRoles()) {
+            if (role.getId().asString().equals(roleId))
+                return role;
+        }
+        return null;
+    }
+
+    /**
      * Returns the {@link GuildMessageChannel} in this {@link Guild} that has the given name.
      * 
      * @param channelName The name of the channel to get

@@ -27,5 +27,6 @@ public enum PermissibleAction {
     TESTCOMMAND,
     TRADECOMMAND,
     CARDCOMMAND,
+    BANKCOMMAND,
     DEFAULT
 }

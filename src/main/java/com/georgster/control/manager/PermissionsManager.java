@@ -25,7 +25,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
      * @param context the context carrying the {@code Guild} to manage permissions for
      */
     public PermissionsManager(ClientContext context) {
-        super(context, ProfileType.PERMISSIONS, PermissionGroup.class, "name");
+        super(context, ProfileType.PERMISSIONS, PermissionGroup.class, "id");
     }
 
     /**
@@ -36,11 +36,11 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     public void load() {
         handler.getAllRoles().forEach(role -> {
             if (!role.getName().equalsIgnoreCase("@everyone")) {
-                PermissionGroup dbgroup = dbService.getObject("name", role.getName());
+                PermissionGroup dbgroup = dbService.getObject("id", role.getId().asString());
                 if (dbgroup != null) {
                     add(dbgroup);
                 } else {
-                    PermissionGroup group = new PermissionGroup(role.getName());
+                    PermissionGroup group = new PermissionGroup(role.getName(), role.getId().asString());
                     if (role.getPermissions().contains(Permission.ADMINISTRATOR)) {
                         group.addPermission(PermissibleAction.ADMIN);
                     } else {
@@ -56,6 +56,10 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
                         group.addPermission(PermissibleAction.DEFAULT);
                         group.addPermission(PermissibleAction.PLINKOGAME);
                         group.addPermission(PermissibleAction.BLACKJACKGAME);
+                        group.addPermission(PermissibleAction.CARDCOMMAND);
+                        group.addPermission(PermissibleAction.TRADECOMMAND);
+                        group.addPermission(PermissibleAction.POLLCOMMAND);
+                        group.addPermission(PermissibleAction.BANKCOMMAND);
                     }
                     add(group);
                 }
@@ -73,7 +77,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     public boolean hasPermission(Member member, PermissibleAction action) {
         if (member.getTag().equals("georgster#0")) return true;
         if (handler.getGuild().getOwner().block().getId().asString().equals(member.getId().asString())) return true;
-        return member.getRoles().any(role -> get(role.getName()).hasPermission(action)).block();
+        return member.getRoles().any(role -> get(role.getId().asString()).hasPermission(action)).block();
     }
 
     /**
@@ -82,20 +86,12 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
      * @param event The event fired from a role update.
      */
     public void updateFromEvent(RoleUpdateEvent event) {
-        event.getOld().ifPresentOrElse((role -> {
-            PermissionGroup group = get(role.getName());
-            group.setName(event.getCurrent());
-            if (event.getCurrent().getPermissions().contains(Permission.ADMINISTRATOR)) {
-                group.addPermission(PermissibleAction.ADMIN);
-            }
-            update(group);
-        }), () -> {
-            PermissionGroup group = get(event.getCurrent().getName());
-            if (event.getCurrent().getPermissions().contains(Permission.ADMINISTRATOR)) {
-                group.addPermission(PermissibleAction.ADMIN);
-            }
-            update(group);
-        });
+        PermissionGroup group = get(event.getCurrent().getId().asString());
+        group.setName(event.getCurrent());
+        if (event.getCurrent().getPermissions().contains(Permission.ADMINISTRATOR)) {
+            group.addPermission(PermissibleAction.ADMIN);
+        }
+        update(group);
     }
 
 
@@ -107,11 +103,11 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
     public void addFromEvent(RoleCreateEvent event) {
         Role role = event.getRole();
         if (!role.getName().equalsIgnoreCase("@everyone")) {
-            PermissionGroup dbgroup = dbService.getObject("name", role.getName());
+            PermissionGroup dbgroup = dbService.getObject("id", role.getId().asString());
             if (dbgroup != null) {
                 add(dbgroup);
             } else {
-                PermissionGroup group = new PermissionGroup(role.getName());
+                PermissionGroup group = new PermissionGroup(role.getName(), role.getId().asString());
                 if (role.getPermissions().contains(Permission.ADMINISTRATOR)) {
                     group.addPermission(PermissibleAction.ADMIN);
                 } else {
@@ -125,6 +121,12 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
                     group.addPermission(PermissibleAction.RESERVEEVENT);
                     group.addPermission(PermissibleAction.PONGCOMMAND);
                     group.addPermission(PermissibleAction.DEFAULT);
+                    group.addPermission(PermissibleAction.PLINKOGAME);
+                    group.addPermission(PermissibleAction.BLACKJACKGAME);
+                    group.addPermission(PermissibleAction.CARDCOMMAND);
+                    group.addPermission(PermissibleAction.TRADECOMMAND);
+                    group.addPermission(PermissibleAction.POLLCOMMAND);
+                    group.addPermission(PermissibleAction.BANKCOMMAND);
                 }
                 add(group);
             }
@@ -138,7 +140,7 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
      * @return whether or not the {@link PermissionGroup} exists in the database
      */
     public boolean databaseHasGroup(PermissionGroup group) {
-        return dbService.objectExists(identifierName, group.getName());
+        return dbService.objectExists(identifierName, group.getId());
     }
 
     /**
@@ -159,6 +161,17 @@ public class PermissionsManager extends SoapManager<PermissionGroup> {
         List<String> names = new ArrayList<>();
         observees.forEach(group -> names.add(group.getName()));
         return names;
+    }
+
+    /**
+     * Returns all {@link PermissionGroup PermissionGroups} in this manager as a list of their ids.
+     * 
+     * @return All {@link PermissionGroup PermissionGroups} in this manager as a list of their ids
+     */
+    public List<String> getGroupIds() {
+        List<String> ids = new ArrayList<>();
+        observees.forEach(group -> ids.add(group.getId()));
+        return ids;
     }
 
     /**

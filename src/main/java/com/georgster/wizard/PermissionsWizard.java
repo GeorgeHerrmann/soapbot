@@ -4,6 +4,7 @@ import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.permissions.PermissionGroup;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
@@ -14,6 +15,7 @@ public class PermissionsWizard extends InputWizard {
     private static final String TITLE = "Permissions Wizard";
 
     private PermissionsManager permissionsManager;
+    private final GuildInteractionHandler guildHandler; // To retrieve Role objects
 
     /**
      * Creates a new permissions wizard.
@@ -24,6 +26,7 @@ public class PermissionsWizard extends InputWizard {
     public PermissionsWizard(CommandExecutionEvent event) {
         super (event, InputListenerFactory.createMenuMessageListener(event, TITLE));
         this.permissionsManager = event.getPermissionsManager();
+        this.guildHandler = event.getGuildInteractionHandler();
     }
 
     /**
@@ -43,7 +46,7 @@ public class PermissionsWizard extends InputWizard {
             groups[i] = permissionsManager.getAll().get(i).getName();
         }
         withResponse((response -> {
-            PermissionGroup group = permissionsManager.get(response);
+            PermissionGroup group = permissionsManager.get(guildHandler.getRole(response).getId().asString());
             nextWindow("groupOptions", group);
         }), false, "Which Role would you like to manage?", groups);
     }
@@ -73,7 +76,7 @@ public class PermissionsWizard extends InputWizard {
      * @param inputGroup The group to add the permission to.
      */
     protected void addPermission(PermissionGroup inputGroup) {
-        final PermissionGroup group = permissionsManager.get(inputGroup.getName());
+        final PermissionGroup group = permissionsManager.get(inputGroup.getId());
         String[] perms = new String[PermissibleAction.values().length ];
         for (PermissibleAction action : PermissibleAction.values()) {
             perms[action.ordinal()] = action.toString();
@@ -93,7 +96,7 @@ public class PermissionsWizard extends InputWizard {
      * @param inputGroup The group to remove the permission from.
      */
     protected void removePermission(PermissionGroup inputGroup) {
-        final PermissionGroup group = permissionsManager.get(inputGroup.getName());
+        final PermissionGroup group = permissionsManager.get(inputGroup.getId());
         String[] perms = new String[group.getActions().size()];
         for (int i = 0; i < group.getActions().size(); i++) {
             perms[i] = group.getActions().get(i).toString();

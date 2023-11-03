@@ -1,5 +1,7 @@
 package com.georgster.collectable;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
@@ -10,14 +12,17 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.logs.LogDestination;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.profile.UserProfile;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.SubcommandSystem;
+import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.handler.InteractionHandler;
 import com.georgster.wizard.AlternateWizard;
 import com.georgster.wizard.CollectableViewWizard;
 import com.georgster.wizard.CollectableWizard;
 import com.georgster.wizard.CollectectedMarketWizard;
 import com.georgster.wizard.InputWizard;
+import com.georgster.wizard.IterableStringWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -44,7 +49,7 @@ public final class CardCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        InteractionHandler handler = event.getGuildInteractionHandler();
+        GuildInteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
         SubcommandSystem sb = event.createSubcommandSystem();
 
@@ -86,6 +91,7 @@ public final class CardCommand implements ParseableCommand {
         }, "market", "marketplace", "shop", "store");
 
         sb.on(p -> {
+            logger.append(" - Showing a user's own cards\n", LogDestination.NONAPI);
             UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getAuthorAsMember().getId().asString());
             new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
         }, "mine", "my", "self");
@@ -95,13 +101,32 @@ public final class CardCommand implements ParseableCommand {
                 handler.sendMessage("There are no trading cards to view", "Error", InteractionHandler.MessageFormatting.ERROR);
                 logger.append("\n- No trading cards found, sending help message", LogDestination.NONAPI);
             } else {
-                logger.append("\n- Showing cards by value", LogDestination.NONAPI);
-                new CollectableViewWizard(event, false).begin("viewAllRankedCollecteds", 0);
+                List<Collectable> cards = collectableManager.getAll();
+                StringBuilder lb = new StringBuilder();
+
+                // Sort cards by cost in descending order
+                Collections.sort(cards, Comparator.comparingLong(card -> -card.getCost()));
+                event.getLogger().append("- Sorting " + handler.getGuild().getName() + "'s cards by cost\n", LogDestination.NONAPI);
+                event.getLogger().append("Displaying a guild's card leaderboard" + LogDestination.API);
+
+                // Build the formatted string
+                for (int i = 0; i < cards.size(); i++) {
+                    Collectable card = cards.get(i);
+                    lb.append(String.format("**%d) %s** : *%d*%n", i + 1, card.getName(), card.getCost()));
+                }
+                List<String> leaderboard = SoapUtility.splitAtEvery(lb.toString(), 5);
+
+                InputWizard wizard1 = new IterableStringWizard(event, handler.getGuild().getName() + "'s Card Leaderboard", leaderboard);
+                InputWizard wizard2 = new CollectableViewWizard(event, "viewAllRankedCollecteds", 0);
+                InputWizard wizard = new AlternateWizard(event, wizard1, wizard2, true);
+                wizard.begin();
             }
         }, "lb", "leaderboard");
 
         sb.onIndexLast(arg -> {
+            logger.append("\n - Attempting to find a user with the name " + arg + "\n", LogDestination.NONAPI);
             UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getPresentUsers().get(0).getId().asString());
+            logger.append(" - Showing " + profile.getUsername() + "'s cards\n", LogDestination.NONAPI);
             new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
         }, 0);
 

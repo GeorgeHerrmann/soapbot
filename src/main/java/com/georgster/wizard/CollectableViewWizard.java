@@ -27,7 +27,8 @@ public class CollectableViewWizard extends InputWizard {
     private final CollectableManager manager;
     private final UserProfileManager userManager;
     private final UserProfile profile;
-    private boolean startAtSelect; // True if begin() should start at viewAllCollectablesSelect()
+    private final String startingWindow;
+    private final Object[] startingParams;
 
     /**
      * Constructs a {@link CollectableViewWizard} for the given {@link CommandExecutionEvent}.
@@ -40,18 +41,30 @@ public class CollectableViewWizard extends InputWizard {
         this.userManager = event.getUserProfileManager();
         this.guildHandler = event.getGuildInteractionHandler();
         this.profile = event.getUserProfileManager().get(user.getId().asString());
-        this.startAtSelect = startAtSelect;
+        if (startAtSelect) {
+            this.startingWindow = "viewAllCollectablesSelect";
+            this.startingParams = new Object[0];
+        } else {
+            this.startingWindow = "viewAllCollectables";
+            this.startingParams = new Object[]{0};
+        }
+    }
+
+    public CollectableViewWizard(CommandExecutionEvent event, String startingWindow, Object... startingParams) {
+        super(event, InputListenerFactory.createButtonMessageListener(event, "Collectable Viewer"));
+        this.manager = event.getCollectableManager();
+        this.userManager = event.getUserProfileManager();
+        this.guildHandler = event.getGuildInteractionHandler();
+        this.profile = event.getUserProfileManager().get(user.getId().asString());
+        this.startingWindow = startingWindow;
+        this.startingParams = startingParams;
     }
 
     /**
      * {@inheritDoc}
      */
     public void begin() {
-        if (startAtSelect) {
-            nextWindow("viewAllCollectablesSelect");
-        } else {
-            nextWindow("viewAllCollectables", 0);
-        }
+        nextWindow(startingWindow, startingParams);
         end();
     }
 
