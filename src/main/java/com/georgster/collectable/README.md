@@ -83,10 +83,6 @@ Embark on your journey through the world of SOAP Bot's Trading Card Game with a 
 
 - **Access the Marketplace**: Enter `!cards market` to open up the marketplace where you can buy and sell cards to other players.
 
-### Engaging with Trade Offers
-
-- **Trade Offers**: Beyond buying and selling, you have the power to exchange cards and coins with other users through Trade Offers.
-
 ### General Use Tips
 
 - Be mindful of the changing economy—watch for fluctuations in card costs when buying or selling.
