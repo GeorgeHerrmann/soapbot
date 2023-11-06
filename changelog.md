@@ -364,3 +364,6 @@
         - Added the ability for ButtonMessageListeners to have Danger buttons by prepending a "!" to an option
     General
         - Fixed an issue where testMode was not behaving as intended
+
+2.601-BETA
+    - Added !cards ranges which will show the value ranges for each rarity, as well as total coin values for a Guild

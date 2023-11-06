@@ -71,6 +71,44 @@ public final class CardCommand implements ParseableCommand {
             }
         }, "view");
 
+        sb.on(p -> {
+            StringBuilder response = new StringBuilder();
+
+            long bankTotal = event.getUserProfileManager().getTotalCoins();
+            long cardTotal = collectableManager.getTotalCoins();
+            long total = bankTotal + cardTotal;
+
+            // UNCOMMON: Less than 1% of total
+            long uncommonMin = 0; // By definition it starts from 0
+            long uncommonMax = (long)(total * 0.01) - 1; // Less than 1% of total
+
+            // COMMON: between 1% and 5% of total
+            long commonMin = (long)(total * 0.01);
+            long commonMax = (long)(total * 0.05);
+
+            // RARE: between 5% and 10% of total
+            long rareMin = (long)(total * 0.05) + 1; // Avoid overlap with commonMax
+            long rareMax = (long)(total * 0.10);
+
+            // LEGENDARY: between 10% and 25% of total
+            long legendaryMin = (long)(total * 0.10) + 1; // Avoid overlap with rareMax
+            long legendaryMax = (long)(total * 0.25);
+
+            // UNIQUE: more than 25% of total
+            long uniqueMin = (long)(total * 0.25) + 1; // Avoid overlap with legendaryMax
+
+            response.append("Total Bank Balances: *" + bankTotal).append("*\n");
+            response.append("Total Card Values: *" + cardTotal).append("*\n");
+            response.append("Total Coins: **" + total).append("**\n\n");
+            response.append("***UNCOMMON*** coin ranges: " + uncommonMin + " - " + uncommonMax).append("\n");
+            response.append("***COMMON*** coin ranges: " + commonMin + " - " + commonMax).append("\n");
+            response.append("***RARE*** coin ranges: " + rareMin + " - " + rareMax).append("\n");
+            response.append("***LEGENDARY*** coin ranges: " + legendaryMin + " - " + legendaryMax).append("\n");
+            response.append("***UNIQUE*** coin ranges: " + uniqueMin + " - " + total).append("\n");
+
+            handler.sendMessage(response.toString(), event.getGuildInteractionHandler().getGuild().getName() + "'s Card Ranges");
+        }, "range", "ranges", "total", "values");
+
         sb.on(() -> {
             if (collectableManager.isEmpty()) {
                 handler.sendMessage("There are no trading cards to view", "Error", InteractionHandler.MessageFormatting.ERROR);
@@ -171,6 +209,7 @@ public final class CardCommand implements ParseableCommand {
         "\n - '!cards [NAME]' to view a trading card by name" +
         "\n - '!cards mine' to view your own trading cards" +
         "\n - '!cards leaderboard' or '!cards lb' to view the leaderboard of trading cards" +
+        "\n - '!cards ranges' to view the ranges of trading rarity card values and coin totals" +
         "\n - '!cards @[USER]' to view another user's trading cards" +
         "\n - '!trade @[USER]' to trade with another user" +
         "\n - Visit https://tinyurl.com/soapbotcards for more information";
@@ -227,6 +266,10 @@ public final class CardCommand implements ParseableCommand {
                         .addChoice(ApplicationCommandOptionChoiceData.builder()
                                 .name("market")
                                 .value("market")
+                                .build())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                                .name("range")
+                                .value("range")
                                 .build())
                         .build())
                 .build();
