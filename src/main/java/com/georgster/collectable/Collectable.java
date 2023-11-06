@@ -241,7 +241,12 @@ public final class Collectable extends UniqueIdentified {
             this.adjustOnBuy = true;
         }
 
-        this.context.setCost(getCost() / 2);
+        long newCost = getCost() / 2;
+        if (newCost < 1) {
+            this.context.setCost(1);
+        } else {
+            this.context.setCost(newCost);
+        }
         collecteds.add(collected);
         collecteds.forEach(c -> c.getCollectable().setCost(getCost()));
     }
