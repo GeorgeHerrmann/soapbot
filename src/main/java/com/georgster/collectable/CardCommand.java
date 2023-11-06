@@ -78,13 +78,13 @@ public final class CardCommand implements ParseableCommand {
             long cardTotal = collectableManager.getTotalCoins();
             long total = bankTotal + cardTotal;
 
-            // UNCOMMON: Less than 1% of total
-            long uncommonMin = 0; // By definition it starts from 0
-            long uncommonMax = (long)(total * 0.01) - 1; // Less than 1% of total
+            // COMMON: Less than 1% of total
+            long commonMin = 0; // By definition it starts from 0
+            long commonMax = (long)(total * 0.01) - 1; // Less than 1% of total
 
-            // COMMON: between 1% and 5% of total
-            long commonMin = (long)(total * 0.01);
-            long commonMax = (long)(total * 0.05);
+            // UNCOMMON: between 1% and 5% of total
+            long uncommonMin = (long)(total * 0.01);
+            long uncommonMax = (long)(total * 0.05);
 
             // RARE: between 5% and 10% of total
             long rareMin = (long)(total * 0.05) + 1; // Avoid overlap with commonMax
@@ -100,8 +100,8 @@ public final class CardCommand implements ParseableCommand {
             response.append("Total Bank Balances: *" + bankTotal).append("*\n");
             response.append("Total Card Values: *" + cardTotal).append("*\n");
             response.append("Total Coins: **" + total).append("**\n\n");
-            response.append("***UNCOMMON*** coin ranges: " + uncommonMin + " - " + uncommonMax).append("\n");
             response.append("***COMMON*** coin ranges: " + commonMin + " - " + commonMax).append("\n");
+            response.append("***UNCOMMON*** coin ranges: " + uncommonMin + " - " + uncommonMax).append("\n");
             response.append("***RARE*** coin ranges: " + rareMin + " - " + rareMax).append("\n");
             response.append("***LEGENDARY*** coin ranges: " + legendaryMin + " - " + legendaryMax).append("\n");
             response.append("***UNIQUE*** coin ranges: " + uniqueMin + " - " + total).append("\n");
