@@ -69,9 +69,6 @@ public final class SoapClient {
         context.getUserProfileManager().updateFromEvent(event);
         logger.append("- Updated all user profiles", LogDestination.NONAPI);
 
-        CollectableManager t = this.context.getCollectableManager();
-        t.getAll().forEach(t::update);
-
         logger.sendAll();
     }
 

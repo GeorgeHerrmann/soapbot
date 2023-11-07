@@ -31,7 +31,7 @@ public class ManageCollectableWizard extends InputWizard {
      * @param user the {@code User} to manage the {@code Collectable} for
      */
     public ManageCollectableWizard(CommandExecutionEvent event, Collectable collectable, User user) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, collectable.getName()).builder().withXReaction(false).requireMatch(false, false).build());
+        super(event, InputListenerFactory.createButtonMessageListener(event, collectable.getName()).builder().requireMatch(true, false).build());
         this.collectable = collectable;
         this.manager = event.getCollectableManager();
         this.userManager = event.getUserProfileManager();
@@ -64,6 +64,20 @@ public class ManageCollectableWizard extends InputWizard {
                 displayDetailedCollectable();
             } else if (response.equals("inflate")) {
                 nextWindow("inflateCollectable");
+            } else if (response.equals("lock")) {
+                try {
+                    collectable.lock(true);
+                    manager.update(collectable);
+                    sendMessage("This card has been locked. No one may purchase copies of this card. *Note: this card will be automatically unlocked if no copies remain*", "Card Locked");
+                } catch (Exception e) {
+                    sendMessage(e.getMessage(), "An error occured");
+                }
+            } else if (response.equals("unlock")) {
+                collectable.lock(false);
+                manager.update(collectable);
+                sendMessage("This card has been unlocked. Anyone may now purchase copies of this card.", "Card Unlocked");
+            } else if (response.equals("edit")) {
+                nextWindow("editImageUrl");
             }
         }, false, spec, getOptions());
     }
@@ -72,22 +86,31 @@ public class ManageCollectableWizard extends InputWizard {
      * The window that handles the purchasing of a new {@link Collected} of the {@link Collectable}.
      */
     protected void purchaseCollected() {
-        final String prompt = "Are you sure you want to purchase a " + collectable.getName() + " card for " + collectable.getCost() + " coins?";
-        withResponse(response -> {
-            if (response.equals("confirm")) {
-                if (profile.getBank().hasBalance(collectable.getCost())) {
-                    collectable.purchaseCollected(profile);
-                    manager.update(collectable);
-                    userManager.update(profile);
-                    userManager.updateFromCollectables(manager); // update all profiles with that collectable
-                    sendMessage("You have purchased a " + collectable.getName() + " card. You can view it with !cards in " + userManager.getGuild().getName(), "Card Purchased Successfully");
-                    nextWindow("viewCollectable");
-                } else {
-                    sendMessage("Sorry, you need " + collectable.getCost() + " coins to purchase this card", "Insufficient funds");
-                    nextWindow("viewCollectable");
+        if (collectable.isLocked()) {
+            sendMessage("Sorry, this card is locked and cannot be purchased", "Card Locked");
+            goBack();
+        } else {
+            final String prompt = "Are you sure you want to purchase a " + collectable.getName() + " card for " + collectable.getCost() + " coins?";
+            withResponse(response -> {
+                if (response.equals("confirm")) {
+                    try {
+                        if (profile.getBank().hasBalance(collectable.getCost())) {
+                            collectable.purchaseCollected(profile);
+                            manager.update(collectable);
+                            userManager.update(profile);
+                            userManager.updateFromCollectables(manager); // update all profiles with that collectable
+                            sendMessage("You have purchased a " + collectable.getName() + " card. You can view it with !cards in " + userManager.getGuild().getName(), "Card Purchased Successfully");
+                            nextWindow("viewCollectable");
+                        } else {
+                            sendMessage("Sorry, you need " + collectable.getCost() + " coins to purchase this card", "Insufficient funds");
+                            nextWindow("viewCollectable");
+                        }
+                    } catch (Exception e) {
+                        sendMessage(e.getMessage(), "An error occured");
+                    }
                 }
-            }
-        }, true, prompt, "Confirm");
+            }, true, prompt, "Confirm");
+        }
     }
 
     /**
@@ -97,6 +120,13 @@ public class ManageCollectableWizard extends InputWizard {
      */
     protected void confirmCollectedSell(Integer index) {
         final List<Collected> collecteds = collectable.getUserCollecteds(profile);
+
+        if (collecteds.isEmpty()) {
+            sendMessage("You do not own any copies of this card", "No Copies Owned");
+            goBack();
+            return;
+        }
+
         Collected collected = collecteds.get(index);
         String[] options = new String[]{"Confirm"};
         
@@ -132,12 +162,32 @@ public class ManageCollectableWizard extends InputWizard {
     }
 
     /**
+     * The window that handles the editing of the image url of the {@link Collectable}.
+     */
+    protected void editImageUrl() {
+        final String prompt = "What would you like to set the image url to?";
+        withResponse(response -> {
+            collectable.setImageUrl(response);
+            manager.update(collectable);
+            userManager.updateFromCollectables(manager);
+            sendMessage("The image url has been set to " + response + ". If the image does not show up in the card preview, please try a new link.", "Image Url Set");
+            nextWindow("viewCollectable");
+        }, true, prompt);
+    }
+
+    /**
      * Returns the User's options for the {@link Collectable}.
      * 
      * @return the User's options for the {@code Collectable}.
      */
     private String[] getOptions() {
-        if (collectable.owns(profile)) {
+        if (collectable.getCreatorId().equals(user.getId().asString())) {
+            if (collectable.isLocked()) {
+                return new String[]{"Sell", "Buy", "View", "Unlock", "Edit"};
+            } else {
+                return new String[]{"Sell", "Buy", "View", "Lock", "Edit"};
+            }
+        } else if (collectable.owns(profile)) {
             return new String[]{"Sell", "Buy", "View"};
         } else {
             return new String[]{"Buy", "View"};

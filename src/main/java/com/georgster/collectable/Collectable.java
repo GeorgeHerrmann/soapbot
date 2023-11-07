@@ -27,7 +27,8 @@ public final class Collectable extends UniqueIdentified {
     private static final String EDITION_ICON_URL = "https://static.thenounproject.com/png/5481694-200.png";
 
     private CollectableContext context;
-    private boolean adjustOnBuy;
+    private boolean adjustOnBuy; // Adjust cost on buy if selling caused decimal truncation
+    private boolean isLocked;
     private final List<Collected> collecteds;
 
     /**
@@ -74,6 +75,22 @@ public final class Collectable extends UniqueIdentified {
         this.context = new CollectableContext(name, ownerId, description, imageUrl, initialCost);
         this.adjustOnBuy = false;
         this.collecteds = new ArrayList<>();
+        this.isLocked = false;
+    }
+
+    /**
+     * Creates a new {@link Collectable} with the specified {@link CollectableContext} and {@link Collected Collecteds}.
+     * 
+     * @param context The {@link CollectableContext} of the {@link Collectable}.
+     * @param collecteds The {@link Collected Collecteds} of the {@link Collectable}.
+     * @param adjustOnBuy Whether or not the {@link Collectable} should adjust its cost on purchase.
+     */
+    public Collectable(CollectableContext context, List<Collected> collecteds, boolean adjustOnBuy, boolean isLocked) {
+        super(context.getName());
+        this.context = context;
+        this.adjustOnBuy = adjustOnBuy;
+        this.collecteds = collecteds;
+        this.isLocked = isLocked;
     }
 
     /**
@@ -88,19 +105,7 @@ public final class Collectable extends UniqueIdentified {
         this.context = context;
         this.adjustOnBuy = adjustOnBuy;
         this.collecteds = collecteds;
-    }
-
-    /**
-     * Creates a new {@link Collectable} with the specified {@link CollectableContext} and {@link Collected Collecteds}.
-     * 
-     * @param context The {@link CollectableContext} of the {@link Collectable}.
-     * @param collecteds The {@link Collected Collecteds} of the {@link Collectable}.
-     */
-    public Collectable(CollectableContext context, List<Collected> collecteds) {
-        super(context.getName());
-        this.context = context;
-        this.adjustOnBuy = false;
-        this.collecteds = collecteds;
+        this.isLocked = false;
     }
 
     /**
@@ -155,6 +160,35 @@ public final class Collectable extends UniqueIdentified {
      */
     public List<Collected> getCollecteds() {
         return collecteds;
+    }
+
+    /**
+     * Returns whether or not the {@link Collectable} is locked, meaning it cannot be purchased.
+     * 
+     * @return {@code true} if the {@code Collectable} is locked, {@code false} otherwise.
+     */
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    /**
+     * Locks or unlocks the {@link Collectable}.
+     * 
+     * @param setting {@code true} to lock the {@code Collectable}, {@code false} to unlock it.
+     * @throws IllegalStateException if the {@code Collectable} has no {@link Collected Collecteds} or more than one {@code Collected}.
+     */
+    public void lock(boolean setting) throws IllegalStateException {
+        if (setting) {
+            if (numCards() > 1) {
+                throw new IllegalStateException("Cannot lock a collectable with more than one card");
+            } else if (numCards() < 1) {
+                throw new IllegalStateException("Cannot lock a collectable with no cards");
+            } else {
+                this.isLocked = true;
+            }
+        } else {
+            this.isLocked = false;
+        }
     }
 
     /**
@@ -231,18 +265,23 @@ public final class Collectable extends UniqueIdentified {
      * 
      * @param profile the {@code UserProfile} to purchase the {@code Collectable} for.
      * @throws InsufficientCoinsException if the {@code UserProfile} does not have enough coins.
+     * @throws IllegalStateException If this {@link Collectable} is locked.
      */
-    public void purchaseCollected(UserProfile profile) throws InsufficientCoinsException {
+    public void purchaseCollected(UserProfile profile) throws InsufficientCoinsException, IllegalStateException {
+        if (isLocked()) {
+            throw new IllegalStateException("Cannot purchase a locked card");
+        }
         profile.getBank().withdrawl(getCost()); // Throws InsufficientCoinsException if not enough coins
         Collected collected = new Collected(profile.getMemberId(), getCost(), this);
         profile.addCollected(collected);
 
-        if (getCost() % 2 == 1) {
+        if (getCost() != 1 && getCost() % 2 == 1) {
+            System.out.println("adjust with cost " + getCost());
             this.adjustOnBuy = true;
         }
 
         long newCost = getCost() / 2;
-        if (newCost < 1) {
+        if (newCost <= 1) {
             this.context.setCost(1);
         } else {
             this.context.setCost(newCost);
@@ -258,15 +297,23 @@ public final class Collectable extends UniqueIdentified {
      * @param collected the {@code Collected} to sell.
      */
     public void sellCollected(UserProfile profile, Collected collected) {
-        profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
 
-        if (adjustOnBuy) {
-            this.context.setCost(getCost() * 2 + 1);
-            adjustOnBuy = false;
+        if (collecteds.isEmpty()) {
+            lock(false);
+        }
+
+        if (collected.affectsCost()) {
+            profile.getBank().deposit(adjustOnBuy ? getCost() * 2 + 1 : getCost() * 2);
+            if (adjustOnBuy && getCost() != 1) {
+                this.context.setCost(getCost() * 2 + 1);
+                adjustOnBuy = false;
+            } else {
+                this.context.setCost(getCost() * 2);
+            }
         } else {
-            this.context.setCost(getCost() * 2);
+            profile.getBank().deposit(1);
         }
         collecteds.forEach(c -> c.getCollectable().setCost(getCost()));
     }
@@ -280,15 +327,23 @@ public final class Collectable extends UniqueIdentified {
     public void sellCollected(UserProfile profile, String id) {
         Collected collected = profile.getCollecteds().stream().filter(collected1 -> collected1.getIdentifier().equals(id)).findFirst().orElse(null);
         if (collected == null) return;
-        profile.getBank().deposit(collected.getRecentPurchasePrice());
         profile.removeCollected(collected);
         collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
 
-        if (adjustOnBuy) {
-            this.context.setCost(getCost() * 2 + 1);
-            adjustOnBuy = false;
+        if (collecteds.isEmpty()) {
+            lock(false);
+        }
+
+        if (collected.affectsCost()) {
+            profile.getBank().deposit(adjustOnBuy ? getCost() * 2 + 1 : getCost() * 2);
+            if (adjustOnBuy) {
+                this.context.setCost(getCost() * 2 + 1);
+                adjustOnBuy = false;
+            } else {
+                this.context.setCost(getCost() * 2);
+            }
         } else {
-            this.context.setCost(getCost() * 2);
+            profile.getBank().deposit(1);
         }
         collecteds.forEach(c -> c.getCollectable().setCost(getCost()));
     }
@@ -301,7 +356,7 @@ public final class Collectable extends UniqueIdentified {
      * @throws InsufficientCoinsException if the {@code UserProfile} does not have enough coins.
      */
     public void inflateCost(UserProfile profile, long cost) throws InsufficientCoinsException {
-        this.context.setCost(getCost() + (cost / collecteds.size()));
+        this.context.setCost(getCost() + (cost / (collecteds.size() * 2)));
         collecteds.forEach(collected -> collected.getCollectable().setCost(getCost()));
         profile.getBank().withdrawl(cost);
     }
@@ -492,8 +547,12 @@ public final class Collectable extends UniqueIdentified {
 
         sb.append("*" + getDescription() + "*\n\n");
         sb.append("Cost: " + "*" + getCost() + "*\n");
-        sb.append("Initial Cost: " + "*" + getInitialCost() + "*");
-        
+        sb.append("Initial Cost: " + "*" + getInitialCost() + "*\n");
+        if (isLocked()) {
+            sb.append("*Unavailable to purchase*");
+        } else {
+            sb.append("*Available to purchase*");
+        }        
         return sb.toString();
     }
 

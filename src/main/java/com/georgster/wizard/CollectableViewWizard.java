@@ -65,7 +65,7 @@ public class CollectableViewWizard extends InputWizard {
      */
     public void begin() {
         nextWindow(startingWindow, startingParams);
-        end();
+        shutdown();
     }
 
     /**
@@ -258,7 +258,7 @@ public class CollectableViewWizard extends InputWizard {
      * @param collectable the {@code Collectable} to inflate
      */
     protected void inflateCollectable(Collectable collectable) {
-        final String prompt = "How much would you like to inflate the cost of this card by? Please note that the actual inflation amount will be divived by " + collectable.numCards() + ", as the cost is shared between all cards.";
+        final String prompt = "How much would you like to inflate the cost of this card by? Please note that the actual inflation amount will be divived by " + collectable.numCards() * 2 + ", as the cost is shared between all cards.";
 
         withResponse(response -> {
             try {
@@ -267,7 +267,7 @@ public class CollectableViewWizard extends InputWizard {
                 manager.update(collectable);
                 userManager.update(profile);
                 userManager.updateFromCollectables(manager); // update all profiles with that collectable
-                sendMessage("You have used " + response + " coins to inflate the cost of this card by " + ((int) value / collectable.numCards()) + " coins. The new cost is " + collectable.getCost(), "Card Inflated");
+                sendMessage("You have used " + response + " coins to inflate the cost of this card by " + ((int) value / (collectable.numCards() * 2)) + " coins. The new cost is " + collectable.getCost(), "Card Inflated");
                 nextWindow("viewCollectable", collectable);
             } catch (NumberFormatException e) {
                 sendMessage("Invalid number. Please try again.", "Invalid Number");

@@ -23,6 +23,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 public final class Collected extends DateTimed implements Manageable, Tradeable {
     private final String id;
     private String memberId;
+    private boolean affectsCost; // Affects the cost of the collectable
     private boolean isOnMarket; // Is on "collectable market" for a custom amount
     private long currentMarketPrice; // Custom collectable market amount
     private long recentPurchasePrice;
@@ -44,6 +45,33 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         this.isOnMarket = false;
         this.currentMarketPrice = collectable.getCost();
         this.edition = collectable.getNextEdition();
+        this.affectsCost = !(recentPurchasePrice == 1 && collectable.getCost() == 1);
+    }
+
+    /**
+     * Constructs a {@link Collected} with the given parameters.
+     * 
+     * @param memberId The {@code id} of the {@link com.georgster.profile.UserProfile UserProfile} that collected the {@code Collectable}.
+     * @param id The {@code id} of the {@code Collected}.
+     * @param recentPurchasePrice The price the {@code Collectable} was purchased for.
+     * @param collectable The {@link CollectableContext} of the {@code Collectable}.
+     * @param date The date the {@code Collected} was created.
+     * @param time The time the {@code Collected} was created.
+     * @param isOnMarket Whether or not the {@code Collected} is on the market.
+     * @param currentMarketPrice The current market price of the {@code Collected}.
+     * @param edition The edition of the {@code Collected}.
+     * @param affectsCost Whether or not the {@code Collected} affects the cost of the {@code Collectable}.
+     */
+    public Collected(String memberId, String id, long recentPurchasePrice, CollectableContext collectable, String date, String time, boolean isOnMarket, long currentMarketPrice, int edition, boolean affectsCost) {
+        super(date, time);
+        this.memberId = memberId;
+        this.recentPurchasePrice = recentPurchasePrice;
+        this.id = id;
+        this.collectable = collectable;
+        this.isOnMarket = isOnMarket;
+        this.currentMarketPrice = currentMarketPrice;
+        this.edition = edition;
+        this.affectsCost = affectsCost;
     }
 
     /**
@@ -68,29 +96,11 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
         this.isOnMarket = isOnMarket;
         this.currentMarketPrice = currentMarketPrice;
         this.edition = edition;
+        this.affectsCost = true;
     }
 
-    /**
-     * Constructs a {@link Collected} with the given parameters.
-     * 
-     * @param memberId The {@code id} of the {@link com.georgster.profile.UserProfile UserProfile} that collected the {@code Collectable}.
-     * @param id The {@code id} of the {@code Collected}.
-     * @param recentPurchasePrice The price the {@code Collectable} was purchased for. 
-     * @param collectable The {@link CollectableContext} of the {@code Collectable}.
-     * @param date The date the {@code Collected} was created.
-     * @param time The time the {@code Collected} was created.
-     * @param isOnMarket Whether or not the {@code Collected} is on the market.
-     * @param currentMarketPrice The current market price of the {@code Collected}.
-     */
-    public Collected(String memberId, String id, long recentPurchasePrice, CollectableContext collectable, String date, String time, boolean isOnMarket, long currentMarketPrice) {
-        super(date, time);
-        this.memberId = memberId;
-        this.recentPurchasePrice = recentPurchasePrice;
-        this.id = id;
-        this.collectable = collectable;
-        this.isOnMarket = isOnMarket;
-        this.currentMarketPrice = currentMarketPrice;
-        this.edition = 1;
+    public void fix() {
+        this.affectsCost = true;
     }
 
     /**
@@ -150,6 +160,15 @@ public final class Collected extends DateTimed implements Manageable, Tradeable 
      */
     public boolean isOnMarket() {
         return isOnMarket;
+    }
+
+    /**
+     * Returns whether or not the {@link Collected} affects the cost of the {@link Collectable}.
+     * 
+     * @return {@code true} if the {@code Collected} affects the cost of the {@code Collectable}, {@code false} otherwise.
+     */
+    public boolean affectsCost() {
+        return affectsCost;
     }
 
     /**

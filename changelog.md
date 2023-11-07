@@ -367,3 +367,16 @@
 
 2.601-BETA
     - Added !cards ranges which will show the value ranges for each rarity, as well as total coin values for a Guild
+
+2.602-BETA
+    - Fixed an issue where purchasing multiple copies of cards worth zero cards, then selling those cards, would lead to exponentially high card costs
+        - Cards can now have a minimum cost of 1 coin
+        - Cards purchased at one coin will not affect the overall cost of a card once sold
+    - Fixed an issue where selling a card after inflating its value would deposit the incorrect amount of coins to your account
+    - Fixed an issue where inflating a cards value would inflate the value too high, allowing for exponential gains when selling cards
+        - The algorithm determining the overall inflation amount has been improved
+    - Added the ability for the creator of a card to change its image in the Card Manager
+        - The ability to transfer ownership of a card will come soon
+    - Added the ability to lock and unlock cards in the Card Manager
+        - A locked card can not have copies be purchased
+            - Only cards with a single copy can be locked

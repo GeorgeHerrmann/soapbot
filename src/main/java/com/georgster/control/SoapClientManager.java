@@ -45,7 +45,7 @@ public final class SoapClientManager {
         .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, //The intents the bot will work with
         Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES,
         Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING,
-        Intent.GUILD_VOICE_STATES, Intent.GUILD_MESSAGE_REACTIONS))
+        Intent.GUILD_VOICE_STATES, Intent.GUILD_MESSAGE_REACTIONS, Intent.DIRECT_MESSAGES, Intent.DIRECT_MESSAGE_REACTIONS))
         .login().block();
 
         this.dispatcher = discordClient.getEventDispatcher();
