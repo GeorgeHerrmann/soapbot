@@ -385,3 +385,5 @@
     - The CollectableViewWizard no longer displays displays the 'wizard ended' informational text after ending or timing out in most cases
         - This includes viewing cards via '!cards/!cards view' '!cards [name]' '!cards [ID]' '!cards @[user]' '!cards leaderboard' '!cards mine' or after creating a new card
     - The CollectableCreateWizard now displays the 'wizard ended' informational text after ending the wizard following a successful card creation
+    - Added the ability for the creator of a card to delete the card in the Card Manager
+        - There must be zero active copies of a card to delete it

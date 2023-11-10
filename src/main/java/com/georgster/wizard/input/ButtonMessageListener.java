@@ -18,7 +18,7 @@ import discord4j.core.object.component.Button;
  * containing a valid option.
  * <p>
  * Buttons will be Primary buttons, unless the "back" option is present, in which case it will be
- * a Secondary button, or if the option starts with a "!", it will be a danger button (The first ! is removed).
+ * a Secondary button, or if the option starts with a "!", it will be a danger button (The first ! is removed and not returned as part of the user's response if selected).
  * <p>
  * This listener will timeout after 30s of inactivity following
  * {@link #prompt(WizardState)} being called.

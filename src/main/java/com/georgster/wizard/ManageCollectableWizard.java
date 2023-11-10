@@ -78,8 +78,26 @@ public class ManageCollectableWizard extends InputWizard {
                 sendMessage("This card has been unlocked. Anyone may now purchase copies of this card.", "Card Unlocked");
             } else if (response.equals("edit")) {
                 nextWindow("editImageUrl");
+            } else if (response.equals("delete")) {
+                if (collectable.numCards() == 0) {
+                    nextWindow("confirmDelete");
+                } else {
+                    sendMessage("You cannot delete a card that has copies. Please sell all copies of this card before deleting it.", "Cannot Delete Card");
+                }
             }
         }, false, spec, getOptions());
+    }
+
+    protected void confirmDelete() {
+        final String prompt = "Are you sure you want to delete the " + collectable.getName() + " card? This action cannot be undone.";
+
+        withResponse(response -> {
+            if (response.equals("confirm")) {
+                manager.remove(collectable); // Only need to update collectableManager, since no copies should exist, none should be in the UserProfiles
+                sendMessage("The " + collectable.getName() + " card has been deleted.", "Card Deleted");
+                end();
+            }
+        }, true, prompt, "Confirm");
     }
 
     /**
@@ -183,9 +201,9 @@ public class ManageCollectableWizard extends InputWizard {
     private String[] getOptions() {
         if (collectable.getCreatorId().equals(user.getId().asString())) {
             if (collectable.isLocked()) {
-                return new String[]{"Sell", "Buy", "View", "Unlock", "Edit"};
+                return new String[]{"Sell", "Buy", "View", "Unlock", "Edit", "!Delete"};
             } else {
-                return new String[]{"Sell", "Buy", "View", "Lock", "Edit"};
+                return new String[]{"Sell", "Buy", "View", "Lock", "Edit", "!Delete"};
             }
         } else if (collectable.owns(profile)) {
             return new String[]{"Sell", "Buy", "View"};
