@@ -276,7 +276,6 @@ public final class Collectable extends UniqueIdentified {
         profile.addCollected(collected);
 
         if (getCost() != 1 && getCost() % 2 == 1) {
-            System.out.println("adjust with cost " + getCost());
             this.adjustOnBuy = true;
         }
 

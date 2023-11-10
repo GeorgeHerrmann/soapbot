@@ -111,8 +111,8 @@ public final class CollectableWizard extends InputWizard {
                         manager.add(current);
                         userManager.update(ownerProfile);
                         sendMessage(current.getName() + " created successfully.", "Card created");
-                        shutdown();
-                        ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new CollectableViewWizard(event, false).begin("viewCollectable", current));
+                        end();
+                        ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> new CollectableViewWizard(event, false).beginSilent("viewCollectable", current));
                     } else {
                         sendMessage("You do not have enough money to create this card.", "Insufficient funds");
                     }

@@ -131,7 +131,7 @@ public final class CardCommand implements ParseableCommand {
         sb.on(p -> {
             logger.append(" - Showing a user's own cards\n", LogDestination.NONAPI);
             UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getAuthorAsMember().getId().asString());
-            new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
+            new CollectableViewWizard(event, false).beginSilent("viewMemberCards", profile, 0);
         }, "mine", "my", "self");
 
         sb.on(p -> {
@@ -166,13 +166,13 @@ public final class CardCommand implements ParseableCommand {
                 logger.append("\n - Found trading card with the name " + id + ", beginning view wizard", LogDestination.NONAPI);
                 Collectable collectable = collectableManager.get(id);
                 InputWizard wizard = new CollectableViewWizard(event, false);
-                wizard.begin("viewCollectable", collectable);
+                wizard.beginSilent("viewCollectable", collectable);
             } else {
                 try {
                     logger.append("\n - Attempting to find a user with the name " + id + "\n", LogDestination.NONAPI);
                     UserProfile profile = event.getUserProfileManager().get(event.getDiscordEvent().getPresentUsers().get(0).getId().asString());
                     logger.append(" - Showing " + profile.getUsername() + "'s cards\n", LogDestination.NONAPI);
-                    new CollectableViewWizard(event, false).begin("viewMemberCards", profile, 0);
+                    new CollectableViewWizard(event, false).beginSilent("viewMemberCards", profile, 0);
                 } catch (Exception e) {
                     logger.append("\n - No trading card with the name " + id + ", attempting lookup by ID", LogDestination.NONAPI);
                     Collected c = collectableManager.getCollectedById(id);
@@ -182,7 +182,7 @@ public final class CardCommand implements ParseableCommand {
                     } else {
                         logger.append("\n - Found trading card with the ID " + id + ", beginning view wizard", LogDestination.NONAPI);
                         InputWizard wizard = new CollectableViewWizard(event, false);
-                        wizard.begin("viewCollected", c);
+                        wizard.beginSilent("viewCollected", c);
                     }
                 }
             }

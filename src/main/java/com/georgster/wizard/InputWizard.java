@@ -376,6 +376,26 @@ public abstract class InputWizard {
      * Begins the wizard starting from the provided method window name and its paramaters (if any).
      * Using this method instead of {@link #begin()} requires knowledge of the method names of the
      * InputWizard being used and does NOT begin from the wizard's configurated initial window.
+     * <p>
+     * This method will shut down the wizard once no more windows are running, but <b>WILL NOT</b> use
+     * {@link #end()} to perform additional shutdown activities (like displaying the 'wizard ended' text).
+     * 
+     * @param startingMethod The method name to begin the wizard from.
+     * @param parameters The paramaters required (if any) to run said method.
+     * @throws IllegalArgumentException If a method with the provided name and paramaters was not found.
+     */
+    public void beginSilent(String startingMethod, Object... parameters) throws IllegalArgumentException {
+        nextWindow(startingMethod, parameters);
+        shutdown();
+    }
+
+    /**
+     * Begins the wizard starting from the provided method window name and its paramaters (if any).
+     * Using this method instead of {@link #begin()} requires knowledge of the method names of the
+     * InputWizard being used and does NOT begin from the wizard's configurated initial window.
+     * <p>
+     * This method will shut down the wizard once no more windows are running, but <b>WILL</b> use
+     * {@link #end()} to perform additional shutdown activities (like displaying the 'wizard ended' text).
      * 
      * @param startingMethod The method name to begin the wizard from.
      * @param parameters The paramaters required (if any) to run said method.

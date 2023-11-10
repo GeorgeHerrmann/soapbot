@@ -380,3 +380,8 @@
     - Added the ability to lock and unlock cards in the Card Manager
         - A locked card can not have copies be purchased
             - Only cards with a single copy can be locked
+
+2.603-BETA
+    - The CollectableViewWizard no longer displays displays the 'wizard ended' informational text after ending or timing out in most cases
+        - This includes viewing cards via '!cards/!cards view' '!cards [name]' '!cards [ID]' '!cards @[user]' '!cards leaderboard' '!cards mine' or after creating a new card
+    - The CollectableCreateWizard now displays the 'wizard ended' informational text after ending the wizard following a successful card creation
