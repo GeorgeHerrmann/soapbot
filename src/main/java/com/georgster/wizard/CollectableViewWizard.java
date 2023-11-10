@@ -9,7 +9,6 @@ import com.georgster.collectable.Collected;
 import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
-import com.georgster.economy.exception.InsufficientCoinsException;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.thread.ThreadPoolFactory;
@@ -26,7 +25,6 @@ public class CollectableViewWizard extends InputWizard {
     private final GuildInteractionHandler guildHandler; // Specifically needed apart from handler for member utility
     private final CollectableManager manager;
     private final UserProfileManager userManager;
-    private final UserProfile profile;
     private final String startingWindow;
     private final Object[] startingParams;
 
@@ -40,7 +38,6 @@ public class CollectableViewWizard extends InputWizard {
         this.manager = event.getCollectableManager();
         this.userManager = event.getUserProfileManager();
         this.guildHandler = event.getGuildInteractionHandler();
-        this.profile = event.getUserProfileManager().get(user.getId().asString());
         if (startAtSelect) {
             this.startingWindow = "viewAllCollectablesSelect";
             this.startingParams = new Object[0];
@@ -55,7 +52,6 @@ public class CollectableViewWizard extends InputWizard {
         this.manager = event.getCollectableManager();
         this.userManager = event.getUserProfileManager();
         this.guildHandler = event.getGuildInteractionHandler();
-        this.profile = event.getUserProfileManager().get(user.getId().asString());
         this.startingWindow = startingWindow;
         this.startingParams = startingParams;
     }
@@ -98,7 +94,7 @@ public class CollectableViewWizard extends InputWizard {
         List<Collectable> collectables = manager.getAll();
         Collectable collectable = collectables.get(index);
 
-        String[] options = new String[]{"Card Manager", "View Cards", "Inflate Value"};
+        String[] options = new String[]{"Card Manager", "View Cards"};
         
         boolean hasPrevious = index != 0;
         boolean hasNext = index != collectables.size() - 1;
@@ -107,12 +103,12 @@ public class CollectableViewWizard extends InputWizard {
 
         if (hasPrevious) {
             if (hasNext) {
-                options = new String[]{"Card Manager", "View Cards", "Inflate Value", "back", "next"};
+                options = new String[]{"Card Manager", "View Cards", "back", "next"};
             } else {
-                options = new String[]{"Card Manager", "View Cards", "Inflate Value", "back"};
+                options = new String[]{"Card Manager", "View Cards", "back"};
             }
         } else if (hasNext) {
-            options = new String[]{"Card Manager", "View Cards", "Inflate Value", "next"};
+            options = new String[]{"Card Manager", "View Cards", "next"};
         }
 
         withFullResponse(fullResponse -> {
@@ -126,8 +122,6 @@ public class CollectableViewWizard extends InputWizard {
                 } else {
                     sendMessage("Nobody in " + getGuild().getName() + " has any " + collectable.getName() + " cards currently. You can use the Card Manager to buy one.", "No cards");
                 }
-            } else if (response.equals("inflate value")) {
-                nextWindow("inflateCollectable", collectable);
             } else if (response.equals("back")) {
                 nextWindow("viewAllCollectables", index - 1);
             } else if (response.equals("next")) {
@@ -246,35 +240,8 @@ public class CollectableViewWizard extends InputWizard {
                 } else {
                     sendMessage("Nobody in " + getGuild().getName() + " has any " + collectable.getName() + " cards currently. You can use the Card Manager to buy one.", "No cards");
                 }
-            } else if (response.equals("inflate value")) {
-                nextWindow("inflateCollectable", collectable);
             }
-        }, false, listener, spec, "Card Manager", "View Cards", "Inflate Value");
-    }
-
-    /**
-     * The window to inflate the cost of a {@link Collectable}.
-     * 
-     * @param collectable the {@code Collectable} to inflate
-     */
-    protected void inflateCollectable(Collectable collectable) {
-        final String prompt = "How much would you like to inflate the cost of this card by? Please note that the actual inflation amount will be divived by " + collectable.numCards() * 2 + ", as the cost is shared between all cards.";
-
-        withResponse(response -> {
-            try {
-                long value = Long.parseLong(response);
-                collectable.inflateCost(profile, value);
-                manager.update(collectable);
-                userManager.update(profile);
-                userManager.updateFromCollectables(manager); // update all profiles with that collectable
-                sendMessage("You have used " + response + " coins to inflate the cost of this card by " + ((int) value / (collectable.numCards() * 2)) + " coins. The new cost is " + collectable.getCost(), "Card Inflated");
-                nextWindow("viewCollectable", collectable);
-            } catch (NumberFormatException e) {
-                sendMessage("Invalid number. Please try again.", "Invalid Number");
-            } catch (InsufficientCoinsException e2) {
-                sendMessage("You do not have enough coins to inflate the cost of this card by " + response + " coins.", "Insufficient Coins");
-            }
-        }, true, prompt);
+        }, false, listener, spec, "Card Manager", "View Cards");
     }
 
     /**

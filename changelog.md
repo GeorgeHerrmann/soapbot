@@ -387,3 +387,11 @@
     - The CollectableCreateWizard now displays the 'wizard ended' informational text after ending the wizard following a successful card creation
     - Added the ability for the creator of a card to delete the card in the Card Manager
         - There must be zero active copies of a card to delete it
+
+2.604-BETA
+    - Only a User who owns a copy of the desired card, or the card's creator may now inflate that card's value
+    - Locked cards can no longer have their value inflated
+    - The ManageCollectableWizard (CardManager) can now be ended with the 'X' reaction
+    - Card Inflation has been moved from the CollectableViewWizard to the ManageCollectableWizard (CardManager)
+        - Accessing the CardManager will now display the option to inflate a card's cost
+            - This was always the desired functionality, but a backend issue with personal User Wizards had to get fixed first

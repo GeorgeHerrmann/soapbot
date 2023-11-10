@@ -7,6 +7,7 @@ import com.georgster.collectable.Collected;
 import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.economy.exception.InsufficientCoinsException;
 import com.georgster.profile.UserProfile;
 import com.georgster.wizard.input.InputListenerFactory;
 
@@ -68,14 +69,14 @@ public class ManageCollectableWizard extends InputWizard {
                 try {
                     collectable.lock(true);
                     manager.update(collectable);
-                    sendMessage("This card has been locked. No one may purchase copies of this card. *Note: this card will be automatically unlocked if no copies remain*", "Card Locked");
+                    sendMessage("This card has been locked. No one may purchase copies of nor inflate this card. *Note: this card will be automatically unlocked if no copies remain*", "Card Locked");
                 } catch (Exception e) {
                     sendMessage(e.getMessage(), "An error occured");
                 }
             } else if (response.equals("unlock")) {
                 collectable.lock(false);
                 manager.update(collectable);
-                sendMessage("This card has been unlocked. Anyone may now purchase copies of this card.", "Card Unlocked");
+                sendMessage("This card has been unlocked. Anyone may now purchase copies of and inflate this card.", "Card Unlocked");
             } else if (response.equals("edit")) {
                 nextWindow("editImageUrl");
             } else if (response.equals("delete")) {
@@ -88,6 +89,9 @@ public class ManageCollectableWizard extends InputWizard {
         }, false, spec, getOptions());
     }
 
+    /**
+     * The window that confirms the deletion of the {@link Collectable}.
+     */
     protected void confirmDelete() {
         final String prompt = "Are you sure you want to delete the " + collectable.getName() + " card? This action cannot be undone.";
 
@@ -98,6 +102,35 @@ public class ManageCollectableWizard extends InputWizard {
                 end();
             }
         }, true, prompt, "Confirm");
+    }
+
+    /**
+     * The window to inflate the cost of a {@link Collectable}.
+     */
+    protected void inflateCollectable() {
+        if (collectable.isLocked()) {
+            sendMessage("Sorry, this card is locked and cannot be inflated", "Card Locked");
+            goBack();
+            return;
+        }
+
+        final String prompt = "How much would you like to inflate the cost of this card by? Please note that the actual inflation amount will be divived by " + collectable.numCards() * 2 + ", as the cost is shared between all cards.";
+
+        withResponse(response -> {
+            try {
+                long value = Long.parseLong(response);
+                collectable.inflateCost(profile, value);
+                manager.update(collectable);
+                userManager.update(profile);
+                userManager.updateFromCollectables(manager); // update all profiles with that collectable
+                sendMessage("You have used " + response + " coins to inflate the cost of this card by " + ((int) value / (collectable.numCards() * 2)) + " coins. The new cost is " + collectable.getCost(), "Card Inflated");
+                goBack();
+            } catch (NumberFormatException e) {
+                sendMessage("Invalid number. Please try again.", "Invalid Number");
+            } catch (InsufficientCoinsException e2) {
+                sendMessage("You do not have enough coins to inflate the cost of this card by " + response + " coins.", "Insufficient Coins");
+            }
+        }, true, prompt);
     }
 
     /**
@@ -201,12 +234,12 @@ public class ManageCollectableWizard extends InputWizard {
     private String[] getOptions() {
         if (collectable.getCreatorId().equals(user.getId().asString())) {
             if (collectable.isLocked()) {
-                return new String[]{"Sell", "Buy", "View", "Unlock", "Edit", "!Delete"};
+                return new String[]{"Sell", "Buy", "View", "Inflate", "Unlock", "Edit", "!Delete"};
             } else {
-                return new String[]{"Sell", "Buy", "View", "Lock", "Edit", "!Delete"};
+                return new String[]{"Sell", "Buy", "View", "Inflate", "Lock", "Edit", "!Delete"};
             }
         } else if (collectable.owns(profile)) {
-            return new String[]{"Sell", "Buy", "View"};
+            return new String[]{"Sell", "Buy", "View", "Inflate"};
         } else {
             return new String[]{"Buy", "View"};
         }

@@ -180,7 +180,7 @@ public final class CardCommand implements ParseableCommand {
                         logger.append("\n - No trading card with the ID " + id + ", sending help message", LogDestination.NONAPI);
                         handler.sendMessage("A trading card with that ID or name does not exist inside of " + event.getGuildInteractionHandler().getGuild().getName(), "Card not found");
                     } else {
-                        logger.append("\n - Found trading card with the ID " + id + ", beginning view wizard", LogDestination.NONAPI);
+                        logger.append("\n - Found trading card with the ID " + id + ", beginning view wizard\n", LogDestination.NONAPI);
                         InputWizard wizard = new CollectableViewWizard(event, false);
                         wizard.beginSilent("viewCollected", c);
                     }
