@@ -81,7 +81,9 @@ public final class CollectableWizard extends InputWizard {
             prompt = "What is the image url of the card? Please note that this cannot be changed upon creation.";
         }
 
-        withResponse(response -> {
+        withFullResponse(fullResponse -> {
+            String response = fullResponse.getResponse();
+            handler.sendMessage(fullResponse.getMessage().getData().attachments().get(0).url());
             try {
                 current.setImageUrl(response);
                 nextWindow("collectableCost", current);

@@ -44,7 +44,10 @@ public class MessageListener extends InputListener {
 
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
-            .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
+            .subscribe(event -> {
+                setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user));
+                setResponseMessage(event.getMessage());
+            }));
             
         return waitForResponse(inputState);
     }

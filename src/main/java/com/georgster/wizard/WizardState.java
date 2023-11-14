@@ -2,6 +2,7 @@ package com.georgster.wizard;
 
 import java.util.Optional;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateSpec;
 
@@ -14,6 +15,7 @@ public class WizardState {
     private String notes;
     private String[] options;
     private User user;
+    private Optional<Message> msg; // Only on user response
     private Optional<EmbedCreateSpec> embed;
 
     /**
@@ -29,6 +31,7 @@ public class WizardState {
         this.embed = Optional.empty();
         this.user = user;
         this.notes = "";
+        this.msg = Optional.empty();
     }
 
     /**
@@ -49,6 +52,7 @@ public class WizardState {
         this.notes = "";
         this.message = "";
         this.options = options;
+        this.msg = Optional.empty();
     }
 
     /**
@@ -159,5 +163,53 @@ public class WizardState {
      */
     public void setUser(User user) {
         this.user = user;
+    }
+
+    /**
+     * Sets the {@link Message} that the user responded with.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @param message The {@link Message} that the user responded with.
+     */
+    public void setMessage(Message message) {
+        this.msg = Optional.of(message);
+    }
+
+    /**
+     * Returns the {@link Message} that the user sent, or null if one did not exist.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @return The {@link Message} that the user sent, or null if one did not exist.
+     */
+    public Message getMessageObject() {
+        return msg.orElse(null);
+    }
+
+    /**
+     * Returns whether the {@link Message} that the user responded with is present.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @return Whether the {@link Message} that the user responded with is present.
+     */
+    public boolean hasMessageObject() {
+        return msg.isPresent();
+    }
+
+    /**
+     * Returns the {@link Message} that the user sent as an optional.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @return The {@link Message} that the user sent as an optional.
+     */
+    public Optional<Message> getMessageOptional() {
+        return msg;
     }
 }

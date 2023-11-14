@@ -213,7 +213,10 @@ public abstract class InputWizard {
             return null;
         }
 
-        return new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+        WizardResponse userResponse = new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+        state.getMessageOptional().ifPresent(userResponse::setMessage);
+
+        return userResponse;
     }
 
     /**
@@ -264,7 +267,11 @@ public abstract class InputWizard {
         if (state.hasEnded()) {
             return null;
         }
-        return new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+
+        WizardResponse userResponse = new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+        state.getMessageOptional().ifPresent(userResponse::setMessage);
+
+        return userResponse;
     }
 
     /**
@@ -315,7 +322,10 @@ public abstract class InputWizard {
         if (state.hasEnded()) {
             return null;
         }
-        return new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+        WizardResponse userResponse = new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+        state.getMessageOptional().ifPresent(userResponse::setMessage);
+
+        return userResponse;
     }
 
     /**
@@ -364,7 +374,11 @@ public abstract class InputWizard {
         if (state.hasEnded()) {
             return null;
         }
-        return new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+        
+        WizardResponse userResponse = new WizardResponse(state.getRecentUser(), state.getMessage(), state.getNotes());
+        state.getMessageOptional().ifPresent(userResponse::setMessage);
+
+        return userResponse;
     }
 
     /**

@@ -560,4 +560,16 @@ public abstract class InputListener {
     public InteractionHandler getInteractionHandler() {
         return handler;
     }
+
+    /**
+     * Sets the {@link Message} that the user responded with in the most recent {@link WizardState}.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @param msg The {@link Message} that the user responded with.
+     */
+    protected void setResponseMessage(Message msg) {
+        recentState.setMessage(msg);
+    }
 }
