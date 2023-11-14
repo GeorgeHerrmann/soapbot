@@ -19,6 +19,7 @@ import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.ReserveEventWizard;
+import com.georgster.wizard.SinglyAttachmentWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -104,32 +105,38 @@ public class ReserveEventCommand implements ParseableCommand {
 
         subcommands.onIndexLast(eventName -> {
             if (eventManager.exists(eventName, TYPE)) {
-            logger.append("Showing information about a specific reserve event in a text channel", LogDestination.API);
-            ReserveEvent reserve = (ReserveEvent) eventManager.get(eventName);
+                logger.append("Showing information about a specific reserve event in a text channel", LogDestination.API);
+                ReserveEvent reserve = (ReserveEvent) eventManager.get(eventName);
 
-            logger.append("- Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
+                logger.append("- Showing information about reserve event: " + reserve.getIdentifier() + "\n", LogDestination.NONAPI);
 
-            StringBuilder response = new StringBuilder();
-            response.append("Event: " + reserve.getIdentifier() + "\n");
-            response.append("- Reserved: " + reserve.getReserved() + "\n");
-            if (reserve.isUnlimited()) {
-                response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
-            } else {
-                response.append("- Needed: " + reserve.getNumPeople() + "\n");
-            }
-            if (reserve.isTimeless()) {
-                response.append("- This event has no associated time\n");
-                response.append("\t- This event will pop once the needed number of people have reserved to it");
-            } else {
-                response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
-                response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
-            }
-            response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
-            response.append("\nReserved users:\n");
-            reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberById(user).getMention() + "\n"));
+                StringBuilder response = new StringBuilder();
+                response.append("Event: " + reserve.getIdentifier() + "\n");
+                response.append("- Reserved: " + reserve.getReserved() + "\n");
+                if (reserve.isUnlimited()) {
+                    response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
+                } else {
+                    response.append("- Needed: " + reserve.getNumPeople() + "\n");
+                }
+                if (reserve.isTimeless()) {
+                    response.append("- This event has no associated time\n");
+                    response.append("\t- This event will pop once the needed number of people have reserved to it");
+                } else {
+                    response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
+                    response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
+                }
+                response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
+                response.append("\nReserved users:\n");
+                reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberById(user).getMention() + "\n"));
 
-            String[] output = SoapUtility.splitFirst(response.toString());
-            handler.sendMessage(output[1], output[0]);
+                String[] output = SoapUtility.splitFirst(response.toString());
+                SinglyAttachmentWizard wizard = new SinglyAttachmentWizard(event, output[0], output[1]); // will attach the "manage" button
+                wizard.addOption("manage", () -> {
+                    InputWizard wizard2 = new ReserveEventWizard(event); // brings up the manage wizard on click
+                    wizard2.getInputListener().setCurrentMessage(wizard.getInputListener().getCurrentMessage()); // sets the current message to the same message as the first wizard
+                    wizard2.begin("manageEvent", reserve);
+                });
+                wizard.begin();
             } else {
                 handler.sendMessage("This reserve event does not exist, type !events list for a list of all active events", MessageFormatting.ERROR);
             }

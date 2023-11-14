@@ -317,3 +317,88 @@
 2.521
     - Fixed an issue where some wizards which overrode their default listener on the first window would create duplicate Messages when switching windows
     - Fixed an issue where the MessageCommand was not working
+
+2.600-BETA
+    Command Parser
+        - Fixed an issue where the command parser would duplicate single-word arguments if that word was present in another argument
+        - Fixed an issue where the command parser would cut off some inputs if certain words were present multiple times in a single argument
+            - These issues were related to an issue with how the parser treated "variable" arguments by comparing words to substrings in other arguments
+        - Fixed an issue where the command parser would assume some input strings were date inputs if there was a number in them, even if the "in" keyword was not present
+    Permissions
+        - Updated PermissionGroups to be identified by their Role id, rather than their name
+        - Fixed an issue where updating a Discord Role would cause a duplicate PermissionGroup to be made, resetting that group's permissions as the system fell back to a new default group
+        - Fixed an issue where moving users between Discord Roles could cause unintended behaviors with the Permissions System
+    Blackjack
+        - The dealer will now automatically win if it has not busted and it has a greater score than the player
+        - The dealer will now draw with the user if both decks have a total of 16
+    Trading Cards
+        - Created a new Trading Card System
+            - Cards can be created via !cards create
+            - Individual versions of cards can be bought and sold from SOAP Bot
+                - The price doubles on a sale, and halves on a purchase
+            - Cards can be viewed with !cards or !cards view
+            - Cards can be put on the marketplace for a specific price with !cards market
+            - You can view your own cards with !cards mine
+            - You can view another users cards with !cards @[USER]
+            - Cards can be traded between users with !trade @[USER]
+            - You can view all the cards ranked by their cost with !cards leaderboard
+            - Cards can be inflated in value
+                - Actual inflation cost is based on the number of cards in circulation
+            - Cards have rarities, determined by the number of coins total in a Guild and the cost of the card
+                - Can be COMMON, UNCOMMON, RARE, LEGENDARY or UNIQUE
+    Trading
+        - Coins and any Tradeable objects (including Cards) can be traded with !trade @[USER]
+            - You can create a trade offer, then send it to a User, who has 5 minutes to accept or reject
+    Interaction Handler
+        - Added the ability for Interaction Handlers to send messages with outside EmbedCreateSpecs
+    InputWizard
+        - Greatly enhanced InputWizard utility
+            - InputWizards can now send images or custom EmbedCreateSpecs in their Messages.
+            - InputWizards can now be switched to UserWizards, which will live in a User's private MessageChannel
+                - Note that these can only be interacted with via ComponentInteractions (Menus and Buttons)
+        - Fixed an issue where an InputWizard which failed to run properly would run in an infinite loop
+        - Added the new AlternateWizard, which can swap between two InputWizards with a reaction
+            - This is used with !cards view, for example, which switches between a menu or button based UI
+        - Various minor performance optimizations
+    InputListener
+        - Added the ability for ButtonMessageListeners to have Danger buttons by prepending a "!" to an option
+    General
+        - Fixed an issue where testMode was not behaving as intended
+
+2.601-BETA
+    - Added !cards ranges which will show the value ranges for each rarity, as well as total coin values for a Guild
+
+2.602-BETA
+    - Fixed an issue where purchasing multiple copies of cards worth zero cards, then selling those cards, would lead to exponentially high card costs
+        - Cards can now have a minimum cost of 1 coin
+        - Cards purchased at one coin will not affect the overall cost of a card once sold
+    - Fixed an issue where selling a card after inflating its value would deposit the incorrect amount of coins to your account
+    - Fixed an issue where inflating a cards value would inflate the value too high, allowing for exponential gains when selling cards
+        - The algorithm determining the overall inflation amount has been improved
+    - Added the ability for the creator of a card to change its image in the Card Manager
+        - The ability to transfer ownership of a card will come soon
+    - Added the ability to lock and unlock cards in the Card Manager
+        - A locked card can not have copies be purchased
+            - Only cards with a single copy can be locked
+
+2.603-BETA
+    - The CollectableViewWizard no longer displays displays the 'wizard ended' informational text after ending or timing out in most cases
+        - This includes viewing cards via '!cards/!cards view' '!cards [name]' '!cards [ID]' '!cards @[user]' '!cards leaderboard' '!cards mine' or after creating a new card
+    - The CollectableCreateWizard now displays the 'wizard ended' informational text after ending the wizard following a successful card creation
+    - Added the ability for the creator of a card to delete the card in the Card Manager
+        - There must be zero active copies of a card to delete it
+
+2.604-BETA
+    - Only a User who owns a copy of the desired card, or the card's creator may now inflate that card's value
+    - Locked cards can no longer have their value inflated
+    - The ManageCollectableWizard (CardManager) can now be ended with the 'X' reaction
+    - Card Inflation has been moved from the CollectableViewWizard to the ManageCollectableWizard (CardManager)
+        - Accessing the CardManager will now display the option to inflate a card's cost
+            - This was always the desired functionality, but a backend issue with personal User Wizards had to get fixed first
+
+2.605-BETA
+    - When creating a Collectable, an image can be uploaded and sent in a Message to be used as the image URL
+    - When viewing a specific event via the ReserveEventCommand (!re, !events, etc), a "manage" button will appear
+        - The person who executed the command can click that button to directly bring up the manage screen for that event in the ReserveEventWizard
+        - When the wizard is ended, the old Display comes back up
+    - Updated InputWizards and InputListeners to be able to pass around the respondants Message object, if it exists

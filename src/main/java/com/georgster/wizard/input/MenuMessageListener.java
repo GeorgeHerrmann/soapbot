@@ -1,5 +1,7 @@
 package com.georgster.wizard.input;
 
+import java.util.List;
+
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.wizard.WizardState;
 
@@ -7,6 +9,7 @@ import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
+import discord4j.core.object.entity.Attachment;
 
 /**
  * Sends a message to the user in a {@code SelectMenu} and records their response via either
@@ -38,9 +41,11 @@ public class MenuMessageListener extends InputListener {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * If the user sends an attachment with their message, the attachment's URL will be used as the response.
      */
     public WizardState prompt(WizardState inputState) {
-        String prompt = inputState.getMessage();
+        StringBuilder prompt = new StringBuilder(inputState.getMessage());
         String[] options = inputState.getOptions();
 
         SelectMenu.Option[] menuOptions = new SelectMenu.Option[options.length];
@@ -51,13 +56,25 @@ public class MenuMessageListener extends InputListener {
 
         SelectMenu menu = SelectMenu.of(title, menuOptions);
 
-        prompt += "\nYour options are: " + String.join(", ", options);
-        sendPromptMessage(prompt, ActionRow.of(menu));
+        prompt.append("\nYour options are: " + String.join(", ", options));
+
+        inputState.getEmbed().ifPresentOrElse(spec ->
+            sendPromptMessage(spec, ActionRow.of(menu)),
+        () ->
+            sendPromptMessage(prompt.toString(), ActionRow.of(menu)));
 
         // Create a listener that listens for the user's next message
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
-            .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
+            .subscribe(event -> {
+                List<Attachment> attachments = event.getMessage().getAttachments();
+                if (attachments.isEmpty()) {
+                    setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user));
+                } else {
+                    setResponse(attachments.get(0).getUrl(), event.getMessage().getAuthor().orElse(user));
+                }
+                setResponseMessage(event.getMessage());
+            }));
 
         // Create a listener that listens for the user to select an option
         createListener(dispatcher -> dispatcher.on(SelectMenuInteractionEvent.class)

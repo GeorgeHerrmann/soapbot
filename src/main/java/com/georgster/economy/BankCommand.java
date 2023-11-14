@@ -10,6 +10,7 @@ import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
+import com.georgster.permissions.PermissibleAction;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
@@ -80,6 +81,14 @@ public class BankCommand implements ParseableCommand {
      */
     public CommandParser getCommandParser() {
         return new ParseBuilder("1O").withIdentifiers("leaderboard", "lb").build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.BANKCOMMAND;
     }
 
     /**

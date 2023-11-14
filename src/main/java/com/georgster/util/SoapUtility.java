@@ -145,6 +145,14 @@ public class SoapUtility {
         return lines;
     }
 
+    /**
+     * Splits a String into a List of Strings, each of which is no longer than the specified line length.
+     * The new line character is used as the delimiter.
+     * 
+     * @param input the String to split
+     * @param lineNum the maximum number of lines per String
+     * @return a List of Strings
+     */
     public static List<String> splitAtEvery(String input, int lineNum) {
         if (lineNum <= 0) {
             throw new IllegalArgumentException("lineNum must be a positive integer");
@@ -176,9 +184,6 @@ public class SoapUtility {
      * @throws IllegalArgumentException if the input date string is invalid
      */
     public static String convertDate(String inputDate) throws IllegalArgumentException {
-        if (inputDate.equalsIgnoreCase("cs2")) { // 
-            throw new IllegalArgumentException("Invalid date format, valid date formats are MMM dd, yyyy, MMM dd, yy, MMM dd, yyyy, tomorrow, and in x days");
-        }
         inputDate = insertSpaces(inputDate);
         LocalDate date = null;
         try {
@@ -187,10 +192,12 @@ public class SoapUtility {
             try {
                 if (inputDate.equalsIgnoreCase("tomorrow")) {
                     date = LocalDate.now(ZoneId.of("-05:00")).plusDays(1);
-                } else {
+                } else if (inputDate.startsWith("in ")) {
                     String[] parts = inputDate.split(" ");
                     int daysToAdd = Integer.parseInt(parts[1]);
                     date = LocalDate.now(ZoneId.of("-05:00")).plusDays(daysToAdd);
+                } else {
+                    throw new IllegalArgumentException();
                 }
             } catch (Exception ex) {
                 throw new IllegalArgumentException("Invalid date format, valid date formats are MMM dd, yyyy, MMM dd, yy, MMM dd, yyyy, tomorrow, and in x days");

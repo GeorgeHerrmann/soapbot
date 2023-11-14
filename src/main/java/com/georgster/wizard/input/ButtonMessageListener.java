@@ -11,11 +11,15 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
+import discord4j.core.object.entity.Attachment;
 
 /**
  * Sends a message to the user in a {@code Message} containing {@link Button}s as the options.
  * Users can respond by either clicking on the corresponding button, or by sending a message
  * containing a valid option.
+ * <p>
+ * Buttons will be Primary buttons, unless the "back" option is present, in which case it will be
+ * a Secondary button, or if the option starts with a "!", it will be a danger button (The first ! is removed and not returned as part of the user's response if selected).
  * <p>
  * This listener will timeout after 30s of inactivity following
  * {@link #prompt(WizardState)} being called.
@@ -48,6 +52,8 @@ public class ButtonMessageListener extends InputListener {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * If the user sends an attachment with their message, the attachment's URL will be used as the response.
      */
     public WizardState prompt(WizardState inputState) {
         String prompt = inputState.getMessage();
@@ -58,17 +64,23 @@ public class ButtonMessageListener extends InputListener {
         for (int i = 0; i < options.length; i++) {
             if (options[i].equals("back")) {
                 buttons[i] = Button.secondary(options[i], options[i]);
+            } else if (options[i].startsWith("!"))  {
+                options[i] = options[i].substring(1);
+                inputState.getOptions()[i] = options[i];
+                buttons[i] = Button.danger(options[i], options[i]);
             } else {
                 buttons[i] = Button.primary(options[i], options[i]);
             }
         }
 
-        sendPromptMessage(prompt, getRowsFromButtons(buttons));
-        
+        inputState.getEmbed().ifPresentOrElse(spec ->
+            sendPromptMessage(spec, getRowsFromButtons(buttons)),
+        () -> 
+            sendPromptMessage(prompt, getRowsFromButtons(buttons)));
 
         // Create a listener that listens for the user to click a button
         createListener(dispatcher -> dispatcher.on(ButtonInteractionEvent.class)
-            .filter(event -> event.getInteraction().getMember().get().getId().asString().equals(user.getId().asString()))
+            .filter(event -> event.getInteraction().getUser().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().get().getId().asString().equals(message.getMessage().getId().asString()))
             .subscribe(event -> {
                 setResponse(event.getCustomId().toLowerCase(), event.getInteraction().getUser());
@@ -76,9 +88,17 @@ public class ButtonMessageListener extends InputListener {
             }));
 
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
-            .filter(event -> event.getMessage().getAuthor().get().getId().asString().equals(user.getId().asString()))
+            .filter(event -> event.getMessage().getAuthor().orElse(user).getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
-            .subscribe(event -> setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user))));
+            .subscribe(event -> {
+                List<Attachment> attachments = event.getMessage().getAttachments();
+                if (attachments.isEmpty()) {
+                    setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user));
+                } else {
+                    setResponse(attachments.get(0).getUrl(), event.getMessage().getAuthor().orElse(user));
+                }
+                setResponseMessage(event.getMessage());
+            }));
             
         return waitForResponse(inputState);
     }

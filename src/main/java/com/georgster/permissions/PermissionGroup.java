@@ -13,29 +13,34 @@ import discord4j.core.object.entity.Role;
  * the group will be the name of the role that the group is assigned to.
  */
 public class PermissionGroup implements Manageable {
+    private String id;
     private String name;
     private List<PermissibleAction> actions;
 
     /**
-     * Constructs a {@code PermissionGroup} with the given name and actions.
+     * Constructs a {@code PermissionGroup} with the given name and actions and id.
      * <p>
      * Generally used when loading a {@link PermissionGroup} from the database.
      * 
      * @param name    the name of the group
      * @param actions the actions the group has permission to perform
+     * @param id      the id of the group
      */
-    public PermissionGroup(String name, List<PermissibleAction> actions) {
+    public PermissionGroup(String name, List<PermissibleAction> actions, String id) {
         this.name = name;
         this.actions = actions;
+        this.id = id;
     }
 
     /**
-     * Constructs a {@code PermissionGroup} with the given name and no actions.
+     * Constructs a {@code PermissionGroup} with the given name, id and no actions.
      * 
      * @param name the name of the group
+     * @param id   the id of the group
      */
-    public PermissionGroup(String name) {
+    public PermissionGroup(String name, String id) {
         this.name = name;
+        this.id = id;
         this.actions = new ArrayList<>();
     }
 
@@ -46,6 +51,15 @@ public class PermissionGroup implements Manageable {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the id of the group.
+     * 
+     * @return the id of the group
+     */
+    public String getId() {
+        return id;
     }
 
     /**
@@ -108,6 +122,6 @@ public class PermissionGroup implements Manageable {
      */
     @Override
     public String getIdentifier() {
-        return getName();
+        return getId();
     }
 }

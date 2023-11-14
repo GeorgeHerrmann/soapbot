@@ -60,7 +60,7 @@ import com.georgster.ParseableCommand;
  * If no variable arguments are present, identifiers are not necessary.
  * @see {@link #setRules(String...)}
  */
-public class CommandParser {
+public final class CommandParser {
     private static final List<String> AVAILABLE_RULES = List.of("X", "N", "T", "D", "Z", "C", "S", "F", "L", "M", "I", "<", ">");
 
     private boolean autoFormat; //Whether or not the parser should automatically format the arguments
@@ -71,7 +71,7 @@ public class CommandParser {
     /**
      * A context for an ongoing {@link CommandParser#parse(String)}.
      */
-    protected class ParseContext {
+    protected final class ParseContext {
         private String inputString;
         private List<String> currentArgs;
         private List<String> inputWords;
@@ -174,7 +174,7 @@ public class CommandParser {
         protected int getCurrentWordFrequency(String word) {
             int count = 0;
             for (String currentArg : currentArgs) {
-                if (currentArg.contains(word)) {
+                if (List.of(currentArg.split(" ")).contains(word)) {
                     count++;
                 }
             }

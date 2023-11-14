@@ -56,6 +56,7 @@ public class BlackjackWizard extends InputWizard {
                 dealerTurn();
             }
         } else { // Otherwise we display the result
+            game.showAllDealerCards();
             StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
             if (game.dealerWon()) {
                 prompt.append("*Dealer wins, you lost your wager*");
@@ -78,6 +79,7 @@ public class BlackjackWizard extends InputWizard {
             getInputListener().editCurrentMessageContentDelay(game.getCardsAsString(), 500);
         }
 
+        game.showAllDealerCards();
         StringBuilder prompt = new StringBuilder(game.getCardsAsString() + "\n");
         if (game.dealerWon()) {
             prompt.append("*Dealer wins, you lost your wager*");

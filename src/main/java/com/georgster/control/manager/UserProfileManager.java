@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.collectable.Collected;
 import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
 import com.georgster.economy.CoinBank;
@@ -64,7 +65,10 @@ public class UserProfileManager extends SoapManager<UserProfile> {
                 if (completions == null) completions = new MemberChatCompletions(id);
                 CoinBank bank = profile.getBank();
                 if (bank == null) bank = new CoinBank(id);
-                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank));
+                List<Collected> collecteds = profile.getCollecteds();
+                if (collecteds == null) collecteds = new ArrayList<>();
+
+                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, collecteds));
             } else {
                 add(new UserProfile(event.getGuild().getId().asString(), id, member.getTag()));
             }
@@ -145,5 +149,27 @@ public class UserProfileManager extends SoapManager<UserProfile> {
         ChatCompletionRequest request = ChatCompletionRequest.builder().messages(messages).model("gpt-3.5-turbo").build();
 
        return aiService.createChatCompletion(request);
+    }
+
+    /**
+     * Returns the total amount of coins for all users in this manager,
+     * that is, the total amount of coins for users in a Guild.
+     * 
+     * @return The total amount of coins for all users in this manager.
+     */
+    public long getTotalCoins() {
+        return getAll().stream().mapToLong(profile -> profile.getBank().getBalance()).sum();
+    }
+
+    public void updateFromCollectables(CollectableManager manager) {
+        manager.getAll().forEach(collectable -> 
+            collectable.getCollecteds().forEach(collected -> {
+                UserProfile profile = get(collected.getMemberId());
+                List<Collected> collecteds = profile.getCollecteds();
+                collecteds.removeIf(c -> c.getIdentifier().equals(collected.getIdentifier()));
+                collecteds.add(collected);
+                update(profile);
+            })
+        );
     }
 }

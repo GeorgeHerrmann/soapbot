@@ -1,7 +1,10 @@
 package com.georgster.wizard;
 
+import java.util.Optional;
+
 import com.georgster.util.DateTimed;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 
 /**
@@ -11,6 +14,7 @@ public class WizardResponse extends DateTimed {
     private final User responder;
     private final String response;
     private final String notes;
+    private Optional<Message> message;
 
     /**
      * Creates a new WizardResponse with no notes for the provided User and their response.
@@ -22,6 +26,7 @@ public class WizardResponse extends DateTimed {
         this.responder = responser;
         this.response = response;
         this.notes = "";
+        this.message = Optional.empty();
     }
 
     /**
@@ -35,6 +40,7 @@ public class WizardResponse extends DateTimed {
         this.responder = responser;
         this.response = response;
         this.notes = notes;
+        this.message = Optional.empty();
     }
 
     /**
@@ -64,5 +70,42 @@ public class WizardResponse extends DateTimed {
      */
     public String getNotes() {
         return notes;
+    }
+
+    /**
+     * Returns the {@link Message} that the user responded with, or an empty Optional if no message was provided.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @return The {@link Message} that the user responded with, or an empty Optional if no message was provided.
+     */
+    public Optional<Message> getMessageOptional() {
+        return message;
+    }
+
+    /**
+     * Sets the {@link Message} that the user responded with.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @param message The {@link Message} that the user responded with.
+     */
+    public void setMessage(Message message) {
+        this.message = Optional.of(message);
+    }
+
+    /**
+     * Returns the {@link Message} that the user responded with.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @return The {@link Message} that the user responded with.
+     * @throws IllegalStateException if the message is not present
+     */
+    public Message getMessage() {
+        return message.orElseThrow(() -> new IllegalStateException("Message is not present"));
     }
 }

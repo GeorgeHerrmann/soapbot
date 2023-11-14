@@ -17,6 +17,7 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateSpec;
 import reactor.core.Disposable;
 
 /**
@@ -42,7 +43,7 @@ public abstract class InputListener {
     protected final String endString; // String to type to cancel the listener
     protected String title; // The title to attach to messages
     private final EventDispatcher dispatcher; // Dispatcher sending events
-    protected final InteractionHandler handler; // Handler to interact with the Guild
+    protected InteractionHandler handler; // Handler to interact with the Guild or User
     protected User user; // The initial user of the listener
     private final List<Disposable> listeners; // The Disposable listeners
 
@@ -53,6 +54,7 @@ public abstract class InputListener {
     private boolean sendPromptMessage; // If false (generally not reccomended), sendPromptMessage(String) does nothing
     private boolean allowAllUsers; // If false, only user will be able to respond.
     private boolean apiCallOnSeparateThread; // If true, all API calls will be placed on a seperate general task thread
+    private boolean autoFormat; // If true, all responses will be lowercase
 
     /*
      * InputListeners work on a message to message basis.
@@ -84,6 +86,7 @@ public abstract class InputListener {
         this.sendPromptMessage = true;
         this.allowAllUsers = false;
         this.apiCallOnSeparateThread = false;
+        this.autoFormat = true;
         this.timeoutTime = 300;
         this.responseContainer = new StringBuilder();
     }
@@ -150,6 +153,38 @@ public abstract class InputListener {
     }
 
     /**
+     * Sends a message using the provided {@link EmbedCreateSpec} containing the content and a potential title, and the optional
+     * LayoutComponents attached.
+     * <p>
+     * If options are present, they should be included in the content of the EmbedCreateSpec.
+     * <p>
+     * This method does not use this listener's default title.
+     * 
+     * @param spec The EmbedCreateSpec to send.
+     * @param components The components to attach (optional).
+     */
+    protected void sendPromptMessage(EmbedCreateSpec spec, LayoutComponent... components) {
+        if (!sendPromptMessage) return;
+
+        if (message == null || message.getMessage() == null) {
+            message = new WizardMessage(components.length == 0 ? handler.sendMessage(spec) : handler.sendMessage(spec, components));
+        } else {
+            try {
+                if (apiCallOnSeparateThread) {
+                    ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), spec) : handler.editMessage(message.getMessage(), spec, components)));
+                } else {
+                    message.setMessage(components.length == 0 ? handler.editMessage(message.getMessage(), spec) : handler.editMessage(message.getMessage(), spec, components));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (addXReaction) {
+            addXEmojiListener();
+        }
+    }
+
+    /**
      * Attaches the ❌ emoji as a reaction to this listener's active {@link Message},
      * and adds a listener that ends the most recent {@link WizardState} when reacted by this listener's user.
      */
@@ -159,7 +194,7 @@ public abstract class InputListener {
         }
         // Create a listener that listens for the user to end the wizard by reacting
         createListener(eventDispatcher -> eventDispatcher.on(ReactionAddEvent.class)
-            .filter(event -> event.getMember().get().getId().asString().equals(user.getId().asString()))
+            .filter(event -> event.getUser().block().getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getEmoji().equals(ReactionEmoji.unicode("❌")))
             .subscribe(event -> recentState.end()));
     }
@@ -244,6 +279,15 @@ public abstract class InputListener {
      */
     public void apiCallsOnSeparateThread(boolean setting) {
         this.apiCallOnSeparateThread = setting;
+    }
+
+    /**
+     * If true, all responses will be automatically formatted to lowercase.
+     * 
+     * @param setting If true, all responses will be automatically formatted to lowercase.
+     */
+    public void autoFormat(boolean setting) {
+        this.autoFormat = setting;
     }
 
     /**
@@ -338,16 +382,26 @@ public abstract class InputListener {
             options.set(i, options.get(i).toLowerCase());
         }
 
+        String fullResponse = response;
         response = response.toLowerCase();
+
         if (!mustMatchLenient && !mustMatchStrict) {
             this.recentState.setNotes(String.join("\n", notes));
-            this.responseContainer.append(response);
+            if (autoFormat) {
+                this.responseContainer.append(response);
+            } else {
+                this.responseContainer.append(fullResponse);
+            }
             this.recentState.setUser(responder);
             return;
         }
         if (options.contains(response) || ((mustMatchLenient && (options.size() > 2 || (options.contains("back") && options.size() == 2) || options.size() == 1)) && !mustMatchStrict)) {
             this.recentState.setNotes(String.join("\n", notes));
-            this.responseContainer.append(response);
+            if (autoFormat) {
+                this.responseContainer.append(response);
+            } else {
+                this.responseContainer.append(fullResponse);
+            }
             this.recentState.setUser(responder);
         }
     }
@@ -469,5 +523,53 @@ public abstract class InputListener {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returns the current {@link User} of this listener.
+     * 
+     * @param user The new user.
+     */
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    /**
+     * Returns the current {@link User} of this listener.
+     * 
+     * @return The current {@link User} of this listener.
+     */
+    public User getUser() {
+        return user;
+    }
+
+    /**
+     * Sets the {@link InteractionHandler}, which will handle all interactions with discord.
+     * 
+     * @param handler The new {@link InteractionHandler}.
+     */
+    public void setInteractionHandler(InteractionHandler handler) {
+        this.handler = handler;
+    }
+
+    /**
+     * Returns the {@link InteractionHandler} for this listener, which will handle all interactions with discord.
+     * 
+     * @return The {@link InteractionHandler} for this listener.
+     */
+    public InteractionHandler getInteractionHandler() {
+        return handler;
+    }
+
+    /**
+     * Sets the {@link Message} that the user responded with in the most recent {@link WizardState}.
+     * <p>
+     * Note this will only be present for an {@link com.georgster.wizard.input.InputListener InputListener}
+     * which recorded a user's response via a unique {@link Message}.
+     * 
+     * @param msg The {@link Message} that the user responded with.
+     */
+    protected void setResponseMessage(Message msg) {
+        recentState.setMessage(msg);
     }
 }

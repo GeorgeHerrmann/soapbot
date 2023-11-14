@@ -108,6 +108,16 @@ public class InputListenerBuilder {
     }
 
     /**
+     * Disables auto formatting of the responses to lowercase.
+     * 
+     * @return This Builder
+     */
+    public InputListenerBuilder disableAutoFormatting() {
+        listener.autoFormat(false);
+        return this;
+    }
+
+    /**
      * Builds the {@link InputListener}.
      * 
      * @return The resulting {@link InputListener}.

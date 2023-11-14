@@ -58,6 +58,19 @@ public abstract class DateTimed {
     }
 
     /**
+     * Returns the {@link LocalDateTime} representation of this {@link DateTimed}.
+     * 
+     * @return The {@link LocalDateTime} representation of this {@link DateTimed}.
+     */
+    public LocalDateTime getLocalDateTime() {
+        try {
+            return LocalDateTime.parse(date + "T" + time + ":00");
+        } catch (Exception e) {
+            return LocalDateTime.parse(date + "T" + time);
+        }
+    }
+
+    /**
      * Returns how long, in seconds, from now (EST) until this {@link DateTimed} date and time.
      * If this {@link DateTimed} is in the past, the result will be negative.
      * 
@@ -159,10 +172,29 @@ public abstract class DateTimed {
 
     /**
      * Returns a standardized String representing the date and time using the ISO 8601 format.
+     * <p>
+     * This method manually adds the seconds field to the time String. If the time String
+     * already has a seconds field, use {@link #getRawDateTime()} instead.
      * 
      * @return A String with the date and time using the ISO 8601 format.
+     * @see {@link #getRawDateTime()} for a version without the seconds field.
      */
     public String getDateTime() {
         return date + "T" + time + ":00";
+    }
+
+    /**
+     * Returns a standardized String representing the date and time using the ISO 8601 format.
+     * <p>
+     * This method does not add the seconds field to the time String. If the time String
+     * does not have a seconds field, use {@link #getDateTime()} instead.
+     * <p>
+     * This method includes the time zone ("Z") at the end of the String.
+     * 
+     * @return A String with the date and time using the ISO 8601 format.
+     * @see {@link #getDateTime()} for a version with the seconds field.
+     */
+    public String getRawDateTime() {
+        return date + "T" + time + "Z";
     }
 }

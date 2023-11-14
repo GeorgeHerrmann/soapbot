@@ -39,7 +39,8 @@ public class ReactionListener extends InputListener {
      * {@inheritDoc}
      */
     public WizardState prompt(WizardState inputState) {
-        sendPromptMessage(inputState.getMessage());
+        inputState.getEmbed().ifPresentOrElse(this::sendPromptMessage,
+        () -> sendPromptMessage(inputState.getMessage()));
 
         String[] options = inputState.getOptions();
 

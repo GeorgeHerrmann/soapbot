@@ -45,7 +45,7 @@ public final class SoapClientManager {
         .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS, //The intents the bot will work with
         Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES,
         Intent.GUILDS, Intent.GUILD_MESSAGE_TYPING,
-        Intent.GUILD_VOICE_STATES, Intent.GUILD_MESSAGE_REACTIONS))
+        Intent.GUILD_VOICE_STATES, Intent.GUILD_MESSAGE_REACTIONS, Intent.DIRECT_MESSAGES, Intent.DIRECT_MESSAGE_REACTIONS))
         .login().block();
 
         this.dispatcher = discordClient.getEventDispatcher();
@@ -82,8 +82,7 @@ public final class SoapClientManager {
 
         dispatcher.on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
-        .filter(message -> (testMode && message.getMessage().getContent().startsWith("!!")) || !testMode) //If test mode is enabled, commands must start with "!!"
-        .filter(message -> message.getMessage().getContent().startsWith("!") || message.getMessage().getContent().startsWith("/")) //If test mode is disabled, commands must start with "!"
+        .filter(message -> isValidForTestMode(message.getMessage().getContent()))
         .subscribe(event -> clients.get(event.getGuild().block().getId()).onMessageCreate(event)); //Executes onMessageCreate when a MessageCreateEvent is fired
 
         dispatcher.on(ChatInputInteractionEvent.class)
@@ -99,6 +98,20 @@ public final class SoapClientManager {
 
         dispatcher.on(RoleCreateEvent.class)
         .subscribe(event -> clients.get(event.getGuildId()).onRoleCreate(event));
+    }
+
+    /**
+     * Returns if the given message is valid for the current test mode setting.
+     * 
+     * @param message The message to check.
+     * @return If the message is valid for the current test mode setting.
+     */
+    private boolean isValidForTestMode(String message) {
+        if (testMode) {
+            return message.startsWith("!!") || message.startsWith("//");
+        } else {
+            return (message.startsWith("!") && !message.startsWith("!!")) || (message.startsWith("/") && !message.startsWith("//"));
+        }
     }
 
     /**
