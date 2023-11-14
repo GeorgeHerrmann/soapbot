@@ -23,7 +23,7 @@ public final class SinglyAttachmentWizard extends InputWizard {
 
     public void begin() {
         nextWindow("show");
-        end();
+        shutdown();
     }
 
     protected void show() {

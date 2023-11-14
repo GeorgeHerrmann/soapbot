@@ -130,10 +130,10 @@ public class ReserveEventCommand implements ParseableCommand {
                 reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberById(user).getMention() + "\n"));
 
                 String[] output = SoapUtility.splitFirst(response.toString());
-                SinglyAttachmentWizard wizard = new SinglyAttachmentWizard(event, output[0], output[1]);
+                SinglyAttachmentWizard wizard = new SinglyAttachmentWizard(event, output[0], output[1]); // will attach the "manage" button
                 wizard.addOption("manage", () -> {
-                    InputWizard wizard2 = new ReserveEventWizard(event);
-                    wizard2.getInputListener().setCurrentMessage(wizard.getInputListener().getCurrentMessage());
+                    InputWizard wizard2 = new ReserveEventWizard(event); // brings up the manage wizard on click
+                    wizard2.getInputListener().setCurrentMessage(wizard.getInputListener().getCurrentMessage()); // sets the current message to the same message as the first wizard
                     wizard2.begin("manageEvent", reserve);
                 });
                 wizard.begin();
