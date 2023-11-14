@@ -78,12 +78,10 @@ public final class CollectableWizard extends InputWizard {
         if (Boolean.TRUE.equals(retry)) {
             prompt = "Invalid url. Please try again.";
         } else {
-            prompt = "What is the image url of the card? Please note that this cannot be changed upon creation.";
+            prompt = "Please provide the image to use as the card's art. You can either provide the direct image URL or send a Message with the image attached.";
         }
 
-        withFullResponse(fullResponse -> {
-            String response = fullResponse.getResponse();
-            handler.sendMessage(fullResponse.getMessage().getData().attachments().get(0).url());
+        withResponse(response -> {
             try {
                 current.setImageUrl(response);
                 nextWindow("collectableCost", current);
@@ -99,7 +97,7 @@ public final class CollectableWizard extends InputWizard {
      * @param current the {@code Collectable} being created
      */
     protected void collectableCost(Collectable current) {
-        String prompt = "What is the cost of the card? Please note that this cannot be changed by you after creation.";
+        String prompt = "What is the initial cost of the card? You will purchase the first copy of the card for this amount.";
         withResponse(response -> {
             try {
                 long cost = Long.parseLong(response);

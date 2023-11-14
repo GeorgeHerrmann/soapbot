@@ -11,6 +11,7 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
+import discord4j.core.object.entity.Attachment;
 
 /**
  * Sends a message to the user in a {@code Message} containing {@link Button}s as the options.
@@ -51,6 +52,8 @@ public class ButtonMessageListener extends InputListener {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * If the user sends an attachment with their message, the attachment's URL will be used as the response.
      */
     public WizardState prompt(WizardState inputState) {
         String prompt = inputState.getMessage();
@@ -88,7 +91,12 @@ public class ButtonMessageListener extends InputListener {
             .filter(event -> event.getMessage().getAuthor().orElse(user).getId().asString().equals(user.getId().asString()))
             .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
             .subscribe(event -> {
-                setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user));
+                List<Attachment> attachments = event.getMessage().getAttachments();
+                if (attachments.isEmpty()) {
+                    setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user));
+                } else {
+                    setResponse(attachments.get(0).getUrl(), event.getMessage().getAuthor().orElse(user));
+                }
                 setResponseMessage(event.getMessage());
             }));
             

@@ -1,9 +1,12 @@
 package com.georgster.wizard.input;
 
+import java.util.List;
+
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.wizard.WizardState;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Attachment;
 
 /**
  * Sends a message containing the provided options to the user in a {@code Message}.
@@ -31,6 +34,8 @@ public class MessageListener extends InputListener {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * If the user sends an attachment with their message, the attachment's URL will be used as the response.
      */
     public WizardState prompt(WizardState inputState) {
         StringBuilder prompt = new StringBuilder(inputState.getMessage());
@@ -45,7 +50,12 @@ public class MessageListener extends InputListener {
         createListener(dispatcher -> dispatcher.on(MessageCreateEvent.class)
             .filter(event -> event.getMessage().getChannelId().equals(message.getMessage().getChannelId()))
             .subscribe(event -> {
-                setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user));
+                List<Attachment> attachments = event.getMessage().getAttachments();
+                if (attachments.isEmpty()) {
+                    setResponse(event.getMessage().getContent(), event.getMessage().getAuthor().orElse(user));
+                } else {
+                    setResponse(attachments.get(0).getUrl(), event.getMessage().getAuthor().orElse(user));
+                }
                 setResponseMessage(event.getMessage());
             }));
             

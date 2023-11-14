@@ -395,3 +395,10 @@
     - Card Inflation has been moved from the CollectableViewWizard to the ManageCollectableWizard (CardManager)
         - Accessing the CardManager will now display the option to inflate a card's cost
             - This was always the desired functionality, but a backend issue with personal User Wizards had to get fixed first
+
+2.605-BETA
+    - When creating a Collectable, an image can be uploaded and sent in a Message to be used as the image URL
+    - When viewing a specific event via the ReserveEventCommand (!re, !events, etc), a "manage" button will appear
+        - The person who executed the command can click that button to directly bring up the manage screen for that event in the ReserveEventWizard
+        - When the wizard is ended, the old Display comes back up
+    - Updated InputWizards and InputListeners to be able to pass around the respondants Message object, if it exists
