@@ -12,7 +12,7 @@ import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 /**
- * A {@link InputWizard} for managing {@code PermissionGroups}.
+ * An {@link InputWizard} for managing {@code PermissionGroups}.
  */
 public class PermissionsWizard extends InputWizard {
     private static final String TITLE = "Permissions Wizard";

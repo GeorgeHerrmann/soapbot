@@ -10,7 +10,7 @@ import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
 /**
- * A {@link InputWizard} that handles the creation of a {@link Collectable}.
+ * An {@link InputWizard} that handles the creation of a {@link Collectable}.
  */
 public final class CollectableWizard extends InputWizard {
     private UserProfile ownerProfile;

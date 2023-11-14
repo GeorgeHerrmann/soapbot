@@ -13,6 +13,9 @@ import com.georgster.wizard.TradableWizard.PersonalTradeWizard.TradeResult;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
+/**
+ * An {@link InputWizard} that handles the creation of a {@link TradeOffer}.
+ */
 public final class TradableWizard extends InputWizard {
     private final UserProfile profile1;
     private final UserProfile profile2;
@@ -21,14 +24,28 @@ public final class TradableWizard extends InputWizard {
 
     private final TradeOffer offer;
 
+    /**
+     * An {@link InputWizard} that prompts a user to accept or decline a {@link TradeOffer} in a private message.
+     * <p>
+     * A {@link TradeResult} indicating the user's response can be obtained with {@link #getResult()}.
+     */
     public class PersonalTradeWizard extends InputWizard {
         private final TradeOffer offer;
         private TradeResult result;
 
+        /**
+         * An enum representing the result of a {@link PersonalTradeWizard}.
+         */
         public enum TradeResult {
             ACCEPTED, DECLINED, TIMEOUT
         }
 
+        /**
+         * Creates a new {@link PersonalTradeWizard} with the given parameters.
+         * 
+         * @param event the event to construct for
+         * @param offer the {@code TradeOffer} to prompt the user with
+         */
         protected PersonalTradeWizard(CommandExecutionEvent event, TradeOffer offer) {
             super(event, InputListenerFactory.createButtonMessageListener(event, "Trade Offer From " + offer.getOfferer().getUsername()).builder().withTimeoutDuration(300000).allowAllResponses(true).build());
             this.offer = offer;
@@ -36,10 +53,16 @@ public final class TradableWizard extends InputWizard {
             swtichToUserWizard(event.getGuildInteractionHandler().getMemberById(offer.getReciever().getId()));
         }
 
+        /**
+         * {@inheritDoc}
+         */
         public void begin() {
             nextWindow("presentTrade");
         }
 
+        /**
+         * Presents the {@link TradeOffer} to the user.
+         */
         protected void presentTrade() {
             StringBuilder prompt = new StringBuilder("You have recieved a trade offer from " + offer.getOfferer().getUsername() + ":\n\n");
 
@@ -86,6 +109,13 @@ public final class TradableWizard extends InputWizard {
         }
     }
 
+    /**
+     * Creates a new {@link TradableWizard} with the given parameters.
+     * 
+     * @param event   the event to construct for
+     * @param profile1 the first {@code UserProfile} to trade with
+     * @param profile2 the second {@code UserProfile} to trade with
+     */
     public TradableWizard(CommandExecutionEvent event, UserProfile profile1, UserProfile profile2) {
         super(event, InputListenerFactory.createButtonMessageListener(event, "Trade Wizard").builder().requireMatch(false, false).disableAutoFormatting().build());
         this.profile1 = profile1;
@@ -95,11 +125,17 @@ public final class TradableWizard extends InputWizard {
         this.tradeables = new ArrayList<>(profile1.getAllTradeables());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         nextWindow("offerTradeables");
         end();
     }
 
+    /**
+     * The window that handles the tradeable input of the {@link TradeOffer}.
+     */
     protected void offerTradeables() {
         final InputListener newListener = InputListenerFactory.createMenuMessageListener(event, "Add Items To Trade");
 
@@ -126,6 +162,9 @@ public final class TradableWizard extends InputWizard {
         }, false, newListener, sb.toString(), options);
     }
 
+    /**
+     * The window that handles the coin input of the {@link TradeOffer}.
+     */
     protected void offerCoins() {
         final String prompt = "Please type how many coins you would like to offer in this trade, or select \"Continue\" to not offer coins";
 
@@ -150,6 +189,9 @@ public final class TradableWizard extends InputWizard {
         }, true, prompt, "Continue");
     }
 
+    /**
+     * The window that handles the tradeable request of the {@link TradeOffer}.
+     */
     protected void requestTradeables() {
         final InputListener newListener = InputListenerFactory.createMenuMessageListener(event, "Add Items To Trade");
 
@@ -176,6 +218,9 @@ public final class TradableWizard extends InputWizard {
         }, false, newListener, sb.toString(), options);
     }
 
+    /**
+     * The window that handles the coin request of the {@link TradeOffer}.
+     */
     protected void requestCoins() {
         final String prompt = "Please type how many coins you would like to request in this trade, or select \"Continue\" to not request coins";
 
@@ -200,6 +245,9 @@ public final class TradableWizard extends InputWizard {
         }, true, prompt, "Continue");
     }
 
+    /**
+     * Sends the {@link TradeOffer} to {@code profile2}.
+     */
     protected void sendTradeOffer() {
         ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> {
             PersonalTradeWizard wizard = new PersonalTradeWizard(event, offer);

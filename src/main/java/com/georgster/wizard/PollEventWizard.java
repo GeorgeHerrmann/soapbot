@@ -16,7 +16,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
 /**
- * An {@link OldInputWizard} for handling PollEvents.
+ * An {@link InputWizard} for handling PollEvents.
  */
 public class PollEventWizard extends InputWizard {
 

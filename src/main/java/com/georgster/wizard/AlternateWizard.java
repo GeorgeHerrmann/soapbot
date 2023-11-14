@@ -23,6 +23,7 @@ public final class AlternateWizard extends InputWizard {
      * Creates a new AlternateWizard from the provided event that prompted this wizard's creation and wizards that will be swapped.
      * <p>
      * The {@link AlternateWizard} will begin from the first window of {@code wizard1}.
+     * 
      * @param event The event that prompted this wizard's creation.
      * @param wizard1 The first wizard to swap to and from.
      * @param wizard2 The second wizard to swap to and from.
@@ -37,6 +38,7 @@ public final class AlternateWizard extends InputWizard {
      * Creates a new AlternateWizard from the provided event that prompted this wizard's creation and wizards that will be swapped, with the option to use a unique {@link InteractionHandler}.
      * <p>
      * The {@link AlternateWizard} will begin from the first window of {@code wizard1}.
+     * 
      * @param event The event that prompted this wizard's creation.
      * @param wizard1 The first wizard to swap to and from.
      * @param wizard2 The second wizard to swap to and from.

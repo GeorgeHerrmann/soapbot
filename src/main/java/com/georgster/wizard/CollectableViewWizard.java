@@ -18,7 +18,7 @@ import com.georgster.wizard.input.InputListenerFactory;
 import discord4j.core.spec.EmbedCreateSpec;
 
 /**
- * A {@link InputWizard} that handles viewing {@link Collectable Collectables} and {@link Collected Collecteds}.
+ * An {@link InputWizard} that handles viewing {@link Collectable Collectables} and {@link Collected Collecteds}.
  */
 public class CollectableViewWizard extends InputWizard {
     
