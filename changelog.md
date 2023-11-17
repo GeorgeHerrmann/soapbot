@@ -402,3 +402,10 @@
         - The person who executed the command can click that button to directly bring up the manage screen for that event in the ReserveEventWizard
         - When the wizard is ended, the old Display comes back up
     - Updated InputWizards and InputListeners to be able to pass around the respondants Message object, if it exists
+
+2.606
+    - Trading Cards are proving to be stable and have been taken out of beta
+    - Fixed multiple issues with the Application Command (slash commands) registration system
+        - Fixed an issue where Global Application Commands were being registered multiple times, once for each Guild SOAP Bot is in
+        - Fixed an issue where the registration system would attempt to register a new application for commands which were already registered
+        - Fixed an isssue where new Commands may not be automatically be registered

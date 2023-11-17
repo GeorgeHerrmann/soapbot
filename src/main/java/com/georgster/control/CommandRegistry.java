@@ -18,6 +18,7 @@ import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.game.blackjack.BlackjackCommand;
 import com.georgster.game.plinko.PlinkoCommand;
 import com.georgster.gpt.GPTCommand;
+import com.georgster.logs.MultiLogger;
 import com.georgster.misc.EchoCommand;
 import com.georgster.misc.HelloWorldCommand;
 import com.georgster.misc.HelpCommand;
@@ -33,13 +34,16 @@ import com.georgster.util.DiscordEvent;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 import discord4j.core.event.domain.Event;
+import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * The CommandRegistry is responsible for handling all of SOAP Bot's {@link Command Commands}.
  */
-public class CommandRegistry {
+public final class CommandRegistry {
     
+    private static boolean registeredGlobalCommands = false;
+
     private final ClientContext context;
     private final List<Class<? extends Command>> commands;
 
@@ -107,23 +111,34 @@ public class CommandRegistry {
      * all pre-existing definitions if they are out of date.
      */
     protected void registerGlobalCommands() {
+        if (registeredGlobalCommands) { // If the global commands have already been registered, don't register them again.
+            return;
+        }
+
+        CommandRegistry.markGlobalRegistrationStatus(true);
         ThreadPoolFactory.scheduleGlobalDiscordApiTask(() -> { //These tasks are scheduled to run on the global Discord API thread.
 
             long appId = context.getRestClient().getApplicationId().block();
             
-            List<ApplicationCommandRequest> newCommandRequests = new ArrayList<>(); // SOAPBot's records of the commands
-
-            getCommands().forEach(command -> { // Obtains the ApplicationCommandRequest for each command
-                ApplicationCommandRequest request = command.getCommandApplicationInformation();
-                if (request != null) { // Commands that don't want to be registered will return null
-                    newCommandRequests.add(request);
+            List<Command> commandObjects = this.getCommands();
+            List<ApplicationCommandRequest> newCommandRequests = new ArrayList<>();
+            List<ApplicationCommandData> applicationCommandData = context.getRestClient().getApplicationService().getGlobalApplicationCommands(appId).collectList().block();
+            
+            for (Command command : commandObjects) {
+                ApplicationCommandRequest newRequest = command.getCommandApplicationInformation();
+                if (newRequest != null) {
+                    newCommandRequests.add(newRequest);
+                    String commandName = newRequest.name();
+    
+                    boolean isCommandNameAbsent = applicationCommandData.stream()
+                        .noneMatch(appCommandData -> appCommandData.name().equals(commandName));
+        
+                    if (isCommandNameAbsent) {
+                        MultiLogger.logSystem("Registering global command: " + commandName + "\n", getClass());
+                        context.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, newRequest).block();
+                    }
                 }
-            });
-
-            context.getRestClient().getApplicationService().getGlobalApplicationCommands(appId).collectList().block().forEach(globalCommand -> 
-                newCommandRequests.stream().filter(examiner -> !globalCommand.name().equals(examiner.name()))
-                                    .forEach(newRequest -> context.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, newRequest).block())
-            );
+            }
 
             context.getRestClient().getApplicationService().getGuildApplicationCommands(appId, context.getGuild().getId().asLong()).collectList().block().forEach(guildCommand -> 
                 context.getRestClient().getApplicationService().deleteGuildApplicationCommand(appId, context.getGuild().getId().asLong(), guildCommand.id().asLong()).subscribe()
@@ -131,6 +146,8 @@ public class CommandRegistry {
 
             // Overwrites the global commands with the new ones
             context.getRestClient().getApplicationService().bulkOverwriteGlobalApplicationCommand(appId, newCommandRequests).subscribe();
+
+            MultiLogger.logSystem("Overwrite complete\n", getClass());
         });
     }
 
@@ -170,5 +187,16 @@ public class CommandRegistry {
             }
         }
         throw new IllegalArgumentException("No Command found with alias: " + alias);
+    }
+
+    /**
+     * Marks the global registration status of the {@link CommandRegistry}.
+     * If this is {@code true}, the {@link CommandRegistry} will not attempt to register
+     * global commands again.
+     * 
+     * @param status The global registration status of the {@link CommandRegistry}.
+     */
+    private static void markGlobalRegistrationStatus(boolean status) {
+        CommandRegistry.registeredGlobalCommands = status;
     }
 }
