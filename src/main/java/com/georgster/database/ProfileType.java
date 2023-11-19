@@ -19,5 +19,9 @@ public enum ProfileType {
     /**
      * Represents a guild's collectables profile.
      */
-    COLLECTABLES
+    COLLECTABLES,
+    /**
+     * Represents a guild's mention groups profile.
+     */
+    MENTIONGROUPS
 }

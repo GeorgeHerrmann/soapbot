@@ -29,20 +29,20 @@ public class PongCommand implements Command {
         List<String> args = new ArrayList<>(List.of(event.getDiscordEvent().getFormattedMessage().toLowerCase().replace("!", "").split(" ")));
         StringBuilder fullMessage = new StringBuilder();
         int counter = 0;
-        while(args.contains("ping")) {
-            args.remove("ping");
+        while(args.contains("pong")) {
+            args.remove("pong");
             fullMessage.append("pong! ");
             counter++;
         }
-        logger.append("- Responding to a !ping command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
-        handler.sendMessage(fullMessage.toString().trim(), "You said ping " + counter + " times");
+        logger.append("- Responding to a !pong command request with " + counter + " pongs", LogDestination.API, LogDestination.NONAPI);
+        handler.sendMessage(fullMessage.toString().trim(), "You said pong " + counter + " times");
     }
 
     /**
      * {@inheritDoc}
      */
     public List<String> getAliases() {
-        return List.of("ping");
+        return List.of("pong");
     }
 
     /**
@@ -67,6 +67,6 @@ public class PongCommand implements Command {
      */
     public String help() {
       return "Aliases: " + getAliases().toString() +
-      "\n!ping to have SOAP Bot respond with pong! for each 'ping' in your message";
+      "\n!pong to have SOAP Bot respond with pong! for each 'ping' in your message";
     }
 }

@@ -239,7 +239,7 @@ public final class CardCommand implements ParseableCommand {
                 .name(getAliases().get(0))
                 .description("Interact with trading cards")
                 .addOption(ApplicationCommandOptionData.builder()
-                        .name("id, name or 'mine'")
+                        .name("view")
                         .description("Either a trading card ID, name to lookup, or 'mine' for personal cards")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false)

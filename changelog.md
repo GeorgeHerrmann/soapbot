@@ -409,3 +409,14 @@
         - Fixed an issue where Global Application Commands were being registered multiple times, once for each Guild SOAP Bot is in
         - Fixed an issue where the registration system would attempt to register a new application for commands which were already registered
         - Fixed an isssue where new Commands may not be automatically be registered
+    
+2.700
+    - New: Mention Groups
+        - MentionGroups allow you to easily mention a pre-determined list of members at once
+            - Mention Groups can be accessed with !mention, !ping or !p
+                - !mention create to create a new groups
+                - !mention edit to edit a new group
+                - !mention [name] to mention all people in a group
+                - !mention list to view all groups
+    - Fixed an issue where the GPTCommand was formatting its AI responses, instead of sending them in plain text
+    - The current PingCommand (!ping) has been changed to execute with !pong, as the MentionGroupCommand now occupies !ping

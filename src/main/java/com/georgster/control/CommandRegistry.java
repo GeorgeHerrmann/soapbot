@@ -19,6 +19,7 @@ import com.georgster.game.blackjack.BlackjackCommand;
 import com.georgster.game.plinko.PlinkoCommand;
 import com.georgster.gpt.GPTCommand;
 import com.georgster.logs.MultiLogger;
+import com.georgster.mentiongroups.MentionGroupCommand;
 import com.georgster.misc.EchoCommand;
 import com.georgster.misc.HelloWorldCommand;
 import com.georgster.misc.HelpCommand;
@@ -79,7 +80,8 @@ public final class CommandRegistry {
             EchoCommand.class,
             BlackjackCommand.class,
             TradeCommand.class,
-            CardCommand.class
+            CardCommand.class,
+            MentionGroupCommand.class
         ));
     }
 

@@ -1,6 +1,7 @@
 package com.georgster.control;
 
 import com.georgster.control.manager.CollectableManager;
+import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.SoapManager;
@@ -43,7 +44,8 @@ public final class SoapClient {
         this.context.addManagers(new SoapEventManager(context),
                            new PermissionsManager(context),
                            new UserProfileManager(context),
-                           new CollectableManager(context));
+                           new CollectableManager(context),
+                           new MentionGroupManager(context));
         this.context.setCommandRegistry(new CommandRegistry(context));
         this.context.getCommandRegistry().registerGlobalCommands();
     }

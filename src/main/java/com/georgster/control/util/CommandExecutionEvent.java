@@ -8,6 +8,7 @@ import com.georgster.ParseableCommand;
 import com.georgster.control.CommandRegistry;
 import com.georgster.control.SoapClient;
 import com.georgster.control.manager.CollectableManager;
+import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.UserProfileManager;
@@ -194,6 +195,15 @@ public class CommandExecutionEvent {
      */
     public CollectableManager getCollectableManager() {
         return context.getCollectableManager();
+    }
+
+    /**
+     * Returns the {@link MentionGroupManager} for the SoapClient in this Event.
+     * 
+     * @return the {@link MentionGroupManager} for the SoapClient in this Event.
+     */
+    public MentionGroupManager getMentionGroupManager() {
+        return context.getMentionGroupManager();
     }
 
     /**

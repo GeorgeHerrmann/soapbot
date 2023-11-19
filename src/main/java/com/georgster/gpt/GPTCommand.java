@@ -48,7 +48,7 @@ public class GPTCommand implements ParseableCommand {
         
             if (responses.size() == 1) {
                 logger.append("- Only one response found, sending it in plain text", LogDestination.NONAPI);
-                handler.sendMessage(responses.get(0));
+                handler.sendPlainMessage(responses.get(0));
             } else if (responses.size() > 1) {
                 logger.append("- Multiple responses found, starting an iterable wizard to view them", LogDestination.NONAPI);
                 IterableStringWizard wizard = new IterableStringWizard(event, "Responses", responses);

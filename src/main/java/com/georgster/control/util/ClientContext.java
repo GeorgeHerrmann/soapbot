@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import com.georgster.control.CommandRegistry;
 import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.Manageable;
+import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.SoapManager;
@@ -118,6 +119,15 @@ public class ClientContext {
      */
     public CollectableManager getCollectableManager() {
         return (CollectableManager) managers.stream().filter(CollectableManager.class::isInstance).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the MentionGroupManager
+     * 
+     * @return the mention group manager.
+     */
+    public MentionGroupManager getMentionGroupManager() {
+        return (MentionGroupManager) managers.stream().filter(MentionGroupManager.class::isInstance).findFirst().orElse(null);
     }
 
     /**
