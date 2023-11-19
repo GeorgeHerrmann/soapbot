@@ -12,17 +12,29 @@ import com.georgster.wizard.input.InputListenerFactory;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 
-public class MentionGroupWizard extends InputWizard {
+/**
+ * A wizard for creating and editing {@link MentionGroup MentionGroups}.
+ */
+public final class MentionGroupWizard extends InputWizard {
     
     private final MentionGroupManager manager;
     private boolean isEdit; // If this wizard should start on the edit path
 
+    /**
+     * Creates a new MentionGroupWizard.
+     * 
+     * @param event The event that triggered this wizard
+     * @param isEdit If this wizard should start on the edit path
+     */
     public MentionGroupWizard(CommandExecutionEvent event, boolean isEdit) {
         super(event, InputListenerFactory.createButtonMessageListener(event, "Mention Group Wizard").builder().requireMatch(false, false).build());
         this.manager = event.getMentionGroupManager();
         this.isEdit = isEdit;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         if (isEdit) {
             nextWindow("editGroups");
@@ -32,6 +44,9 @@ public class MentionGroupWizard extends InputWizard {
         end();
     }
 
+    /**
+     * The window that starts the process of creating a new mention group.
+     */
     protected void newGroupName() {
         final String prompt = "What should the name of this group be? You will use this name to mention the group.";
 
@@ -41,6 +56,11 @@ public class MentionGroupWizard extends InputWizard {
         }, false, prompt);
     }
 
+    /**
+     * The window that adds members to a new mention group.
+     * 
+     * @param group The group to add members to
+     */
     protected void addMembers(MentionGroup group) {
         final StringBuilder prompt = new StringBuilder();
         prompt.append("Please mention the members you would like to add to this group. You may do this all in one message or in multiple messages.\n");
@@ -64,6 +84,9 @@ public class MentionGroupWizard extends InputWizard {
         }, true, prompt.toString(), "done");
     }
 
+    /**
+     * The window that starts the process of editing a mention group, by listing all mention groups.
+     */
     protected void editGroups() {
 
         if (manager.isEmpty()) {
@@ -90,6 +113,11 @@ public class MentionGroupWizard extends InputWizard {
         }
     }
 
+    /**
+     * The window that lists the options for editing a mention group.
+     * 
+     * @param group The group to edit
+     */
     protected void editGroupOptions(MentionGroup group) {
         final String prompt = "What would you like to do with mention group " + group.getIdentifier() + "?";
 
@@ -104,6 +132,11 @@ public class MentionGroupWizard extends InputWizard {
         }, true, prompt, "add members", "remove members", "delete group");
     }
 
+    /**
+     * The window that adds members to an existing mention group.
+     * 
+     * @param group The group to add members to
+     */
     protected void addGroupMembers(MentionGroup group) {
         final StringBuilder prompt = new StringBuilder();
         prompt.append("Please mention the members you would like to add to this group. You may do this all in one message or in multiple messages.\n");
@@ -118,6 +151,11 @@ public class MentionGroupWizard extends InputWizard {
         }, true, prompt.toString());
     }
 
+    /**
+     * The window that removes members from an existing mention group.
+     * 
+     * @param group The group to remove members from
+     */
     protected void removeGroupMembers(MentionGroup group) {
         final InputListener newListener = InputListenerFactory.createMenuMessageListener(event, "Select Members to Remove");
 
@@ -140,6 +178,11 @@ public class MentionGroupWizard extends InputWizard {
         }, true, newListener, prompt, options.toArray(new String[options.size()]));
     }
 
+    /**
+     * The window that confirms the deletion of an existing mention group.
+     * 
+     * @param group The group to delete
+     */
     protected void confirmGroupDelete(MentionGroup group) {
         final String prompt = "Are you sure you want to delete mention group " + group.getIdentifier() + "? ***This action cannot be undone.***";
 

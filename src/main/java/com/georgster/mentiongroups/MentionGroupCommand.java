@@ -18,8 +18,14 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
+/**
+ * A command for interacting with {@link MentionGroup MentionGroups}.
+ */
 public final class MentionGroupCommand implements ParseableCommand {
     
+    /**
+     * {@inheritDoc}
+     */
     public void execute(CommandExecutionEvent event) {
         MentionGroupManager manager = event.getMentionGroupManager();
         SubcommandSystem sb = event.createSubcommandSystem();
@@ -63,10 +69,16 @@ public final class MentionGroupCommand implements ParseableCommand {
         }, 0);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public CommandParser getCommandParser() {
         return new CommandParser("VR");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\n- !mention [GROUP] - Mention a group of people in a Mention group" +
@@ -75,6 +87,9 @@ public final class MentionGroupCommand implements ParseableCommand {
         "\n- !mention list - List all mention groups";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public List<String> getAliases() {
         return List.of("mention", "ping", "p");
     }
