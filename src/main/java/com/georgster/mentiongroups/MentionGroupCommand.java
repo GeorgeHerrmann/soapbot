@@ -50,9 +50,9 @@ public final class MentionGroupCommand implements ParseableCommand {
 
             builder.append("Mention Groups:\n");
             for (MentionGroup group : event.getMentionGroupManager().getAll()) {
-                builder.append("- " + group.getIdentifier() + " *(" + group.getMemberIds().size() + ") members*").append("\n");
+                builder.append("- " + group.getIdentifier() + " *(" + group.getMemberIds().size() + " members)*").append("\n");
             }
-            builder.append("\nTo mention a group, use !mention [GROUP]");
+            builder.append("\nTo mention a group, use **!mention [GROUP]**");
 
             handler.sendMessage(builder.toString(), handler.getGuild().getName() + " Mention Groups");
         }, "list");

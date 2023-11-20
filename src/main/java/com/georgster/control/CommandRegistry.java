@@ -120,36 +120,36 @@ public final class CommandRegistry {
         CommandRegistry.markGlobalRegistrationStatus(true);
         ThreadPoolFactory.scheduleGlobalDiscordApiTask(() -> { //These tasks are scheduled to run on the global Discord API thread.
 
-            long appId = context.getRestClient().getApplicationId().block();
+            try {
+                long appId = context.getRestClient().getApplicationId().block();
             
-            List<Command> commandObjects = this.getCommands();
-            List<ApplicationCommandRequest> newCommandRequests = new ArrayList<>();
-            List<ApplicationCommandData> applicationCommandData = context.getRestClient().getApplicationService().getGlobalApplicationCommands(appId).collectList().block();
-            
-            for (Command command : commandObjects) {
-                ApplicationCommandRequest newRequest = command.getCommandApplicationInformation();
-                if (newRequest != null) {
-                    newCommandRequests.add(newRequest);
-                    String commandName = newRequest.name();
-    
-                    boolean isCommandNameAbsent = applicationCommandData.stream()
-                        .noneMatch(appCommandData -> appCommandData.name().equals(commandName));
+                List<Command> commandObjects = this.getCommands();
+                List<ApplicationCommandRequest> newCommandRequests = new ArrayList<>();
+                List<ApplicationCommandData> applicationCommandData = context.getRestClient().getApplicationService().getGlobalApplicationCommands(appId).collectList().block();
+                
+                for (Command command : commandObjects) {
+                    ApplicationCommandRequest newRequest = command.getCommandApplicationInformation();
+                    if (newRequest != null) {
+                        newCommandRequests.add(newRequest);
+                        String commandName = newRequest.name();
         
-                    if (isCommandNameAbsent) {
-                        MultiLogger.logSystem("Registering global command: " + commandName + "\n", getClass());
-                        context.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, newRequest).block();
+                        boolean isCommandNameAbsent = applicationCommandData.stream()
+                            .noneMatch(appCommandData -> appCommandData.name().equals(commandName));
+            
+                        if (isCommandNameAbsent) {
+                            MultiLogger.logSystem("Registering global command: " + commandName + "\n", getClass());
+                            context.getRestClient().getApplicationService().createGlobalApplicationCommand(appId, newRequest).block();
+                        }
                     }
                 }
+
+                // Overwrites the global commands with the new ones
+                context.getRestClient().getApplicationService().bulkOverwriteGlobalApplicationCommand(appId, newCommandRequests).subscribe();
+
+                MultiLogger.logSystem("Overwrite complete\n", getClass());
+            } catch (Exception e) {
+                e.printStackTrace();   
             }
-
-            context.getRestClient().getApplicationService().getGuildApplicationCommands(appId, context.getGuild().getId().asLong()).collectList().block().forEach(guildCommand -> 
-                context.getRestClient().getApplicationService().deleteGuildApplicationCommand(appId, context.getGuild().getId().asLong(), guildCommand.id().asLong()).subscribe()
-            );
-
-            // Overwrites the global commands with the new ones
-            context.getRestClient().getApplicationService().bulkOverwriteGlobalApplicationCommand(appId, newCommandRequests).subscribe();
-
-            MultiLogger.logSystem("Overwrite complete\n", getClass());
         });
     }
 

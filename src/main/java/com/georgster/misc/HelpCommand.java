@@ -97,12 +97,15 @@ public class HelpCommand implements ParseableCommand {
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false);
 
-        register.getCommands().forEach(command -> 
-            temp.addChoice(ApplicationCommandOptionChoiceData.builder()
-                    .name(command.getAliases().get(0))
-                    .value(command.getAliases().get(0))
-                    .build())
-        );
+        register.getCommands().forEach(command -> {
+            List<String> aliases = command.getAliases();
+            if (!aliases.isEmpty()) {
+                temp.addChoice(ApplicationCommandOptionChoiceData.builder()
+                    .name(aliases.get(0))
+                    .value(aliases.get(0))
+                    .build());
+            }
+        });
 
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
