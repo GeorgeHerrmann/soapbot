@@ -420,3 +420,8 @@
                 - !mention list to view all groups
     - Fixed an issue where the GPTCommand was formatting its AI responses, instead of sending them in plain text
     - The current PingCommand (!ping) has been changed to execute with !pong, as the MentionGroupCommand now occupies !ping
+
+2.701
+    - Fixed an issue where the HelpCommand was not updating its ApplicationCommand (Slash Command) definition when new Commands were being created
+    - Fixed an issue where TimedEvents (Poll and Reserve Events) were still adjusting for daylight savings, even though it is over
+    

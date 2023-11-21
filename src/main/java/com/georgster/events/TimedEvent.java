@@ -60,10 +60,11 @@ public abstract class TimedEvent extends DateTimed {
     public long until() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00"));
         String eventDateTimeString = date + "T" + time + ":00";
-        long until = (now.until(LocalDateTime.parse(eventDateTimeString), ChronoUnit.SECONDS)) - 3600;
+        long until = (now.until(LocalDateTime.parse(eventDateTimeString), ChronoUnit.SECONDS));
         if (until < 0 && Math.abs(until) > 60) {
             until = Math.abs(until);
         }
+        System.out.println(until);
         return until;
     }
 
@@ -76,7 +77,7 @@ public abstract class TimedEvent extends DateTimed {
      */
     protected String getCorrectDate(String time) {
         LocalTime localTime = LocalTime.parse(time);
-        if (LocalTime.now(ZoneId.of("-05:00")).plusHours(1).isAfter(localTime)) {
+        if (LocalTime.now(ZoneId.of("-05:00")).isAfter(localTime)) {
             return LocalDate.now(ZoneId.of("-05:00")).plusDays(1).toString();
         } else {
             return LocalDate.now(ZoneId.of("-05:00")).toString();
