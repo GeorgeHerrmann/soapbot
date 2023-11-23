@@ -425,3 +425,10 @@
     - Fixed an issue where the HelpCommand was not updating its ApplicationCommand (Slash Command) definition when new Commands were being created
     - Fixed an issue where TimedEvents (Poll and Reserve Events) were still adjusting for daylight savings, even though it is over
     
+2.702
+    - Fixed various formatting issues with Mention Groups (including help and log messages)
+    - Added a "silent" option to MentionGroups to view all the mentions in a group without pinging Members
+        - Use "silent", "quiet" or "s" anywhere in the command to use the silent option
+            - Example: '!mention cs2 silent'
+                - Or, to be really concise, you can use '!p cs2 s' or '!p s cs2'
+        - The ApplicationCommand (slash command) description has been updated to reflect this new option

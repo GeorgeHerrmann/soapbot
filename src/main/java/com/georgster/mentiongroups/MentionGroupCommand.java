@@ -8,6 +8,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.InputWizard;
@@ -33,19 +34,19 @@ public final class MentionGroupCommand implements ParseableCommand {
         MultiLogger logger = event.getLogger();
 
         sb.on(p -> {
-            logger.append("Opening the Mention Group Wizard\n", LogDestination.NONAPI);
+            logger.append("- Opening the Mention Group Wizard at the creation window\n", LogDestination.NONAPI);
             InputWizard wizard = new MentionGroupWizard(event, false);
             wizard.begin();
         }, "create");
 
         sb.on(p -> {
-            logger.append("Opening the Mention Group Wizard\n", LogDestination.NONAPI);
+            logger.append("- Opening the Mention Group Wizard at the editing window\n", LogDestination.NONAPI);
             InputWizard wizard = new MentionGroupWizard(event, true);
             wizard.begin();
         }, "edit");
 
         sb.on(p -> {
-            logger.append("Listing all mention groups", LogDestination.NONAPI);
+            logger.append("- Listing all mention groups", LogDestination.NONAPI);
             StringBuilder builder = new StringBuilder();
 
             builder.append("Mention Groups:\n");
@@ -57,13 +58,30 @@ public final class MentionGroupCommand implements ParseableCommand {
             handler.sendMessage(builder.toString(), handler.getGuild().getName() + " Mention Groups");
         }, "list");
 
+        sb.on(p -> {
+            if (p.size() > 1) {
+                logger.append("- Searching for a mention group\n", LogDestination.NONAPI);
+                String group = p.get(0);
+                if (manager.exists(group)) {
+                    logger.append("- Mention group found\n", LogDestination.NONAPI);
+                    handler.sendMessage(manager.get(group).getMentionString(handler), "Mention Group " + group);
+                } else {
+                    logger.append("- Mention group not found\n", LogDestination.NONAPI);
+                    handler.sendMessage("A Mention Group with that name does not exist. Type '!mention create' to create a new one", "Group not found");
+                }
+            } else {
+                logger.append("- No mention group specified\n", LogDestination.NONAPI);
+                handler.sendMessage("You must specify a mention group to mention silently", "No group specified");
+            }
+        }, "silent", "quiet", "s");
+
         sb.onIndexLast(group -> {
-            logger.append("Searching for a mention group\n", LogDestination.NONAPI);
+            logger.append("- Searching for a mention group\n", LogDestination.NONAPI);
             if (manager.exists(group)) {
-                logger.append("Mention group found\n", LogDestination.NONAPI);
+                logger.append("- Mention group found\n", LogDestination.NONAPI);
                 handler.sendPlainMessage(manager.get(group).getMentionString(handler));
             } else {
-                logger.append("Mention group not found\n", LogDestination.NONAPI);
+                logger.append("- Mention group not found\n", LogDestination.NONAPI);
                 handler.sendMessage("A Mention Group with that name does not exist. Type '!mention create' to create a new one", "Group not found");
             }
         }, 0);
@@ -73,7 +91,7 @@ public final class MentionGroupCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new CommandParser("VR");
+        return new ParseBuilder("VR", "1O").withRules("X", "I").withIdentifiers("create", "edit", "list", "silent", "quiet", "s").build();
     }
 
     /**
@@ -82,7 +100,8 @@ public final class MentionGroupCommand implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
         "\n- !mention [GROUP] - Mention a group of people in a Mention group" +
-        "\n- !mention create - Create a new Metion Group" +
+        "\n- !mention [GROUP] silent/s/quiet - Mention a group of people in a Mention group without pinging them" +
+        "\n- !mention create - Create a new Mention Group" +
         "\n- !mention edit - Edit an existing Mention Group" +
         "\n- !mention list - List all mention groups";
     }
@@ -104,7 +123,7 @@ public final class MentionGroupCommand implements ParseableCommand {
                 .description("Interact with Mention Groups")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("group")
-                        .description("A group to mention")
+                        .description("A group to mention, add 'silent' to mention without pinging")
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(false)
                         .build())
