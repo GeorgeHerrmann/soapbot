@@ -177,6 +177,18 @@ public class SoapUtility {
     }
 
     /**
+     * Appends a specified suffix to each element of a list of strings.
+     *
+     * @param list The list of strings to be modified.
+     * @param suffix The string to append to each element of the list.
+     */
+    public static void appendSuffixToList(List<String> list, String suffix) {
+        for (int i = 0; i < list.size(); i++) {
+            list.set(i, list.get(i) + suffix);
+        }
+    }
+
+    /**
      * Parses a String describing a month into an standardized Date string.
      * 
      * @param inputDate the date string to parse

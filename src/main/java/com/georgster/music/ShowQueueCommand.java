@@ -9,7 +9,7 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.util.SoapUtility;
-import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.wizard.IterableStringWizard;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -34,25 +34,16 @@ public class ShowQueueCommand implements Command {
      */
     public void execute(CommandExecutionEvent event) {
         MultiLogger logger = event.getLogger();
-        GuildInteractionHandler handler = event.getGuildInteractionHandler();
-
-        StringBuilder response = new StringBuilder("Current Queue:\n");
+        StringBuilder response = new StringBuilder();
         int x = 1;
 
         logger.append("- Showing the current audio track queue\n", LogDestination.API, LogDestination.NONAPI);
 
         for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
-            response.append("\t" + x + ") " + i.getInfo().title + "\n");
-            if (response.length() >= 1800) {
-                logger.append("- Queue too large, sending multiple responses to Discord", LogDestination.NONAPI);
-
-                String[] output = SoapUtility.splitFirst(response.toString());
-                handler.sendMessage(output[1], output[0]);
-                response = new StringBuilder();
-            }
-            x++;
+            response.append("- " + x + ") " + i.getInfo().title + "\n");
         }
-        handler.sendMessage(response.toString());
+        
+        new IterableStringWizard(event, "Current Audio Queue", SoapUtility.splitAtEvery(response.toString(), 10)).begin();
     }
 
     /**

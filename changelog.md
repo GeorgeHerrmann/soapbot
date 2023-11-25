@@ -432,3 +432,19 @@
             - Example: '!mention cs2 silent'
                 - Or, to be really concise, you can use '!p cs2 s' or '!p s cs2'
         - The ApplicationCommand (slash command) description has been updated to reflect this new option
+
+2.703
+    Misc:
+        - View all outputs are now split into different Windows for long outputs when viewing all AudioTracks, ReserveEvents and MentionGroups
+        - The SoapEventHandler has been refactored to be part of the SoapEventManager
+            - Each SoapEventManager schedules its own events
+            - The SoapEventHandler has been removed
+    ReserveEvents
+        - When using the ReserveCommand, if an Reserve event name that already exists is present, the command will attempt to reserve the User to the event,
+        irregardless if the user indicated they were trying to create a new event or not
+            - For example, consider an existing ReserveEvent called "cs2"
+                - Like before, when using '!reserve cs2', SOAP Bot will attempt to reserve the user to the event
+                - However, if the user used '!reserve cs2 5 9pm', SOAP Bot will now also attempt to reserve the user to event "cs2",
+                instead of informing the user the event already exists like it did before.
+        - The event date is no longer present for timeless ReserveEvents (events with no time and only a max number of reservees)
+        - Various formatting improvements to ReserveCommand informational messages

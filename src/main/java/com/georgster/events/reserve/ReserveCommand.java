@@ -54,7 +54,7 @@ public class ReserveCommand implements ParseableCommand {
                 if (!reserve.isFull()) {
                     discordEvent.getAuthorOptionally().ifPresent(user -> {
                         if (reserve.alreadyReserved(user.getId().asString())) {
-                            handler.sendMessage("You have already reserved for this event, type !unreserve " + reserve.getIdentifier() + " to unreserve", MessageFormatting.ERROR);
+                            handler.sendMessage("You have already reserved to event " + reserve.getIdentifier() + ", type *!unreserve " + reserve.getIdentifier() + "* to unreserve", "Already Reserved", MessageFormatting.ERROR);
                         } else {
                             logger.append("- Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getId().asString());
@@ -64,7 +64,7 @@ public class ReserveCommand implements ParseableCommand {
                         }
                     });
                 } else {
-                    handler.sendMessage("Event " + reserve.getIdentifier() + " is full", MessageFormatting.INFO);
+                    handler.sendMessage("Event " + reserve.getIdentifier() + " is full", "Event Full", MessageFormatting.INFO);
                 }
             } else {
                 logger.append("- Creating a new event " + reserve.getIdentifier() + "\n", LogDestination.NONAPI, LogDestination.API);
@@ -73,15 +73,16 @@ public class ReserveCommand implements ParseableCommand {
                 String messageString = "";
                 if (reserve.isTimeless()) {
                     logger.append("- This event is timeless\n", LogDestination.NONAPI);
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled with " + reserve.getAvailable() + " spots remaining! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
                 } else if (reserve.isUnlimited()) {
                     logger.append("- This event is unlimited\n", LogDestination.NONAPI);
                     messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + "! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString += "\n- Scheduled for: " + SoapUtility.formatDate(reserve.getDate());
                 } else {
                     logger.append("- This event is neither timeless nor unlimited\n", LogDestination.NONAPI);
-                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots available! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString = "Event " + reserve.getIdentifier() + " scheduled for " + SoapUtility.convertToAmPm(reserve.getTime()) + " with " + reserve.getAvailable() + " spots remaining! Type !reserve " + reserve.getIdentifier() + " to reserve a spot!";
+                    messageString += "\n- Scheduled for: " + SoapUtility.formatDate(reserve.getDate());
                 }
-                messageString += "\n- Scheduled for: " + SoapUtility.formatDate(reserve.getDate());
                 handler.sendMessage(messageString, reserve.getIdentifier() + " event created");
             }
         } catch (IllegalArgumentException e) { // assignCorrectEvent will send custom error messages, all other exceptions are handled by the CommandExecutionEvent
@@ -100,10 +101,12 @@ public class ReserveCommand implements ParseableCommand {
 
 
     /**
-     * Assigns the correct ReserveEvents based on the user's command message.
+     * Assigns the correct {@link ReserveEvent} based on the user's command message.
+     * <p>
+     * This method assists in adapting the user's command message to the {@link ReserveEvent} model.
      * 
-     * @param event The CommandExecutionEvent that prompted the creation of this ReserveEvent.
-     * @return The ReserveEvent that the user wants to create or reserve to.
+     * @param event The CommandExecutionEvent that prompted the creation of this {@link ReserveEvent}.
+     * @return The {@link ReserveEvent} that the user wants to create or reserve to.
      * @throws IllegalArgumentException If the user's command message is in the wrong format.
      */
     private ReserveEvent assignCorrectEvent(CommandExecutionEvent event) throws IllegalArgumentException {
@@ -112,7 +115,7 @@ public class ReserveCommand implements ParseableCommand {
 
         String channelName = ((TextChannel) manager.getActiveMessageChannel()).getName();
 
-        if (parser.size() == 1) { //Means the user is trying to reserve to an event that already exists
+        if (parser.size() == 1 || eventManager.exists(parser.get(0), TYPE)) { //Means the user is trying to reserve to an event that already exists
             if (eventManager.exists(parser.get(0), TYPE)) { //If the event exists, we get the event and return it
                 return (ReserveEvent) eventManager.get(parser.get(0));
             } else {
@@ -148,7 +151,7 @@ public class ReserveCommand implements ParseableCommand {
                     throw new IllegalArgumentException(e.getMessage());
                 } catch (IndexOutOfBoundsException e) { //If the name of the event has some issue the parser can't handle
                     throw new IllegalArgumentException("There is an issue with the name of the event. The event name cannot have a number unless it is attached to a word." + 
-                    "\n\t- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
+                    "\n- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
                 }
             }
         } else if (parser.size() == 4 && !eventManager.exists(parser.get(0), TYPE)) {
@@ -168,7 +171,7 @@ public class ReserveCommand implements ParseableCommand {
                 "\n- Example: !reserve csgo 1 v 1 5 5:00pm is incorrect, but !reserve csgo 1v1 5 5:00pm is correct.");
             }
         }
-        throw new IllegalArgumentException("Incorrect Reserve Event Format or this event already exists, simply type !reserve [EVENTNAME] if you want to reserve to an event that exists.");
+        throw new IllegalArgumentException("Incorrect Reserve Event Format, type !reserve [EVENTNAME] if you want to reserve to an event that exists, or use !help reserve to see how to make a new event.");
     }
 
     /**

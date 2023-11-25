@@ -7,11 +7,13 @@ import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
+import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.InputWizard;
+import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.MentionGroupWizard;
 
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -53,9 +55,14 @@ public final class MentionGroupCommand implements ParseableCommand {
             for (MentionGroup group : event.getMentionGroupManager().getAll()) {
                 builder.append("- " + group.getIdentifier() + " *(" + group.getMemberIds().size() + " members)*").append("\n");
             }
-            builder.append("\nTo mention a group, use **!mention [GROUP]**");
 
-            handler.sendMessage(builder.toString(), handler.getGuild().getName() + " Mention Groups");
+            List<String> output = SoapUtility.splitAtEvery(builder.toString(), 10);
+
+            SoapUtility.appendSuffixToList(output, "\nTo mention a group, use **!mention [GROUP]**"
+                    + "\nTo view members of a group without pinging them, use **!mention [GROUP] silent**");
+
+            InputWizard wizard = new IterableStringWizard(event, handler.getGuild().getName() + " Mention Groups", output);
+            wizard.begin();
         }, "list");
 
         sb.on(p -> {

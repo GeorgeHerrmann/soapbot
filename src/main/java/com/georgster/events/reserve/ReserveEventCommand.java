@@ -18,6 +18,7 @@ import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.georgster.wizard.InputWizard;
+import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.ReserveEventWizard;
 import com.georgster.wizard.SinglyAttachmentWizard;
 
@@ -32,7 +33,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class ReserveEventCommand implements ParseableCommand {
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
-    private SoapEventManager eventManager;
+    private final SoapEventManager eventManager;
 
     /**
      * Creates a new {@code ReserveEventCommand} with the given {@code ClientContext}.
@@ -54,10 +55,12 @@ public class ReserveEventCommand implements ParseableCommand {
         subcommands.on(() -> {
             logger.append("Showing all reserve events in a text channel", LogDestination.API);
 
-            if (eventManager.hasAny(TYPE)) { // michael says hi
+            if (eventManager.hasAny(TYPE)) {
                 logger.append("- Showing the user a list of reserve events\n", LogDestination.NONAPI);
-                String[] output = SoapUtility.splitFirst(getEventListString(event));
-                handler.sendMessage(output[1], output[0]);
+                List<String> output = SoapUtility.splitAtEvery(getEventListString(event), 10);
+                SoapUtility.appendSuffixToList(output, event.getDiscordEvent().getAuthorAsMember().getMention() + " has reserved to the **bolded events**\n"
+                        + "Type *!events [NAME]* for more information about a specific reserve event");
+                new IterableStringWizard(event, handler.getGuild().getName() + " Reserve Events", output).begin();
             } else {
                 logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
                 handler.sendMessage("There are no reserve events currently active", MessageFormatting.ERROR);
@@ -67,10 +70,12 @@ public class ReserveEventCommand implements ParseableCommand {
         subcommands.on(p -> { //Shows the list of events
             logger.append("Showing all reserve events in a text channel", LogDestination.API);
 
-            if (eventManager.hasAny(TYPE)) { // michael says hi
+            if (eventManager.hasAny(TYPE)) {
                 logger.append("- Showing the user a list of reserve events\n", LogDestination.NONAPI);
-                String[] output = SoapUtility.splitFirst(getEventListString(event));
-                handler.sendMessage(output[1], output[0]);
+                List<String> output = SoapUtility.splitAtEvery(getEventListString(event), 10);
+                SoapUtility.appendSuffixToList(output, event.getDiscordEvent().getAuthorAsMember().getMention() + " has reserved to the **bolded events**\n"
+                        + "Type *!events [NAME]* for more information about a specific reserve event");
+                new IterableStringWizard(event, handler.getGuild().getName() + " Reserve Events", output).begin();
             } else {
                 logger.append("- There are no reserve events currently active\n", LogDestination.NONAPI);
                 handler.sendMessage("There are no reserve events currently active", MessageFormatting.ERROR);
@@ -151,7 +156,6 @@ public class ReserveEventCommand implements ParseableCommand {
      */
     private String getEventListString(CommandExecutionEvent event) {
         StringBuilder response = new StringBuilder();
-        response.append("All reserve events:\n");
         List<SoapEvent> events = eventManager.getAll(TYPE);
         for (int i = 0; i < events.size(); i++) {
             /* The EventManager will ensure we get events of the correct type, so casting is safe */
@@ -173,8 +177,6 @@ public class ReserveEventCommand implements ParseableCommand {
                 }
             }
         }
-        response.append(event.getDiscordEvent().getAuthorAsMember().getMention() + " has reserved to the **bolded events**\n");
-        response.append("Type !events [NAME] for more information about a specific reserve event");
 
         return response.toString();
     }

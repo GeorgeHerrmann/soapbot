@@ -7,13 +7,12 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
 import com.georgster.database.adapter.SoapEventClassAdapter;
 import com.georgster.events.SoapEvent;
-import com.georgster.events.SoapEventHandler;
 import com.georgster.events.SoapEventType;
+import com.georgster.util.handler.InteractionHandler.MessageFormatting;
 import com.georgster.util.thread.ThreadPoolFactory;
 
 /**
- * Manages all {@link SoapEvent SoapEvents} for a given {@code SoapClient} and
- * handles the scheduling of events through the {@link SoapEventHandler}.
+ * Manages and schedules all {@link SoapEvent SoapEvents} for a given {@code SoapClient}.
  */
 public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
 
@@ -34,7 +33,7 @@ public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
         dbService.getAllObjects(adapter).forEach(event -> {
             if (!exists(event)) {
                 observees.add(event);
-                ThreadPoolFactory.scheduleEventTask(handler.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
+                ThreadPoolFactory.scheduleEventTask(handler.getId(), () -> this.scheduleEvent(event));
             }
         });
     }
@@ -47,7 +46,7 @@ public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
         if (!exists(event)) {
             observees.add(event);
             dbService.addObjectIfNotExists(event, "identifier", event.getIdentifier(), adapter);
-            ThreadPoolFactory.scheduleEventTask(handler.getId(), () -> SoapEventHandler.scheduleEvent(event, this));
+            ThreadPoolFactory.scheduleEventTask(handler.getId(), () -> this.scheduleEvent(event));
         }
     }
 
@@ -112,5 +111,52 @@ public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
             }
         });
         return typeEvents;
+    }
+
+    /**
+     * Schedules a {@code SoapEvent} to be fulfilled for the Guild the event originated from.
+     * If the event is a {@code ReserveEvent} the active channel is set to the channel the event was reserved in.
+     * This method will wait and block the calling thread until the event has been
+     * cancelled, is no longer valid, or the event's {@code fulfilled()} condition has been met and will
+     * call {@code onFulfill()} on the event if the event is valid.
+     * 
+     * @param event the event to be scheduled
+     */
+    public void scheduleEvent(final SoapEvent event) {
+        if (this.exists(event.getIdentifier())) {
+            handler.setActiveMessageChannel(handler.getMessageChannel(event.getChannel()));
+            if (validateSoapEvent(event)) {
+                event.onFulfill(handler);
+            } else {
+                handler.sendMessage("Event " + event.getIdentifier() + " has been cancelled", "Event Cancelled", MessageFormatting.INFO);
+            }
+            if (this.exists(event.getIdentifier())) {
+                this.remove(event);
+            }
+        }
+    }
+
+    
+    /**
+     * Validates a {@code SoapEvent} by waiting until the event has been cancelled, is no longer valid
+     * or the event's {@code fulfilled()} condition has been met.
+     * 
+     * @param event the event to be validated
+     * @return true if the event is valid, false otherwise
+     */
+    private boolean validateSoapEvent(final SoapEvent event) {
+        try {
+            /* Will continue to wait until the event has been removed/cancelled, or the fulfillment condition has been met */
+            while (this.exists(event.getIdentifier()) && !event.fulfilled()) {
+                Thread.sleep(2000);
+            }
+            if (!this.exists(event.getIdentifier())) { //If it was removed we return false
+                return false;
+            }
+        } catch (Exception e) { //If we are interrupted we return false
+            Thread.currentThread().interrupt();
+            return false;
+        }
+        return true; //Otherwise we return true
     }
 }
