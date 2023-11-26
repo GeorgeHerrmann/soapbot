@@ -448,3 +448,8 @@
                 instead of informing the user the event already exists like it did before.
         - The event date is no longer present for timeless ReserveEvents (events with no time and only a max number of reservees)
         - Various formatting improvements to ReserveCommand informational messages
+
+2.704
+    MentionGroups
+        - When using '!mention list' to view all MentionGroups, the repeat reaction can now be used to switch to an Alternate view which
+          displays the members of each group

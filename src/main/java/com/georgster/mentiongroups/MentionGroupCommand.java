@@ -1,9 +1,11 @@
 package com.georgster.mentiongroups;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
 import com.georgster.control.manager.MentionGroupManager;
+import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
@@ -12,6 +14,7 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
+import com.georgster.wizard.AlternateWizard;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.IterableStringWizard;
 import com.georgster.wizard.MentionGroupWizard;
@@ -26,11 +29,21 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  */
 public final class MentionGroupCommand implements ParseableCommand {
     
+    private final MentionGroupManager manager;
+
+    /**
+     * Creates a new MentionGroupCommand.
+     * 
+     * @param context The ClientContext to use
+     */
+    public MentionGroupCommand(ClientContext context) {
+        this.manager = context.getMentionGroupManager();
+    }
+
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        MentionGroupManager manager = event.getMentionGroupManager();
         SubcommandSystem sb = event.createSubcommandSystem();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
@@ -61,7 +74,9 @@ public final class MentionGroupCommand implements ParseableCommand {
             SoapUtility.appendSuffixToList(output, "\nTo mention a group, use **!mention [GROUP]**"
                     + "\nTo view members of a group without pinging them, use **!mention [GROUP] silent**");
 
-            InputWizard wizard = new IterableStringWizard(event, handler.getGuild().getName() + " Mention Groups", output);
+            InputWizard wizard1 = new IterableStringWizard(event, handler.getGuild().getName() + " Mention Groups", output);
+            InputWizard wizard2 = new IterableStringWizard(event, handler.getGuild().getName() + " Mention Groups", getMentionGroupDescriptors(handler));
+            InputWizard wizard = new AlternateWizard(event, wizard1, wizard2, true);
             wizard.begin();
         }, "list");
 
@@ -92,6 +107,21 @@ public final class MentionGroupCommand implements ParseableCommand {
                 handler.sendMessage("A Mention Group with that name does not exist. Type '!mention create' to create a new one", "Group not found");
             }
         }, 0);
+    }
+
+    private List<String> getMentionGroupDescriptors(GuildInteractionHandler handler) {
+        List<String> output = new ArrayList<>();
+        manager.getAll().forEach(group -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append("**" + group.getIdentifier() + "**\n");
+            sb.append(group.getMemberIds().size() + " Members: \n");
+            group.getMemberIds().forEach(id -> {
+                sb.append("- " + handler.getMemberById(id).getMention() + "\n");
+            });
+            sb.append("Mention this group with **!mention " + group.getIdentifier() + "**");
+            output.add(sb.toString());
+        });
+        return output;
     }
 
     /**
