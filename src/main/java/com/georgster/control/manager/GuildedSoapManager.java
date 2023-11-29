@@ -11,9 +11,12 @@ import com.georgster.util.handler.GuildInteractionHandler;
 import discord4j.core.object.entity.Guild;
 
 /**
- * A framework for managing non-extending nor implementing objects that are stored in SOAPBot's database.
+ * A {@link SoapManager} which manages guild-specific, non-extending nor implementing {@link Manageable Manageables} that are stored in SOAPBot's database.
+ * <p>
+ * A {@link GuildedSoapManager} will only communicate with the database for the SOAP Client corresponding to the {@link Guild} that it is managing objects for.
  * 
- * @see {@link AbstractGuildedSoapManager} for a framework for managing extending or implementing objects.
+ * @see {@link AbstractGuildedSoapManager} for {@link SoapManager} that can manage extending or implementing objects.
+ * @see {@link GlobalSoapManager} for {@link SoapManager} that manages non-guild-specific objects.
  */
 public abstract class GuildedSoapManager<T extends Manageable> implements SoapManager<T> {
     protected String identifierName; // The name of the identifier field in the database.

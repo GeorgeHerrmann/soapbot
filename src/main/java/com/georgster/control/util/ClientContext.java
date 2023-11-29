@@ -10,7 +10,7 @@ import com.georgster.control.manager.Manageable;
 import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
-import com.georgster.control.manager.GuildedSoapManager;
+import com.georgster.control.manager.SoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.music.components.AudioContext;
 
@@ -25,7 +25,7 @@ import discord4j.rest.RestClient;
 public class ClientContext {
     private final EventDispatcher dispatcher;
     private final Guild guild;
-    private final Set<GuildedSoapManager<? extends Manageable>> managers;
+    private final Set<SoapManager<? extends Manageable>> managers;
     private AudioContext audioContext;
     private CommandRegistry commandRegistry;
     private RestClient restClient;
@@ -145,8 +145,8 @@ public class ClientContext {
      * 
      * @param soapManagers The managers to add.
      */
-    public void addManagers(GuildedSoapManager<?>... soapManagers) {
-        for (GuildedSoapManager<?> manager : soapManagers) {
+    public void addManagers(SoapManager<?>... soapManagers) {
+        for (SoapManager<?> manager : soapManagers) {
             this.managers.add(manager);
         }
     }
@@ -156,7 +156,7 @@ public class ClientContext {
      * 
      * @param action The action to perform with each manager.
      */
-    public void forEachManager(Consumer<GuildedSoapManager<? extends Manageable>> action) {
+    public void forEachManager(Consumer<SoapManager<? extends Manageable>> action) {
         managers.forEach(action::accept);
     }
 

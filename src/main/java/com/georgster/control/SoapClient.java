@@ -4,7 +4,7 @@ import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
-import com.georgster.control.manager.GuildedSoapManager;
+import com.georgster.control.manager.SoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.logs.LogDestination;
@@ -65,7 +65,7 @@ public final class SoapClient {
         MultiLogger logger = new MultiLogger(new GuildInteractionHandler(event.getGuild()), getClass());
         logger.append("Logging in to server: " + context.getGuild().getName() + "\n", LogDestination.NONAPI);
 
-        this.context.forEachManager(GuildedSoapManager::load);
+        this.context.forEachManager(SoapManager::load);
         logger.append("- Initialized " + context.getGuild().getName() + "'s management system\n", LogDestination.NONAPI);
 
         context.getUserProfileManager().updateFromEvent(event);
