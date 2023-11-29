@@ -10,9 +10,9 @@ import com.georgster.database.ProfileType;
 import com.georgster.util.Unwrapper;
 
 /**
- * A {@link SoapManager} that manages {@link Collectable Collectables} for a SoapClient.
+ * A {@link GuildedSoapManager} that manages {@link Collectable Collectables} for a SoapClient.
  */
-public class CollectableManager extends SoapManager<Collectable> {
+public class CollectableManager extends GuildedSoapManager<Collectable> {
     /**
      * Constructs a {@link CollectableManager} for the given {@link ClientContext}
      * 

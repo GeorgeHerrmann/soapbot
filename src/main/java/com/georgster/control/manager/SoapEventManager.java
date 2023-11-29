@@ -14,7 +14,7 @@ import com.georgster.util.thread.ThreadPoolFactory;
 /**
  * Manages and schedules all {@link SoapEvent SoapEvents} for a given {@code SoapClient}.
  */
-public class SoapEventManager extends AbstractSoapManager<SoapEvent> {
+public class SoapEventManager extends AbstractGuildedSoapManager<SoapEvent> {
 
     /**
      * Constructs a {@link SoapEventManager} for the given {@code ClientContext}.

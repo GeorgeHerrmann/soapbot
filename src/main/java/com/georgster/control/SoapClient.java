@@ -4,7 +4,7 @@ import com.georgster.control.manager.CollectableManager;
 import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
-import com.georgster.control.manager.SoapManager;
+import com.georgster.control.manager.GuildedSoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.logs.LogDestination;
@@ -25,7 +25,7 @@ import discord4j.core.event.domain.role.RoleUpdateEvent;
 /**
  * An aggregation of all the shard-specific objects that SOAP Bot needs to run for
  * a single {@code Guild}. Each SoapClient handles all the events that occur in
- * its associated {@code Guild}, houses its {@link CommandRegistry} and has their own Set of {@link SoapManager SoapManagers}.
+ * its associated {@code Guild}, houses its {@link CommandRegistry} and has their own Set of {@link GuildedSoapManager SoapManagers}.
  */
 public final class SoapClient {
     private final Snowflake flake;
@@ -54,7 +54,7 @@ public final class SoapClient {
      * Defines SOAP Bot's actions when a {@link GuildCreateEvent} is fired.
      * <p>
      * Upon the firing of a {@link GuildCreateEvent}, SOAP Bot will initialize
-     * all its {@link SoapManager SoapManagers} and update all {@link UserProfile UserProfiles}
+     * all its {@link GuildedSoapManager SoapManagers} and update all {@link UserProfile UserProfiles}
      * for the {@code Guild} in the event.
      * 
      * @param event The {@link GuildCreateEvent} that was fired.
@@ -65,7 +65,7 @@ public final class SoapClient {
         MultiLogger logger = new MultiLogger(new GuildInteractionHandler(event.getGuild()), getClass());
         logger.append("Logging in to server: " + context.getGuild().getName() + "\n", LogDestination.NONAPI);
 
-        this.context.forEachManager(SoapManager::load);
+        this.context.forEachManager(GuildedSoapManager::load);
         logger.append("- Initialized " + context.getGuild().getName() + "'s management system\n", LogDestination.NONAPI);
 
         context.getUserProfileManager().updateFromEvent(event);

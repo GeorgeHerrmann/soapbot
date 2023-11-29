@@ -17,7 +17,7 @@ import discord4j.rest.util.Permission;
 /**
  * Manages all {@link PermissionGroup PermissionGroups} for a given {@code SoapClient}.
  */
-public class PermissionsManager extends SoapManager<PermissionGroup> {
+public class PermissionsManager extends GuildedSoapManager<PermissionGroup> {
 
     /**
      * Constructs a {@link PermissionsManager} for the given {@link ClientContext}

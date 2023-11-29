@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
 /**
- * An object that can be managed by a {@link SoapManager} or {@link AbstractSoapManager}.
+ * An object that can be managed by a {@link GuildedSoapManager} or {@link AbstractGuildedSoapManager}.
  * All Manageable objects must have a unique identifier that can be retrieved by {@link #getIdentifier()}.
  */
 public interface Manageable {

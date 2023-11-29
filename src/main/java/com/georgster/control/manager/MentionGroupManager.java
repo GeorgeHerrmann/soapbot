@@ -7,7 +7,7 @@ import com.georgster.mentiongroups.MentionGroup;
 /**
  * Manages all {@link MentionGroup MentionGroups} for a SOAP Client.
  */
-public final class MentionGroupManager extends SoapManager<MentionGroup> {
+public final class MentionGroupManager extends GuildedSoapManager<MentionGroup> {
     
     /**
      * Creates a new MentionGroupManager with the given {@link ClientContext}.

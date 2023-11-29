@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Member;
 /**
  * Manages all {@link UserProfile UserProfiles} for a {@link com.georgster.control.SoapClient SoapClient}.
  */
-public class UserProfileManager extends SoapManager<UserProfile> {
+public class UserProfileManager extends GuildedSoapManager<UserProfile> {
 
     private static OpenAiService aiService; //The singleton AI Service to communicate with OpenAI's API
     

@@ -9,15 +9,15 @@ import com.georgster.database.adapter.DatabaseObjectClassAdapter;
 import discord4j.core.object.entity.Guild;
 
 /**
- * A {@link SoapManager} which can manage extending or implementing objects that are stored in SOAPBot's database
+ * A {@link GuildedSoapManager} which can manage extending or implementing objects that are stored in SOAPBot's database
  * in the form of their parent class. A valid {@link DatabaseObjectClassAdapter} must be provided to convert the
  * objects from the database to their appropriate type.
  */
-public abstract class AbstractSoapManager<T extends Manageable> extends SoapManager<T> {
+public abstract class AbstractGuildedSoapManager<T extends Manageable> extends GuildedSoapManager<T> {
     protected DatabaseObjectClassAdapter<T> adapter; // The adapter that will be used to convert the objects from the database.
 
     /**
-     * Creates a new {@link AbstractSoapManager} which will access the database using the given paramaters.
+     * Creates a new {@link AbstractGuildedSoapManager} which will access the database using the given paramaters.
      * 
      * @param context The context of the SOAPClient that is using this manager.
      * @param profileType The type of profile that this manager will be accessing.
@@ -25,7 +25,7 @@ public abstract class AbstractSoapManager<T extends Manageable> extends SoapMana
      * @param identifierName The name of the identifier field in the database.
      * @param adapter The adapter that will be used to convert the objects from the database.
      */
-    protected AbstractSoapManager(ClientContext context, ProfileType profileType, Class<T> observeeClass, String identifierName, DatabaseObjectClassAdapter<T> adapter) {
+    protected AbstractGuildedSoapManager(ClientContext context, ProfileType profileType, Class<T> observeeClass, String identifierName, DatabaseObjectClassAdapter<T> adapter) {
         super(context, profileType, observeeClass, identifierName);
         this.adapter = adapter;
     }

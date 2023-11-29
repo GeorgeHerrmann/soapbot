@@ -10,7 +10,7 @@ import com.georgster.control.manager.Manageable;
 import com.georgster.control.manager.MentionGroupManager;
 import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
-import com.georgster.control.manager.SoapManager;
+import com.georgster.control.manager.GuildedSoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.music.components.AudioContext;
 
@@ -25,7 +25,7 @@ import discord4j.rest.RestClient;
 public class ClientContext {
     private final EventDispatcher dispatcher;
     private final Guild guild;
-    private final Set<SoapManager<? extends Manageable>> managers;
+    private final Set<GuildedSoapManager<? extends Manageable>> managers;
     private AudioContext audioContext;
     private CommandRegistry commandRegistry;
     private RestClient restClient;
@@ -140,23 +140,23 @@ public class ClientContext {
     }
 
     /**
-     * Adds the given {@link SoapManager}s to this context. Each {@link ClientContext} for
+     * Adds the given {@link GuildedSoapManager}s to this context. Each {@link ClientContext} for
      * its {@link SoapClient} can only have one SoapManager for each type.
      * 
      * @param soapManagers The managers to add.
      */
-    public void addManagers(SoapManager<?>... soapManagers) {
-        for (SoapManager<?> manager : soapManagers) {
+    public void addManagers(GuildedSoapManager<?>... soapManagers) {
+        for (GuildedSoapManager<?> manager : soapManagers) {
             this.managers.add(manager);
         }
     }
 
     /**
-     * Executes the given consumer with each {@link SoapManager} in this context;
+     * Executes the given consumer with each {@link GuildedSoapManager} in this context;
      * 
      * @param action The action to perform with each manager.
      */
-    public void forEachManager(Consumer<SoapManager<? extends Manageable>> action) {
+    public void forEachManager(Consumer<GuildedSoapManager<? extends Manageable>> action) {
         managers.forEach(action::accept);
     }
 

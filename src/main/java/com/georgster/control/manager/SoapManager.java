@@ -1,168 +1,100 @@
 package com.georgster.control.manager;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.georgster.control.util.ClientContext;
-import com.georgster.database.DatabaseService;
-import com.georgster.database.ProfileType;
-import com.georgster.util.handler.GuildInteractionHandler;
-
-import discord4j.core.object.entity.Guild;
-
 /**
- * A framework for managing non-extending nor implementing objects that are stored in SOAPBot's database.
- * 
- * @see {@link AbstractSoapManager} for a framework for managing extending or implementing objects.
+ * A manager which manages {@link Manageable Manageables} that are stored in SOAPBot's database.
  */
-public abstract class SoapManager<T extends Manageable> {
-    protected String identifierName; // The name of the identifier field in the database.
-    protected List<T> observees; // The objects that this manager is managing.
-    protected DatabaseService<T> dbService; // The service that this manager will use to access the database.
-    protected GuildInteractionHandler handler; // The handler that this manager will use to interact with the guild.
+public interface SoapManager<T extends Manageable> {
 
     /**
-     * Creates a new SoapManager which will access the database using the given paramaters.
-     * 
-     * @param context The context of the SOAPClient that is using this manager.
-     * @param profileType The type of profile that this manager will be accessing.
-     * @param observeeClass The class of the objects that this manager will be managing.
-     * @param identifierName The name of the identifier field in the database.
+     * Wipes the local cache and loads all objects from the database into this manager.
      */
-    protected SoapManager(ClientContext context, ProfileType profileType, Class<T> observeeClass, String identifierName) {
-        this.handler = new GuildInteractionHandler(context.getGuild());
-        this.dbService = new DatabaseService<>(handler.getId(), profileType, observeeClass);
-        this.observees = new ArrayList<>();
-        this.identifierName = identifierName;
-    }
+    public void load();
 
     /**
-     * Loads all non-existing objects from the database into this manager.
-     */
-    public void load() {
-        dbService.getAllObjects().forEach(this::add);
-    }
-
-    /**
-     * Adds an object to the manager.
+     * Adds an object to the manager and the database, if an object with the same identifier does not already exist.
      * 
      * @param observee The object to add.
      */
-    public void add(T observee) {
-        if (!exists(observee.getIdentifier())) {
-            dbService.addObjectIfNotExists(observee, identifierName, observee.getIdentifier());
-            observees.add(observee);
-        }
-    }
+    public void add(T observee);
 
     /**
-     * Checks if an object exists in the manager.
+     * Checks if an object with the same identifier as the {@code observee} exists in the manager.
      * 
      * @param observee The object to check.
-     * @return True if the object exists in the manager, false otherwise.
+     * @return {@code true} if the object exists in the manager, {@code false} otherwise.
      */
-    public boolean exists(T observee) {
-        return observees.contains(observee);
-    }
+    public boolean exists(T observee);
 
     /**
-     * Checks if an object exists in the manager.
+     * Checks if an object with the given identifier exists in the manager.
      * 
      * @param identifier The identifier of the object to check.
-     * @return True if the object exists in the manager, false otherwise.
+     * @return {@code true} if the object exists in the manager, {@code false} otherwise.
      */
-    public boolean exists(String identifier) {
-        return observees.stream().anyMatch(observee -> observee.getIdentifier().equals(identifier));
-    }
+    public boolean exists(String identifier);
 
     /**
-     * Removes an object from the manager.
+     * Removes an object with the same identifier as the {@code observee} from the manager and the database.
      * 
      * @param observee The object to remove.
      */
-    public void remove(T observee) {
-        if (exists(observee)) {
-            dbService.removeObjectIfExists(identifierName, observee.getIdentifier());
-            observees.remove(observee);
-        }
-    }
+    public void remove(T observee);
 
     /**
-     * Removes an object from the manager.
+     * Removes an object with the given identifier from the manager and the database.
      * 
      * @param identifier The identifier of the object to remove.
      */
-    public void remove(String identifier) {
-        observees.stream().filter(observee -> observee.getIdentifier().equals(identifier)).forEach(observee -> {
-            dbService.removeObjectIfExists(identifierName, identifier);
-            observees.remove(observee);
-        });
-    }
+    public void remove(String identifier);
 
     /**
-     * Removes all objects from the manager.
+     * Removes all objects from the manager and the database.
      */
-    public void removeAll() {
-        observees.forEach(observee -> dbService.removeObjectIfExists(identifierName, observee.getIdentifier()));
-        observees.clear();
-    }
+    public void removeAll();
 
     /**
-     * Gets an object from the manager.
-     * 
-     * @param identifier The identifier of the object to get.
-     * @return The object with the given identifier, or null if no such object exists.
-     */
-    public T get(String identifier) {
-        return observees.stream().filter(observee -> observee.getIdentifier().equals(identifier)).findFirst().orElse(null);
-    }
-
-    /**
-     * Gets all objects from the manager.
-     * 
-     * @return A list of all objects in the manager.
-     */
-    public List<T> getAll() {
-        return observees;
-    }
-
-    /**
-     * Updates an object in the manager.
+     * Updates an object with the same identifier as the {@code observee} in the manager and the database with {@code observee}.
      * 
      * @param observee The object to update.
      */
-    public void update(T observee) {
-        observees.stream().filter(examiner -> examiner.getIdentifier().equals(observee.getIdentifier())).forEach(examiner -> {
-            observees.set(observees.indexOf(examiner), observee); //Replace the old observee with the new one
-            dbService.updateObjectIfExists(observee, identifierName, observee.getIdentifier());
-        });
-    }
+    public void update(T observee);
 
     /**
-     * Gets the number of objects in the manager.
+     * Updates an object with the given identifier in the manager and the database with {@code observee}.
      * 
-     * @return The number of objects in the manager.
+     * @param identifier The identifier of the object to update.
+     * @param observee The object to update.
      */
-    public int getCount() {
-        return observees.size();
-    }
+    public void update(String identifier, T observee);
 
     /**
-     * Checks if the manager is empty.
+     * Returns the number of objects in this manager.
      * 
-     * @return True if the manager is empty, false otherwise.
+     * @return the number of objects in this manager.
      */
-    public boolean isEmpty() {
-        return observees.isEmpty();
-    }
+    public int getCount();
 
     /**
-     * Gets the guild that this manager is managing objects for.
+     * Returns the object with the given identifier, or {@code null} if none exists.
      * 
-     * @return The guild that this manager is managing objects for.
+     * @param identifier the identifier of the object to get.
+     * @return the object with the given identifier, or {@code null} if none exists.
      */
-    
-    public Guild getGuild() {
-        return handler.getGuild();
-    }
+    public T get(String identifier);
+
+    /**
+     * Returns all objects in this manager as a {@link List}.
+     * 
+     * @return all objects in this manager as a {@link List}.
+     */
+    public List<T> getAll();
+
+    /**
+     * Returns whether or not this manager is empty.
+     * 
+     * @return {@code true} if this manager is empty, {@code false} otherwise.
+     */
+    public boolean isEmpty();
 }
