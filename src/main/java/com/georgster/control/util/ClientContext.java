@@ -12,6 +12,7 @@ import com.georgster.control.manager.PermissionsManager;
 import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.SoapManager;
 import com.georgster.control.manager.UserProfileManager;
+import com.georgster.control.manager.UserSettingsManager;
 import com.georgster.music.components.AudioContext;
 
 import discord4j.core.event.EventDispatcher;
@@ -128,6 +129,15 @@ public class ClientContext {
      */
     public MentionGroupManager getMentionGroupManager() {
         return (MentionGroupManager) managers.stream().filter(MentionGroupManager.class::isInstance).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the global UserSettingsManager
+     * 
+     * @return The global user settings manager.
+     */
+    public UserSettingsManager getUserSettingsManager() {
+        return (UserSettingsManager) managers.stream().filter(UserSettingsManager.class::isInstance).findFirst().orElse(null);
     }
 
     /**

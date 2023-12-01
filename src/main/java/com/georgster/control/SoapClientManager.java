@@ -1,11 +1,17 @@
 package com.georgster.control;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import com.georgster.control.manager.GlobalSoapManager;
+import com.georgster.control.manager.SoapManager;
+import com.georgster.control.manager.UserSettingsManager;
 import com.georgster.control.util.ClientContext;
 
 import com.georgster.logs.MultiLogger;
+import com.georgster.settings.UserSettings;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClientBuilder;
@@ -27,6 +33,7 @@ import discord4j.gateway.intent.IntentSet;
  * maintaining the active connection to Discord's API.
  */
 public final class SoapClientManager {
+    private static Set<GlobalSoapManager<?>> managers = new HashSet<>();
     private final Map<Snowflake, SoapClient> clients; // Maps each Guild's Snowflake ID to its client
     private final GatewayDiscordClient discordClient; //Maintains the connection to Discord
     private final EventDispatcher dispatcher;
@@ -50,6 +57,15 @@ public final class SoapClientManager {
 
         this.dispatcher = discordClient.getEventDispatcher();
         this.testMode = false;
+
+        loadManagers();
+    }
+
+    private static void loadManagers() {
+        if (managers.isEmpty()) {
+            managers.add(new UserSettingsManager());
+        }
+        managers.forEach(SoapManager::load);
     }
 
     /**
@@ -78,7 +94,15 @@ public final class SoapClientManager {
      */
     public void listenToEvents() {
         dispatcher.on(GuildCreateEvent.class)
-        .subscribe(this::distributeClient); //Executes onGuildCreate when a GuildCreateEvent is fired
+        .subscribe(event -> {
+            event.getGuild().getMembers().collectList().block().forEach(member -> {
+                UserSettingsManager manager = getUserSettingsManager();
+                if (!manager.exists(member.getId().asString())) {
+                    manager.add(new UserSettings(member.getId().asString()));
+                }
+            });
+            this.distributeClient(event);
+        }); //Executes onGuildCreate when a GuildCreateEvent is fired
 
         dispatcher.on(MessageCreateEvent.class)
         .filter(message -> message.getMessage().getAuthor().map(user -> !user.isBot()).orElse(false))
@@ -91,7 +115,13 @@ public final class SoapClientManager {
 
         dispatcher.on(MemberJoinEvent.class)
         .filter(event -> !event.getMember().isBot())
-        .subscribe(event -> clients.get(event.getGuildId()).onMemberJoin(event));
+        .subscribe(event -> {
+            UserSettingsManager manager = getUserSettingsManager();
+            if (!manager.exists(event.getMember().getId().asString())) {
+                manager.add(new UserSettings(event.getMember().getId().asString()));
+            }
+            clients.get(event.getGuildId()).onMemberJoin(event);
+        });
 
         dispatcher.on(RoleUpdateEvent.class)
         .subscribe(event -> clients.get(event.getCurrent().getGuild().block().getId()).onRoleUpdate(event));
@@ -126,7 +156,11 @@ public final class SoapClientManager {
      */
     private void distributeClient(GuildCreateEvent event) {
         Snowflake flake = event.getGuild().getId();
-        clients.computeIfAbsent(flake, client -> new SoapClient(new ClientContext(dispatcher, event.getGuild(), discordClient.getRestClient()))); //Creates a new SoapClient if one does not already exist for the Guild
+        clients.computeIfAbsent(flake, client -> {
+            ClientContext context = new ClientContext(dispatcher, event.getGuild(), discordClient.getRestClient());
+            context.addManagers(managers.toArray(new GlobalSoapManager<?>[managers.size()]));
+            return new SoapClient(context);
+        }); //Creates a new SoapClient if one does not already exist for the Guild
         clients.get(flake).onGuildCreate(event); //Distributes the event to the client
     }
 
@@ -136,5 +170,14 @@ public final class SoapClientManager {
      */
     public void enableTestMode() {
         this.testMode = true;
+    }
+
+    /**
+     * Returns the {@link UserSettingsManager}.
+     * 
+     * @return the {@link UserSettingsManager}.
+     */
+    public UserSettingsManager getUserSettingsManager() {
+        return (UserSettingsManager) managers.stream().filter(UserSettingsManager.class::isInstance).findFirst().orElse(null);
     }
 }

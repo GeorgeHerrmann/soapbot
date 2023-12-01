@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 import com.georgster.control.manager.Manageable;
+import com.georgster.settings.UserSettings;
 
 /**
  * An object which is associated with a date and a time.
@@ -159,6 +160,10 @@ public abstract class DateTimed {
      */
     public String getFormattedDate() {
         return SoapUtility.formatDate(date);
+    }
+
+    public String getFormattedDate(UserSettings settings) {
+        LocalDate date = LocalDate.parse(this.date);
     }
 
     /**

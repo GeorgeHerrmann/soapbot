@@ -1,6 +1,11 @@
 package com.georgster.control.manager;
 
+import java.lang.reflect.Type;
+
+import com.georgster.database.adapter.SettingsOptionTypeAdapter;
+import com.georgster.settings.UserSettings.SettingsOption;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 /**
@@ -9,7 +14,7 @@ import com.google.gson.JsonParseException;
  */
 public interface Manageable {
     /** Gson responsible for serialization and deserialization of {@link Manageable Manageables} */
-    static final Gson GSON = new Gson();
+    static final Gson GSON = new GsonBuilder().registerTypeAdapter(SettingsOption.class, new SettingsOptionTypeAdapter()).create();
 
     /**
      * Returns the identifier of this object.
@@ -56,5 +61,27 @@ public interface Manageable {
      */
     public static <T extends Manageable> T serialize(String json, Class<T> classType) throws JsonParseException {
         return GSON.fromJson(json, classType);
+    }
+
+    /**
+     * Attempts to serialize a JSON String into a {@link Manageable} of the given {@code type}.
+     * 
+     * @param <T> The type of the resulting {@link Manageable} based on the given {@link Type}.
+     * @param json The JSON String.
+     * @param type The {@link Type}.
+     * @return The serialized {@link Manageable}.
+     * @throws JsonParseException If the JSON String cannot be automatically serialized.
+     */
+    public static <T extends Manageable> T serialize(String json, Type type) throws JsonParseException {
+        return GSON.fromJson(json, type);
+    }
+
+    /**
+     * Returns the default {@link Gson} instance used for serialization and deserialization of {@link Manageable Manageables}.
+     * 
+     * @return the default {@link Gson} instance.
+     */
+    public static Gson getGson() {
+        return GSON;
     }
 }

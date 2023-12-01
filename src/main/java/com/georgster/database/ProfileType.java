@@ -23,5 +23,9 @@ public enum ProfileType {
     /**
      * Represents a guild's mention groups profile.
      */
-    MENTIONGROUPS
+    MENTIONGROUPS,
+    /**
+     * Represents the global user settings profile.
+     */
+    SETTINGS
 }

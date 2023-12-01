@@ -17,6 +17,7 @@ import org.bson.conversions.Bson;
 import com.georgster.control.manager.Manageable;
 import com.georgster.database.adapter.DatabaseObjectClassAdapter;
 import com.georgster.util.Unwrapper;
+import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -202,7 +203,7 @@ public class DatabaseService<T extends Manageable> {
 
             try {
                 String json = collection.find(query).projection(projection).first().toJson();
-                object.setObject(Manageable.serialize(json, deserializer.getClass(json)));
+                object.setObject(Manageable.serialize(json, TypeToken.get(deserializer.getClass(json)).getType()));
             } catch (Exception e) {
                 object.setObject(null);
             }
@@ -243,7 +244,7 @@ public class DatabaseService<T extends Manageable> {
                 
                 String json = document.toJson();
                 if (!json.isEmpty()) {
-                    list.add(Manageable.serialize(json, deserializer.getClass(json)));
+                    list.add(Manageable.serialize(json, TypeToken.get(deserializer.getClass(json)).getType()));
                 }
             });
             objects.setObject(list);
