@@ -90,6 +90,14 @@ public final class UserSettings implements Manageable {
         return settings.stream().filter(settingClass::isInstance).findFirst().orElse(null);
     }
 
+    public SettingsOption getSetting(String settingName) {
+        return settings.stream().filter(setting -> setting.name().equals(settingName)).findFirst().orElse(null);
+    }
+
+    public Set<SettingsOption> getAllSettings() {
+        return settings;
+    }
+
     public SettingsOption getTimezoneSetting() {
         return getSetting(TimezoneOption.class);
     }

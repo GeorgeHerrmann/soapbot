@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 import com.georgster.control.manager.Manageable;
@@ -106,6 +107,29 @@ public abstract class DateTimed {
     }
 
     /**
+     * Sets the time for this {@link DateTimed} based on the given {@link UserSettings}.
+     * The time will be standardized, therefore any time standard
+     * accepted by {@link SoapUtility#timeConverter(String)} will be accepted.
+     * 
+     * @param time The new time.
+     * @param settings The {@link UserSettings} to use for formatting.
+     * @throws IllegalArgumentException If the time string is in an invalid format.
+     */
+    public void setTime(String time, UserSettings settings) throws IllegalArgumentException {
+        ZoneId estId = ZoneId.of("-05:00");
+        ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+
+        String standardizedTime = SoapUtility.timeConverter(time);
+        LocalTime timeObj = LocalTime.parse(standardizedTime);
+        LocalDateTime dateTime = LocalDateTime.of(LocalDate.parse(date), timeObj);
+
+        ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estId);
+        ZonedDateTime targetDateTime = estDateTime.withZoneSameInstant(userZoneId);
+
+        this.time = targetDateTime.toLocalTime().toString();
+    }
+
+    /**
      * Sets the date for this {@link DateTimed}. The date will be standardized, therefore any date standard
      * accepted by {@link SoapUtility#convertDate(String)} will be accepted.
      * 
@@ -162,8 +186,24 @@ public abstract class DateTimed {
         return SoapUtility.formatDate(date);
     }
 
+    /**
+     * Returns a formatted String representing the Date of this {@link DateTimed} based on the given {@link UserSettings}.
+     * 
+     * @param settings The {@link UserSettings} to use for formatting.
+     * @return A formatted date String.
+     */
     public String getFormattedDate(UserSettings settings) {
-        LocalDate date = LocalDate.parse(this.date);
+        LocalDate dateObj = LocalDate.parse(this.date);
+        LocalTime timeObj = LocalTime.parse(this.time);
+        LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);
+
+        ZoneId estZoneId = ZoneId.of("-05:00");
+        ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+
+        ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estZoneId);
+        ZonedDateTime targetDateTime = estDateTime.withZoneSameInstant(userZoneId);
+
+        return SoapUtility.formatDate(targetDateTime.toLocalDate().toString());
     }
 
     /**
@@ -173,6 +213,26 @@ public abstract class DateTimed {
      */
     public String getFormattedTime() {
         return SoapUtility.convertToAmPm(time);
+    }
+
+    /**
+     * Returns a formatted String representing the Time of this {@link DateTimed} based on the given {@link UserSettings}.
+     * 
+     * @param settings The {@link UserSettings} to use for formatting.
+     * @return A formatted time String.
+     */
+    public String getFormattedTime(UserSettings settings) {
+        LocalDate dateObj = LocalDate.parse(this.date);
+        LocalTime timeObj = LocalTime.parse(this.time);
+        LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);
+
+        ZoneId estZoneId = ZoneId.of("-05:00");
+        ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+
+        ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estZoneId);
+        ZonedDateTime targetDateTime = estDateTime.withZoneSameInstant(userZoneId);
+
+        return SoapUtility.convertToAmPm(targetDateTime.toLocalTime().toString());
     }
 
     /**
