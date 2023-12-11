@@ -29,8 +29,8 @@ public abstract class DateTimed {
      * Creates a DateTimed for the current moment (EST).
      */
     protected DateTimed() {
-        this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
-        this.time = LocalTime.now(ZoneId.of("-05:00")).toString();
+        this.date = LocalDate.now(ZoneId.of("America/New_York")).toString();
+        this.time = LocalTime.now(ZoneId.of("America/New_York")).toString();
     }
 
     /**
@@ -79,7 +79,7 @@ public abstract class DateTimed {
      * @return How long, in seconds, from now (EST) until this {@link DateTimed} date and time.
      */
     public long until() {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("America/New_York"));
         String eventDateTimeString = date + "T" + time + ":00";
         return (now.until(LocalDateTime.parse(eventDateTimeString), ChronoUnit.SECONDS));
     }
@@ -90,7 +90,7 @@ public abstract class DateTimed {
      * @return True if this {@link DateTimed DateTimed's} date is today, false otherwise.
      */
     public boolean isToday() {
-        LocalDate now = LocalDate.now(ZoneId.of("-05:00"));
+        LocalDate now = LocalDate.now(ZoneId.of("America/New_York"));
         LocalDate eventDate = LocalDate.parse(date);
         return (now.getYear() == eventDate.getYear() && now.getDayOfYear() == (eventDate.getDayOfYear()));
     }
@@ -116,17 +116,23 @@ public abstract class DateTimed {
      * @throws IllegalArgumentException If the time string is in an invalid format.
      */
     public void setTime(String time, UserSettings settings) throws IllegalArgumentException {
-        ZoneId estId = ZoneId.of("-05:00");
+        // EST timezone
+        ZoneId estId = ZoneId.of("America/New_York");
         ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
-
+    
         String standardizedTime = SoapUtility.timeConverter(time);
         LocalTime timeObj = LocalTime.parse(standardizedTime);
-        LocalDateTime dateTime = LocalDateTime.of(LocalDate.parse(date), timeObj);
+    
+        // Assuming 'date' is a valid LocalDate instance you have defined earlier
+        LocalDateTime userDateTime = LocalDateTime.of(LocalDate.parse(date), timeObj);
+    
+        // Create the date-time in the user's timezone
+        ZonedDateTime userZoneDateTime = ZonedDateTime.of(userDateTime, userZoneId);
 
-        ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estId);
-        ZonedDateTime targetDateTime = estDateTime.withZoneSameInstant(userZoneId);
+        // Convert it to EST
+        ZonedDateTime estDateTime = userZoneDateTime.withZoneSameInstant(estId);
 
-        this.time = targetDateTime.toLocalTime().toString();
+        this.time = estDateTime.toLocalTime().toString();
     }
 
     /**
@@ -197,7 +203,7 @@ public abstract class DateTimed {
         LocalTime timeObj = LocalTime.parse(this.time);
         LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);
 
-        ZoneId estZoneId = ZoneId.of("-05:00");
+        ZoneId estZoneId = ZoneId.of("America/New_York");
         ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
 
         ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estZoneId);
@@ -226,7 +232,7 @@ public abstract class DateTimed {
         LocalTime timeObj = LocalTime.parse(this.time);
         LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);
 
-        ZoneId estZoneId = ZoneId.of("-05:00");
+        ZoneId estZoneId = ZoneId.of("America/New_York");
         ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
 
         ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estZoneId);

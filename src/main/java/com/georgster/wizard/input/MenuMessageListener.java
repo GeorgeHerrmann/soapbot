@@ -56,7 +56,7 @@ public class MenuMessageListener extends InputListener {
 
         SelectMenu menu = SelectMenu.of(title, menuOptions);
 
-        //prompt.append("\nYour options are: " + String.join(", ", options));
+        prompt.append("\nYour options are: " + String.join(", ", options));
 
         inputState.getEmbed().ifPresentOrElse(spec ->
             sendPromptMessage(spec, ActionRow.of(menu)),

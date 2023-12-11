@@ -6,6 +6,7 @@ import com.georgster.api.ActionWriter;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.TimedEvent;
+import com.georgster.settings.UserSettings;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.handler.GuildInteractionHandler;
 
@@ -58,8 +59,8 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
      * @param time the time the event will start
      * @param channel the name of the channel the event was reserved in
      */
-    public ReserveEvent(String identifier, int numPeople, String time, String channel) {
-        super(time);
+    public ReserveEvent(String identifier, int numPeople, String time, String channel, UserSettings settings) {
+        super(time, settings);
 
         this.identifier = identifier;
         this.numPeople = numPeople;
@@ -76,8 +77,8 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
      * @param time the time the event will start
      * @param channel the name of the channel the event was reserved in
      */
-    public ReserveEvent(String identifier, int numPeople, String time, String channel, String date) {
-        super(time, date);
+    public ReserveEvent(String identifier, int numPeople, String time, String channel, String date, UserSettings settings) {
+        super(time, date, settings);
 
         this.identifier = identifier;
         this.numPeople = numPeople;
@@ -111,8 +112,8 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
      * @param time the time the event will start
      * @param channel the name of the channel the event was reserved in
      */
-    public ReserveEvent(String identifier, String time, String channel) {
-        super(time);
+    public ReserveEvent(String identifier, String time, String channel, UserSettings settings) {
+        super(time, settings);
 
         this.identifier = identifier;
         this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start
@@ -129,8 +130,8 @@ public class ReserveEvent extends TimedEvent implements SoapEvent {
      * @param time the time the event will start
      * @param channel the name of the channel the event was reserved in
      */
-    public ReserveEvent(String identifier, String time, String channel, String date) {
-        super(time, date);
+    public ReserveEvent(String identifier, String time, String channel, String date, UserSettings settings) {
+        super(time, date, settings);
 
         this.identifier = identifier;
         this.numPeople = 9999; //An Unlimited event will always have 9999 people needed to start

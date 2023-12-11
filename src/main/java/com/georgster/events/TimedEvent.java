@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
+import com.georgster.settings.UserSettings;
 import com.georgster.util.DateTimed;
 import com.georgster.util.SoapUtility;
 
@@ -31,10 +33,32 @@ public abstract class TimedEvent extends DateTimed {
     protected TimedEvent(String time) throws IllegalArgumentException {
         if (time.equals("99:99")) {
             this.time = time;
-            this.date = LocalDate.now(ZoneId.of("-05:00")).toString();
+            this.date = LocalDate.now(ZoneId.of("America/New_York")).toString();
         } else {
             this.date = getCorrectDate(SoapUtility.timeConverter(time));
             setTime(time);
+        }
+    }
+
+    /**
+     * Creates a TimedEvent based on a time input. If the time is {@code 99:99},
+     * this event will have no associated time and the date is set to today, otherwise,
+     * the time is standardized. If the time is not in the past, the date is set to today, otherwise
+     * the date is set for the next day.
+     * <p>
+     * This constructor will also adjust the time to the user's timezone.
+     * 
+     * @param time The describing time String.
+     * @param settings The user's settings.
+     * @throws IllegalArgumentException is the time input is invalid.
+     */
+    protected TimedEvent(String time, UserSettings settings) throws IllegalArgumentException {
+        if (time.equals("99:99")) {
+            this.time = time;
+            this.date = LocalDate.now(ZoneId.of("America/New_York")).toString();
+        } else {
+            this.date = getCorrectDate(SoapUtility.timeConverter(time));
+            setTime(time, settings);
         }
     }
 
@@ -51,6 +75,21 @@ public abstract class TimedEvent extends DateTimed {
     }
 
     /**
+     * Creates a TimedEvent based on a date and time input.
+     * <p>
+     * This constructor will also adjust the time to the user's timezone.
+     * 
+     * @param time The describing time String.
+     * @param date The describing date String.
+     * @param settings The user's settings.
+     * @throws IllegalArgumentException is the date or time input is invalid.
+     */
+    protected TimedEvent(String time, String date, UserSettings settings) throws IllegalArgumentException {
+        setDate(date);
+        setTime(time, settings);
+    }
+
+    /**
      * Returns how many seconds until this event's date and time is equal to the current date and time.
      * If this event has no time, this method fails.
      * 
@@ -58,7 +97,7 @@ public abstract class TimedEvent extends DateTimed {
      */
     @Override
     public long until() {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("-05:00"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("America/New_York"));
         String eventDateTimeString = date + "T" + time + ":00";
         long until = (now.until(LocalDateTime.parse(eventDateTimeString), ChronoUnit.SECONDS));
         if (until < 0 && Math.abs(until) > 60) {
@@ -76,10 +115,10 @@ public abstract class TimedEvent extends DateTimed {
      */
     protected String getCorrectDate(String time) {
         LocalTime localTime = LocalTime.parse(time);
-        if (LocalTime.now(ZoneId.of("-05:00")).isAfter(localTime)) {
-            return LocalDate.now(ZoneId.of("-05:00")).plusDays(1).toString();
+        if (LocalTime.now(ZoneId.of("America/New_York")).isAfter(localTime)) {
+            return LocalDate.now(ZoneId.of("America/New_York")).plusDays(1).toString();
         } else {
-            return LocalDate.now(ZoneId.of("-05:00")).toString();
+            return LocalDate.now(ZoneId.of("America/New_York")).toString();
         }
     }
 
@@ -93,6 +132,34 @@ public abstract class TimedEvent extends DateTimed {
     @Override
     public void setTime(String time) throws IllegalArgumentException {
         this.time = SoapUtility.timeConverter(time);
+        if (isToday()) {
+            this.date = getCorrectDate(this.time); //Makes sure date time is not in the past
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setTime(String time, UserSettings settings) throws IllegalArgumentException {
+       // EST timezone
+       ZoneId estId = ZoneId.of("America/New_York");
+       ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+   
+       String standardizedTime = SoapUtility.timeConverter(time);
+       LocalTime timeObj = LocalTime.parse(standardizedTime);
+   
+       // Assuming 'date' is a valid LocalDate instance you have defined earlier
+       LocalDateTime userDateTime = LocalDateTime.of(LocalDate.parse(date), timeObj);
+   
+       // Create the date-time in the user's timezone
+       ZonedDateTime userZoneDateTime = ZonedDateTime.of(userDateTime, userZoneId);
+
+       // Convert it to EST
+       ZonedDateTime estDateTime = userZoneDateTime.withZoneSameInstant(estId);
+
+       this.time = estDateTime.toLocalTime().toString();
+
         if (isToday()) {
             this.date = getCorrectDate(this.time); //Makes sure date time is not in the past
         }

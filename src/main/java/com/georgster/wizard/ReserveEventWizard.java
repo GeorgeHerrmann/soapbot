@@ -7,7 +7,8 @@ import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.events.SoapEvent;
 import com.georgster.events.SoapEventType;
 import com.georgster.events.reserve.ReserveEvent;
-import com.georgster.util.SoapUtility;
+import com.georgster.settings.TimezoneOption;
+import com.georgster.settings.UserSettings;
 import com.georgster.wizard.input.InputListener;
 import com.georgster.wizard.input.InputListenerFactory;
 
@@ -19,6 +20,7 @@ public class ReserveEventWizard extends InputWizard {
     private static final SoapEventType TYPE = SoapEventType.RESERVE;
 
     private final SoapEventManager eventManager;
+    private final UserSettings settings;
 
     /**
      * Creates a new ReserveEventWizard.
@@ -29,6 +31,7 @@ public class ReserveEventWizard extends InputWizard {
     public ReserveEventWizard(CommandExecutionEvent event) {
         super(event, InputListenerFactory.createMenuMessageListener(event, TITLE));
         this.eventManager = event.getEventManager();
+        this.settings = event.getClientContext().getUserSettingsManager().get(user.getId().asString());
     }
 
     /**
@@ -112,14 +115,14 @@ public class ReserveEventWizard extends InputWizard {
     protected void editTime(ReserveEvent event) {
         InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
 
-        String prompt = "Current time: " + SoapUtility.convertToAmPm(event.getTime()) + "\n" + 
+        String prompt = "Current time: " + event.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) + "\n" + 
                     "Please enter the new time for " + event.getIdentifier();
 
         withResponse((response -> {
             try {
-                event.setTime(response);
+                event.setTime(response, settings);
                 eventManager.update(event);
-                sendMessage("Updated event " + event.getIdentifier() + " to have the time " + SoapUtility.convertToAmPm(event.getTime()) + "." +
+                sendMessage("Updated event " + event.getIdentifier() + " to have the time " + event.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) + "." +
                                 "\n*Note: The date may have been adjusted if the new date time was in the past*", TITLE);
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
@@ -135,14 +138,14 @@ public class ReserveEventWizard extends InputWizard {
     protected void editDate(ReserveEvent event) {
         InputListener buttonListener = InputListenerFactory.createButtonMessageListener(this.event, TITLE);
 
-        String prompt = "Current date: " + SoapUtility.formatDate(event.getDate()) + "\n" + 
+        String prompt = "Current date: " + event.getFormattedDate(settings) + "\n" + 
                     "Please enter the new date for " + event.getIdentifier();
 
         withResponse((response -> {
             try {
                 event.setDate(response);
                 eventManager.update(event);
-                sendMessage("Updated event " + event.getIdentifier() + " to have the date " + SoapUtility.formatDate(event.getDate()) + ".", TITLE);
+                sendMessage("Updated event " + event.getIdentifier() + " to have the date " + event.getFormattedDate(settings) + ".", TITLE);
             } catch (IllegalArgumentException e) {
                 sendMessage(e.getMessage(), TITLE);
             }

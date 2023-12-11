@@ -43,19 +43,19 @@ public final class UserSettingsWizard extends InputWizard {
     protected void selectOption() {
         final String prompt = "Which option would you like to set? *(Current: " + getSettingDisplay(changingOption) + ")*";
         String[] options = changingOption.availableOptions().toArray(String[]::new);
-        System.out.println("Options: " + options.length);
 
         withResponse(response -> {
             try {
                 changingOption.setOption(response);
                 manager.update(settings);
+                sendMessage("Successfully changed setting to " + getSettingDisplay(changingOption), "Success");
             } catch (Exception e) {
                 sendMessage("Sorry, that option does not exist. Try again.", "Invalid Option");
             }
         }, true, prompt, options);
     }
 
-    private String getSettingDisplay(SettingsOption option) {
+    private static String getSettingDisplay(SettingsOption option) {
         if (option instanceof TimezoneOption) {
             if (option.currentOption().equals("-05:00")) {
                 return "EST";

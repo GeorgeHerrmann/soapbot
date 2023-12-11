@@ -11,6 +11,7 @@ import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
+import com.georgster.settings.TimezoneOption;
 import com.georgster.settings.UserSettings;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
@@ -129,8 +130,8 @@ public class ReserveEventCommand implements ParseableCommand {
                     response.append("- This event has no associated time\n");
                     response.append("\t- This event will pop once the needed number of people have reserved to it");
                 } else {
-                    response.append("- Time: " + reserve.getFormattedTime(settings) + "\n");
-                    response.append("\t- This event will pop at " + reserve.getFormattedTime(settings));
+                    response.append("- Time: " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) +  "\n");
+                    response.append("\t- This event will pop at " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()));
                 }
                 response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
                 response.append("\nReserved users:\n");
@@ -159,6 +160,7 @@ public class ReserveEventCommand implements ParseableCommand {
     private String getEventListString(CommandExecutionEvent event) {
         StringBuilder response = new StringBuilder();
         List<SoapEvent> events = eventManager.getAll(TYPE);
+        UserSettings settings = event.getClientContext().getUserSettingsManager().get(event.getDiscordEvent().getUser().getId().asString());
         for (int i = 0; i < events.size(); i++) {
             /* The EventManager will ensure we get events of the correct type, so casting is safe */
             ReserveEvent reserve = (ReserveEvent) events.get(i);
@@ -172,10 +174,10 @@ public class ReserveEventCommand implements ParseableCommand {
             } else {
                 if (reserve.alreadyReserved(user)) {
                     response.append("- **" + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
-                                "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "**\n");
+                                "\n\tReserved for " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) + " on " + reserve.getFormattedDate(settings) + "**\n");
                 } else {
                     response.append("- " + reserve.getIdentifier() + " - " + reserve.getReserved() + "/" + reserve.getNumPeople() + " people reserved" +
-                                "\n\tReserved at " + reserve.getFormattedTime() + " on " + reserve.getFormattedDate() + "\n");
+                                "\n\tReserved for " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) + " on " + reserve.getFormattedDate(settings) + "\n");
                 }
             }
         }
