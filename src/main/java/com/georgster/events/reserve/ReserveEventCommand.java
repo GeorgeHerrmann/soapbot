@@ -11,6 +11,7 @@ import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
+import com.georgster.settings.UserSettings;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
@@ -51,6 +52,7 @@ public class ReserveEventCommand implements ParseableCommand {
         MultiLogger logger = event.getLogger();
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         SubcommandSystem subcommands = event.createSubcommandSystem();
+        UserSettings settings = event.getClientContext().getUserSettingsManager().get(event.getDiscordEvent().getUser().getId().asString());
 
         subcommands.on(() -> {
             logger.append("Showing all reserve events in a text channel", LogDestination.API);
@@ -127,10 +129,10 @@ public class ReserveEventCommand implements ParseableCommand {
                     response.append("- This event has no associated time\n");
                     response.append("\t- This event will pop once the needed number of people have reserved to it");
                 } else {
-                    response.append("- Time: " + SoapUtility.convertToAmPm(reserve.getTime()) + "\n");
-                    response.append("\t- This event will pop at " + SoapUtility.convertToAmPm(reserve.getTime()));
+                    response.append("- Time: " + reserve.getFormattedTime(settings) + "\n");
+                    response.append("\t- This event will pop at " + reserve.getFormattedTime(settings));
                 }
-                response.append("\nScheduled for: " + SoapUtility.formatDate(reserve.getDate()));
+                response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
                 response.append("\nReserved users:\n");
                 reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberById(user).getMention() + "\n"));
 

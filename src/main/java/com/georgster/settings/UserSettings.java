@@ -17,7 +17,7 @@ public final class UserSettings implements Manageable {
      * A specific setting for the user.
      */
     public abstract static class SettingsOption {
-        private String option; // the current option for this setting
+        protected String option; // the current option for this setting
 
         /**
          * Creates a new setting with the given default option.
@@ -87,11 +87,11 @@ public final class UserSettings implements Manageable {
     }
 
     public SettingsOption getSetting(Class<? extends SettingsOption> settingClass) {
-        return settings.stream().filter(settingClass::isInstance).findFirst().orElse(null);
+        return settings.stream().filter(settingClass::isInstance).findFirst().orElseThrow();
     }
 
     public SettingsOption getSetting(String settingName) {
-        return settings.stream().filter(setting -> setting.name().equals(settingName)).findFirst().orElse(null);
+        return settings.stream().filter(setting -> setting.name().equals(settingName)).findFirst().orElseThrow();
     }
 
     public Set<SettingsOption> getAllSettings() {

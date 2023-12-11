@@ -30,6 +30,7 @@ import com.georgster.music.PlayMusicCommand;
 import com.georgster.music.ShowQueueCommand;
 import com.georgster.music.SkipMusicCommand;
 import com.georgster.permissions.PermissionsCommand;
+import com.georgster.settings.UserSettingsCommand;
 import com.georgster.test.TestCommand;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.thread.ThreadPoolFactory;
@@ -81,7 +82,8 @@ public final class CommandRegistry {
             BlackjackCommand.class,
             TradeCommand.class,
             CardCommand.class,
-            MentionGroupCommand.class
+            MentionGroupCommand.class,
+            UserSettingsCommand.class
         ));
     }
 
