@@ -453,3 +453,21 @@
     MentionGroups
         - When using '!mention list' to view all MentionGroups, the repeat reaction can now be used to switch to an Alternate view which
           displays the members of each group
+
+2.710-BETA
+    - Created a UserSettings system
+        - Users can now have global settings to change how they interact with SOAP Bot
+        - UserSettings are global across every Guild SOAP Bot is in. The settings a user sets in one Guild will modify how SOAP Bot interacts with them in every Guild.
+        - Settings can be managed with the UserSettingsWizard via '!settings'
+    - Created a TimezoneSetting
+        - Users can now change their timezone for SOAP Bot.
+            - SOAP Bot offers the 24 most common timezones as options
+        - Any system (such as ReserveEvents) which use exact times will now display the time and date based on the User's timezone
+          This affects the following:
+            - Creating a new ReserveEvent
+                - When creating a ReserveEvent, the time will be adjusted based on the User's Timezone.
+                  For example: The command '!reserve cs2 5 6pm' can be used to create an event for 9PM EST if the User's timezone setting is set to PST (America/Los_Angeles).
+                - When viewing a ReserveEvent
+                  For example: An event set for 9pm EST will display as 6pm PST if the user's timezone is set to PST
+                    - This, of course, only applies to commands done by the user. Each command will display the time based on the timezone of the user who executed the command.
+                - Managing a ReserveEvent
