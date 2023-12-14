@@ -7,6 +7,8 @@ import com.georgster.control.manager.Manageable;
 
 /**
  * A {@link Manageable} representing the settings of a user for SOAP Bot.
+ * <p>
+ * This {@link Manageable Manageable's} identifier is the user id.
  */
 public final class UserSettings implements Manageable {
 
@@ -68,11 +70,22 @@ public final class UserSettings implements Manageable {
         }
     }
 
+    /**
+     * Creates a new {@link UserSettings} with the given id and settings.
+     * 
+     * @param id      The id of the user.
+     * @param settings The settings of the user.    
+     */
     public UserSettings(String id, Set<SettingsOption> settings) {
         this.id = id;
         this.settings = settings;
     }
 
+    /**
+     * Creates a new {@link UserSettings} with the given id and default settings.
+     * 
+     * @param id The id of the user.
+     */
     public UserSettings(String id) {
         this.id = id;
         this.settings = new HashSet<>();
@@ -86,22 +99,47 @@ public final class UserSettings implements Manageable {
         return id;
     }
 
+    /**
+     * Returns the setting of the given class.
+     * 
+     * @param settingClass The class of the setting to return.
+     * @return the setting of the given class.
+     */
     public SettingsOption getSetting(Class<? extends SettingsOption> settingClass) {
         return settings.stream().filter(settingClass::isInstance).findFirst().orElseThrow();
     }
 
+    /**
+     * Returns the setting of the given name.
+     * 
+     * @param settingName The name of the setting to return.
+     * @return the setting of the given name.
+     */
     public SettingsOption getSetting(String settingName) {
         return settings.stream().filter(setting -> setting.name().equals(settingName)).findFirst().orElseThrow();
     }
 
+    /**
+     * Returns all settings for the user.
+     * 
+     * @return all settings for the user.
+     */
     public Set<SettingsOption> getAllSettings() {
         return settings;
     }
 
+    /**
+     * Returns the timezone setting for the user.
+     * 
+     * @return the timezone setting for the user.
+     */
     public SettingsOption getTimezoneSetting() {
         return getSetting(TimezoneOption.class);
     }
 
+    /**
+     * Loads the settings for the user.
+     */
     private void loadSettings() {
         this.settings.add(new TimezoneOption());
     }
