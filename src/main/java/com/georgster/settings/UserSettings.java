@@ -138,10 +138,20 @@ public final class UserSettings implements Manageable {
     }
 
     /**
+     * Returns the default color setting for the user.
+     * 
+     * @return the default color setting for the user.
+     */
+    public SettingsOption getDefaultColorSetting() {
+        return getSetting(DefaultColorOption.class);
+    }
+
+    /**
      * Loads the settings for the user.
      */
     private void loadSettings() {
         this.settings.add(new TimezoneOption());
+        this.settings.add(new DefaultColorOption());
     }
 
 }

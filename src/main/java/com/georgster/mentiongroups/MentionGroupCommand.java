@@ -109,6 +109,12 @@ public final class MentionGroupCommand implements ParseableCommand {
         }, 0);
     }
 
+    /**
+     * Returns a list of strings that describe each mention group.
+     * 
+     * @param handler The GuildInteractionHandler to use to get the members
+     * @return A list of strings that describe each mention group
+     */
     private List<String> getMentionGroupDescriptors(GuildInteractionHandler handler) {
         List<String> output = new ArrayList<>();
         manager.getAll().forEach(group -> {

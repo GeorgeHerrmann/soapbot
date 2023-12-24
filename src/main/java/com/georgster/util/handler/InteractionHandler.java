@@ -2,6 +2,8 @@ package com.georgster.util.handler;
 
 import java.util.Optional;
 
+import com.georgster.settings.DefaultColorOption;
+import com.georgster.settings.UserSettings;
 import com.georgster.util.Unwrapper;
 
 import discord4j.common.util.Snowflake;
@@ -25,6 +27,7 @@ import discord4j.rest.util.Color;
 public abstract class InteractionHandler {
     protected Optional<MessageChannel> activeChannel;
     protected Optional<ComponentInteractionEvent> activeComponentInteraction;
+    protected Optional<UserSettings> activeUserSettings;
     protected final Snowflake id;
 
     /**
@@ -60,6 +63,7 @@ public abstract class InteractionHandler {
     protected InteractionHandler(Snowflake flake) {
         this.activeChannel = Optional.empty();
         this.activeComponentInteraction = Optional.empty();
+        this.activeUserSettings = Optional.empty();
         this.id = flake;
     }
 
@@ -86,6 +90,23 @@ public abstract class InteractionHandler {
      */
     public void setActiveMessageChannel(MessageChannel channel) {
         this.activeChannel = Optional.of(channel);
+    }
+
+    /**
+     * Resets this {@link InteractionHandler InteractionHandler's} active {@link UserSettings}.
+     */
+    public void killUserSettings() {
+        this.activeUserSettings = Optional.empty();
+    }
+
+    /**
+     * Sets the {@link UserSettings} this handler is actively using to determine
+     * how to perform actions.
+     * 
+     * @param settings The new {@link UserSettings}.
+     */
+    public void setUserSettings(UserSettings settings) {
+        this.activeUserSettings = Optional.of(settings);
     }
 
     /**
@@ -521,7 +542,7 @@ public abstract class InteractionHandler {
      * @return The created {@link Message}.
      */
     public static Message sendMessage(MessageChannel channel, String text, MessageFormatting format) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).build();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
@@ -554,7 +575,7 @@ public abstract class InteractionHandler {
      * @return The created {@link Message}.
      */
     public static Message sendMessage(MessageChannel channel, String text, String title, MessageFormatting format) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
@@ -589,7 +610,7 @@ public abstract class InteractionHandler {
      * @return The created {@link Message}.
      */
     public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, MessageFormatting format) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).image(imageUrl).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
@@ -624,7 +645,7 @@ public abstract class InteractionHandler {
      * @return The created {@link Message}.
      */
     public static Message sendMessage(MessageChannel channel, String text, String title, MessageFormatting format, LayoutComponent... components) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
         return channel.createMessage(spec).block();
     }
@@ -665,7 +686,7 @@ public abstract class InteractionHandler {
      * @return The created {@link Message}.
      */
     public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, MessageFormatting format, LayoutComponent... components) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).image(imageUrl).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
         return channel.createMessage(spec).block();
     }
@@ -798,16 +819,31 @@ public abstract class InteractionHandler {
     }
 
     /**
-     * Returns the {@link Color} associated with the provided {@link MessageFormatting},
+     * Returns the default {@link Color} associated with the provided {@link MessageFormatting}, disregarding any {@link UserSettings},
      * or {@link Color#BLUE} if one does not exist.
      * 
      * @param format The {@link MessageFormatting} to get the {@link Color} for.
      * @return The {@link Color} associated with the provided {@link MessageFormatting}.
      */
-    protected static Color getColor(MessageFormatting format) {
+    protected static Color getDefaultColor(MessageFormatting format) {
         switch (format) {
             case DEFAULT:
                 return Color.BLUE;
+            case ERROR:
+                return Color.RED;
+            case INFO:
+                return Color.GRAY_CHATEAU;
+            default:
+                return Color.BLUE;
+        }
+    }
+
+    protected Color getColor(MessageFormatting format) {
+        switch (format) {
+            case DEFAULT:
+                if (activeUserSettings.isPresent()) {
+                    return ((DefaultColorOption) activeUserSettings.orElse(null).getDefaultColorSetting()).getColor();
+                }
             case ERROR:
                 return Color.RED;
             case INFO:
