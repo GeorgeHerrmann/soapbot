@@ -471,3 +471,7 @@
                   For example: An event set for 9pm EST will display as 6pm PST if the user's timezone is set to PST
                     - This, of course, only applies to commands done by the user. Each command will display the time based on the timezone of the user who executed the command.
                 - Managing a ReserveEvent
+
+2.720-BETA
+    - Added message color settings options to the UserSettings system
+        - Message colors for DEFAULT, ERROR and INFO messages can be customized in the UserSettingsWizard with !settings
