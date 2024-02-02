@@ -12,13 +12,13 @@ public final class UserSettingsManager extends GlobalSoapManager<UserSettings> {
     /**
      * {@inheritDoc}
      */
-    @Override
+    /*@Override
     public void load() {
         dbService.getAllObjects().forEach(settings -> {
             settings.loadSettings();
             add(settings);
             update(settings);
         });
-    }
+    }*/
     
 }
