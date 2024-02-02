@@ -19,7 +19,6 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.InteractionReplyEditSpec;
-import discord4j.rest.util.Color;
 
 /**
  * An {@link InteractionHandler} for a Discord {@link Guild}.
@@ -148,8 +147,9 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text) {
         Unwrapper<Message> message = new Unwrapper<>();
+
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(MessageFormatting.DEFAULT)).description(text).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
                 interaction.editReply(spec).block();
@@ -160,7 +160,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed))));
 
         return message.getObject();
     }
@@ -174,8 +174,9 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, MessageFormatting format) {
         Unwrapper<Message> message = new Unwrapper<>();
+
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
                 interaction.editReply(spec).block();
@@ -186,7 +187,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, format))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed))));
 
         return message.getObject();
     }
@@ -200,8 +201,8 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title) {
         Unwrapper<Message> message = new Unwrapper<>();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(MessageFormatting.DEFAULT)).description(text).title(title).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
                 interaction.editReply(spec).block();
@@ -212,7 +213,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed))));
         return message.getObject();
     }
 
@@ -225,8 +226,9 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title, MessageFormatting format) {
         Unwrapper<Message> message = new Unwrapper<>();
+
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
                 interaction.editReply(spec).block();
@@ -237,7 +239,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed))));
         return message.getObject();
     }
 
@@ -250,8 +252,9 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title, String imageUrl) {
         Unwrapper<Message> message = new Unwrapper<>();
+
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(MessageFormatting.DEFAULT)).description(text).title(title).image(imageUrl).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).image(imageUrl).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
                 interaction.editReply(spec).block();
@@ -262,7 +265,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed))));
         return message.getObject();
     }
 
@@ -275,8 +278,8 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format) {
         Unwrapper<Message> message = new Unwrapper<>();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).build();
                 interaction.editReply(spec).block();
@@ -287,7 +290,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed))));
         return message.getObject();
     }
 
@@ -300,8 +303,8 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(MessageFormatting.DEFAULT)).description(text).title(title).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
                 interaction.editReply(spec).block();
@@ -312,7 +315,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, components))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed, components))));
         return message.getObject();
     }
 
@@ -325,8 +328,8 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title, MessageFormatting format, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
                 interaction.editReply(spec).block();
@@ -337,7 +340,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format, components))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed, components))));
         return message.getObject();
     }
 
@@ -350,8 +353,8 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title, String imageUrl, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(MessageFormatting.DEFAULT)).description(text).title(title).image(imageUrl).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(Color.BLUE).description(text).title(title).image(imageUrl).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
                 interaction.editReply(spec).block();
@@ -362,7 +365,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, components))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed, components))));
         return message.getObject();
     }
 
@@ -375,8 +378,8 @@ public final class GuildInteractionHandler extends InteractionHandler {
     @Override
     public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
         activeCommandInteraction.ifPresentOrElse(interaction -> {
-            EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getColor(format)).description(text).title(title).image(imageUrl).build();
             if (replyWasDeferred) {
                 InteractionReplyEditSpec spec = InteractionReplyEditSpec.builder().addEmbed(embed).addAllComponents(List.of(components)).build();
                 interaction.editReply(spec).block();
@@ -387,7 +390,7 @@ public final class GuildInteractionHandler extends InteractionHandler {
             }
             message.setObject(interaction.getReply().block());
             killActiveCommandInteraction();
-        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format, components))));
+        }, () -> activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, embed, components))));
         return message.getObject();
     }
 

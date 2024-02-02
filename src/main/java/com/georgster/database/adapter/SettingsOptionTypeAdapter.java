@@ -2,6 +2,9 @@ package com.georgster.database.adapter;
 
 import java.io.IOException;
 
+import com.georgster.settings.DefaultColorOption;
+import com.georgster.settings.ErrorColorOption;
+import com.georgster.settings.InfoColorOption;
 import com.georgster.settings.TimezoneOption;
 import com.georgster.settings.UserSettings.SettingsOption;
 import com.google.gson.JsonParseException;
@@ -65,6 +68,12 @@ public final class SettingsOptionTypeAdapter extends TypeAdapter<SettingsOption>
         // Instantiate the appropriate class based on the type information
         if (type.equals(TimezoneOption.class.getName())) {
             return new TimezoneOption(option);
+        } else if (type.equals(DefaultColorOption.class.getName())) {
+            return new DefaultColorOption(option);
+        } else if (type.equals(ErrorColorOption.class.getName())) {
+            return new ErrorColorOption(option);
+        } else if (type.equals(InfoColorOption.class.getName())) {
+            return new InfoColorOption(option);
         }
     
         // You can add more else if blocks here for other concrete classes

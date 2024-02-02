@@ -4,18 +4,17 @@ import java.util.Set;
 
 import discord4j.rest.util.Color;
 
-public class DefaultColorOption extends ColorOption {
-
-    public DefaultColorOption() {
-        super("blue");
+public final class ErrorColorOption extends ColorOption {
+    public ErrorColorOption() {
+        super("red");
     }
 
-    public DefaultColorOption(String option) {
+    public ErrorColorOption(String option) {
         super(option);
     }
 
     public String name() {
-        return "default color";
+        return "error color";
     }
 
     public Set<String> availableOptions() {
@@ -25,5 +24,4 @@ public class DefaultColorOption extends ColorOption {
     public Color getColor() {
         return AVAILABLE_OPTIONS.get(option);
     }
-
 }

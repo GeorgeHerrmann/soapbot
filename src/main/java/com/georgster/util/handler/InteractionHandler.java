@@ -3,6 +3,8 @@ package com.georgster.util.handler;
 import java.util.Optional;
 
 import com.georgster.settings.DefaultColorOption;
+import com.georgster.settings.ErrorColorOption;
+import com.georgster.settings.InfoColorOption;
 import com.georgster.settings.UserSettings;
 import com.georgster.util.Unwrapper;
 
@@ -37,19 +39,19 @@ public abstract class InteractionHandler {
         /**
          * The default formatting for SOAP Bot {@link Message Messages}.
          * <p>
-         * Default formatting wraps the {@link Message} in a blue embed.
+         * Default formatting wraps the {@link Message} in a blue embed by default.
          */
         DEFAULT,
         /**
          * The error formatting for SOAP Bot {@link Message Messages}.
          * <p>
-         * Error formatting wraps the {@link Message} in a red embed.
+         * Error formatting wraps the {@link Message} in a red embed by default.
          */
         ERROR,
         /**
          * The info formatting for SOAP Bot {@link Message Messages}.
          * <p>
-         * Info formatting wraps the {@link Message} in a grey-chateu embed.
+         * Info formatting wraps the {@link Message} in a light-gray embed by default.
          */
         INFO
     }
@@ -131,7 +133,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, getColor(MessageFormatting.DEFAULT))));
         return message.getObject();
     }
 
@@ -144,7 +146,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, MessageFormatting format) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, format)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, getColor(format))));
         return message.getObject();
     }
 
@@ -160,7 +162,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, getColor(MessageFormatting.DEFAULT))));
         return message.getObject();
     }
 
@@ -175,7 +177,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title, MessageFormatting format) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, getColor(format))));
         return message.getObject();
     }
 
@@ -192,7 +194,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title, String imageUrl) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, getColor(MessageFormatting.DEFAULT))));
         return message.getObject();
     }
 
@@ -208,7 +210,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, getColor(format))));
         return message.getObject();
     }
 
@@ -225,7 +227,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, components)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, getColor(MessageFormatting.DEFAULT), components)));
         return message.getObject();
     }
 
@@ -241,7 +243,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title, MessageFormatting format, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, format, components)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, getColor(format), components)));
         return message.getObject();
     }
 
@@ -260,7 +262,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title, String imageUrl, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, components)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, getColor(MessageFormatting.DEFAULT), components)));
         return message.getObject();
     }
 
@@ -278,7 +280,7 @@ public abstract class InteractionHandler {
      */
     public Message sendMessage(String text, String title, String imageUrl, MessageFormatting format, LayoutComponent... components) {
         Unwrapper<Message> message = new Unwrapper<>();
-        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, format, components)));
+        activeChannel.ifPresent(channel -> message.setObject(InteractionHandler.sendMessage(channel, text, title, imageUrl, getColor(format), components)));
         return message.getObject();
     }
 
@@ -538,11 +540,11 @@ public abstract class InteractionHandler {
      * 
      * @param channel The {@link MessageChannel} to send the message in.
      * @param text The {@link Message} content.
-     * @param format The {@link MessageFormatting} to use.
+     * @param color The {@link Color} to use for the embed.
      * @return The created {@link Message}.
      */
-    public static Message sendMessage(MessageChannel channel, String text, MessageFormatting format) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).build();
+    public static Message sendMessage(MessageChannel channel, String text, Color color) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
@@ -571,11 +573,11 @@ public abstract class InteractionHandler {
      * @param channel The {@link MessageChannel} to send the message in.
      * @param text The {@link Message} content.
      * @param title The {@link Message} title, present at the top of the embed.
-     * @param format The {@link MessageFormatting} to use.
+     * @param color The {@link Color} to use for the embed.
      * @return The created {@link Message}.
      */
-    public static Message sendMessage(MessageChannel channel, String text, String title, MessageFormatting format) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).build();
+    public static Message sendMessage(MessageChannel channel, String text, String title, Color color) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
@@ -606,11 +608,11 @@ public abstract class InteractionHandler {
      * @param text The {@link Message} content.
      * @param title The {@link Message} title, present at the top of the embed.
      * @param imageUrl The url of the image to attach to the {@link Message}.
-     * @param format The {@link MessageFormatting} to use.
+     * @param color The {@link Color} to use for the embed.
      * @return The created {@link Message}.
      */
-    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, MessageFormatting format) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).image(imageUrl).build();
+    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, Color color) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).image(imageUrl).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed);
         return channel.createMessage(spec).block();
     }
@@ -640,12 +642,12 @@ public abstract class InteractionHandler {
      * @param channel The {@link MessageChannel} to send the message in.
      * @param text The {@link Message} content.
      * @param title The {@link Message} title, present at the top of the embed.
-     * @param format The {@link MessageFormatting} to use.
+     * @param color The {@link Color} to use for the embed.
      * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
      * @return The created {@link Message}.
      */
-    public static Message sendMessage(MessageChannel channel, String text, String title, MessageFormatting format, LayoutComponent... components) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).build();
+    public static Message sendMessage(MessageChannel channel, String text, String title, Color color, LayoutComponent... components) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
         return channel.createMessage(spec).block();
     }
@@ -681,12 +683,12 @@ public abstract class InteractionHandler {
      * @param text The {@link Message} content.
      * @param title The {@link Message} title, present at the top of the embed.
      * @param imageUrl The url of the image to attach to the {@link Message}.
-     * @param format The {@link MessageFormatting} to use.
+     * @param color The {@link Color} to use for the embed.
      * @param components The {@link LayoutComponent LayoutComponents} to attach to the {@link Message}.
      * @return The created {@link Message}.
      */
-    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, MessageFormatting format, LayoutComponent... components) {
-        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(getDefaultColor(format)).description(text).title(title).image(imageUrl).build();
+    public static Message sendMessage(MessageChannel channel, String text, String title, String imageUrl, Color color, LayoutComponent... components) {
+        EmbedCreateSpec embed = EmbedCreateSpec.builder().color(color).description(text).title(title).image(imageUrl).build();
         MessageCreateSpec spec = MessageCreateSpec.create().withEmbeds(embed).withComponents(components);
         return channel.createMessage(spec).block();
     }
@@ -832,7 +834,7 @@ public abstract class InteractionHandler {
             case ERROR:
                 return Color.RED;
             case INFO:
-                return Color.GRAY_CHATEAU;
+                return Color.LIGHT_GRAY;
             default:
                 return Color.BLUE;
         }
@@ -843,11 +845,21 @@ public abstract class InteractionHandler {
             case DEFAULT:
                 if (activeUserSettings.isPresent()) {
                     return ((DefaultColorOption) activeUserSettings.orElse(null).getDefaultColorSetting()).getColor();
+                } else {
+                    return Color.BLUE;
                 }
             case ERROR:
-                return Color.RED;
+                if (activeUserSettings.isPresent()) {
+                    return ((ErrorColorOption) activeUserSettings.orElse(null).getErrorColorSetting()).getColor();
+                } else {
+                    return Color.RED;
+                }
             case INFO:
-                return Color.GRAY_CHATEAU;
+                if (activeUserSettings.isPresent()) {
+                    return ((InfoColorOption) activeUserSettings.orElse(null).getInfoColorSetting()).getColor();
+                } else {
+                    return Color.LIGHT_GRAY;
+                }
             default:
                 return Color.BLUE;
         }

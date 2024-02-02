@@ -18,7 +18,7 @@ public final class UserSettingsCommand implements Command {
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        event.getLogger().append("- Opening The User Settings Wizard", LogDestination.NONAPI, LogDestination.API);
+        event.getLogger().append("- Opening The User Settings Wizard\n", LogDestination.NONAPI, LogDestination.API);
         new UserSettingsWizard(event).begin();
     }
 

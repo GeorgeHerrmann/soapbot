@@ -79,6 +79,7 @@ public final class UserSettings implements Manageable {
     public UserSettings(String id, Set<SettingsOption> settings) {
         this.id = id;
         this.settings = settings;
+        loadSettings();
     }
 
     /**
@@ -147,11 +148,44 @@ public final class UserSettings implements Manageable {
     }
 
     /**
+     * Returns the error color setting for the user.
+     * 
+     * @return the error color setting for the user.
+     */
+    public SettingsOption getErrorColorSetting() {
+        return getSetting(ErrorColorOption.class);
+    }
+
+    /**
+     * Returns the info color setting for the user.
+     * 
+     * @return the info color setting for the user.
+     */
+    public SettingsOption getInfoColorSetting() {
+        return getSetting(InfoColorOption.class);
+    }
+
+    /**
      * Loads the settings for the user.
      */
-    private void loadSettings() {
-        this.settings.add(new TimezoneOption());
-        this.settings.add(new DefaultColorOption());
+    public void loadSettings() {
+        // add guard clauses to check if each setting is already loaded (identified by class type, TimezoneOption.class, DefaultColorOption.class)
+
+        if (!settings.stream().anyMatch(setting -> setting instanceof TimezoneOption)) {
+            this.settings.add(new TimezoneOption());
+        }
+
+        if (!settings.stream().anyMatch(setting -> setting instanceof DefaultColorOption)) {
+            this.settings.add(new DefaultColorOption());
+        }
+
+        if (!settings.stream().anyMatch(setting -> setting instanceof ErrorColorOption)) {
+            this.settings.add(new ErrorColorOption());
+        }
+
+        if (!settings.stream().anyMatch(setting -> setting instanceof InfoColorOption)) {
+            this.settings.add(new InfoColorOption());
+        }
     }
 
 }

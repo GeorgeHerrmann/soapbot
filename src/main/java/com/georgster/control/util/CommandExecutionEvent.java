@@ -71,6 +71,8 @@ public class CommandExecutionEvent {
         if (command instanceof ParseableCommand) { // If the Command is parseable, it gets a CommandParser
             this.parser = ((ParseableCommand) command).getCommandParser();
         }
+
+        this.handler.setUserSettings(context.getUserSettingsManager().get(discordEvent.getUser().getId().asString()));
     }
 
     /**
