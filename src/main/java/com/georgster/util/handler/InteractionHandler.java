@@ -10,6 +10,7 @@ import com.georgster.util.Unwrapper;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
+import discord4j.core.object.Embed;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -840,6 +841,13 @@ public abstract class InteractionHandler {
         }
     }
 
+    /**
+     * Returns the {@link Color} associated with the provided {@link MessageFormatting}, using the
+     * active {@link UserSettings} if present, or the {@link #getDefaultColor(MessageFormatting) default color} if not.
+     * 
+     * @param format The {@link MessageFormatting} to get the {@link Color} for.
+     * @return The {@link Color} associated with the provided {@link MessageFormatting}, using the active {@link UserSettings} if present.
+     */
     protected Color getColor(MessageFormatting format) {
         switch (format) {
             case DEFAULT:
