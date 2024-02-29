@@ -10,6 +10,8 @@ import com.georgster.events.SoapEventType;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
+import com.georgster.settings.TimezoneOption;
+import com.georgster.settings.UserSettings;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.SubcommandSystem;
@@ -45,6 +47,7 @@ public class UnreserveCommand implements ParseableCommand {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         SubcommandSystem subcommands = event.createSubcommandSystem();
         DiscordEvent discordEvent = event.getDiscordEvent();
+        UserSettings settings = event.getClientContext().getUserSettingsManager().get(discordEvent.getUser().getId().asString());
 
         subcommands.onIndex(eventName -> {
             if (eventManager.exists(eventName, TYPE)) {
@@ -59,7 +62,25 @@ public class UnreserveCommand implements ParseableCommand {
                         handler.sendMessage("There are no more people reserved to this event, this event has been removed", MessageFormatting.INFO);
                     } else {
                         eventManager.update(reserve);
-                        handler.sendMessage("You have unreserved from " + reserve.getIdentifier());
+                        StringBuilder response = new StringBuilder();
+                        response.append("Event: " + reserve.getIdentifier() + "\n");
+                        response.append("- Reserved: " + reserve.getReserved() + "\n");
+                        if (reserve.isUnlimited()) {
+                            response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
+                        } else {
+                            response.append("- Needed: " + reserve.getNumPeople() + "\n");
+                        }
+                        if (reserve.isTimeless()) {
+                            response.append("- This event has no associated time\n");
+                            response.append("\t- This event will pop once the needed number of people have reserved to it");
+                        } else {
+                            response.append("- Time: " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) +  "\n");
+                            response.append("\t- This event will pop at " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()));
+                        }
+                        response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
+                        response.append("\nReserved users:\n");
+                        reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberById(user).getMention() + "\n"));
+                        handler.sendMessage(response.toString(), event.getDiscordEvent().getUser().getUsername() + " has unreserved from " + reserve.getIdentifier(), MessageFormatting.INFO);
                     }
                 } else {
                     handler.sendMessage("You are not reserved to " + reserve.getIdentifier(), MessageFormatting.ERROR);

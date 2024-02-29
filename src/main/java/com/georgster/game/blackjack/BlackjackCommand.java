@@ -78,7 +78,7 @@ public class BlackjackCommand implements ParseableCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("wager")
                         .description("The amount to wager on the game")
-                        .type(ApplicationCommandOption.Type.NUMBER.getValue())
+                        .type(ApplicationCommandOption.Type.INTEGER.getValue())
                         .required(true)
                         .build())
                 .build();

@@ -63,8 +63,25 @@ public class ReserveCommand implements ParseableCommand {
                             logger.append("- Reserving a user to event " + reserve.getIdentifier() + "\n", LogDestination.API, LogDestination.NONAPI);
                             reserve.addReserved(user.getId().asString());
                             eventManager.update(reserve);
-                            handler.sendMessage(user.getUsername() + " has reserved to event " + reserve.getIdentifier(),
-                            reserve.getReserved() + "/" + reserve.getNumPeople() + " spots filled");
+                            StringBuilder response = new StringBuilder();
+                            response.append("Event: " + reserve.getIdentifier() + "\n");
+                            response.append("- Reserved: " + reserve.getReserved() + "\n");
+                            if (reserve.isUnlimited()) {
+                                response.append("\t- This event has no limit on the amount of people that can reserve to it\n");
+                            } else {
+                                response.append("- Needed: " + reserve.getNumPeople() + "\n");
+                            }
+                            if (reserve.isTimeless()) {
+                                response.append("- This event has no associated time\n");
+                                response.append("\t- This event will pop once the needed number of people have reserved to it");
+                            } else {
+                                response.append("- Time: " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) +  "\n");
+                                response.append("\t- This event will pop at " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()));
+                            }
+                            response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
+                            response.append("\nReserved users:\n");
+                            reserve.getReservedUsers().forEach(user2 -> response.append("- " + handler.getMemberById(user2).getMention() + "\n"));
+                            handler.sendMessage(response.toString(), user.getUsername() + " has reserved to event " + reserve.getIdentifier(), MessageFormatting.INFO);
                         }
                     });
                 } else {

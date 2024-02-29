@@ -475,3 +475,8 @@
 2.720-BETA
     - Added message color settings options to the UserSettings system
         - Message colors for DEFAULT, ERROR and INFO messages can be customized in the UserSettingsWizard with !settings
+
+2.721-BETA
+    - Fixed an issue where the BlackjackCommand could not be used with the slash command feature
+    - Updated the Reserve and Unreserve commands to show detailed event information every time someone reserves or unreserves from an event
+    - Fixed an issue where some commands would fail when using slash commands and a floating point input was expected but not guaranteed

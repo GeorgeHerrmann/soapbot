@@ -2,6 +2,7 @@ package com.georgster.control.manager;
 
 import java.lang.reflect.Type;
 
+import com.georgster.database.adapter.DatabaseObjectClassAdapter;
 import com.georgster.database.adapter.SettingsOptionTypeAdapter;
 import com.georgster.settings.UserSettings.SettingsOption;
 import com.google.gson.Gson;
@@ -9,7 +10,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 /**
- * An object that can be managed by a {@link GuildedSoapManager} or {@link AbstractGuildedSoapManager}.
+ * An object that can be managed by a {@link GuildedSoapManager} or {@link GlobalSoapManager}.
+ * <p>
+ * If the {@link Managable} is an abstract class, it should be managed by a {@link AbstractGuildedSoapManager} or
+ * {@link AbstractGlobalSoapManager}, and use a {@link DatabaseObjectClassAdapter} to serialize and deserialize the
+ * object.
+ * <p>
+ * If the {@link Manageble} contains objects that are abstract (without final class Type declaration), a {@link com.google.gson.TypeAdapter TypeAdapter}
+ * should be used to serialize and deserialize the object and registered with the {@link #GSON} instance.
+ * <p>
  * All Manageable objects must have a unique identifier that can be retrieved by {@link #getIdentifier()}.
  */
 public interface Manageable {

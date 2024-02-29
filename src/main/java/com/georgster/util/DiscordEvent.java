@@ -112,7 +112,11 @@ public class DiscordEvent {
                             try {
                                 response.append(option.getValue().get().asLong() + " ");
                             } catch (IllegalArgumentException e2) {
-                                response.append(option.getValue().get().asUser().block().getMention() + " ");
+                                try {
+                                    response.append(option.getValue().get().asDouble());
+                                } catch (IllegalArgumentException e3) {
+                                    response.append(option.getValue().get().asUser().block().getMention() + " ");
+                                }
                             }
                         }
                     }
