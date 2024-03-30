@@ -56,6 +56,7 @@ public class GPTCommand implements ParseableCommand {
             }
         } catch (RuntimeException e) {
             handler.sendMessage("Sorry, I couldn't process this in time. Please try again", MessageFormatting.ERROR);
+            e.printStackTrace();
             logger.append("- Request timed out", LogDestination.NONAPI);
         }
     }
