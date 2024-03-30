@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
+import com.georgster.settings.TimezoneOption;
 import com.georgster.settings.UserSettings;
 import com.georgster.util.DateTimed;
 import com.georgster.util.SoapUtility;
@@ -144,7 +145,7 @@ public abstract class TimedEvent extends DateTimed {
     public void setTime(String time, UserSettings settings) throws IllegalArgumentException {
        // EST timezone
        ZoneId estId = ZoneId.of("America/New_York");
-       ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+       ZoneId userZoneId = ZoneId.of(TimezoneOption.getJavaTimeString(settings.getTimezoneSetting()));
    
        String standardizedTime = SoapUtility.timeConverter(time);
        LocalTime timeObj = LocalTime.parse(standardizedTime);

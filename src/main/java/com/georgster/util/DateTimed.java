@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 import com.georgster.control.manager.Manageable;
+import com.georgster.settings.TimezoneOption;
 import com.georgster.settings.UserSettings;
 
 /**
@@ -118,7 +119,7 @@ public abstract class DateTimed {
     public void setTime(String time, UserSettings settings) throws IllegalArgumentException {
         // EST timezone
         ZoneId estId = ZoneId.of("America/New_York");
-        ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+        ZoneId userZoneId = ZoneId.of(TimezoneOption.getJavaTimeString(settings.getTimezoneSetting()));
     
         String standardizedTime = SoapUtility.timeConverter(time);
         LocalTime timeObj = LocalTime.parse(standardizedTime);
@@ -199,6 +200,9 @@ public abstract class DateTimed {
      * @return A formatted date String.
      */
     public String getFormattedDate(UserSettings settings) {
+        if (time.equals("99:99")) {
+            return getFormattedDate();
+        }
         LocalDate dateObj = LocalDate.parse(this.date);
         LocalTime timeObj = LocalTime.parse(this.time);
         LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);
@@ -228,6 +232,9 @@ public abstract class DateTimed {
      * @return A formatted time String.
      */
     public String getFormattedTime(UserSettings settings) {
+        if (time.equals("99:99")) {
+            return "No Time";
+        }
         LocalDate dateObj = LocalDate.parse(this.date);
         LocalTime timeObj = LocalTime.parse(this.time);
         LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);

@@ -77,8 +77,8 @@ public class ReserveCommand implements ParseableCommand {
                             } else {
                                 response.append("- Time: " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) +  "\n");
                                 response.append("\t- This event will pop at " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()));
+                                response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
                             }
-                            response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
                             response.append("\nReserved users:\n");
                             reserve.getReservedUsers().forEach(user2 -> response.append("- " + handler.getMemberById(user2).getMention() + "\n"));
                             handler.sendMessage(response.toString(), user.getUsername() + " has reserved to event " + reserve.getIdentifier(), MessageFormatting.INFO);

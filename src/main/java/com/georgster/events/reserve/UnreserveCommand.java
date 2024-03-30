@@ -76,8 +76,8 @@ public class UnreserveCommand implements ParseableCommand {
                         } else {
                             response.append("- Time: " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()) +  "\n");
                             response.append("\t- This event will pop at " + reserve.getFormattedTime(settings) + " " + TimezoneOption.getSettingDisplay(settings.getTimezoneSetting()));
+                            response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
                         }
-                        response.append("\nScheduled for: " + reserve.getFormattedDate(settings));
                         response.append("\nReserved users:\n");
                         reserve.getReservedUsers().forEach(user -> response.append("- " + handler.getMemberById(user).getMention() + "\n"));
                         handler.sendMessage(response.toString(), event.getDiscordEvent().getUser().getUsername() + " has unreserved from " + reserve.getIdentifier(), MessageFormatting.INFO);

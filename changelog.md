@@ -480,3 +480,12 @@
     - Fixed an issue where the BlackjackCommand could not be used with the slash command feature
     - Updated the Reserve and Unreserve commands to show detailed event information every time someone reserves or unreserves from an event
     - Fixed an issue where some commands would fail when using slash commands and a floating point input was expected but not guaranteed
+
+2.722
+    - User Settings out of beta
+    - Events
+        - Fixed an issue where Reserve Events made by users in the EST timezone would not have the correct Timezone reflected when creating a timed event after daylight savings
+        - Fixed an issue where timeless events could not be viewed with the ReserveEventCommand
+        - Fixed an issue where timeless events could not have their date or time managed with the ReserveEventWizard
+        - Fixed an issue where timeless events would show an error message when users reserved or unreserved to them
+            - These issues were related to internal Java Timezone conversions still being attempted when no time was present

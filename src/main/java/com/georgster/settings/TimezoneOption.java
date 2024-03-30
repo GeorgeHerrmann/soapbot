@@ -109,4 +109,25 @@ public final class TimezoneOption extends UserSettings.SettingsOption {
             throw new IllegalArgumentException("Invalid SettingsOption: " + option.name() + " is not a TimezoneOption");
         }
     }
+
+    /**
+     * Returns the Java timezone ID of the given {@link SettingsOption}. If the
+     * option is a {@link TimezoneOption}, then the Java timezone ID is returned. If
+     * the option is not a {@link TimezoneOption}, then an {@link IllegalArgumentException}
+     * is thrown.
+     * 
+     * @param option The {@link SettingsOption} to get the Java timezone ID of.
+     * @return The Java timezone ID of the given {@link SettingsOption}.
+     */
+    public static String getJavaTimeString(SettingsOption option) {
+        if (option instanceof TimezoneOption) {
+            if (option.currentOption().equals("-05:00")) {
+                return "America/New_York";
+            } else {
+                return ZoneId.SHORT_IDS.entrySet().stream().collect(Collectors.toMap(Entry::getValue, Entry::getKey)).get(option.currentOption()); // Flips the map and gets the key from the value
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid SettingsOption: " + option.name() + " is not a TimezoneOption");
+        }
+    }
 }
