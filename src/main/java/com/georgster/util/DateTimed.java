@@ -208,7 +208,7 @@ public abstract class DateTimed {
         LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);
 
         ZoneId estZoneId = ZoneId.of("America/New_York");
-        ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+        ZoneId userZoneId = ZoneId.of(TimezoneOption.getJavaTimeString(settings.getTimezoneSetting()));
 
         ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estZoneId);
         ZonedDateTime targetDateTime = estDateTime.withZoneSameInstant(userZoneId);
@@ -240,7 +240,7 @@ public abstract class DateTimed {
         LocalDateTime dateTime = LocalDateTime.of(dateObj, timeObj);
 
         ZoneId estZoneId = ZoneId.of("America/New_York");
-        ZoneId userZoneId = ZoneId.of(settings.getTimezoneSetting().currentOption());
+        ZoneId userZoneId = ZoneId.of(TimezoneOption.getJavaTimeString(settings.getTimezoneSetting()));
 
         ZonedDateTime estDateTime = ZonedDateTime.of(dateTime, estZoneId);
         ZonedDateTime targetDateTime = estDateTime.withZoneSameInstant(userZoneId);

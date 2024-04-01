@@ -28,6 +28,7 @@ import discord4j.gateway.intent.IntentSet;
 
 /**
  * Manages all {@link SoapClient SoapClients} for each {@code Guild} SOAP Bot is in.
+ * <p>
  * Each {@code Guild} gets a SoapClient which this manager will
  * distribute events to. This manager also houses the {@link GatewayDiscordClient},
  * maintaining the active connection to Discord's API.
@@ -74,7 +75,10 @@ public final class SoapClientManager {
      * has been set up. Until this method is called, SOAP Bot is not fully logged in.
      */
     public void start() {
-        MultiLogger.wipeFileLogs(); //Temporary
+        MultiLogger.wipeFileLogs();
+        if (testMode) {
+            MultiLogger.logSystem("NOTE: Test mode is on! This client will only respond to Message command requests beginning with '//' or '!!'\n", getClass());
+        }
         discordClient.onDisconnect().block();
     }
 

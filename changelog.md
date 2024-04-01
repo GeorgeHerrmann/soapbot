@@ -489,3 +489,7 @@
         - Fixed an issue where timeless events could not have their date or time managed with the ReserveEventWizard
         - Fixed an issue where timeless events would show an error message when users reserved or unreserved to them
             - These issues were related to internal Java Timezone conversions still being attempted when no time was present
+
+2.723
+    - Events
+        - Fixed an issue where DateTimed objects (ReserveEvents, PollEvents) were incorrectly displaying their time if the user's timezone was 'EST' due to daylight savings adjustments
