@@ -493,3 +493,7 @@
 2.723
     - Events
         - Fixed an issue where DateTimed objects (ReserveEvents, PollEvents) were incorrectly displaying their time if the user's timezone was 'EST' due to daylight savings adjustments
+
+2.724
+    - Fixed an issue where an error message would be displayed if a user in a non-EST timezone interacted with a timed object
+        - This includes anything with timed Reserve Events (reserving, unreserving, viewing event)
