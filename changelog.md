@@ -497,3 +497,14 @@
 2.724
     - Fixed an issue where an error message would be displayed if a user in a non-EST timezone interacted with a timed object
         - This includes anything with timed Reserve Events (reserving, unreserving, viewing event)
+
+2.725
+    Reserve Events
+        - Fixed an issue where, upon editing a Reserve Event via the "manage" button when viewing an event via the ReserveEventCommand, switching back to the event
+          informational text (by turning off the edit wizard with the x reaction or by timeout) would not update the text with the new event information
+            - For example: If event "cs2" had a time of 9pm and you did !re cs2, then clicked manage to edit the event and changed the time to 8pm,
+              when you clicked the "x" to finish editing, the "cs2" event window would still show a time of 9pm. It will now properly update to 8pm.
+    
+    Mention Groups
+        - Added the ability to include a message when mentioning members of a MentionGroup. This message should come directly AFTER the name of the MentionGroup
+            - Example: If there's a MentionGroup named "cs2", then "!ping cs2 Can we start at 8pm?" would ping all members of group "cs2" and include the message "Can we start at 8pm?"

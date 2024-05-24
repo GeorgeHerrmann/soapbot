@@ -12,6 +12,7 @@ import com.georgster.logs.MultiLogger;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
+import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
 import com.georgster.wizard.AlternateWizard;
@@ -100,8 +101,14 @@ public final class MentionGroupCommand implements ParseableCommand {
         sb.onIndexLast(group -> {
             logger.append("- Searching for a mention group\n", LogDestination.NONAPI);
             if (manager.exists(group)) {
-                logger.append("- Mention group found\n", LogDestination.NONAPI);
-                handler.sendPlainMessage(manager.get(group).getMentionString(handler));
+                ParsedArguments args = event.getParsedArguments();
+                if (args.size() > 1) {
+                    logger.append("- Mention group found with an additional message\n", LogDestination.NONAPI);
+                    handler.sendPlainMessage(manager.get(group).getMentionString(handler) + "\n" + args.get(1));
+                } else {
+                    logger.append("- Mention group found\n", LogDestination.NONAPI);
+                    handler.sendPlainMessage(manager.get(group).getMentionString(handler));
+                }
             } else {
                 logger.append("- Mention group not found\n", LogDestination.NONAPI);
                 handler.sendMessage("A Mention Group with that name does not exist. Type '!mention create' to create a new one", "Group not found");
@@ -134,7 +141,11 @@ public final class MentionGroupCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new ParseBuilder("VR", "1O").withRules("X", "I").withIdentifiers("create", "edit", "list", "silent", "quiet", "s").build();
+        List<String> groupNames = manager.getAll().stream().map(MentionGroup::getIdentifier).toList();
+        List<String> identifiers = new ArrayList<>(List.of("create", "edit", "list", "silent", "quiet", "s"));
+        identifiers.addAll(groupNames);
+
+        return new ParseBuilder("VO", "VO").withRules("I", ">").withIdentifiers(identifiers.toArray(new String[identifiers.size()])).build();
     }
 
     /**

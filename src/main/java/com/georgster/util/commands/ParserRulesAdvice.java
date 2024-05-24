@@ -99,6 +99,16 @@ public class ParserRulesAdvice {
         List<String> all = parse.getInputWords();
         try {
             int argIndex = all.indexOf(arg.split(" ")[0]);
+            for (String identifier : identifiers) {
+                if (parse.getInputString().contains(identifier)) {
+                    String[] identifierWords = identifier.split(" ");
+                    int identifierIndex = all.indexOf(identifierWords[identifierWords.length - 1]);
+                    // Return if the input arg is after the identifier using the last word of the identifier
+                    if (argIndex > identifierIndex && identifierIndex != -1 && argIndex != -1) {
+                        return true;
+                    }
+                }
+            }
             return identifiers.contains(all.get(argIndex - 1));
         } catch (Exception e) {
             return false;
