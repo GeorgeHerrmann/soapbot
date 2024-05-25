@@ -109,7 +109,7 @@ public class ParserRulesAdvice {
                     }
                 }
             }
-            return identifiers.contains(all.get(argIndex - 1));
+            return false;
         } catch (Exception e) {
             return false;
         }

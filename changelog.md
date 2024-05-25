@@ -508,3 +508,6 @@
     Mention Groups
         - Added the ability to include a message when mentioning members of a MentionGroup. This message should come directly AFTER the name of the MentionGroup
             - Example: If there's a MentionGroup named "cs2", then "!ping cs2 Can we start at 8pm?" would ping all members of group "cs2" and include the message "Can we start at 8pm?"
+
+2.726
+    - Fixed an issue where stored objects (Reserve Events, Poll Events, Permission Groups, MentionGroups, Trading Cards, etc.) would randomly be duplicated, causing multiple issues.

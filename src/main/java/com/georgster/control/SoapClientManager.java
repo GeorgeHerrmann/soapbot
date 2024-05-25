@@ -159,6 +159,9 @@ public final class SoapClientManager {
      * @param event The {@link GuildCreateEvent} that was fired.
      */
     private void distributeClient(GuildCreateEvent event) {
+        if (clients.containsKey(event.getGuild().getId())) {
+            return;
+        } //If the client already exists, do not create a new one
         Snowflake flake = event.getGuild().getId();
         clients.computeIfAbsent(flake, client -> {
             ClientContext context = new ClientContext(dispatcher, event.getGuild(), discordClient.getRestClient());
