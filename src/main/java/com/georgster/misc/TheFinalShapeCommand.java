@@ -24,7 +24,7 @@ public class TheFinalShapeCommand implements Command {
     public void execute(CommandExecutionEvent event) {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
 
-        LocalDateTime finalShapeReleaseDate = LocalDateTime.of(2024, Month.of(2), 27, 12, 0);
+        LocalDateTime finalShapeReleaseDate = LocalDateTime.of(2024, Month.of(6), 4, 12, 0);
         LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("-05:00"));
         int months = (int) currentTime.until(finalShapeReleaseDate, ChronoUnit.MONTHS);
         int days = (int) currentTime.until(finalShapeReleaseDate.minusMonths(months), ChronoUnit.DAYS);
