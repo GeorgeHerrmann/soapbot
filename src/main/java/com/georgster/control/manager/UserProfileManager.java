@@ -6,12 +6,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.coinfarm.model.CoinFactory;
 import com.georgster.collectable.Collected;
 import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
 import com.georgster.economy.CoinBank;
 import com.georgster.gpt.MemberChatCompletions;
 import com.georgster.profile.UserProfile;
+import com.georgster.util.thread.ThreadPoolFactory;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
@@ -26,6 +28,7 @@ import discord4j.core.object.entity.Member;
 public class UserProfileManager extends GuildedSoapManager<UserProfile> {
 
     private static OpenAiService aiService; //The singleton AI Service to communicate with OpenAI's API
+    private boolean isProcessingFactories; //Whether the factories are currently processing
     
     /**
      * Creates a new UserProfileManager for the given SoapClient's {@link ClientContext}.
@@ -34,7 +37,52 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
      */
     public UserProfileManager(ClientContext context) {
         super(context, ProfileType.PROFILES, UserProfile.class, "memberId");
+        this.isProcessingFactories = false;
         createAiService();
+    }
+
+    @Override
+    public void load() {
+        dbService.getAllObjects().forEach(event -> {
+            if (!exists(event)) {
+                observees.add(event);
+            }
+        });
+        ThreadPoolFactory.scheduleGeneralTask(handler.getId(), this::startProcessingFactories);
+    }
+
+    /**
+     * Begins processing all factories in this manager. This manager will call {@link CoinFactory#process()} on each factory every 60 seconds.
+     * <p>
+     * Factories will only be processed once this method is called and will continue to be processed until {@link #stopProcessingFactories()} is called.
+     * <p>
+     * This method is called automatically when the manager is loaded and will run on a separate {@code GENERAL} task thread.
+     */
+    private void startProcessingFactories() {
+        if (isProcessingFactories) {
+            return;
+        }
+        isProcessingFactories = true;
+        ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> {
+            while (isProcessingFactories) {
+                try {
+                    Thread.sleep(60000);
+                    observees.forEach(profile -> {
+                        profile.getFactory().process();
+                        update(profile);
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Stops processing all factories in this manager. Following this method call, this manager will no longer call {@link CoinFactory#process()} on each factory every 60 seconds.
+     */
+    public void stopProcessingFactories() {
+        isProcessingFactories = false;
     }
 
     /**
@@ -67,8 +115,10 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
                 if (bank == null) bank = new CoinBank(id);
                 List<Collected> collecteds = profile.getCollecteds();
                 if (collecteds == null) collecteds = new ArrayList<>();
+                CoinFactory factory = profile.getFactory();
+                if (factory == null) factory = new CoinFactory(id);
 
-                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, collecteds));
+                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, factory, collecteds));
             } else {
                 add(new UserProfile(event.getGuild().getId().asString(), id, member.getTag()));
             }

@@ -27,7 +27,7 @@ public class TestCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() { // Useful when testing using user input arguments
-        return new CommandParser("VR");
+        return new CommandParser("VO");
     }
 
     /**

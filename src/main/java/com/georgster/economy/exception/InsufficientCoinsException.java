@@ -17,4 +17,13 @@ public class InsufficientCoinsException extends RuntimeException {
         super("Bank for user " + bank.getIdentifier() + " has insufficient balance of " + bank.getBalance() + " for withdrawl of " + desiredWithdrawlAmount);
     }
 
+    /**
+     * Creates a new InsufficientCoinsException with the given message.
+     * 
+     * @param message The message for the exception.
+     */
+    public InsufficientCoinsException(String message) {
+        super(message);
+    }
+
 }

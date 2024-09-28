@@ -3,6 +3,7 @@ package com.georgster.profile;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.coinfarm.model.CoinFactory;
 import com.georgster.collectable.Collected;
 import com.georgster.collectable.trade.Tradeable;
 import com.georgster.control.util.identify.util.MemberIdentified;
@@ -22,6 +23,7 @@ public final class UserProfile extends MemberIdentified {
     private String username; //User's discord username
     private final MemberChatCompletions completions;
     private final CoinBank bank;
+    private final CoinFactory factory;
     private final List<Collected> collecteds;
 
     /**
@@ -38,6 +40,7 @@ public final class UserProfile extends MemberIdentified {
         this.completions = new MemberChatCompletions(userId);
         this.bank = new CoinBank(userId);
         this.collecteds = new ArrayList<>();
+        this.factory = new CoinFactory(userId);
     }
 
     /**
@@ -51,13 +54,14 @@ public final class UserProfile extends MemberIdentified {
      * @param completions The {@link MemberChatCompletions} of the user
      * @param bank The {@link CoinBank} of the user
      */
-    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, List<Collected> collecteds) {
+    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, CoinFactory factory, List<Collected> collecteds) {
         super(userId);
         this.guildId = serverId;
         this.username = user;
         this.completions = completions;
         this.bank = bank;
         this.collecteds = collecteds;
+        this.factory = factory;
     }
 
     /**
@@ -134,6 +138,15 @@ public final class UserProfile extends MemberIdentified {
      */
     public CoinBank getBank() {
         return this.bank;
+    }
+
+    /**
+     * Gets the {@link CoinFactory} of the {@code Member} associated with this profile.
+     * 
+     * @return The {@link CoinFactory} of the Member associated with this profile.
+     */
+    public CoinFactory getFactory() {
+        return this.factory;
     }
 
     /**

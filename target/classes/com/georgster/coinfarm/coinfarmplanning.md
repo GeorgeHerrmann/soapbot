@@ -18,3 +18,6 @@ The Coin Factory
             - Upgrades will be based on the total coin value for a Guild
         - The Wizard DOES NOT need to be open for the CoinFactory to be farming coins
             - This will happen in the background, every minute (maybe change)
+
+
+
