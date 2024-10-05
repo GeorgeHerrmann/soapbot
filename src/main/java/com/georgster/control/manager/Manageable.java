@@ -2,7 +2,9 @@ package com.georgster.control.manager;
 
 import java.lang.reflect.Type;
 
+import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
 import com.georgster.database.adapter.DatabaseObjectClassAdapter;
+import com.georgster.database.adapter.FactoryUpgradeTypeAdapter;
 import com.georgster.database.adapter.SettingsOptionTypeAdapter;
 import com.georgster.settings.UserSettings.SettingsOption;
 import com.google.gson.Gson;
@@ -23,7 +25,7 @@ import com.google.gson.JsonParseException;
  */
 public interface Manageable {
     /** Gson responsible for serialization and deserialization of {@link Manageable Manageables} */
-    static final Gson GSON = new GsonBuilder().registerTypeAdapter(SettingsOption.class, new SettingsOptionTypeAdapter()).create();
+    static final Gson GSON = new GsonBuilder().registerTypeAdapter(SettingsOption.class, new SettingsOptionTypeAdapter()).registerTypeAdapter(FactoryUpgrade.class, new FactoryUpgradeTypeAdapter()).create();
 
     /**
      * Returns the identifier of this object.

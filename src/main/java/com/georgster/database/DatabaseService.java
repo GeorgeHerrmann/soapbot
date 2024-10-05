@@ -124,6 +124,23 @@ public class DatabaseService<T extends Manageable> {
     }
 
     /**
+     * Updates all objects in the database for this service's {@code ProfileType} with the given objects.
+     * 
+     * @param objects The objects to update the database with.
+     */
+    public void updateAllObjects(List<T> objects) {
+        withDatabase(database -> {
+            MongoCollection<Document> collection = database.getCollection(type.toString().toLowerCase(), Document.class);
+
+            List<Document> documents = new ArrayList<>();
+            objects.forEach(object -> documents.add(Document.parse(object.deserialize())));
+
+            collection.drop();
+            collection.insertMany(documents);
+        });
+    }
+
+    /**
      * Attempts to remove the object found by the given identifier name and value.
      * 
      * @param identifierName The name of the field to search for.

@@ -62,15 +62,44 @@ public final class CoinFactory implements Manageable {
         return currentProductionValue;
     }
 
-    public void purchaseUpgrade(String rewardTrackName, String upgradeName, CoinBank bank) throws IllegalArgumentException, InsufficientCoinsException {
+    public void purchaseUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException, InsufficientCoinsException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
-        bank.withdrawl(upgrade.getCost());
-        upgrades.add(upgrade);
+        if (currentProductionValue < upgrade.getCost()) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + currentProductionValue + " coins.");
+        } else {
+            currentProductionValue -= upgrade.getCost();
+            upgrade.markAsOwned();
+            upgrades.add(upgrade);
+        }
     }
 
-    public void purchaseUpgrade(FactoryUpgrade upgrade, CoinBank bank) throws InsufficientCoinsException {
-        bank.withdrawl(upgrade.getCost());
-        upgrades.add(upgrade);
+    public void purchaseUpgrade(FactoryUpgrade upgrade) throws InsufficientCoinsException {
+        if (currentProductionValue < upgrade.getCost()) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + currentProductionValue + " coins.");
+        } else {
+            currentProductionValue -= upgrade.getCost();
+            upgrade.markAsOwned();
+            upgrades.add(upgrade);
+        }
+    }
+
+    public void refundUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException {
+        FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
+        upgrade.markAsUnowned();
+        if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
+            currentProductionValue += upgrade.getRefundValue();
+        } else {
+            throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
+        }
+    }
+
+    public void refundUpgrade(FactoryUpgrade upgrade) {
+        upgrade.markAsUnowned();
+        if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
+            currentProductionValue += upgrade.getRefundValue();
+        } else {
+            throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
+        }
     }
 
     public boolean hasUpgrade(FactoryUpgrade upgrade) {
@@ -83,7 +112,7 @@ public final class CoinFactory implements Manageable {
     }
 
     public List<FactoryUpgradeTrack> getCurrentUpgradeTracks() {
-        List<FactoryUpgradeTrack> currentUpgradeTracks = new ArrayList<>(FactoryUpgradeTracks.AVAILABLE_UPGRADE_TRACKS);
+        List<FactoryUpgradeTrack> currentUpgradeTracks = new ArrayList<>(FactoryUpgradeTracks.getAvailableUpgradeTracks());
         currentUpgradeTracks.forEach(track -> {
             track.getUpgrades().forEach(upgrade -> {
                 if (hasUpgrade(upgrade)) {
@@ -94,7 +123,7 @@ public final class CoinFactory implements Manageable {
         return currentUpgradeTracks;
     }
 
-    public void withdrawl(long amount, CoinBank bank) throws IllegalArgumentException, InsufficientCoinsException {
+    public void withdraw(long amount, CoinBank bank) throws IllegalArgumentException, InsufficientCoinsException {
         if (amount < 1) {
             throw new IllegalArgumentException("Cannot withdrawl a negative amount of coins.");
         } else if (currentProductionValue < amount) {

@@ -3,12 +3,16 @@ package com.georgster.coinfarm.model.upgrades;
 public abstract class FactoryUpgrade {
     
     private final String name;
+    private final String trackName;
+    private final String description;
     private final int level;
     private long cost;
     private boolean owned;
 
-    protected FactoryUpgrade(String name, int level, long cost) {
+    protected FactoryUpgrade(String name, String trackName, String description, int level, long cost) throws IllegalArgumentException {
         this.name = name;
+        this.trackName = trackName;
+        this.description = description;
         this.level = level;
         this.cost = cost;
         this.owned = false;
@@ -18,6 +22,10 @@ public abstract class FactoryUpgrade {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public int getLevel() {
@@ -32,8 +40,20 @@ public abstract class FactoryUpgrade {
         owned = true;
     }
 
+    public void markAsUnowned() {
+        owned = false;
+    }
+
     public boolean isOwned() {
         return owned;
+    }
+
+    public long getRefundValue() {
+        return cost / 2;
+    }
+
+    public String getTrackName() {
+        return trackName;
     }
 
 }

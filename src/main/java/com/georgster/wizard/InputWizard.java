@@ -141,7 +141,7 @@ public abstract class InputWizard {
                 activeFunctions.peek().invoke(this, activeFunctionParams.peek());
             } catch (Exception e) {
                 e.printStackTrace();
-                logger.append("An error occurred while running the wizard: " + e.getMessage() + "\n", LogDestination.NONAPI);
+                logger.append("- An error occurred while running the wizard: " + e.getMessage() + "\n", LogDestination.NONAPI);
                 shutdown();
             }
         }

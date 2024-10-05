@@ -3,6 +3,7 @@ package com.georgster.control.manager;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import com.georgster.database.ProfileType;
 import com.georgster.economy.CoinBank;
 import com.georgster.gpt.MemberChatCompletions;
 import com.georgster.profile.UserProfile;
+import com.georgster.util.DateTimed;
 import com.georgster.util.thread.ThreadPoolFactory;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
@@ -26,9 +28,14 @@ import discord4j.core.object.entity.Member;
  * Manages all {@link UserProfile UserProfiles} for a {@link com.georgster.control.SoapClient SoapClient}.
  */
 public class UserProfileManager extends GuildedSoapManager<UserProfile> {
+    /**
+     * The interval in milliseconds at which the factories will be processed.
+     */
+    public static final long FACTORY_PROCESSING_INTERVAL = 300000;
 
     private static OpenAiService aiService; //The singleton AI Service to communicate with OpenAI's API
     private boolean isProcessingFactories; //Whether the factories are currently processing
+    private DateTimed nextFactoryProcessTime; //The next time the factories will be processed
     
     /**
      * Creates a new UserProfileManager for the given SoapClient's {@link ClientContext}.
@@ -41,6 +48,11 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
         createAiService();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The {@link UserProfileManager} also begins processing all {@link CoinFactory CoinFactories} upon loading.
+     */
     @Override
     public void load() {
         dbService.getAllObjects().forEach(event -> {
@@ -48,11 +60,12 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
                 observees.add(event);
             }
         });
-        ThreadPoolFactory.scheduleGeneralTask(handler.getId(), this::startProcessingFactories);
+        startProcessingFactories();
+        //ThreadPoolFactory.scheduleGeneralTask(handler.getId(), this::startProcessingFactories);
     }
 
     /**
-     * Begins processing all factories in this manager. This manager will call {@link CoinFactory#process()} on each factory every 60 seconds.
+     * Begins processing all factories in this manager. This manager will call {@link CoinFactory#process()} on each factory every {@link #FACTORY_PROCESSING_INTERVAL} ms.
      * <p>
      * Factories will only be processed once this method is called and will continue to be processed until {@link #stopProcessingFactories()} is called.
      * <p>
@@ -63,19 +76,29 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
             return;
         }
         isProcessingFactories = true;
-        ThreadPoolFactory.scheduleGeneralTask(getGuild().getId().asString(), () -> {
+        ThreadPoolFactory.scheduleGeneralTask(handler.getId(), () -> {
             while (isProcessingFactories) {
                 try {
-                    Thread.sleep(60000);
+                    nextFactoryProcessTime = DateTimed.fromLocalDateTime(DateTimed.getCurrentLocalDateTime().plus(FACTORY_PROCESSING_INTERVAL, ChronoUnit.MILLIS));
                     observees.forEach(profile -> {
                         profile.getFactory().process();
-                        update(profile);
                     });
+                    dbService.updateAllObjects(observees);
+                    Thread.sleep(FACTORY_PROCESSING_INTERVAL);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    /**
+     * Returns the moment {@link DateTimed time} at which the factories will be processed.
+     * 
+     * @return The next time the factories will be processed as a {@link DateTimed}.
+     */
+    public DateTimed getNextFactoryProcessTime() {
+        return nextFactoryProcessTime;
     }
 
     /**

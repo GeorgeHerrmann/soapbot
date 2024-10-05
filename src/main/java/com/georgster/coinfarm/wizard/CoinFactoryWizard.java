@@ -1,32 +1,250 @@
 package com.georgster.coinfarm.wizard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.georgster.coinfarm.model.CoinFactory;
+import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
+import com.georgster.coinfarm.model.upgrades.FactoryUpgradeTrack;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.economy.exception.InsufficientCoinsException;
+import com.georgster.profile.UserProfile;
+import com.georgster.settings.UserSettings;
+import com.georgster.util.DateTimed;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.input.InputListenerFactory;
 
 public final class CoinFactoryWizard extends InputWizard {
 
-    private final CoinFactory factory;
-    private final UserProfileManager manager;
+    private final CoinFactory factory; // the factory of the user
+    private final UserProfileManager manager; // manager which controls the user's profile (factory stored within profile)
+    private final UserSettings userSettings; // the user's settings (mostly for time displays)
+    private final UserProfile profile; // the user's profile (for convenience to update manager)
     
     public CoinFactoryWizard(CommandExecutionEvent event) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, "Coin Factory"));
+        super(event, InputListenerFactory.createButtonMessageListener(event, "Coin Factory").builder().withTimeoutDuration(120000).build());
         this.manager = event.getUserProfileManager();
-        this.factory = manager.get(event.getDiscordEvent().getAuthorAsMember().getId().asString()).getFactory();
+        this.userSettings = event.getClientContext().getUserSettingsManager().get(event.getDiscordEvent().getUser().getId().asString());
+        this.profile = manager.get(event.getDiscordEvent().getAuthorAsMember().getId().asString());
+        this.factory = profile.getFactory();
     }
 
     public void begin() {
         nextWindow("factoryHome");
+        end();
     }
 
-    protected void factoryHome() {
+    public void factoryHome() {
         String prompt = "Welcome to your Coin Factory! You have " + factory.getCurrentProductionValue() + " coins in this factory.\n\n"
                 + "What would you like to do?";
 
         withResponse(response -> {
+            if (response.equals("upgrade factory")) {
+                nextWindow("viewUpgradeTracks", 0);
+            } else if (response.equals("view investment")) {
+                nextWindow("viewCoinInvestment");
+            }
+        }, false, prompt, "Upgrade Factory", "View Investment");
+    }
 
-        }, false, prompt, "Upgrade Factory");
+    /**
+     * Displays the {@link FactoryUpgradeTrack Upgrade Tracks} for the factory based on the starting position of the current window.
+     * <p>
+     * This window will display at most 2 {@link FactoryUpgradeTrack Upgrade Tracks} at a time.
+     * 
+     * @param startingPos the starting position of the current window in the {@link FactoryUpgradeTrack Upgrade Tracks} list.
+     */
+    public void viewUpgradeTracks(Integer startingPos) {
+        List<FactoryUpgradeTrack> tracks = factory.getCurrentUpgradeTracks();
+        int endPos = Math.min(startingPos + 2, tracks.size());
+        // get a sublist starting from the starting position and ending at the end position
+        List<FactoryUpgradeTrack> displayedTracks = tracks.subList(startingPos, endPos);
+
+        List<String> options = new ArrayList<>(displayedTracks.stream().map(FactoryUpgradeTrack::getName).toList());
+
+        // add "next" option if there are more tracks to display
+        if (endPos < tracks.size()) {
+            options.add("Next");
+        }
+        // add "back" option if the starting position is greater than 1
+        if (startingPos > 1) {
+            options.add("Back");
+        }
+        // always adds "home" option
+        options.add("Home");
+
+        StringBuilder prompt = new StringBuilder("Available Upgrade Tracks:\n\n");
+
+        for (int i = 0; i < displayedTracks.size(); i++) {
+            FactoryUpgradeTrack track = displayedTracks.get(i);
+            prompt.append(i + 1).append(". ").append(track.getName()).append("\n");
+            // iterate through the upgrades in the track and display the first one that returns false when "isOwned()" is called, or "MAX" if all are owned
+            FactoryUpgrade upgrade = track.getCurrentUpgrade();
+            if (track.isMaxUpgrade(upgrade.getName())) {
+                prompt.append("\t- MAX\n");
+            } else {
+                prompt.append("\t- ").append(upgrade.getName()).append(" *(").append(upgrade.getCost()).append(" coins)*\n");
+            }
+        }
+
+        withResponse(response -> {
+            if (response.equals("next")) {
+                nextWindow("viewUpgradeTracks", endPos);
+            } else if (response.equals("back")) {
+                nextWindow("viewUpgradeTracks", startingPos - 2); // Should never go negative because back option only available if startingPos > 1
+            } else if (response.equals("home")) {
+                nextWindow("factoryHome"); // Returns to the homepage
+            } else {
+                // Get the upgrade track that has the same name as the response
+                FactoryUpgradeTrack track = displayedTracks.stream()
+                    .filter(t -> t.getName().equalsIgnoreCase(response))
+                    .findFirst()
+                    .orElse(null);
+                if (track == null) {
+                    sendMessage("An error occurred while trying to find the upgrade track with the name " + response + ".", "Could not find Upgrade Track");
+                } else {
+                    nextWindow("viewUpgradeTrack", track);
+                }
+            }
+        }, false, prompt.toString(), options.toArray(new String[options.size()]));
+    }
+
+    public void viewUpgradeTrack(FactoryUpgradeTrack track) {
+        FactoryUpgrade currentUpgrade = track.getCurrentUpgrade();
+        FactoryUpgrade nextUpgrade = track.getNextUpgrade(currentUpgrade);
+        StringBuilder prompt = new StringBuilder("Current Upgrade for Track: ***" + track.getName() + "*** is **" + currentUpgrade.getName() + "**\n"
+                + "- *" + currentUpgrade.getDescription() + "*\n\n");
+        List<String> options = new ArrayList<>();
+        
+        if (track.isMaxUpgrade(currentUpgrade.getName())) {
+            prompt.append("**MAX UPGRADE**\n");
+        } else {
+            options.add("Purchase " + nextUpgrade.getName());
+            prompt.append("Next Upgrade:\n");
+            prompt.append("- ").append(nextUpgrade.getName()).append(" *(").append(nextUpgrade.getCost()).append(" coins)*\n");
+        } 
+        if (track.ownsAny()) {
+            options.add("Refund " + currentUpgrade.getName());
+            prompt.append("*You may refund **").append(currentUpgrade.getName()).append("** for ").append(currentUpgrade.getRefundValue()).append(" coins.*\n");
+        }
+
+        withResponse(response -> {
+            if (response.startsWith("purchase")) {
+                nextWindow("purchaseUpgrade", track, nextUpgrade.getName());
+            } else if (response.startsWith("refund")) {
+                nextWindow("refundUpgrade", track, currentUpgrade.getName());
+            }
+        }, true, prompt.toString(), options.toArray(new String[options.size()]));
+    }
+
+    public void purchaseUpgrade(FactoryUpgradeTrack track, String upgradeName) {
+        FactoryUpgrade upgrade = track.getUpgrade(upgradeName);
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("**" + upgrade.getName() + "** *(Level " + upgrade.getLevel() + " Upgrade)*\n");
+        prompt.append("- *" + upgrade.getDescription() + "*\n\n");
+        prompt.append("Your factory currently has **" + factory.getCurrentProductionValue() + "** coins. Would you like to buy " + upgrade.getName() + " for **" + upgrade.getCost() + "** coins?\n");
+        prompt.append("*You may refund this upgrade for " + upgrade.getRefundValue() + " coins.*");
+
+        withResponse(response -> {
+            if (response.equals("purchase upgrade")) {
+                try {
+                    factory.purchaseUpgrade(upgrade);
+                    manager.update(profile);
+                    goBack();
+                    sendMessage("You have successfully purchased **" + upgrade.getName() + "** for **" + upgrade.getCost() + "** coins." +
+                                "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*" +
+                                "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + upgrade.getLevel() + "**", "Upgrade Purchased");
+                } catch (InsufficientCoinsException e) {
+                    sendMessage("You currently have **" + factory.getCurrentProductionValue() + "** coins invested in your CoinFactory.\n" +
+                                "You need **" + upgrade.getCost() + "** coins to purchase **" + upgrade.getName() + "**", "Insufficient Coins");
+                }
+            } else if (response.equals("coin investment")) {
+                nextWindow("viewCoinInvestment");   
+            }
+        }, true, prompt.toString(), "Purchase Upgrade", "Coin Investment");
+    }
+
+    public void refundUpgrade(FactoryUpgradeTrack track, String upgradeName) {
+        FactoryUpgrade upgrade = track.getUpgrade(upgradeName);
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("**" + upgrade.getName() + "** *(Level " + upgrade.getLevel() + " Upgrade)*\n");
+        prompt.append("- *" + upgrade.getDescription() + "*\n\n");
+        prompt.append("Would you like to refund " + upgrade.getName() + " for **" + upgrade.getRefundValue() + "** coins?\n");
+
+        withResponse(response -> {
+            if (response.equals("refund upgrade")) {
+                factory.refundUpgrade(upgrade);
+                manager.update(profile);
+                goBack();
+                sendMessage("You have successfully refunded **" + upgrade.getName() + "** for **" + upgrade.getRefundValue() + "** coins." +
+                            "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *available coins invested.*" +
+                            "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + (upgrade.getLevel() - 1) + "**", "Upgrade Refunded");
+            }
+        }, true, prompt.toString(), "Refund Upgrade");
+    }
+
+    public void viewCoinInvestment() {
+        StringBuilder prompt = new StringBuilder("**Coin Investment**\n\n");
+        prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
+        prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n");
+        prompt.append("**Production Rate:** ***" + factory.getProductionRateValue() + "*** coins per process cycle.\n\n");
+        DateTimed nextProcessTime = manager.getNextFactoryProcessTime();
+        prompt.append("This Factory will process coins next at *" + nextProcessTime.getFormattedTime(userSettings) + "* on *" + nextProcessTime.getFormattedDate(userSettings) + "*.\n\n");
+        prompt.append("What would you like to do?");
+
+        withResponse(response -> {
+            if (response.equals("invest coins")) {
+                nextWindow("investCoins");
+            } else if (response.equals("withdraw coins")) {
+                nextWindow("withdrawCoins");
+            }
+        }, true, prompt.toString(), "Invest Coins", "Withdraw Coins");
+    }
+
+    public void investCoins() {
+        StringBuilder prompt = new StringBuilder("**Invest Coins**\n\n");
+        prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
+        prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n\n");
+        prompt.append("How many coins would you like to invest in your Coin Factory from your Coin Bank?\n");
+        prompt.append("*You may withdraw these coins at any time.*");
+
+        withResponse(response -> {
+            try {
+                long coins = Long.parseLong(response);
+                factory.deposit(coins, profile.getBank());
+                manager.update(profile);
+                goBack();
+                sendMessage("You have successfully invested **" + coins + "** coins in your Coin Factory." +
+                            "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*", "Coins Invested");
+            } catch (InsufficientCoinsException e) {
+                sendMessage(e.getMessage(), "Insufficient Coins");
+            } catch (NumberFormatException e) {
+                sendMessage("You must enter a valid number.", "Invalid Number");
+            }
+        }, true, prompt.toString());
+    }
+
+    public void withdrawCoins() {
+        StringBuilder prompt = new StringBuilder("**Withdraw Coins**\n\n");
+        prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
+        prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n\n");
+        prompt.append("How many coins would you like to withdraw from your Coin Factory to your Coin Bank?\n");
+        prompt.append("*You may only withdraw coins that have been processed.*");
+
+        withResponse(response -> {
+            try {
+                long coins = Long.parseLong(response);
+                factory.withdraw(coins, profile.getBank());
+                manager.update(profile);
+                goBack();
+                sendMessage("You have successfully withdrawn **" + coins + "** coins from your Coin Factory." +
+                            "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*", "Coins Withdrawn");
+            } catch (InsufficientCoinsException e) {
+                sendMessage(e.getMessage(), "Insufficient Coins");
+            } catch (NumberFormatException e) {
+                sendMessage("You must enter a valid number.", "Invalid Number");
+            }
+        }, true, prompt.toString());
     }
 }

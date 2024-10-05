@@ -61,6 +61,38 @@ public abstract class DateTimed {
     }
 
     /**
+     * Returns a new {@link DateTimed} object for the current system time.
+     * <p>
+     * SOAP Bot uses the Eastern Standard Time (EST) timezone.
+     * 
+     * @return A new {@link DateTimed} object for the current system time.
+     */
+    public static DateTimed getCurrentSystemTime() {
+        return new DateTimed() {};
+    }
+
+    /**
+     * Returns a new {@link LocalDateTime} object for the current system time.
+     * <p>
+     * SOAP Bot uses the Eastern Standard Time (EST) timezone.
+     * 
+     * @return A new {@link LocalDateTime} object for the current system time.
+     */
+    public static LocalDateTime getCurrentLocalDateTime() {
+        return LocalDateTime.now(ZoneId.of("America/New_York"));
+    }
+
+    /**
+     * Returns a new {@link DateTimed} object for the provided {@link LocalDateTime}.
+     * 
+     * @param dateTime The {@link LocalDateTime} to represent this {@link DateTimed}.
+     * @return A new {@link DateTimed} object for the provided {@link LocalDateTime}.
+     */
+    public static DateTimed fromLocalDateTime(LocalDateTime dateTime) {
+        return new DateTimed(dateTime) {};
+    }
+
+    /**
      * Returns the {@link LocalDateTime} representation of this {@link DateTimed}.
      * 
      * @return The {@link LocalDateTime} representation of this {@link DateTimed}.
