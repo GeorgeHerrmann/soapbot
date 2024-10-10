@@ -40,12 +40,14 @@ public final class CoinFactoryWizard extends InputWizard {
                 + "What would you like to do?";
 
         withResponse(response -> {
-            if (response.equals("upgrade factory")) {
+            if (response.equals("view upgrade tracks")) {
                 nextWindow("viewUpgradeTracks", 0);
             } else if (response.equals("view investment")) {
                 nextWindow("viewCoinInvestment");
+            } else if (response.equals("manage upgrade order")) {
+                nextWindow("switchUpgrades");
             }
-        }, false, prompt, "Upgrade Factory", "View Investment");
+        }, false, prompt, "View Upgrade Tracks", "Manage Upgrade Order", "View Investment");
     }
 
     /**
@@ -246,5 +248,64 @@ public final class CoinFactoryWizard extends InputWizard {
                 sendMessage("You must enter a valid number.", "Invalid Number");
             }
         }, true, prompt.toString());
+    }
+
+    public void switchUpgrades() {
+        StringBuilder prompt = new StringBuilder("**Upgrade Process Reordering**\n\n");
+        prompt.append("Your upgrade process order will currently produce **" + factory.getProductionRateValue() + "** coins per production cycle.\n");
+        prompt.append("Current upgrade order is:\n");
+
+        List<FactoryUpgrade> upgrades = factory.getUpgrades();
+        String[] options = new String[upgrades.size()];
+
+        for (int i = 0; i < upgrades.size(); i++) {
+            FactoryUpgrade upgrade = upgrades.get(i);
+            prompt.append("- ").append(i + 1).append(". ").append(upgrade.getName()).append(" *(Level ").append(upgrade.getLevel()).append(")*\n");
+            options[i] = upgrade.getName();
+        }
+
+        prompt.append("Which upgrade would you like to move?\n\n");
+        prompt.append("*The order in which your upgrades are processed can affect how many coins are produced during a coin production cycle*");
+
+        withResponse(response -> {
+            nextWindow("switchUpgrade", response);
+        }, true, prompt.toString(), options);
+    }
+
+    public void switchUpgrade(String upgradeName) {
+        List<FactoryUpgrade> upgrades = factory.getUpgrades();
+        FactoryUpgrade upgrade = factory.getUpgrade(upgradeName);
+        int currentPosition = upgrades.indexOf(upgrade);
+
+        StringBuilder prompt = new StringBuilder("**Switching** ***" + upgrade.getName() + "***\n\n");
+        prompt.append("Your upgrade process order will currently produce **" + factory.getProductionRateValue() + "** coins per production cycle.\n");
+        prompt.append("**" + upgrade.getName()).append("'s** Current Position: *").append(currentPosition + 1).append("*\n");
+
+        for (int i = 0; i < upgrades.size(); i++) {
+            FactoryUpgrade displayedUpgrade = upgrades.get(i);
+            prompt.append("- ").append(i + 1).append(". ").append(displayedUpgrade.getName()).append(" *(Level ").append(displayedUpgrade.getLevel()).append(")*\n");
+        }
+
+        String[] options = new String[0];
+
+        if (currentPosition == 0 && currentPosition < (upgrades.size() - 1)) {
+            options = new String[] {"v"};
+            prompt.append("\n*You may move this upgrade down in the process order list*");
+        } else if (currentPosition == (upgrades.size() - 1) && currentPosition > 0) {
+            options = new String[] {"^"};
+            prompt.append("\n*You may move this upgrade up in the process order list*");
+        } else {
+            options = new String[] {"v", "^"};
+            prompt.append("\n*You may move this upgrade up or down in the process order list*");
+        }
+
+        withResponse(response -> {
+            if (response.equals("v")) {
+                factory.swap(upgrade, currentPosition + 1);
+                manager.update(profile);
+            } else if (response.equals("^")) {
+                factory.swap(upgrade, currentPosition - 1);
+            }
+        }, true, prompt.toString(), options);
     }
 }

@@ -62,6 +62,24 @@ public final class CoinFactory implements Manageable {
         return currentProductionValue;
     }
 
+    public List<FactoryUpgrade> getUpgrades() {
+        return new ArrayList<>(upgrades);
+    }
+
+    public FactoryUpgrade getUpgrade(String upgradeName) {
+        return upgrades.stream()
+                .filter(u -> u.getName().equalsIgnoreCase(upgradeName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No upgrade with name " + upgradeName + " in factory."));
+    }
+
+    public FactoryUpgrade getUpgrade(String rewardTrackName, String upgradeName) {
+        return upgrades.stream()
+                .filter(u -> u.getName().equalsIgnoreCase(upgradeName) && u.getTrackName().equalsIgnoreCase(rewardTrackName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No upgrade with name " + upgradeName + " in factory."));
+    }
+
     public void purchaseUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException, InsufficientCoinsException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
         if (currentProductionValue < upgrade.getCost()) {
@@ -140,6 +158,16 @@ public final class CoinFactory implements Manageable {
             currentProductionValue += amount;
         } else {
             throw new IllegalArgumentException("Cannot deposit a negative amount of coins.");
+        }
+    }
+
+    public void swap (FactoryUpgrade upgrade, int newSpot) throws IllegalArgumentException {
+        if (newSpot < 0 || newSpot >= upgrades.size()) {
+            throw new IllegalArgumentException("Cannot swap upgrade to spot " + newSpot + " because it is out of bounds.");
+        } else {
+            int oldSpot = upgrades.indexOf(upgrade);
+            upgrades.set(oldSpot, upgrades.get(newSpot));
+            upgrades.set(newSpot, upgrade);
         }
     }
 }
