@@ -15,6 +15,9 @@ import com.georgster.util.DateTimed;
 import com.georgster.wizard.InputWizard;
 import com.georgster.wizard.input.InputListenerFactory;
 
+/**
+ * An {@link InputWizard} for interacting with a Member's {@link CoinFactory}.
+ */
 public final class CoinFactoryWizard extends InputWizard {
 
     private final CoinFactory factory; // the factory of the user
@@ -22,6 +25,11 @@ public final class CoinFactoryWizard extends InputWizard {
     private final UserSettings userSettings; // the user's settings (mostly for time displays)
     private final UserProfile profile; // the user's profile (for convenience to update manager)
     
+    /**
+     * Creates a new {@link CoinFactoryWizard} for the given {@link CommandExecutionEvent}.
+     * 
+     * @param event the {@link CommandExecutionEvent} to create the wizard for.
+     */
     public CoinFactoryWizard(CommandExecutionEvent event) {
         super(event, InputListenerFactory.createButtonMessageListener(event, "Coin Factory").builder().withTimeoutDuration(120000).build());
         this.manager = event.getUserProfileManager();
@@ -30,11 +38,17 @@ public final class CoinFactoryWizard extends InputWizard {
         this.factory = profile.getFactory();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void begin() {
         nextWindow("factoryHome");
         end();
     }
 
+    /**
+     * The home page for the {@link CoinFactoryWizard}.
+     */
     public void factoryHome() {
         String prompt = "Welcome to your Coin Factory! You have " + factory.getCurrentProductionValue() + " coins in this factory.\n\n"
                 + "What would you like to do?";
@@ -112,6 +126,11 @@ public final class CoinFactoryWizard extends InputWizard {
         }, false, prompt.toString(), options.toArray(new String[options.size()]));
     }
 
+    /**
+     * Displays the given {@link FactoryUpgradeTrack}.
+     * 
+     * @param track the {@link FactoryUpgradeTrack} to display.
+     */
     public void viewUpgradeTrack(FactoryUpgradeTrack track) {
         FactoryUpgrade currentUpgrade = track.getCurrentUpgrade();
         FactoryUpgrade nextUpgrade = track.getNextUpgrade(currentUpgrade);
@@ -140,6 +159,12 @@ public final class CoinFactoryWizard extends InputWizard {
         }, true, prompt.toString(), options.toArray(new String[options.size()]));
     }
 
+    /**
+     * The window to purchase a specific {@link FactoryUpgrade} from a {@link FactoryUpgradeTrack}.
+     * 
+     * @param track the {@link FactoryUpgradeTrack} to purchase the upgrade from.
+     * @param upgradeName the name of the upgrade to purchase.
+     */
     public void purchaseUpgrade(FactoryUpgradeTrack track, String upgradeName) {
         FactoryUpgrade upgrade = track.getUpgrade(upgradeName);
         StringBuilder prompt = new StringBuilder();
@@ -153,10 +178,10 @@ public final class CoinFactoryWizard extends InputWizard {
                 try {
                     factory.purchaseUpgrade(upgrade);
                     manager.update(profile);
-                    goBack();
                     sendMessage("You have successfully purchased **" + upgrade.getName() + "** for **" + upgrade.getCost() + "** coins." +
                                 "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*" +
                                 "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + upgrade.getLevel() + "**", "Upgrade Purchased");
+                                goBack();
                 } catch (InsufficientCoinsException e) {
                     sendMessage("You currently have **" + factory.getCurrentProductionValue() + "** coins invested in your CoinFactory.\n" +
                                 "You need **" + upgrade.getCost() + "** coins to purchase **" + upgrade.getName() + "**", "Insufficient Coins");
@@ -167,6 +192,12 @@ public final class CoinFactoryWizard extends InputWizard {
         }, true, prompt.toString(), "Purchase Upgrade", "Coin Investment");
     }
 
+    /**
+     * The window to refund a specific {@link FactoryUpgrade} from a {@link FactoryUpgradeTrack}.
+     * 
+     * @param track the {@link FactoryUpgradeTrack} to refund the upgrade from.
+     * @param upgradeName the name of the upgrade to refund.
+     */
     public void refundUpgrade(FactoryUpgradeTrack track, String upgradeName) {
         FactoryUpgrade upgrade = track.getUpgrade(upgradeName);
         StringBuilder prompt = new StringBuilder();
@@ -178,14 +209,17 @@ public final class CoinFactoryWizard extends InputWizard {
             if (response.equals("refund upgrade")) {
                 factory.refundUpgrade(upgrade);
                 manager.update(profile);
-                goBack();
                 sendMessage("You have successfully refunded **" + upgrade.getName() + "** for **" + upgrade.getRefundValue() + "** coins." +
                             "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *available coins invested.*" +
                             "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + (upgrade.getLevel() - 1) + "**", "Upgrade Refunded");
+                goBack();
             }
         }, true, prompt.toString(), "Refund Upgrade");
     }
 
+    /**
+     * Displays the current coin investment in the {@link CoinFactory}.
+     */
     public void viewCoinInvestment() {
         StringBuilder prompt = new StringBuilder("**Coin Investment**\n\n");
         prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
@@ -204,6 +238,9 @@ public final class CoinFactoryWizard extends InputWizard {
         }, true, prompt.toString(), "Invest Coins", "Withdraw Coins");
     }
 
+    /**
+     * Allows the user to invest coins in the {@link CoinFactory}.
+     */
     public void investCoins() {
         StringBuilder prompt = new StringBuilder("**Invest Coins**\n\n");
         prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
@@ -216,9 +253,9 @@ public final class CoinFactoryWizard extends InputWizard {
                 long coins = Long.parseLong(response);
                 factory.deposit(coins, profile.getBank());
                 manager.update(profile);
-                goBack();
                 sendMessage("You have successfully invested **" + coins + "** coins in your Coin Factory." +
                             "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*", "Coins Invested");
+                goBack();
             } catch (InsufficientCoinsException e) {
                 sendMessage(e.getMessage(), "Insufficient Coins");
             } catch (NumberFormatException e) {
@@ -227,6 +264,9 @@ public final class CoinFactoryWizard extends InputWizard {
         }, true, prompt.toString());
     }
 
+    /**
+     * Allows the user to withdraw coins from the {@link CoinFactory}.
+     */
     public void withdrawCoins() {
         StringBuilder prompt = new StringBuilder("**Withdraw Coins**\n\n");
         prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
@@ -239,9 +279,9 @@ public final class CoinFactoryWizard extends InputWizard {
                 long coins = Long.parseLong(response);
                 factory.withdraw(coins, profile.getBank());
                 manager.update(profile);
-                goBack();
                 sendMessage("You have successfully withdrawn **" + coins + "** coins from your Coin Factory." +
                             "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*", "Coins Withdrawn");
+                goBack();
             } catch (InsufficientCoinsException e) {
                 sendMessage(e.getMessage(), "Insufficient Coins");
             } catch (NumberFormatException e) {
@@ -250,6 +290,9 @@ public final class CoinFactoryWizard extends InputWizard {
         }, true, prompt.toString());
     }
 
+    /**
+     * Allows the user to manage the process order of the {@link FactoryUpgrade FactoryUpgrades} in the {@link CoinFactory}.
+     */
     public void switchUpgrades() {
         StringBuilder prompt = new StringBuilder("**Upgrade Process Reordering**\n\n");
         prompt.append("Your upgrade process order will currently produce **" + factory.getProductionRateValue() + "** coins per production cycle.\n");
@@ -272,18 +315,30 @@ public final class CoinFactoryWizard extends InputWizard {
         }, true, prompt.toString(), options);
     }
 
+    /**
+     * Allows the user to switch the position of a specific {@link FactoryUpgrade} in the process order of the {@link CoinFactory}.
+     * 
+     * @param upgradeName the name of the upgrade to switch.
+     */
     public void switchUpgrade(String upgradeName) {
         List<FactoryUpgrade> upgrades = factory.getUpgrades();
         FactoryUpgrade upgrade = factory.getUpgrade(upgradeName);
         int currentPosition = upgrades.indexOf(upgrade);
 
-        StringBuilder prompt = new StringBuilder("**Switching** ***" + upgrade.getName() + "***\n\n");
+        StringBuilder prompt = new StringBuilder("**Switching** ***" + upgrade.getName() + "***\n");
+        prompt.append("- *" + upgrade.getDescription() + "*\n\n");
         prompt.append("Your upgrade process order will currently produce **" + factory.getProductionRateValue() + "** coins per production cycle.\n");
         prompt.append("**" + upgrade.getName()).append("'s** Current Position: *").append(currentPosition + 1).append("*\n");
 
         for (int i = 0; i < upgrades.size(); i++) {
             FactoryUpgrade displayedUpgrade = upgrades.get(i);
-            prompt.append("- ").append(i + 1).append(". ").append(displayedUpgrade.getName()).append(" *(Level ").append(displayedUpgrade.getLevel()).append(")*\n");
+            prompt.append("- ").append(i + 1).append(". ");
+            if (displayedUpgrade.getName().equals(upgrade.getName())) {
+                prompt.append("***" + displayedUpgrade.getName() + "***");
+            } else {
+                prompt.append(displayedUpgrade.getName());
+            }
+            prompt.append(" *(Level ").append(displayedUpgrade.getLevel()).append(")*\n");
         }
 
         String[] options = new String[0];

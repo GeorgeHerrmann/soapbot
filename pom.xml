@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.10</version>
+      <version>2.11.0</version>
     </dependency>
     <dependency>
       <groupId>com.sedmelluq</groupId>
@@ -54,7 +54,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
+      <version>1.5.9</version>
     </dependency>
     <dependency>
       <groupId>org.mongodb</groupId>
