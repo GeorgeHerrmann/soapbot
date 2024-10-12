@@ -1,5 +1,8 @@
 package com.georgster.coinfarm.model.upgrades;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A state of a {@link com.georgster.coinfarm.model.CoinFactory CoinFactory} that holds the production values of the factory
  * during a production cycle. The state is modified by {@link FactoryUpgrade FactoryUpgrades} to change the production values.
@@ -18,6 +21,7 @@ public final class CoinProductionState {
     private final long startingProductionValue; // starting production value of the factory
     private long baseProductionValue; // base production value of the factory (for multiplicative upgrades)
     private long workingProductionValue; // production value of the factory while working (for additive upgrades)
+    private final List<FactoryUpgrade> upgrades;
 
     /**
      * Constructs a new CoinProductionState with the given starting production value.
@@ -30,6 +34,26 @@ public final class CoinProductionState {
         this.startingProductionValue = startingProductionValue;
         this.baseProductionValue = startingProductionValue;
         this.workingProductionValue = startingProductionValue;
+        this.upgrades = new ArrayList<>();
+    }
+
+    /**
+     * Adds the given upgrade to the list of upgrades in the state.
+     * 
+     * @param upgrade The upgrade to add to the state
+     */
+    public void addUpgrade(FactoryUpgrade upgrade) {
+        upgrades.add(upgrade);
+        upgrade.applyUpgrade(this);
+    }
+
+    /**
+     * Returns the list of upgrades in the state.
+     * 
+     * @return The list of upgrades in the state
+     */
+    public List<FactoryUpgrade> getUpgrades() {
+        return upgrades;
     }
 
     /**

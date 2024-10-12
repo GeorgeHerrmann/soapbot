@@ -1,6 +1,14 @@
-package com.georgster.coinfarm.model.upgrades;
+package com.georgster.coinfarm.model.upgrades.tracks;
 
 import java.util.List;
+
+import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
+import com.georgster.coinfarm.model.upgrades.tracks.iceyintervention.GlaciarMovementHarvesterUpgrade;
+import com.georgster.coinfarm.model.upgrades.tracks.iceyintervention.LiquidCooledComputersUpgrade;
+import com.georgster.coinfarm.model.upgrades.tracks.iceyintervention.WarmthProducingJoggersUpgrade;
+import com.georgster.coinfarm.model.upgrades.tracks.smolderingsupport.HeatEnergyConverterUpgrade;
+import com.georgster.coinfarm.model.upgrades.tracks.smolderingsupport.SolarPanelContractUpgrade;
+import com.georgster.coinfarm.model.upgrades.tracks.smolderingsupport.VolcanicHarvesterUpgrade;
 
 /**
  * Factory class for {@link FactoryUpgradeTrack FactoryUpgradeTracks}.
@@ -28,13 +36,8 @@ public final class FactoryUpgradeTracks {
      */
     public static List<FactoryUpgradeTrack> getAvailableUpgradeTracks() {
         return List.of(
-            new FactoryUpgradeTrack("Working", new AddFiftyWorkingUpgrade(), new DoubleBaseUpgrade()),
-            new FactoryUpgradeTrack("Production", new AddFiftyWorkingUpgrade(), new DoubleBaseUpgrade()),
-            new FactoryUpgradeTrack("Cost", new AddFiftyWorkingUpgrade(), new DoubleBaseUpgrade()),
-            new FactoryUpgradeTrack("Speed", new AddFiftyWorkingUpgrade(), new DoubleBaseUpgrade()),
-            new FactoryUpgradeTrack("Efficiency", new AddFiftyWorkingUpgrade(), new DoubleBaseUpgrade()),
-            new FactoryUpgradeTrack("Quality", new AddFiftyWorkingUpgrade(), new DoubleBaseUpgrade()),
-            new FactoryUpgradeTrack("Safety", new AddFiftyWorkingUpgrade(), new DoubleBaseUpgrade())
+            new FactoryUpgradeTrack("Smoldering Support", new HeatEnergyConverterUpgrade(), new SolarPanelContractUpgrade(), new VolcanicHarvesterUpgrade()),
+            new FactoryUpgradeTrack("Icey Intervention", new WarmthProducingJoggersUpgrade(), new LiquidCooledComputersUpgrade(), new GlaciarMovementHarvesterUpgrade())
         );
     }
 

@@ -1,7 +1,10 @@
-package com.georgster.coinfarm.model.upgrades;
+package com.georgster.coinfarm.model.upgrades.tracks;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.georgster.coinfarm.model.upgrades.AbsentFactoryUpgrade;
+import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
 
 /**
  * A track of {@link FactoryUpgrade FactoryUpgrades} ordered by their {@link FactoryUpgrade#getLevel() level}.

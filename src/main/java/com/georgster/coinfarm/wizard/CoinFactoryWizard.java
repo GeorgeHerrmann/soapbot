@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.georgster.coinfarm.model.CoinFactory;
 import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
-import com.georgster.coinfarm.model.upgrades.FactoryUpgradeTrack;
+import com.georgster.coinfarm.model.upgrades.tracks.FactoryUpgradeTrack;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.economy.exception.InsufficientCoinsException;

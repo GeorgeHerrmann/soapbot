@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.georgster.coinfarm.model.upgrades.CoinProductionState;
 import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
-import com.georgster.coinfarm.model.upgrades.FactoryUpgradeTrack;
-import com.georgster.coinfarm.model.upgrades.FactoryUpgradeTracks;
+import com.georgster.coinfarm.model.upgrades.tracks.FactoryUpgradeTrack;
+import com.georgster.coinfarm.model.upgrades.tracks.FactoryUpgradeTracks;
 import com.georgster.control.manager.Manageable;
 import com.georgster.economy.CoinBank;
 import com.georgster.economy.exception.InsufficientCoinsException;
@@ -56,7 +56,10 @@ public final class CoinFactory implements Manageable {
      */
     public CoinProductionState process() {
         CoinProductionState state = new CoinProductionState(currentProductionValue);
-        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
+        upgrades.forEach(upgrade -> {
+            upgrade.applyUpgrade(state);
+            state.addUpgrade(upgrade);
+        });
         currentProductionValue = state.getWorkingProductionValue();
         return state;
     }
