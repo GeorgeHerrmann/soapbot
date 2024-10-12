@@ -8,7 +8,7 @@ public final class SolarPanelContractUpgrade extends FactoryUpgrade {
         public SolarPanelContractUpgrade() {
             super("Solar Panel Contract",
                 "Smoldering Support",
-                "Sign a contract that puts Solar Panels on your factory, allowing for even more coin production. *1.25 coins to base production each production cycle.",
+                "Sign a contract that puts Solar Panels on your factory, allowing for even more coin production. x1.25 coins to base production each production cycle.",
                 2, 750);
         }
     
