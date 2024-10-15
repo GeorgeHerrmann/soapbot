@@ -3,7 +3,7 @@ package com.georgster.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.georgster.coinfarm.model.CoinFactory;
+import com.georgster.coinfactory.model.CoinFactory;
 import com.georgster.collectable.Collected;
 import com.georgster.collectable.trade.Tradeable;
 import com.georgster.control.util.identify.util.MemberIdentified;

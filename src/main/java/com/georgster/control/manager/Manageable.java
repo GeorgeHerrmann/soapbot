@@ -2,7 +2,7 @@ package com.georgster.control.manager;
 
 import java.lang.reflect.Type;
 
-import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
+import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
 import com.georgster.database.adapter.DatabaseObjectClassAdapter;
 import com.georgster.database.adapter.FactoryUpgradeTypeAdapter;
 import com.georgster.database.adapter.SettingsOptionTypeAdapter;

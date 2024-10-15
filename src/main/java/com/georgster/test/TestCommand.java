@@ -3,7 +3,6 @@ package com.georgster.test;
 import java.util.List;
 
 import com.georgster.ParseableCommand;
-import com.georgster.coinfarm.wizard.CoinFactoryWizard;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.commands.CommandParser;
@@ -15,14 +14,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
  * {@code ACTIVE} field is set to {@code true}.
  */
 public class TestCommand implements ParseableCommand { 
-    private static final boolean ACTIVE = true;
+    private static final boolean ACTIVE = false;
 
     /**
      * {@inheritDoc}
      */
     public void execute(CommandExecutionEvent event) {
-        //throw new UnsupportedOperationException("Test command is currently inactive");
-        new CoinFactoryWizard(event).begin();
+        throw new UnsupportedOperationException("Test command is currently inactive");
     }
 
     /**

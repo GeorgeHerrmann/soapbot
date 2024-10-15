@@ -2,8 +2,8 @@ package com.georgster.database.adapter;
 
 import java.io.IOException;
 
-import com.georgster.coinfarm.model.upgrades.FactoryUpgrade;
-import com.georgster.coinfarm.model.upgrades.tracks.FactoryUpgradeTracks;
+import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.FactoryUpgradeTracks;
 import com.google.gson.JsonParseException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

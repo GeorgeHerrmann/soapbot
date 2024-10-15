@@ -7,7 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.georgster.coinfarm.model.CoinFactory;
+import com.georgster.coinfactory.model.CoinFactory;
 import com.georgster.collectable.Collected;
 import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;

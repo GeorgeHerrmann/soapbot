@@ -127,6 +127,8 @@ public class PermissionsManager extends GuildedSoapManager<PermissionGroup> {
                     group.addPermission(PermissibleAction.TRADECOMMAND);
                     group.addPermission(PermissibleAction.POLLCOMMAND);
                     group.addPermission(PermissibleAction.BANKCOMMAND);
+                    group.addPermission(PermissibleAction.COINFACTORYCOMMAND);
+                    group.addPermission(PermissibleAction.MENTIONGROUPCOMMAND);
                 }
                 add(group);
             }

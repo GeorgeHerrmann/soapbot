@@ -28,5 +28,7 @@ public enum PermissibleAction {
     TRADECOMMAND,
     CARDCOMMAND,
     BANKCOMMAND,
+    MENTIONGROUPCOMMAND,
+    COINFACTORYCOMMAND,
     DEFAULT
 }

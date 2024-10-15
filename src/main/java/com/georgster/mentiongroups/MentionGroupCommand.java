@@ -9,6 +9,7 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
+import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.SoapUtility;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
@@ -165,6 +166,14 @@ public final class MentionGroupCommand implements ParseableCommand {
      */
     public List<String> getAliases() {
         return List.of("mention", "ping", "p");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PermissibleAction getRequiredPermission(List<String> args) {
+        return PermissibleAction.MENTIONGROUPCOMMAND;
     }
 
     /**

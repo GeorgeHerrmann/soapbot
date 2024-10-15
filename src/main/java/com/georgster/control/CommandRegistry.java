@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.Command;
+import com.georgster.coinfactory.CoinFactoryCommand;
 import com.georgster.collectable.CardCommand;
 import com.georgster.collectable.trade.TradeCommand;
 import com.georgster.control.util.ClientContext;
@@ -83,7 +84,8 @@ public final class CommandRegistry {
             TradeCommand.class,
             CardCommand.class,
             MentionGroupCommand.class,
-            UserSettingsCommand.class
+            UserSettingsCommand.class,
+            CoinFactoryCommand.class
         ));
     }
 
