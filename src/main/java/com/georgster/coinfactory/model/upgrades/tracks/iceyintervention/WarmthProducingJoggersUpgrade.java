@@ -13,7 +13,7 @@ public final class WarmthProducingJoggersUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 1.2));
+        state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.2));
         state.upgradeWorkingProductionValue(5);
     }
 

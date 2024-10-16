@@ -13,7 +13,7 @@ public final class GlaciarMovementHarvesterUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * (1.1 + Math.random() * 1.4)));
+        state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * (0.1 + Math.random() * 0.4)));
     }
 
 }

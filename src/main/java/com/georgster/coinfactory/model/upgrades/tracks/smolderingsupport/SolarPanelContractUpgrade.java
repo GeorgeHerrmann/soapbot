@@ -13,6 +13,6 @@ public final class SolarPanelContractUpgrade extends FactoryUpgrade {
         }
     
         public void applyUpgrade(CoinProductionState state) {
-            state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 1.25));
+            state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.25));
         }
 }

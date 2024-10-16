@@ -88,7 +88,7 @@ public final class CoinFactoryWizard extends InputWizard {
             options.add("Back");
         }
         // always adds "home" option
-        options.add("Home");
+        options.add("!Home");
 
         StringBuilder prompt = new StringBuilder("Available Upgrade Tracks:\n\n");
 
@@ -98,11 +98,13 @@ public final class CoinFactoryWizard extends InputWizard {
             // iterate through the upgrades in the track and display the first one that returns false when "isOwned()" is called, or "MAX" if all are owned
             FactoryUpgrade upgrade = track.getCurrentUpgrade();
             if (track.isMaxUpgrade(upgrade.getName())) {
-                prompt.append("\t- MAX\n");
+                prompt.append("\t- ***MAX***\n");
             } else {
-                prompt.append("\t- ").append(upgrade.getName()).append(" *(").append(upgrade.getCost()).append(" coins)*\n");
+                prompt.append("\t- **").append(upgrade.getName()).append("** *(Level ").append(upgrade.getLevel()).append(")*\n");
             }
         }
+
+        prompt.append("\n*Select an upgrade track to view more details, use next/back to iterate through them, or press 'Home' to return to the homepage.*");
 
         withResponse(response -> {
             if (response.equals("next")) {
@@ -142,8 +144,8 @@ public final class CoinFactoryWizard extends InputWizard {
             prompt.append("**MAX UPGRADE**\n");
         } else {
             options.add("Purchase " + nextUpgrade.getName());
-            prompt.append("Next Upgrade:\n");
-            prompt.append("- ").append(nextUpgrade.getName()).append(" *(").append(nextUpgrade.getCost()).append(" coins)*\n");
+            prompt.append("Next Upgrade: **").append(nextUpgrade.getName()).append("** *(").append(nextUpgrade.getCost()).append(" coins)*\n");
+            prompt.append("- *").append(nextUpgrade.getDescription()).append("*\n\n");
         } 
         if (track.ownsAny()) {
             options.add("Refund " + currentUpgrade.getName());
@@ -245,7 +247,7 @@ public final class CoinFactoryWizard extends InputWizard {
         StringBuilder prompt = new StringBuilder("**Invest Coins**\n\n");
         prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
         prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n\n");
-        prompt.append("How many coins would you like to invest in your Coin Factory from your Coin Bank?\n");
+        prompt.append("Please type how many coins would you like to invest in your Coin Factory from your Coin Bank.\n");
         prompt.append("*You may withdraw these coins at any time.*");
 
         withResponse(response -> {
@@ -271,7 +273,7 @@ public final class CoinFactoryWizard extends InputWizard {
         StringBuilder prompt = new StringBuilder("**Withdraw Coins**\n\n");
         prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
         prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n\n");
-        prompt.append("How many coins would you like to withdraw from your Coin Factory to your Coin Bank?\n");
+        prompt.append("Please type how many coins would you like to withdraw from your Coin Factory to your Coin Bank.\n");
         prompt.append("*You may only withdraw coins that have been processed.*");
 
         withResponse(response -> {

@@ -13,7 +13,7 @@ public final class VolcanicHarvesterUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeBaseProductionValue(state.getBaseProductionValue() * 2);
+        state.upgradeBaseProductionValue(state.getBaseProductionValue());
         state.upgradeWorkingProductionValue(50);
     }
     

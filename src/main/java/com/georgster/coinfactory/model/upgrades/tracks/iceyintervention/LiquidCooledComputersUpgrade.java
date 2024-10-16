@@ -13,7 +13,7 @@ public final class LiquidCooledComputersUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 1.05));
+        state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.05));
         state.upgradeWorkingProductionValue(50 * state.getUpgrades().size());
     }
     
