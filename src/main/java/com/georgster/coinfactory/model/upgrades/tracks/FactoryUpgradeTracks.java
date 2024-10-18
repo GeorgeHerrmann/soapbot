@@ -3,9 +3,29 @@ package com.georgster.coinfactory.model.upgrades.tracks;
 import java.util.List;
 
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.automatedprecision.AiPoweredAssemblyLineUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.automatedprecision.QuantumComputingIntegrationUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.automatedprecision.RoboticArmsUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.cyberneticascension.AugmentedWorkersUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.cyberneticascension.FullyAutomatedWorkforceUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.cyberneticascension.NeuralNetworkCoordinationUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.cyberneticascension.TheSingularityUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.experimentalscience.AntimatterReactorUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.experimentalscience.CloningFacilityUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.experimentalscience.TimeManipulatorUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.financialshenanigans.CorporateMergerUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.financialshenanigans.StockMarketManipulationUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.financialshenanigans.TaxHavenUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.galaticexpansion.AsteroidMiningUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.galaticexpansion.DysonSphereConstructionUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.galaticexpansion.MoonMiningColonyUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.iceyintervention.GlaciarMovementHarvesterUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.iceyintervention.LiquidCooledComputersUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.iceyintervention.WarmthProducingJoggersUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.occultengineering.DemonPoweredFurnaceUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.occultengineering.NecromancersWorkshopUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.occultengineering.RealityBendingPortalUpgrade;
+import com.georgster.coinfactory.model.upgrades.tracks.occultengineering.SummoningCircleOfFortuneUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.smolderingsupport.HeatEnergyConverterUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.smolderingsupport.SolarPanelContractUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.smolderingsupport.VolcanicHarvesterUpgrade;
@@ -36,8 +56,14 @@ public final class FactoryUpgradeTracks {
      */
     public static List<FactoryUpgradeTrack> getAvailableUpgradeTracks() {
         return List.of(
-            new FactoryUpgradeTrack("Smoldering Support", new HeatEnergyConverterUpgrade(), new SolarPanelContractUpgrade(), new VolcanicHarvesterUpgrade()),
-            new FactoryUpgradeTrack("Icey Intervention", new WarmthProducingJoggersUpgrade(), new LiquidCooledComputersUpgrade(), new GlaciarMovementHarvesterUpgrade())
+            new FactoryUpgradeTrack("Smoldering Support", "Warming our future one coin at a time", new HeatEnergyConverterUpgrade(), new SolarPanelContractUpgrade(), new VolcanicHarvesterUpgrade()),
+            new FactoryUpgradeTrack("Icey Intervention", "Would an ice age be profitable?", new WarmthProducingJoggersUpgrade(), new LiquidCooledComputersUpgrade(), new GlaciarMovementHarvesterUpgrade()),
+            new FactoryUpgradeTrack("Automated Precision", "A high-tech approach to maximize efficiency through automation.", new RoboticArmsUpgrade(), new AiPoweredAssemblyLineUpgrade(), new QuantumComputingIntegrationUpgrade()),
+            new FactoryUpgradeTrack("Galactic Expansion", "Take your coin production to the moon. Literally.", new MoonMiningColonyUpgrade(), new AsteroidMiningUpgrade(), new DysonSphereConstructionUpgrade()),
+            new FactoryUpgradeTrack("Experimental Science", "Delve into cutting-edge, questionably legal science for big profits.", new AntimatterReactorUpgrade(), new CloningFacilityUpgrade(), new TimeManipulatorUpgrade()),
+            new FactoryUpgradeTrack("Financial Shenanigans", "It's called 'creative accounting'", new TaxHavenUpgrade(), new CorporateMergerUpgrade(), new StockMarketManipulationUpgrade()),
+            new FactoryUpgradeTrack("Occult Engineering", "The supernatural is actually quite profitable.", new DemonPoweredFurnaceUpgrade(), new NecromancersWorkshopUpgrade(), new RealityBendingPortalUpgrade(), new SummoningCircleOfFortuneUpgrade()),
+            new FactoryUpgradeTrack("Cybernetic Ascension", "When humans aren’t enough, it’s time to upgrade... the humans.", new AugmentedWorkersUpgrade(), new NeuralNetworkCoordinationUpgrade(), new FullyAutomatedWorkforceUpgrade(), new TheSingularityUpgrade())
         );
     }
 

@@ -13,6 +13,7 @@ import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
  */
 public final class FactoryUpgradeTrack {
     private final String name; // The name of the track
+    private final String tag; // The tag of the track
     private final List<FactoryUpgrade> upgrades; // The upgrades in the track
 
     /**
@@ -21,8 +22,9 @@ public final class FactoryUpgradeTrack {
      * @param name The name of the track
      * @param upgrades The upgrades in the track
      */
-    public FactoryUpgradeTrack(String name, List<FactoryUpgrade> upgrades) {
+    public FactoryUpgradeTrack(String name, String tag, List<FactoryUpgrade> upgrades) {
         this.name = name;
+        this.tag = tag;
         this.upgrades = upgrades;
         //sort the list by level
         this.upgrades.sort((u1, u2) -> Integer.compare(u1.getLevel(), u2.getLevel()));
@@ -34,8 +36,9 @@ public final class FactoryUpgradeTrack {
      * @param name The name of the track
      * @param upgrades The upgrades in the track
      */
-    public FactoryUpgradeTrack(String name, FactoryUpgrade... upgrades) {
+    public FactoryUpgradeTrack(String name, String tag, FactoryUpgrade... upgrades) {
         this.name = name;
+        this.tag = tag;
         this.upgrades = new ArrayList<>(List.of(upgrades));
         //sort the list by level
         this.upgrades.sort((u1, u2) -> Integer.compare(u1.getLevel(), u2.getLevel()));
@@ -48,6 +51,15 @@ public final class FactoryUpgradeTrack {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the tag of the track.
+     * 
+     * @return The tag of the track
+     */
+    public String getTag() {
+        return tag;
     }
 
     /**

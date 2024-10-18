@@ -511,3 +511,7 @@
 
 2.726
     - Fixed an issue where stored objects (Reserve Events, Poll Events, Permission Groups, MentionGroups, Trading Cards, etc.) would randomly be duplicated, causing multiple issues.
+
+2.800-BETA
+    Misc
+        - Removed The Final Shape Command

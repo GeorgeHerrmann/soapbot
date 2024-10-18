@@ -31,7 +31,7 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
     /**
      * The interval in milliseconds at which the factories will be processed.
      */
-    public static final long FACTORY_PROCESSING_INTERVAL = 300000;
+    public static final long FACTORY_PROCESSING_INTERVAL = 3600000;
 
     private static OpenAiService aiService; //The singleton AI Service to communicate with OpenAI's API
     private boolean isProcessingFactories; //Whether the factories are currently processing

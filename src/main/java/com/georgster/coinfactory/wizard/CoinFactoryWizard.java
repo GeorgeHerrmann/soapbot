@@ -94,13 +94,14 @@ public final class CoinFactoryWizard extends InputWizard {
 
         for (int i = 0; i < displayedTracks.size(); i++) {
             FactoryUpgradeTrack track = displayedTracks.get(i);
-            prompt.append(i + 1).append(". ").append(track.getName()).append("\n");
+            prompt.append(i + 1 + startingPos).append(". ").append(track.getName()).append("\n");
+            prompt.append("\t- *").append(track.getTag()).append("*\n");
             // iterate through the upgrades in the track and display the first one that returns false when "isOwned()" is called, or "MAX" if all are owned
             FactoryUpgrade upgrade = track.getCurrentUpgrade();
             if (track.isMaxUpgrade(upgrade.getName())) {
-                prompt.append("\t- ***MAX***\n");
+                prompt.append("\t\t- ***MAX***\n");
             } else {
-                prompt.append("\t- **").append(upgrade.getName()).append("** *(Level ").append(upgrade.getLevel()).append(")*\n");
+                prompt.append("\t\t- **").append(upgrade.getName()).append("** *(Level ").append(upgrade.getLevel()).append(")*\n");
             }
         }
 
@@ -119,9 +120,7 @@ public final class CoinFactoryWizard extends InputWizard {
                     .filter(t -> t.getName().equalsIgnoreCase(response))
                     .findFirst()
                     .orElse(null);
-                if (track == null) {
-                    sendMessage("An error occurred while trying to find the upgrade track with the name " + response + ".", "Could not find Upgrade Track");
-                } else {
+                if (track != null) {
                     nextWindow("viewUpgradeTrack", track);
                 }
             }
@@ -136,12 +135,15 @@ public final class CoinFactoryWizard extends InputWizard {
     public void viewUpgradeTrack(FactoryUpgradeTrack track) {
         FactoryUpgrade currentUpgrade = track.getCurrentUpgrade();
         FactoryUpgrade nextUpgrade = track.getNextUpgrade(currentUpgrade);
-        StringBuilder prompt = new StringBuilder("Current Upgrade for Track: ***" + track.getName() + "*** is **" + currentUpgrade.getName() + "**\n"
+        StringBuilder prompt = new StringBuilder("Track: ***" + track.getName() + "***\n");
+        prompt.append("- *" + track.getTag() + "*\n\n");
+        prompt.append("Current Upgrade: **" + currentUpgrade.getName() + "**\n"
                 + "- *" + currentUpgrade.getDescription() + "*\n\n");
         List<String> options = new ArrayList<>();
         
         if (track.isMaxUpgrade(currentUpgrade.getName())) {
             prompt.append("**MAX UPGRADE**\n");
+            prompt.append("- *This upgrade track is at its maximum level.*\n\n");
         } else {
             options.add("Purchase " + nextUpgrade.getName());
             prompt.append("Next Upgrade: **").append(nextUpgrade.getName()).append("** *(").append(nextUpgrade.getCost()).append(" coins)*\n");

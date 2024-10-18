@@ -9,7 +9,7 @@ public final class WarmthProducingJoggersUpgrade extends FactoryUpgrade {
         super("Warmth Producing Joggers",
             "Icey Intervention",
             "When your factory gets cold, crew members will now jog to produce heat, allowing them to work faster. x1.2 coins to base production and +5 coins each production cycle.",
-            1, 350);
+            1, 850);
     }
 
     public void applyUpgrade(CoinProductionState state) {

@@ -9,7 +9,7 @@ public final class HeatEnergyConverterUpgrade extends FactoryUpgrade {
         super("Heat Energy Converter",
             "Smoldering Support",
             "Heat produced by your CoinFactory gets reused to make even more coins. +15 to working production each production cycle.",
-            1, 200);
+            1, 300);
     }
 
     public void applyUpgrade(CoinProductionState state) {

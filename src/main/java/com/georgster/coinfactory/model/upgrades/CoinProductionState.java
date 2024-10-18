@@ -9,7 +9,7 @@ import java.util.List;
  * <p>
  * A {@link CoinProductionState} has a starting production value, a base production value, and a working production value.
  * <p>
- * <i>The starting production value is the production value of the factory at the start of a production cycle and is not modified.
+ * <i>The starting production value is the production value of the factory at the start of a production cycle and is not modified unless decreased by an upgrade.
  * <p>
  * The base production value is the production value of the factory that is modified by multiplicative upgrades. Base production value
  * upgrades <b>also affect</b> the working production value.
@@ -18,7 +18,7 @@ import java.util.List;
  * upgrades <b>DO NOT</b> affect the base production value.</i>
  */
 public final class CoinProductionState {
-    private final long startingProductionValue; // starting production value of the factory
+    private long startingProductionValue; // starting production value of the factory
     private long baseProductionValue; // base production value of the factory (for multiplicative upgrades)
     private long workingProductionValue; // production value of the factory while working (for additive upgrades)
     private final List<FactoryUpgrade> upgrades;
@@ -80,6 +80,50 @@ public final class CoinProductionState {
     }
 
     /**
+     * Decreases the working production value of the factory by the given value.
+     * 
+     * @param value The value to decrease the working production value by
+     */
+    public void decreaseWorkingProductionValue(long value) {
+        workingProductionValue -= value;
+    }
+    
+    /**
+     * Decreases the base production value of the factory by the given value.
+     * 
+     * @param value The value to decrease the base production value by
+     */
+    public void decreaseBaseProductionValue(long value) {
+        baseProductionValue -= value;
+        workingProductionValue -= value;
+    }
+
+    /**
+     * Wipes the given value of coins from the factory, draining the base and working production values first, then the starting production value if needed.
+     * <p>
+     * <i>Values should not go negative and should stop at zero no matter how large the value is.</i>
+     * 
+     * @param value The value of coins to wipe from the factory
+     */
+    public void wipeCoins(long value) {
+        // drain base and working values first, then drain starting value if needed, ensuring "value" coins are removed. no values should go negative and stop at zero no matter how large value is
+        long drain = Math.min(value, baseProductionValue);
+        baseProductionValue -= drain;
+        workingProductionValue -= drain;
+
+        if (drain < value) {
+            drain = Math.min(value - drain, workingProductionValue);
+            workingProductionValue -= drain;
+        }
+
+        if (drain < value) {
+            drain = Math.min(value - drain, startingProductionValue);
+            startingProductionValue -= drain;
+        }
+
+    }
+
+    /**
      * Returns the starting production value of the factory.
      * 
      * @return The starting production value of the factory
@@ -104,6 +148,15 @@ public final class CoinProductionState {
      */
     public long getWorkingProductionValue() {
         return workingProductionValue;
+    }
+
+    /**
+     * Returns the total production value of the factory <i>(the sum of the starting production value and the working production value)</i>.
+     * 
+     * @return The total production value of the factory
+     */
+    public long getTotalCoins() {
+        return startingProductionValue + workingProductionValue;
     }
 
     /**
