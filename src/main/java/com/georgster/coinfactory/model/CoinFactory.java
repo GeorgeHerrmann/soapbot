@@ -56,10 +56,8 @@ public final class CoinFactory implements Manageable {
      */
     public CoinProductionState process() {
         CoinProductionState state = new CoinProductionState(currentProductionValue);
-        upgrades.forEach(upgrade -> {
-            upgrade.applyUpgrade(state);
-            state.addUpgrade(upgrade);
-        });
+        state.setUpgrades(upgrades);
+        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
         currentProductionValue = state.getWorkingProductionValue();
         return state;
     }
@@ -71,6 +69,7 @@ public final class CoinFactory implements Manageable {
      */
     public long getProductionRateValue() {
         CoinProductionState state = new CoinProductionState(currentProductionValue);
+        state.setUpgrades(upgrades);
         upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
         return state.finishProductionCycle();
     }

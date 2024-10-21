@@ -44,7 +44,16 @@ public final class CoinProductionState {
      */
     public void addUpgrade(FactoryUpgrade upgrade) {
         upgrades.add(upgrade);
-        upgrade.applyUpgrade(this);
+    }
+
+    /**
+     * Sets the list of upgrades in the state to the given list of upgrades.
+     * 
+     * @param upgrades The list of upgrades to set in the state
+     */
+    public void setUpgrades(List<FactoryUpgrade> upgrades) {
+        this.upgrades.clear();
+        this.upgrades.addAll(upgrades);
     }
 
     /**
