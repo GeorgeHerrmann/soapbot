@@ -8,7 +8,7 @@ public final class NecromancersWorkshopUpgrade extends FactoryUpgrade {
     public NecromancersWorkshopUpgrade() {
         super("Necromancer's Workshop",
             "Occult Engineering",
-            "Reanimate the “disappeared” workers to maximize productivity and properly work the Demon-Powered Furnace. Each upgrade has a 10% chance to bring back a deceased worker, adding 500 coins to working production each cycle. The Demon-Powered Furnace upgrade no longer wipes coins.",
+            "Reanimate the \"disappeared\" workers to maximize productivity and properly work the Demon-Powered Furnace. Each upgrade has a 10% chance to bring back a deceased worker, adding 500 coins to working production each cycle. The Demon-Powered Furnace upgrade no longer wipes coins.",
             2, 8000);
     }
 

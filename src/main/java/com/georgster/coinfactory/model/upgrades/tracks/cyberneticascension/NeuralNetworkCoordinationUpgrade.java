@@ -8,7 +8,7 @@ public final class NeuralNetworkCoordinationUpgrade extends FactoryUpgrade {
     public NeuralNetworkCoordinationUpgrade() {
         super("Neural Network Coordination",
             "Cybernetic Ascension",
-            "Sync the minds of your workers through a neural network, coordinating production with perfect efficiency. Multiplies base production by *1.3 each cycle.",
+            "Sync the minds of your workers through a neural network, coordinating production with perfect efficiency. Multiplies base production by 1.3x each cycle.",
             2, 5000);
     }
 

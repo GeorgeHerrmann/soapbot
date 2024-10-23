@@ -50,7 +50,7 @@ public final class CoinFactoryWizard extends InputWizard {
      * The home page for the {@link CoinFactoryWizard}.
      */
     public void factoryHome() {
-        String prompt = "Welcome to your Coin Factory! You have " + factory.getCurrentProductionValue() + " coins in this factory.\n\n"
+        String prompt = "Welcome to your Coin Factory! You have " + factory.getInvestedCoins() + " coins in this factory.\n\n"
                 + "What would you like to do?";
 
         withResponse(response -> {
@@ -174,7 +174,7 @@ public final class CoinFactoryWizard extends InputWizard {
         StringBuilder prompt = new StringBuilder();
         prompt.append("**" + upgrade.getName() + "** *(Level " + upgrade.getLevel() + " Upgrade)*\n");
         prompt.append("- *" + upgrade.getDescription() + "*\n\n");
-        prompt.append("Your factory currently has **" + factory.getCurrentProductionValue() + "** coins. Would you like to buy " + upgrade.getName() + " for **" + upgrade.getCost() + "** coins?\n");
+        prompt.append("Your factory currently has **" + factory.getInvestedCoins() + "** coins. Would you like to buy " + upgrade.getName() + " for **" + upgrade.getCost() + "** coins?\n");
         prompt.append("*You may refund this upgrade for " + upgrade.getRefundValue() + " coins.*");
 
         withResponse(response -> {
@@ -183,11 +183,11 @@ public final class CoinFactoryWizard extends InputWizard {
                     factory.purchaseUpgrade(upgrade);
                     manager.update(profile);
                     sendMessage("You have successfully purchased **" + upgrade.getName() + "** for **" + upgrade.getCost() + "** coins." +
-                                "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*" +
+                                "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *coins invested.*" +
                                 "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + upgrade.getLevel() + "**", "Upgrade Purchased");
                                 goBack();
                 } catch (InsufficientCoinsException e) {
-                    sendMessage("You currently have **" + factory.getCurrentProductionValue() + "** coins invested in your CoinFactory.\n" +
+                    sendMessage("You currently have **" + factory.getInvestedCoins() + "** coins invested in your CoinFactory.\n" +
                                 "You need **" + upgrade.getCost() + "** coins to purchase **" + upgrade.getName() + "**", "Insufficient Coins");
                 }
             } else if (response.equals("coin investment")) {
@@ -214,7 +214,7 @@ public final class CoinFactoryWizard extends InputWizard {
                 factory.refundUpgrade(upgrade);
                 manager.update(profile);
                 sendMessage("You have successfully refunded **" + upgrade.getName() + "** for **" + upgrade.getRefundValue() + "** coins." +
-                            "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *available coins invested.*" +
+                            "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *available coins invested.*" +
                             "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + (upgrade.getLevel() - 1) + "**", "Upgrade Refunded");
                 goBack();
             }
@@ -226,7 +226,7 @@ public final class CoinFactoryWizard extends InputWizard {
      */
     public void viewCoinInvestment() {
         StringBuilder prompt = new StringBuilder("**Coin Investment**\n\n");
-        prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
+        prompt.append("**Factory:** ***" + factory.getInvestedCoins() + "*** coins.\n");
         prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n");
         prompt.append("**Production Rate:** ***" + factory.getProductionRateValue() + "*** coins per process cycle.\n\n");
         DateTimed nextProcessTime = manager.getNextFactoryProcessTime();
@@ -247,7 +247,7 @@ public final class CoinFactoryWizard extends InputWizard {
      */
     public void investCoins() {
         StringBuilder prompt = new StringBuilder("**Invest Coins**\n\n");
-        prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
+        prompt.append("**Factory:** ***" + factory.getInvestedCoins() + "*** coins.\n");
         prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n\n");
         prompt.append("Please type how many coins would you like to invest in your Coin Factory from your Coin Bank.\n");
         prompt.append("*You may withdraw these coins at any time.*");
@@ -258,7 +258,7 @@ public final class CoinFactoryWizard extends InputWizard {
                 factory.deposit(coins, profile.getBank());
                 manager.update(profile);
                 sendMessage("You have successfully invested **" + coins + "** coins in your Coin Factory." +
-                            "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*", "Coins Invested");
+                            "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *coins invested.*", "Coins Invested");
                 goBack();
             } catch (InsufficientCoinsException e) {
                 sendMessage(e.getMessage(), "Insufficient Coins");
@@ -273,7 +273,7 @@ public final class CoinFactoryWizard extends InputWizard {
      */
     public void withdrawCoins() {
         StringBuilder prompt = new StringBuilder("**Withdraw Coins**\n\n");
-        prompt.append("**Factory:** ***" + factory.getCurrentProductionValue() + "*** coins.\n");
+        prompt.append("**Factory:** ***" + factory.getInvestedCoins() + "*** coins.\n");
         prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n\n");
         prompt.append("Please type how many coins would you like to withdraw from your Coin Factory to your Coin Bank.\n");
         prompt.append("*You may only withdraw coins that have been processed.*");
@@ -284,7 +284,7 @@ public final class CoinFactoryWizard extends InputWizard {
                 factory.withdraw(coins, profile.getBank());
                 manager.update(profile);
                 sendMessage("You have successfully withdrawn **" + coins + "** coins from your Coin Factory." +
-                            "\n*Your CoinFactory now has* **" + factory.getCurrentProductionValue() + "** *coins invested.*", "Coins Withdrawn");
+                            "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *coins invested.*", "Coins Withdrawn");
                 goBack();
             } catch (InsufficientCoinsException e) {
                 sendMessage(e.getMessage(), "Insufficient Coins");

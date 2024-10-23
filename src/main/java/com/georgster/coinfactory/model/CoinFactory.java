@@ -16,7 +16,7 @@ import com.georgster.economy.exception.InsufficientCoinsException;
  * <p>
  * This {@link Manageable} is identified by the member's Snowflake id.
  * <p>
- * The {@link CoinFactory} will produce coins based on its current {@link FactoryUpgrade FactoryUpgrades} and {@link #getCurrentProductionValue() production value} each production cycle.
+ * The {@link CoinFactory} will produce coins based on its current {@link FactoryUpgrade FactoryUpgrades} and {@link #getinvestedCoins() production value} each production cycle.
  * <p>
  * {@link FactoryUpgrade FactoryUpgrades} can be purchased and applied to the factory to increase its production rate and will be processed in the order maintained in the {@link #getUpgrades() upgrades} list.
  */
@@ -25,7 +25,7 @@ public final class CoinFactory implements Manageable {
 
     private final List<FactoryUpgrade> upgrades; // List of upgrades this factory has purchased
 
-    private long currentProductionValue; // The current production value of the factory (aka the number of coins invested)
+    private long investedCoins; // The current production value of the factory (aka the number of coins invested)
 
     /**
      * Constructs a new {@link CoinFactory} with the given member id.
@@ -35,7 +35,7 @@ public final class CoinFactory implements Manageable {
     public CoinFactory(String memberId) {
         this.memberId = memberId;
         this.upgrades = new ArrayList<>();
-        this.currentProductionValue = 1;
+        this.investedCoins = 1;
     }
 
     /**
@@ -50,28 +50,32 @@ public final class CoinFactory implements Manageable {
     /**
      * Processes the coin production of the factory based on its current {@link FactoryUpgrade FactoryUpgrades}.
      * <p>
-     * This method will apply all upgrades to the current {@link #getCurrentProductionValue() production value} and return the new {@link CoinProductionState}.
+     * This method will apply all upgrades to the current {@link #getinvestedCoins() production value} and return the new {@link CoinProductionState}.
      * 
      * @return the new {@link CoinProductionState} of the factory after applying all upgrades.
      */
     public CoinProductionState process() {
-        CoinProductionState state = new CoinProductionState(currentProductionValue);
+        CoinProductionState state = new CoinProductionState();
         state.setUpgrades(upgrades);
         upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
-        currentProductionValue = state.getWorkingProductionValue();
+        state.markFirstBatchProcessed();
+        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
+        investedCoins += state.getWorkingProductionValue();
         return state;
     }
 
     /**
-     * Returns how many coins this factory produces each production cycle based on its current {@link FactoryUpgrade FactoryUpgrades} and {@link #getCurrentProductionValue() production value}.
+     * Returns how many coins this factory produces each production cycle based on its current {@link FactoryUpgrade FactoryUpgrades} and {@link #getinvestedCoins() production value}.
      * 
      * @return how many coins this factory produces each production cycle.
      */
     public long getProductionRateValue() {
-        CoinProductionState state = new CoinProductionState(currentProductionValue);
+        CoinProductionState state = new CoinProductionState();
         state.setUpgrades(upgrades);
         upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
-        return state.finishProductionCycle();
+        state.markFirstBatchProcessed();
+        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
+        return state.getWorkingProductionValue();
     }
 
     /**
@@ -79,8 +83,8 @@ public final class CoinFactory implements Manageable {
      * 
      * @return the current production value of the factory.
      */
-    public long getCurrentProductionValue() {
-        return currentProductionValue;
+    public long getInvestedCoins() {
+        return investedCoins;
     }
 
     /**
@@ -122,7 +126,7 @@ public final class CoinFactory implements Manageable {
     }
 
     /**
-     * Purchases the {@link FactoryUpgrade} using the factory's {@link #getCurrentProductionValue() invested coins} with the given name and reward track name.
+     * Purchases the {@link FactoryUpgrade} using the factory's {@link #getinvestedCoins() invested coins} with the given name and reward track name.
      * 
      * @param rewardTrackName the name of the reward track the upgrade is in.
      * @param upgradeName the name of the upgrade to purchase.
@@ -131,33 +135,33 @@ public final class CoinFactory implements Manageable {
      */
     public void purchaseUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException, InsufficientCoinsException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
-        if (currentProductionValue < upgrade.getCost()) {
-            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + currentProductionValue + " coins.");
+        if (investedCoins < upgrade.getCost()) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + investedCoins + " coins.");
         } else {
-            currentProductionValue -= upgrade.getCost();
+            investedCoins -= upgrade.getCost();
             upgrade.markAsOwned();
             upgrades.add(upgrade);
         }
     }
 
     /**
-     * Purchases the {@link FactoryUpgrade} using the factory's {@link #getCurrentProductionValue() invested coins}.
+     * Purchases the {@link FactoryUpgrade} using the factory's {@link #getinvestedCoins() invested coins}.
      * 
      * @param upgrade the upgrade to purchase.
      * @throws InsufficientCoinsException if the factory does not have enough coins to purchase the upgrade.
      */
     public void purchaseUpgrade(FactoryUpgrade upgrade) throws InsufficientCoinsException {
-        if (currentProductionValue < upgrade.getCost()) {
-            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + currentProductionValue + " coins.");
+        if (investedCoins < upgrade.getCost()) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + investedCoins + " coins.");
         } else {
-            currentProductionValue -= upgrade.getCost();
+            investedCoins -= upgrade.getCost();
             upgrade.markAsOwned();
             upgrades.add(upgrade);
         }
     }
 
     /**
-     * Refunds the {@link FactoryUpgrade} with the given name owned by the factory into the factory's {@link #getCurrentProductionValue() invested coins}.
+     * Refunds the {@link FactoryUpgrade} with the given name owned by the factory into the factory's {@link #getinvestedCoins() invested coins}.
      * 
      * @param rewardTrackName the name of the reward track the upgrade is in.
      * @param upgradeName the name of the upgrade to refund.
@@ -167,14 +171,14 @@ public final class CoinFactory implements Manageable {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
         upgrade.markAsUnowned();
         if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
-            currentProductionValue += upgrade.getRefundValue();
+            investedCoins += upgrade.getRefundValue();
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
         }
     }
 
     /**
-     * Refunds the {@link FactoryUpgrade} owned by the factory into the factory's {@link #getCurrentProductionValue() invested coins}.
+     * Refunds the {@link FactoryUpgrade} owned by the factory into the factory's {@link #getinvestedCoins() invested coins}.
      * 
      * @param upgrade the upgrade to refund.
      * @throws IllegalArgumentException if the upgrade is not owned by the factory.
@@ -182,7 +186,7 @@ public final class CoinFactory implements Manageable {
     public void refundUpgrade(FactoryUpgrade upgrade) throws IllegalArgumentException {
         upgrade.markAsUnowned();
         if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
-            currentProductionValue += upgrade.getRefundValue();
+            investedCoins += upgrade.getRefundValue();
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
         }
@@ -239,10 +243,10 @@ public final class CoinFactory implements Manageable {
     public void withdraw(long amount, CoinBank bank) throws IllegalArgumentException, InsufficientCoinsException {
         if (amount < 1) {
             throw new IllegalArgumentException("Cannot withdrawl a negative amount of coins.");
-        } else if (currentProductionValue < amount) {
+        } else if (investedCoins < amount) {
             throw new InsufficientCoinsException("Cannot withdrawl more coins than the factory has produced.");
         } else {
-            currentProductionValue -= amount;
+            investedCoins -= amount;
             bank.deposit(amount);
         }
     }
@@ -258,7 +262,7 @@ public final class CoinFactory implements Manageable {
     public void deposit(long amount, CoinBank bank) throws IllegalArgumentException, InsufficientCoinsException {
         if (amount > 0) {
             bank.withdrawl(amount);
-            currentProductionValue += amount;
+            investedCoins += amount;
         } else {
             throw new IllegalArgumentException("Cannot deposit a negative amount of coins.");
         }

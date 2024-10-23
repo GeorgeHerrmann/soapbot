@@ -8,12 +8,12 @@ public final class AiPoweredAssemblyLineUpgrade extends FactoryUpgrade {
     public AiPoweredAssemblyLineUpgrade() {
         super("AI-Powered Assembly Line",
             "Automated Precision",
-            "Artificial intelligence takes over your assembly line, predicting and avoiding production bottlenecks before they even happen. The future is here, and it’s profitable! Multiplies base production by *1.3 each cycle.",
+            "Artificial intelligence takes over your assembly line, predicting and avoiding production bottlenecks before they even happen. The future is here, and it’s profitable! Increases starting production value by 30%",
             2, 3500);
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.3));
+        state.upgradeStartingProductionValue((long) (state.getStartingProductionValue() * 0.3));
     }
 
 }

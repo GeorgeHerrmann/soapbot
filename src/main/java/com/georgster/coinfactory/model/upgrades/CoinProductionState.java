@@ -23,18 +23,19 @@ public final class CoinProductionState {
     private long workingProductionValue; // production value of the factory while working (for additive upgrades)
     private final List<FactoryUpgrade> upgrades;
 
+    private boolean hasProcessedStartingModifiers; // whether the state has processed any upgrades that modify the starting production value (they go first)
+
     /**
-     * Constructs a new CoinProductionState with the given starting production value.
+     * Constructs a new CoinProductionState
      * <p>
      * <b>This signifies the start of a coin production cycle.</b>
-     * 
-     * @param startingProductionValue The starting production value of the factory <i>(aka how many coins the factory has at the start of a cycle)</i>
      */
-    public CoinProductionState(long startingProductionValue) {
-        this.startingProductionValue = startingProductionValue;
+    public CoinProductionState() {
+        this.startingProductionValue = 1;
         this.baseProductionValue = startingProductionValue;
         this.workingProductionValue = startingProductionValue;
         this.upgrades = new ArrayList<>();
+        this.hasProcessedStartingModifiers = false;
     }
 
     /**
@@ -73,8 +74,10 @@ public final class CoinProductionState {
      * @param value The value to add to the base production value
      */
     public void upgradeBaseProductionValue(long value) {
-        baseProductionValue += value;
-        workingProductionValue += value;
+        if (hasProcessedStartingModifiers) {
+            baseProductionValue += value;
+            workingProductionValue += value;
+        }
     }
 
     /**
@@ -85,7 +88,33 @@ public final class CoinProductionState {
      * @param value The value to add to the working production value
      */
     public void upgradeWorkingProductionValue(long value) {
-        workingProductionValue += value;
+        if (hasProcessedStartingModifiers) {
+            workingProductionValue += value;
+        }
+    }
+
+    /**
+     * Adds to the starting production value of the factory by the given value.
+     * 
+     * @param value The value to add to the starting production value
+     */
+    public void upgradeStartingProductionValue(long value) {
+        if (!hasProcessedStartingModifiers) {
+            startingProductionValue += value;
+        }
+    }
+
+    /**
+     * Decreases the starting production value of the factory by the given value.
+     * 
+     * @param value The value to decrease the starting production value by
+     */
+    public void decreaseStartingProductionValue(long value) {
+        if (!hasProcessedStartingModifiers) {
+            startingProductionValue -= value;
+        }
+
+        startingProductionValue = Math.max(0, startingProductionValue);
     }
 
     /**
@@ -94,7 +123,12 @@ public final class CoinProductionState {
      * @param value The value to decrease the working production value by
      */
     public void decreaseWorkingProductionValue(long value) {
-        workingProductionValue -= value;
+        if (!hasProcessedStartingModifiers) {
+            workingProductionValue -= value;
+        }
+
+        // set to zero if negative, or keep value if positive
+        workingProductionValue = Math.max(0, workingProductionValue);
     }
     
     /**
@@ -103,8 +137,14 @@ public final class CoinProductionState {
      * @param value The value to decrease the base production value by
      */
     public void decreaseBaseProductionValue(long value) {
-        baseProductionValue -= value;
-        workingProductionValue -= value;
+        if (!hasProcessedStartingModifiers) {
+            baseProductionValue -= value;
+            workingProductionValue -= value;
+        }
+
+        // set to zero if negative, or keep value if positive
+        baseProductionValue = Math.max(0, baseProductionValue);
+        workingProductionValue = Math.max(0, workingProductionValue);
     }
 
     /**
@@ -115,6 +155,10 @@ public final class CoinProductionState {
      * @param value The value of coins to wipe from the factory
      */
     public void wipeCoins(long value) {
+        if (!hasProcessedStartingModifiers) {
+            return;
+        }
+
         // drain base and working values first, then drain starting value if needed, ensuring "value" coins are removed. no values should go negative and stop at zero no matter how large value is
         long drain = Math.min(value, baseProductionValue);
         baseProductionValue -= drain;
@@ -169,11 +213,26 @@ public final class CoinProductionState {
     }
 
     /**
-     * Finishes the production cycle and returns the production value of the factory during the cycle <i>(how many coins the factory produced during the cycle, excluding the starting production value)</i>.
-     * 
-     * @return The production value of the factory during the cycle
+     * Marks the state as having processed the starting modifiers <i>(upgrades that modify the starting production value)</i>.
+     * <p>
+     * Upgrades which affect the starting production value should be processed first before any other upgrades.
      */
-    public long finishProductionCycle() {
-        return workingProductionValue - startingProductionValue;
+    public void markFirstBatchProcessed() {
+        hasProcessedStartingModifiers = true;
+        workingProductionValue = startingProductionValue;
+        baseProductionValue = startingProductionValue;
+    }
+
+    /**
+     * Returns whether the state has processed upgrades that modify the starting production value.
+     * <p>
+     * Upgrades which affect the starting production value will be processed first before any other upgrades,
+     * any modifiers that affect the base or working production values will not be processed until all starting modifiers have been processed and
+     * vice versa.
+     * 
+     * @return Whether the state has processed upgrades that modify the starting production value
+     */
+    public boolean hasProcessedStartingModifiers() {
+        return hasProcessedStartingModifiers;
     }
 }

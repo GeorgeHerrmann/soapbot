@@ -8,7 +8,7 @@ public final class CorporateMergerUpgrade extends FactoryUpgrade {
     public CorporateMergerUpgrade() {
         super("Corporate Merger",
             "Financial Shenanigans",
-            "Merge with a competitor to gain access to new production methods and streamline operations. Multiplies base production by *1.1 per 3 upgrades you own.",
+            "Merge with a competitor to gain access to new production methods and streamline operations. Multiplies base production by 1.1x per 3 upgrades you own.",
             2, 12000);
     }
 

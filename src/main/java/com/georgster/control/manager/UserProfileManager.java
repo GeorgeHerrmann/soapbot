@@ -80,11 +80,11 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
             while (isProcessingFactories) {
                 try {
                     nextFactoryProcessTime = DateTimed.fromLocalDateTime(DateTimed.getCurrentLocalDateTime().plus(FACTORY_PROCESSING_INTERVAL, ChronoUnit.MILLIS));
+                    Thread.sleep(FACTORY_PROCESSING_INTERVAL);
                     observees.forEach(profile -> {
                         profile.getFactory().process();
                     });
                     dbService.updateAllObjects(observees);
-                    Thread.sleep(FACTORY_PROCESSING_INTERVAL);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -15,7 +15,7 @@ public final class FullyAutomatedWorkforceUpgrade extends FactoryUpgrade {
     public void applyUpgrade(CoinProductionState state) {
         for (int i = 0; i < state.getUpgrades().size(); i++) {
             if (Math.random() < 0.01) {
-                state.wipeCoins(state.finishProductionCycle());
+                state.wipeCoins(state.getWorkingProductionValue());
                 break;
             } else {
                 state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.1));
