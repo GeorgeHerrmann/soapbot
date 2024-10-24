@@ -8,8 +8,15 @@ import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.FactoryUpgradeTrack;
 import com.georgster.coinfactory.model.upgrades.tracks.FactoryUpgradeTracks;
 import com.georgster.control.manager.Manageable;
+import com.georgster.control.manager.UserProfileManager;
 import com.georgster.economy.CoinBank;
 import com.georgster.economy.exception.InsufficientCoinsException;
+import com.georgster.settings.UserSettings;
+import com.georgster.util.DateTimed;
+import com.georgster.util.handler.GuildInteractionHandler;
+
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
 
 /**
  * A {@link Manageable} that represents a factory that produces coins.
@@ -27,6 +34,8 @@ public final class CoinFactory implements Manageable {
 
     private long investedCoins; // The current production value of the factory (aka the number of coins invested)
 
+    private int prestige; // The number of times the factory has been prestiged
+
     /**
      * Constructs a new {@link CoinFactory} with the given member id.
      * 
@@ -36,6 +45,7 @@ public final class CoinFactory implements Manageable {
         this.memberId = memberId;
         this.upgrades = new ArrayList<>();
         this.investedCoins = 1;
+        this.prestige = 0;
     }
 
     /**
@@ -55,8 +65,7 @@ public final class CoinFactory implements Manageable {
      * @return the new {@link CoinProductionState} of the factory after applying all upgrades.
      */
     public CoinProductionState process() {
-        CoinProductionState state = new CoinProductionState();
-        state.setUpgrades(upgrades);
+        CoinProductionState state = new CoinProductionState(upgrades, prestige);
         upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
         state.markFirstBatchProcessed();
         upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
@@ -70,8 +79,7 @@ public final class CoinFactory implements Manageable {
      * @return how many coins this factory produces each production cycle.
      */
     public long getProductionRateValue() {
-        CoinProductionState state = new CoinProductionState();
-        state.setUpgrades(upgrades);
+        CoinProductionState state = new CoinProductionState(upgrades, prestige);
         upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
         state.markFirstBatchProcessed();
         upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
@@ -135,10 +143,10 @@ public final class CoinFactory implements Manageable {
      */
     public void purchaseUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException, InsufficientCoinsException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
-        if (investedCoins < upgrade.getCost()) {
-            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + investedCoins + " coins.");
+        if (investedCoins < upgrade.getCost(prestige)) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost(prestige) + " when the factory has only produced " + investedCoins + " coins.");
         } else {
-            investedCoins -= upgrade.getCost();
+            investedCoins -= upgrade.getCost(prestige);
             upgrade.markAsOwned();
             upgrades.add(upgrade);
         }
@@ -151,10 +159,10 @@ public final class CoinFactory implements Manageable {
      * @throws InsufficientCoinsException if the factory does not have enough coins to purchase the upgrade.
      */
     public void purchaseUpgrade(FactoryUpgrade upgrade) throws InsufficientCoinsException {
-        if (investedCoins < upgrade.getCost()) {
-            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost() + " when the factory has only produced " + investedCoins + " coins.");
+        if (investedCoins < upgrade.getCost(prestige)) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost(prestige) + " when the factory has only produced " + investedCoins + " coins.");
         } else {
-            investedCoins -= upgrade.getCost();
+            investedCoins -= upgrade.getCost(prestige);
             upgrade.markAsOwned();
             upgrades.add(upgrade);
         }
@@ -171,7 +179,7 @@ public final class CoinFactory implements Manageable {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
         upgrade.markAsUnowned();
         if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
-            investedCoins += upgrade.getRefundValue();
+            investedCoins += upgrade.getRefundValue(prestige);
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
         }
@@ -186,7 +194,7 @@ public final class CoinFactory implements Manageable {
     public void refundUpgrade(FactoryUpgrade upgrade) throws IllegalArgumentException {
         upgrade.markAsUnowned();
         if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
-            investedCoins += upgrade.getRefundValue();
+            investedCoins += upgrade.getRefundValue(prestige);
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
         }
@@ -230,6 +238,30 @@ public final class CoinFactory implements Manageable {
             });
         });
         return currentUpgradeTracks;
+    }
+
+    /**
+     * Returns the number of upgrades owned by the factory.
+     * 
+     * @return the number of upgrades owned by the factory.
+     */
+    public int getUpgradeCount() {
+        return upgrades.size();
+    }
+
+    /**
+     * Returns the number of upgrades owned by the factory at the given level.
+     * 
+     * @param level the level to get the upgrade count for.
+     * @return the number of upgrades owned by the factory at the given level.
+     * @throws IllegalArgumentException if the level is non-positive (zero or negative integer).
+     */
+    public int getUpgradeCountByLevel(int level) throws IllegalArgumentException {
+        if (level <= 0) {
+            throw new IllegalArgumentException("Cannot get upgrade count by level for a non-positive level.");
+        } else {
+            return (int) upgrades.stream().filter(u -> u.getLevel() == level).count();
+        }
     }
 
     /**
@@ -283,5 +315,142 @@ public final class CoinFactory implements Manageable {
             upgrades.set(oldSpot, upgrades.get(newSpot));
             upgrades.set(newSpot, upgrade);
         }
+    }
+
+    /**
+     * Prestiges this {@link CoinFactory} by resetting all owned upgrades, taking the prestige cost from the {@link #getinvestedCoins() invested coins}, and incrementing the prestige level.
+     * <p>
+     * <i>The cost of prestige is the sum of the refund value of all upgrades from {@link #getCurrentUpgradeTracks()} multiplied by the prestige level plus one.
+     * Prestiging the factory requires all available {@link FactoryUpgrade FactoryUpgrades} to be owned.</i>
+     * 
+     * @throws InsufficientCoinsException if the factory does not have enough coins to prestige.
+     * @throws IllegalStateException if the factory does not own all available upgrades.
+     * @see {@link #getCurrentUpgradeTracks()} for all available upgrades that must be owned to prestige.
+     */
+    public void prestige() throws InsufficientCoinsException, IllegalStateException {
+        boolean canBePrestiged = canBePrestiged();
+        boolean ownsAllUpgrades = ownsAllUpgrades();
+        long prestigeCost = getPrestigeCost();
+
+        if (!canBePrestiged && !ownsAllUpgrades) {
+            throw new IllegalStateException("Cannot prestige the factory when the factory does not own all upgrades.");
+        }
+
+        if (!canBePrestiged && investedCoins < prestigeCost) {
+            throw new InsufficientCoinsException("Cannot prestige the factory when the factory has only produced " + investedCoins + " coins and the cost of prestige is " + prestigeCost + " coins.");
+        }
+
+        upgrades.clear();
+        investedCoins -= prestigeCost;
+        prestige++;
+    }
+
+    /**
+     * Returns whether the factory can be prestiged.
+     * 
+     * @return True if the factory can be prestiged, false otherwise.
+     */
+    public boolean canBePrestiged() {
+        if (investedCoins < getPrestigeCost()) {
+            return false;
+        }
+
+        if (!ownsAllUpgrades()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns the cost of prestige for the factory.
+     * 
+     * @return the cost of prestige for the factory.
+     */
+    public long getPrestigeCost() {
+        return (prestige + 1) * (getCurrentUpgradeTracks().stream().flatMap(track -> track.getUpgrades().stream()).mapToLong(upgrade -> upgrade.getRefundValue(prestige)).sum());
+    }
+
+    /**
+     * Returns whether the factory owns all available upgrades.
+     * 
+     * @return True if the factory owns all available upgrades, false otherwise.
+     */
+    public boolean ownsAllUpgrades() {
+        return getCurrentUpgradeTracks().stream().allMatch(track -> track.getUpgrades().stream().allMatch(up -> up.isOwned()));
+    }
+
+    /**
+     * Returns the number of times the factory has been prestiged.
+     * If the factory has not been prestiged, 0 is returned.
+     * 
+     * @return the number of times the factory has been prestiged.
+     */
+    public int getPrestige() {
+        return prestige;
+    }
+
+    /**
+     * Returns the {@link Color} associated with the given prestige level.
+     * 
+     * @param prestigeLevel the prestige level to get the color for.
+     * @return the {@link Color} associated with the given prestige level.
+     */
+    public static Color getPrestigeColor(int prestigeLevel) {
+        if (prestigeLevel == 0) {
+            return Color.BLUE;
+        } else if (prestigeLevel < 2) {
+            return Color.RUBY;
+        } else if (prestigeLevel < 6) {
+            return Color.GREEN;
+        } else if (prestigeLevel < 10) {
+            return Color.TAHITI_GOLD;
+        } else {
+            return Color.MAGENTA;
+        }
+    }
+
+    /**
+     * Returns the {@link Color} associated with this factory's current prestige level.
+     * 
+     * @return the {@link Color} associated with this factory's current prestige level.
+     */
+    public Color getPrestigeColor() {
+        return CoinFactory.getPrestigeColor(prestige);
+    }
+
+    /**
+     * Returns an {@link EmbedCreateSpec} with the details of this {@link CoinFactory}.
+     * 
+     * @param manager The {@link UserProfileManager} that manages the UserProfile for this {@link CoinFactory}.
+     * @param userSettings The {@link UserSettings} of the UserProfile for this {@link CoinFactory} <i>(used for time display)</i>.
+     * @return An {@link EmbedCreateSpec} with the details of this {@link CoinFactory}.
+     */
+    public EmbedCreateSpec getDetailEmbed(UserProfileManager manager, UserSettings userSettings) {
+        String factoryOwner = new GuildInteractionHandler(manager.getGuild()).getMemberById(memberId).getUsername();
+
+        StringBuilder description = new StringBuilder();
+        description.append("***PRESTIGE: " + prestige + "***\n\n");
+        description.append("**Invested Coins:** *" + investedCoins + " coins*\n");
+        description.append("**Production Rate:** *" + getProductionRateValue() + " coins per cycle*\n");
+        DateTimed nextProcessTime = manager.getNextFactoryProcessTime();
+        description.append("This Factory will process coins next at *" + nextProcessTime.getFormattedTime(userSettings) + "* on *" + nextProcessTime.getFormattedDate(userSettings) + "*.\n\n");
+        description.append("**Number of Upgrades:** *" + getUpgradeCount() + "*\n");
+        description.append("- **Level 1 Upgrades:** *" + getUpgradeCountByLevel(1) + "*\n");
+        description.append("- **Level 2 Upgrades:** *" + getUpgradeCountByLevel(2) + "*\n");
+        description.append("- **Level 3 Upgrades:** *" + getUpgradeCountByLevel(3) + "*\n");
+        description.append("- **Level 4 Upgrades:** *" + getUpgradeCountByLevel(4) + "*\n\n");
+
+        if (canBePrestiged()) {
+            description.append("*This factory can be prestiged for* **" + getPrestigeCost() + " coins.**");
+        } else {
+            description.append("*This factory cannot be prestiged.*");
+        }
+
+        return EmbedCreateSpec.builder()
+            .title(factoryOwner + "'s Coin Factory")
+            .description(description.toString())
+            .color(getPrestigeColor())
+            .build();
     }
 }

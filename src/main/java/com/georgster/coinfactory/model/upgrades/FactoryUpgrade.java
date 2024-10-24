@@ -69,11 +69,23 @@ public abstract class FactoryUpgrade {
     }
 
     /**
-     * Returns the cost of the upgrade.
+     * Returns the cost of the upgrade given a prestige level.
+     * <p>
+     * <i>The cost is increased for each prestige level.</i>
      * 
+     * @param prestigeLevel The prestige level of the factory
      * @return The cost of the upgrade
      */
-    public long getCost() {
+    public long getCost(int prestigeLevel) {
+        return (long) (cost * ((prestigeLevel * 0.25) + 1));
+    }
+
+    /**
+     * Returns the base cost of the upgrade.
+     * 
+     * @return The base cost of the upgrade
+     */
+    public long getBaseCost() {
         return cost;
     }
 
@@ -101,13 +113,23 @@ public abstract class FactoryUpgrade {
     }
 
     /**
-     * Returns the refund value of the upgrade.
+     * Returns the refund value of the upgrade given the prestige level.
      * <p>
      * The floor is returned if the refund value is not a whole number.
      * 
+     * @param prestigeLevel The prestige level of the factory
      * @return The refund value of the upgrade.
      */
-    public long getRefundValue() {
+    public long getRefundValue(int prestigeLevel) {
+        return getCost(prestigeLevel) / 2;
+    }
+
+    /**
+     * Returns the base refund value of the upgrade.
+     * 
+     * @return The base refund value of the upgrade
+     */
+    public long getBaseRefundValue() {
         return cost / 2;
     }
 

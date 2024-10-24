@@ -22,6 +22,7 @@ public final class CoinProductionState {
     private long baseProductionValue; // base production value of the factory (for multiplicative upgrades)
     private long workingProductionValue; // production value of the factory while working (for additive upgrades)
     private final List<FactoryUpgrade> upgrades;
+    private final int prestigeLevel; // the prestige level of the factory
 
     private boolean hasProcessedStartingModifiers; // whether the state has processed any upgrades that modify the starting production value (they go first)
 
@@ -30,11 +31,12 @@ public final class CoinProductionState {
      * <p>
      * <b>This signifies the start of a coin production cycle.</b>
      */
-    public CoinProductionState() {
+    public CoinProductionState(List<FactoryUpgrade> upgrades, int prestigeLevel) {
         this.startingProductionValue = 1;
         this.baseProductionValue = startingProductionValue;
         this.workingProductionValue = startingProductionValue;
-        this.upgrades = new ArrayList<>();
+        this.upgrades = new ArrayList<>(upgrades);
+        this.prestigeLevel = prestigeLevel;
         this.hasProcessedStartingModifiers = false;
     }
 
@@ -74,6 +76,8 @@ public final class CoinProductionState {
      * @param value The value to add to the base production value
      */
     public void upgradeBaseProductionValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
         if (hasProcessedStartingModifiers) {
             baseProductionValue += value;
             workingProductionValue += value;
@@ -88,6 +92,8 @@ public final class CoinProductionState {
      * @param value The value to add to the working production value
      */
     public void upgradeWorkingProductionValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
         if (hasProcessedStartingModifiers) {
             workingProductionValue += value;
         }
@@ -99,6 +105,8 @@ public final class CoinProductionState {
      * @param value The value to add to the starting production value
      */
     public void upgradeStartingProductionValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
         if (!hasProcessedStartingModifiers) {
             startingProductionValue += value;
         }
@@ -110,6 +118,8 @@ public final class CoinProductionState {
      * @param value The value to decrease the starting production value by
      */
     public void decreaseStartingProductionValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
         if (!hasProcessedStartingModifiers) {
             startingProductionValue -= value;
         }
@@ -123,6 +133,8 @@ public final class CoinProductionState {
      * @param value The value to decrease the working production value by
      */
     public void decreaseWorkingProductionValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
         if (!hasProcessedStartingModifiers) {
             workingProductionValue -= value;
         }
@@ -137,6 +149,8 @@ public final class CoinProductionState {
      * @param value The value to decrease the base production value by
      */
     public void decreaseBaseProductionValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
         if (!hasProcessedStartingModifiers) {
             baseProductionValue -= value;
             workingProductionValue -= value;
@@ -155,24 +169,16 @@ public final class CoinProductionState {
      * @param value The value of coins to wipe from the factory
      */
     public void wipeCoins(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
         if (!hasProcessedStartingModifiers) {
             return;
         }
 
-        // drain base and working values first, then drain starting value if needed, ensuring "value" coins are removed. no values should go negative and stop at zero no matter how large value is
-        long drain = Math.min(value, baseProductionValue);
-        baseProductionValue -= drain;
-        workingProductionValue -= drain;
+        // wipe from working and base production values, ensuring they do not go below zero
+        baseProductionValue = Math.max(0, baseProductionValue - value);
+        workingProductionValue = Math.max(0, workingProductionValue - value);
 
-        if (drain < value) {
-            drain = Math.min(value - drain, workingProductionValue);
-            workingProductionValue -= drain;
-        }
-
-        if (drain < value) {
-            drain = Math.min(value - drain, startingProductionValue);
-            startingProductionValue -= drain;
-        }
 
     }
 
@@ -210,6 +216,15 @@ public final class CoinProductionState {
      */
     public long getTotalCoins() {
         return startingProductionValue + workingProductionValue;
+    }
+
+    /**
+     * Returns the prestige level of the factory.
+     * 
+     * @return The prestige level of the factory
+     */
+    public int getPrestigeLevel() {
+        return prestigeLevel;
     }
 
     /**

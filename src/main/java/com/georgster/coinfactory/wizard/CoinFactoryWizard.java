@@ -48,10 +48,11 @@ public final class CoinFactoryWizard extends InputWizard {
 
     /**
      * The home page for the {@link CoinFactoryWizard}.
+     * <p>
+     * This window displays the options for the user to interact with their {@link CoinFactory} and displays the current state of the factory
+     * as defined by the embed returned by {@link CoinFactory#getDetailEmbed(UserProfileManager)}.
      */
     public void factoryHome() {
-        String prompt = "Welcome to your Coin Factory! You have " + factory.getInvestedCoins() + " coins in this factory.\n\n"
-                + "What would you like to do?";
 
         withResponse(response -> {
             if (response.equals("view upgrade tracks")) {
@@ -60,8 +61,18 @@ public final class CoinFactoryWizard extends InputWizard {
                 nextWindow("viewCoinInvestment");
             } else if (response.equals("manage upgrade order")) {
                 nextWindow("switchUpgrades");
+            } else if (response.equals("prestige")) {
+                if (!factory.canBePrestiged()) {
+                    try {
+                        factory.prestige();
+                    } catch (Exception e) {
+                        sendMessage("*" + e.getMessage() + "*", "Coin Factory Cannot Be Prestiged");
+                    }
+                } else {
+                    nextWindow("prestigeFactory");
+                }
             }
-        }, false, prompt, "View Upgrade Tracks", "Manage Upgrade Order", "View Investment");
+        }, false, factory.getDetailEmbed(manager, userSettings), "View Upgrade Tracks", "Manage Upgrade Order", "View Investment", "Prestige");
     }
 
     /**
@@ -146,12 +157,12 @@ public final class CoinFactoryWizard extends InputWizard {
             prompt.append("- *This upgrade track is at its maximum level.*\n\n");
         } else {
             options.add("Purchase " + nextUpgrade.getName());
-            prompt.append("Next Upgrade: **").append(nextUpgrade.getName()).append("** *(").append(nextUpgrade.getCost()).append(" coins)*\n");
+            prompt.append("Next Upgrade: **").append(nextUpgrade.getName()).append("** *(").append(nextUpgrade.getCost(factory.getPrestige())).append(" coins)*\n");
             prompt.append("- *").append(nextUpgrade.getDescription()).append("*\n\n");
         } 
         if (track.ownsAny()) {
             options.add("Refund " + currentUpgrade.getName());
-            prompt.append("*You may refund **").append(currentUpgrade.getName()).append("** for ").append(currentUpgrade.getRefundValue()).append(" coins.*\n");
+            prompt.append("*You may refund **").append(currentUpgrade.getName()).append("** for ").append(currentUpgrade.getRefundValue(factory.getPrestige())).append(" coins.*\n");
         }
 
         withResponse(response -> {
@@ -174,21 +185,21 @@ public final class CoinFactoryWizard extends InputWizard {
         StringBuilder prompt = new StringBuilder();
         prompt.append("**" + upgrade.getName() + "** *(Level " + upgrade.getLevel() + " Upgrade)*\n");
         prompt.append("- *" + upgrade.getDescription() + "*\n\n");
-        prompt.append("Your factory currently has **" + factory.getInvestedCoins() + "** coins. Would you like to buy " + upgrade.getName() + " for **" + upgrade.getCost() + "** coins?\n");
-        prompt.append("*You may refund this upgrade for " + upgrade.getRefundValue() + " coins.*");
+        prompt.append("Your factory currently has **" + factory.getInvestedCoins() + "** coins. Would you like to buy " + upgrade.getName() + " for **" + upgrade.getCost(factory.getPrestige()) + "** coins?\n");
+        prompt.append("*You may refund this upgrade for " + upgrade.getRefundValue(factory.getPrestige()) + " coins.*");
 
         withResponse(response -> {
             if (response.equals("purchase upgrade")) {
                 try {
                     factory.purchaseUpgrade(upgrade);
                     manager.update(profile);
-                    sendMessage("You have successfully purchased **" + upgrade.getName() + "** for **" + upgrade.getCost() + "** coins." +
+                    sendMessage("You have successfully purchased **" + upgrade.getName() + "** for **" + upgrade.getCost(factory.getPrestige()) + "** coins." +
                                 "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *coins invested.*" +
                                 "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + upgrade.getLevel() + "**", "Upgrade Purchased");
                                 goBack();
                 } catch (InsufficientCoinsException e) {
                     sendMessage("You currently have **" + factory.getInvestedCoins() + "** coins invested in your CoinFactory.\n" +
-                                "You need **" + upgrade.getCost() + "** coins to purchase **" + upgrade.getName() + "**", "Insufficient Coins");
+                                "You need **" + upgrade.getCost(factory.getPrestige()) + "** coins to purchase **" + upgrade.getName() + "**", "Insufficient Coins");
                 }
             } else if (response.equals("coin investment")) {
                 nextWindow("viewCoinInvestment");   
@@ -207,13 +218,13 @@ public final class CoinFactoryWizard extends InputWizard {
         StringBuilder prompt = new StringBuilder();
         prompt.append("**" + upgrade.getName() + "** *(Level " + upgrade.getLevel() + " Upgrade)*\n");
         prompt.append("- *" + upgrade.getDescription() + "*\n\n");
-        prompt.append("Would you like to refund " + upgrade.getName() + " for **" + upgrade.getRefundValue() + "** coins?\n");
+        prompt.append("Would you like to refund " + upgrade.getName() + " for **" + upgrade.getRefundValue(factory.getPrestige()) + "** coins?\n");
 
         withResponse(response -> {
             if (response.equals("refund upgrade")) {
                 factory.refundUpgrade(upgrade);
                 manager.update(profile);
-                sendMessage("You have successfully refunded **" + upgrade.getName() + "** for **" + upgrade.getRefundValue() + "** coins." +
+                sendMessage("You have successfully refunded **" + upgrade.getName() + "** for **" + upgrade.getRefundValue(factory.getPrestige()) + "** coins." +
                             "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *available coins invested.*" +
                             "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + (upgrade.getLevel() - 1) + "**", "Upgrade Refunded");
                 goBack();
@@ -368,5 +379,28 @@ public final class CoinFactoryWizard extends InputWizard {
                 factory.swap(upgrade, currentPosition - 1);
             }
         }, true, prompt.toString(), options);
+    }
+
+    /**
+     * Allows the user to prestige the {@link CoinFactory}.
+     */
+    public void prestigeFactory() {
+        StringBuilder prompt = new StringBuilder("**Prestige Coin Factory**\n\n");
+        prompt.append("Prestiging your coin factory will cost **" + factory.getPrestigeCost() + "** coins and reset all owned upgrades.\n");
+        prompt.append("You will receive a prestige point and a bonus to your production rate, but upgrades will cost more\n\n");
+        prompt.append("*The color of your Coin Factory may change to signify the prestige*\n\n");
+        prompt.append("***Are you sure you want to prestige your Coin Factory?***");
+        prompt.append("*This cannot be undone.*");
+
+        withResponse(response -> {
+            if (response.equals("prestige factory")) {
+                //factory.prestige();
+                //manager.update(profile);
+                sendMessage("You have successfully prestiged your Coin Factory to **Level " + factory.getPrestige() + "**\n" +
+                            "You have received a prestige point and a bonus to your production rate.\n\n" +
+                            "*All upgrades have been reset and the prestige cost has been withdrawn.*", "Coin Factory Prestiged");
+                goBack();
+            }
+        }, true, prompt.toString(), "Prestige Factory");
     }
 }
