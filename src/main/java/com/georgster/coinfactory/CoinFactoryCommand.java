@@ -2,16 +2,20 @@ package com.georgster.coinfactory;
 
 import java.util.List;
 
+import com.georgster.Command;
 import com.georgster.ParseableCommand;
 import com.georgster.coinfactory.wizard.CoinFactoryWizard;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.manager.UserSettingsManager;
 import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
+import com.georgster.logs.LogDestination;
+import com.georgster.logs.MultiLogger;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.settings.UserSettings;
 import com.georgster.util.DiscordEvent;
 import com.georgster.util.commands.CommandParser;
+import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
 
@@ -46,12 +50,45 @@ public final class CoinFactoryCommand implements ParseableCommand {
         DiscordEvent discordEvent = event.getDiscordEvent();
         UserSettings settings = settingsManager.get(discordEvent.getAuthorAsMember().getId().asString());
         CoinFactory factory = manager.get(discordEvent.getAuthorAsMember().getId().asString()).getFactory();
-
-        sb.on(() -> new CoinFactoryWizard(event).begin()); // !factory
+        MultiLogger logger = event.getLogger();
 
         sb.on(p -> {
             handler.sendMessage(factory.getDetailEmbed(manager, settings));
-        }, "stats", "info", "i"); // !factory stats
+            logger.append("- Displaying a user's CoinFactory stats", LogDestination.NONAPI, LogDestination.API);
+        }, "stats", "mine", "s"); // !factory stats
+
+        sb.on(p -> {
+            StringBuilder output = new StringBuilder("**OVERVIEW**\n");
+            output.append("- The CoinFactory is an idle upgrade farm game that allows you to passively gain coins.\n");
+            output.append("- You can view upgrade tracks which have specific factory upgrades, each with an associated level, cost and effect.\n" +
+                            "- Based on your current factory upgrades, your CoinFactory will produce a certain amount of coins each process cycle.\n" +
+                            "- You can invest coins into your factory from your CoinBank in order to be able to purchase more upgrades, and withdraw produced coins from your factory into your CoinBank.\n");
+            output.append("\n**PROCESS CYCLE AND UPGRADES**\n");
+            output.append("- Each process cycle, your coin factory will produce coins based on its upgrades. Upgrades can influence various factors which affect how many coins will be produced.\n" +
+                            "- The Coin Factory processes coins with the following algorithm:\n" +
+                            "- All upgrades which affect **STARTING PRODUCTION** are processed first, increasing the starting number of coins the factory will work with.\n" +
+                            "- Then, the factory will examine **BASE** and **WORKING** values. Any upgrade which influences **WORKING** production will ALSO influence **BASE** production, while **BASE** production increases DO NOT influence **WORKING** production.\n" +
+                            "\t- ***For example:*** An upgrade which increases **STARTING** production by +15, **WORKING** production by +20, and **BASE** production by 1.15x will be processed as follows:\n" +
+                            "\t- **STARTING** *production will be increased by +15, then any other upgrades that influence* **STARTING** *production will be processed.*\n" +
+                            "\t- *Then, the* **WORKING** *and* **BASE** *productions will be increased by +20 and then the* **BASE** *production will further be increased by 15%.*\n");
+            
+            output.append("\n**PRESTIGES**\n");
+            output.append("- You can prestige your factory for greater coin production, but the cost of your upgrades will also increase.\n" +
+                            "- In order to prestige your factory, you must own ALL available upgrades and have the equivilant of the refund value of ALL upgrades invested in your Factory.\n" +
+                            "- Upon prestiging, your owned upgrades will reset, the cost of the prestige will be deducted from your invested coins and your prestige level will increase.\n" +
+                            "- The color of your Coin Factory *(the background color of the UI)* will change depending on your prestige level.\n");
+            
+            output.append("\n*Use* **!factory** *to interact with your Coin Factory, or use* **!help factory** *to view the available subcommands.*");
+
+            handler.sendMessage(output.toString(), "The Coin Factory");
+            logger.append("- Diplaying Coin Factory information", LogDestination.NONAPI, LogDestination.API);
+        }, "info", "i", "help");
+
+        sb.on(() -> {
+            CoinFactoryWizard wizard = new CoinFactoryWizard(event);
+            wizard.begin();
+            logger.append("- Opening the Coin Factory Wizard", LogDestination.NONAPI, LogDestination.API);
+        }); // !factory
     }
 
     /**
@@ -59,7 +96,9 @@ public final class CoinFactoryCommand implements ParseableCommand {
      */
     public String help() {
         return "Aliases: " + getAliases().toString() +
-        "\n- !factory - Opens the Coin Factory wizard.";
+        "\n- !factory - Interact with your CoinFactory" +
+        "\n- !factory stats - Displays the current stats of your Coin Factory." +
+        "\n- !factory info - Displays information about how the Coin Factory works";
     }
 
     /**
@@ -73,7 +112,7 @@ public final class CoinFactoryCommand implements ParseableCommand {
      * {@inheritDoc}
      */
     public CommandParser getCommandParser() {
-        return new CommandParser("VO");
+        return new ParseBuilder("VO").withIdentifiers("stats", "mine", "s", "info", "i", "help").build();
     }
 
     /**

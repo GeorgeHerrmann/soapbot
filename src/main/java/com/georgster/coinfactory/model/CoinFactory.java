@@ -398,7 +398,7 @@ public final class CoinFactory implements Manageable {
      */
     public static Color getPrestigeColor(int prestigeLevel) {
         if (prestigeLevel == 0) {
-            return Color.BLUE;
+            return Color.PINK;
         } else if (prestigeLevel < 2) {
             return Color.RUBY;
         } else if (prestigeLevel < 6) {

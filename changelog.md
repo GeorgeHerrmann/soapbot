@@ -515,3 +515,6 @@
 2.800-BETA
     Misc
         - Removed The Final Shape Command
+    
+    Coin Factory
+        - Added the brand new Coin Factory feature, allowing you to passively increase your coin gains!
