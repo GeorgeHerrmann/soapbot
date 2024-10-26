@@ -19,6 +19,9 @@ import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.SubcommandSystem;
 import com.georgster.util.handler.GuildInteractionHandler;
 
+import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import com.georgster.coinfactory.model.CoinFactory;
@@ -131,6 +134,20 @@ public final class CoinFactoryCommand implements ParseableCommand {
         return ApplicationCommandRequest.builder()
                 .name(getAliases().get(0))
                 .description("Interact with your CoinFactory")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("option")
+                        .description("View Factory stats or info")
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                            .name("stats")
+                            .value("stats")
+                            .build())
+                        .addChoice(ApplicationCommandOptionChoiceData.builder()
+                            .name("info")
+                            .value("info")
+                            .build())
+                        .required(false)
+                        .build())
                 .build();
     }
 

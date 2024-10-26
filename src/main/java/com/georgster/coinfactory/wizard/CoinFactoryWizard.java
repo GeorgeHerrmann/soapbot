@@ -195,7 +195,7 @@ public final class CoinFactoryWizard extends InputWizard {
                     manager.update(profile);
                     sendMessage("You have successfully purchased **" + upgrade.getName() + "** for **" + upgrade.getCost(factory.getPrestige()) + "** coins." +
                                 "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *coins invested.*" +
-                                "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + upgrade.getLevel() + "**", "Upgrade Purchased");
+                                "\n\n*Upgrade track* ***" + track.getName() + "*** *is now at level* **" + upgrade.getLevel() + "**", "Upgrade Purchased");
                                 goBack();
                 } catch (InsufficientCoinsException e) {
                     sendMessage("You currently have **" + factory.getInvestedCoins() + "** coins invested in your CoinFactory.\n" +
@@ -226,7 +226,7 @@ public final class CoinFactoryWizard extends InputWizard {
                 manager.update(profile);
                 sendMessage("You have successfully refunded **" + upgrade.getName() + "** for **" + upgrade.getRefundValue(factory.getPrestige()) + "** coins." +
                             "\n*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *available coins invested.*" +
-                            "\n\n*Upgrade track * ***" + track.getName() + "*** *is now at level* **" + (upgrade.getLevel() - 1) + "**", "Upgrade Refunded");
+                            "\n\n*Upgrade track* ***" + track.getName() + "*** *is now at level* **" + (upgrade.getLevel() - 1) + "**", "Upgrade Refunded");
                 goBack();
             }
         }, true, prompt.toString(), "Refund Upgrade");
