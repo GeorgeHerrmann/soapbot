@@ -394,8 +394,8 @@ public final class CoinFactoryWizard extends InputWizard {
 
         withResponse(response -> {
             if (response.equals("prestige factory")) {
-                //factory.prestige();
-                //manager.update(profile);
+                factory.prestige();
+                manager.update(profile);
                 sendMessage("You have successfully prestiged your Coin Factory to **Level " + factory.getPrestige() + "**\n" +
                             "You have received a prestige point and a bonus to your production rate.\n\n" +
                             "*All upgrades have been reset and the prestige cost has been withdrawn.*", "Coin Factory Prestiged");
