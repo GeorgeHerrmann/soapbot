@@ -14,6 +14,17 @@ public final class GlaciarMovementHarvesterUpgrade extends FactoryUpgrade {
 
     public void applyUpgrade(CoinProductionState state) {
         state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * (0.1 + Math.random() * 0.4)));
+
+        // Register x1.1 as the lowest possible value for the working production value and x2.5 as the highest possible value
+        state.registerLowestPossibleWorkingValue((long) (state.getLowestPossibleWorkingValue() * 0.1));
+        state.registerHighestPossibleWorkingValue((long) (state.getHighestPossibleWorkingValue() * 1.5));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return true;
     }
 
 }

@@ -15,5 +15,12 @@ public final class MoonMiningColonyUpgrade extends FactoryUpgrade {
     public void applyUpgrade(CoinProductionState state) {
         state.upgradeWorkingProductionValue(40);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
     
 }

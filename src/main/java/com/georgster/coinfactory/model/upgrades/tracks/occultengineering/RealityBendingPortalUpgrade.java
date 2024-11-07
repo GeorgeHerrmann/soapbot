@@ -18,12 +18,21 @@ public final class RealityBendingPortalUpgrade extends FactoryUpgrade {
     public void applyUpgrade(CoinProductionState state) {
         LocalDateTime now = DateTimed.getCurrentLocalDateTime();
 
-        // give a 5% chance at 1am, decreasing by 0.2% every hour
-        double chance = 0.05 - (now.getHour() * 0.002);
+        // give a 10% chance at 1am, decreasing by 0.4% every hour
+        double chance = 0.1 - (now.getHour() * 0.004);
 
         if (Math.random() < chance) {
             state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 2));
         }
+
+        state.registerHighestPossibleWorkingValue(state.getHighestPossibleWorkingValue() * 2);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return true;
     }
 
 }

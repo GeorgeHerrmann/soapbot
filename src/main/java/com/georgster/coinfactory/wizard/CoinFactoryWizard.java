@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.georgster.coinfactory.model.CoinFactory;
+import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.FactoryUpgradeTrack;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.economy.exception.InsufficientCoinsException;
 import com.georgster.profile.UserProfile;
+import com.georgster.settings.TimezoneOption;
 import com.georgster.settings.UserSettings;
 import com.georgster.util.DateTimed;
 import com.georgster.wizard.InputWizard;
@@ -60,7 +62,7 @@ public final class CoinFactoryWizard extends InputWizard {
             } else if (response.equals("view investment")) {
                 nextWindow("viewCoinInvestment");
             } else if (response.equals("manage upgrade order")) {
-                nextWindow("switchUpgrades");
+                nextWindow("switchUpgrades", 0);
             } else if (response.equals("prestige")) {
                 if (!factory.canBePrestiged()) {
                     try {
@@ -185,7 +187,7 @@ public final class CoinFactoryWizard extends InputWizard {
         StringBuilder prompt = new StringBuilder();
         prompt.append("**" + upgrade.getName() + "** *(Level " + upgrade.getLevel() + " Upgrade)*\n");
         prompt.append("- *" + upgrade.getDescription() + "*\n\n");
-        prompt.append("Your factory currently has **" + factory.getInvestedCoins() + "** coins. Would you like to buy " + upgrade.getName() + " for **" + upgrade.getCost(factory.getPrestige()) + "** coins?\n");
+        prompt.append("Your factory currently has **" + factory.getInvestedCoins() + "** coins. Would you like to buy **" + upgrade.getName() + "** for **" + upgrade.getCost(factory.getPrestige()) + "** coins?\n");
         prompt.append("*You may refund this upgrade for " + upgrade.getRefundValue(factory.getPrestige()) + " coins.*");
 
         withResponse(response -> {
@@ -218,7 +220,7 @@ public final class CoinFactoryWizard extends InputWizard {
         StringBuilder prompt = new StringBuilder();
         prompt.append("**" + upgrade.getName() + "** *(Level " + upgrade.getLevel() + " Upgrade)*\n");
         prompt.append("- *" + upgrade.getDescription() + "*\n\n");
-        prompt.append("Would you like to refund " + upgrade.getName() + " for **" + upgrade.getRefundValue(factory.getPrestige()) + "** coins?\n");
+        prompt.append("Would you like to refund **" + upgrade.getName() + "** for **" + upgrade.getRefundValue(factory.getPrestige()) + "** coins?\n");
 
         withResponse(response -> {
             if (response.equals("refund upgrade")) {
@@ -236,12 +238,14 @@ public final class CoinFactoryWizard extends InputWizard {
      * Displays the current coin investment in the {@link CoinFactory}.
      */
     public void viewCoinInvestment() {
+        CoinProductionState simulatedState = factory.simulateProductionCycle();
+
         StringBuilder prompt = new StringBuilder("**Coin Investment**\n\n");
         prompt.append("**Factory:** ***" + factory.getInvestedCoins() + "*** coins.\n");
         prompt.append("**Coin Bank:** ***" + profile.getBank().getBalance() + "*** coins.\n");
-        prompt.append("**Production Rate:** ***" + factory.getProductionRateValue() + "*** coins per process cycle.\n\n");
+        prompt.append("**Production Rate:** ***" + simulatedState.getLowestPossibleWorkingValue() + " - " + simulatedState.getHighestPossibleWorkingValue() + "*** coins per process cycle.\n\n");
         DateTimed nextProcessTime = manager.getNextFactoryProcessTime();
-        prompt.append("This Factory will process coins next at *" + nextProcessTime.getFormattedTime(userSettings) + "* on *" + nextProcessTime.getFormattedDate(userSettings) + "*.\n\n");
+        prompt.append("This Factory will process coins next at *" + nextProcessTime.getFormattedTime(userSettings) + " " + TimezoneOption.getSettingDisplay(userSettings.getTimezoneSetting()) + "* on *" + nextProcessTime.getFormattedDate(userSettings) + "*.\n\n");
         prompt.append("What would you like to do?");
 
         withResponse(response -> {
@@ -308,26 +312,48 @@ public final class CoinFactoryWizard extends InputWizard {
     /**
      * Allows the user to manage the process order of the {@link FactoryUpgrade FactoryUpgrades} in the {@link CoinFactory}.
      */
-    public void switchUpgrades() {
+    public void switchUpgrades(Integer startingPos) {
+        CoinProductionState simulatedState = factory.simulateProductionCycle();
+
         StringBuilder prompt = new StringBuilder("**Upgrade Process Reordering**\n\n");
-        prompt.append("Your upgrade process order will currently produce **" + factory.getProductionRateValue() + "** coins per production cycle.\n");
+        prompt.append("Your upgrade process order will currently produce **" + simulatedState.getLowestPossibleWorkingValue() + " - " + simulatedState.getHighestPossibleWorkingValue() + "** coins per production cycle.\n");
         prompt.append("Current upgrade order is:\n");
 
         List<FactoryUpgrade> upgrades = factory.getUpgrades();
-        String[] options = new String[upgrades.size()];
+        int endPos = Math.min(startingPos + 5, upgrades.size());
+        List<FactoryUpgrade> displayedUpgrades = upgrades.subList(startingPos, endPos);
+        List<String> options = new ArrayList<>(displayedUpgrades.stream().map(FactoryUpgrade::getName).toList());
+
+        // add "next" option if there are more upgrades to display
+        if (endPos < upgrades.size()) {
+            options.add("Next");
+        }
+        // add "back" option if the starting position is greater than 1
+        if (startingPos > 4) {
+            options.add("Back");
+        }
+        // always adds "home" option
+        options.add("!Home");
 
         for (int i = 0; i < upgrades.size(); i++) {
             FactoryUpgrade upgrade = upgrades.get(i);
             prompt.append("- ").append(i + 1).append(". ").append(upgrade.getName()).append(" *(Level ").append(upgrade.getLevel()).append(")*\n");
-            options[i] = upgrade.getName();
         }
 
-        prompt.append("Which upgrade would you like to move?\n\n");
-        prompt.append("*The order in which your upgrades are processed can affect how many coins are produced during a coin production cycle*");
+        prompt.append("Select an upgrade to reorder it, select 'next' or 'back' to iterate through your upgrades, or select 'home' to return to the homepage.\n\n");
+        prompt.append("*The order in which your upgrades are processed may affect how many coins are produced during a coin production cycle*");
 
         withResponse(response -> {
-            nextWindow("switchUpgrade", response);
-        }, true, prompt.toString(), options);
+            if (response.equals("next")) {
+                nextWindow("switchUpgrades", endPos);
+            } else if (response.equals("back")) {
+                nextWindow("switchUpgrades", startingPos - 5); // Should never go negative because back option only available if startingPos > 4
+            } else if (response.equals("home")) {
+                nextWindow("factoryHome"); // Returns to the homepage
+            } else {
+                nextWindow("switchUpgrade", response);
+            }
+        }, false, prompt.toString(), options.toArray(new String[options.size()]));
     }
 
     /**
@@ -336,13 +362,14 @@ public final class CoinFactoryWizard extends InputWizard {
      * @param upgradeName the name of the upgrade to switch.
      */
     public void switchUpgrade(String upgradeName) {
+        CoinProductionState simulatedState = factory.simulateProductionCycle();
         List<FactoryUpgrade> upgrades = factory.getUpgrades();
         FactoryUpgrade upgrade = factory.getUpgrade(upgradeName);
         int currentPosition = upgrades.indexOf(upgrade);
 
         StringBuilder prompt = new StringBuilder("**Switching** ***" + upgrade.getName() + "***\n");
         prompt.append("- *" + upgrade.getDescription() + "*\n\n");
-        prompt.append("Your upgrade process order will currently produce **" + factory.getProductionRateValue() + "** coins per production cycle.\n");
+        prompt.append("Your upgrade process order will currently produce **" + simulatedState.getLowestPossibleWorkingValue() + " - " + simulatedState.getHighestPossibleWorkingValue() + "** coins per production cycle.\n");
         prompt.append("**" + upgrade.getName()).append("'s** Current Position: *").append(currentPosition + 1).append("*\n");
 
         for (int i = 0; i < upgrades.size(); i++) {
@@ -389,7 +416,7 @@ public final class CoinFactoryWizard extends InputWizard {
         prompt.append("Prestiging your coin factory will cost **" + factory.getPrestigeCost() + "** coins and reset all owned upgrades.\n");
         prompt.append("You will receive a prestige point and a bonus to your production rate, but upgrades will cost more\n\n");
         prompt.append("*The color of your Coin Factory may change to signify the prestige*\n\n");
-        prompt.append("***Are you sure you want to prestige your Coin Factory?***");
+        prompt.append("***Are you sure you want to prestige your Coin Factory?***\n");
         prompt.append("*This cannot be undone.*");
 
         withResponse(response -> {

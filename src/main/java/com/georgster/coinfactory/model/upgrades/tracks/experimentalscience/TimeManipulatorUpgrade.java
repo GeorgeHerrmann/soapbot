@@ -13,12 +13,22 @@ public final class TimeManipulatorUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
+        state.registerLowestPossibleWorkingValue(75);
+        state.registerHighestPossibleWorkingValue((long) (state.getHighestPossibleWorkingValue() * 0.7));
+
         state.upgradeStartingProductionValue(100);
         if (Math.random() < 0.5) {
             state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.7));
         } else {
             state.upgradeWorkingProductionValue(75);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return true;
     }
 
 }

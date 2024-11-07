@@ -27,5 +27,12 @@ public final class CloningFacilityUpgrade extends FactoryUpgrade {
         }
         state.upgradeWorkingProductionValue(workingProductionValue);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
     
 }

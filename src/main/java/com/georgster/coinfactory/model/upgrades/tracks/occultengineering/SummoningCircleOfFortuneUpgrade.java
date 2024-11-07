@@ -13,12 +13,28 @@ public final class SummoningCircleOfFortuneUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
+        long possibleWorkingUpgrade = state.getWorkingProductionValue() + 75000;
+        long possibleBaseUpgrade = state.getBaseProductionValue() * 2;
+
+        if (possibleWorkingUpgrade > possibleBaseUpgrade) { // If working upgrade is higher than base upgrade, set highest possible working increase to 75000, otherwise set it to base upgrade increase
+            state.registerHighestPossibleWorkingValue(75000);
+        } else {
+            state.registerHighestPossibleWorkingValue(state.getHighestPossibleWorkingValue());
+        }
+
         int random = (int) (Math.random() * 3);
         if (random == 0) {
             state.upgradeWorkingProductionValue(75000);
         } else if (random == 1) {
             state.upgradeBaseProductionValue(state.getBaseProductionValue());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return true;
     }
     
 }

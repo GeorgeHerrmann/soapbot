@@ -13,9 +13,16 @@ public final class TaxHavenUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        for (int i = 0; i < state.getUpgrades().size(); i++) {
+        for (int i = 0; i < state.getUpgradeCount(); i++) {
             state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.03));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
     }
     
 }

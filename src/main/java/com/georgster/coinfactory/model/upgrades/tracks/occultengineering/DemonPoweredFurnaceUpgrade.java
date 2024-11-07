@@ -16,8 +16,15 @@ public final class DemonPoweredFurnaceUpgrade extends FactoryUpgrade {
         state.upgradeWorkingProductionValue(200);
         state.upgradeStartingProductionValue(30);
         if (state.getUpgrades().stream().noneMatch(upgrade -> upgrade instanceof NecromancersWorkshopUpgrade)) {
-            state.wipeCoins((long) (state.getTotalCoins() * 0.2));
+            state.wipeCoinsPercentage(0.2);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
     }
     
 }

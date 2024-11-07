@@ -22,5 +22,12 @@ public final class VolcanicHarvesterUpgrade extends FactoryUpgrade {
             state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.6));
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
     
 }

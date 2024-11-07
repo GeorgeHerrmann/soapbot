@@ -16,5 +16,12 @@ public final class AsteroidMiningUpgrade extends FactoryUpgrade {
         state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.25));
         state.upgradeStartingProductionValue(50);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
     
 }

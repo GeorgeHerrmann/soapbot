@@ -5,7 +5,7 @@ import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
 
 public final class TheSingularityUpgrade extends FactoryUpgrade {
     
-    public static final boolean IDLING = true;
+    private static boolean IDLING = true;
 
     public TheSingularityUpgrade() {
         super("The Singularity",
@@ -19,6 +19,17 @@ public final class TheSingularityUpgrade extends FactoryUpgrade {
             state.upgradeBaseProductionValue((long) (state.getBaseProductionValue()));
             state.upgradeWorkingProductionValue(10000);
         }
+
+        if (state.isTrueProcessCycle()) {
+            IDLING = !IDLING;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
     }
 
 }

@@ -518,3 +518,18 @@
     
     Coin Factory
         - Added the brand new Coin Factory feature, allowing you to passively increase your coin gains!
+
+2.801-BETA
+    Coin Factory
+        - Factory Production Rate now shows a range of production values to account for upgrades with random probabilities
+        - Fixed an issue where the "Manage Upgrade Order" window would not load if more than 24 upgrades were present
+            - Now shows options for 5 upgrades at a time with next/back buttons to iterate through them.
+                - All upgrades and their process order is still displayed at once
+                - The "home" button now acts as the old "back" button on this window
+        - Increased the chance of the Reality Bending Portal Upgrade from a peak of 5% with 0.2% decrements/hour to a peak of 10% with 0.4% decrements/hour
+        - Fixed an issue where base production upgrades that upgrade by a static multiplier could have variations in actual coin production due to rounding errors
+            - Base production upgrades now always round to two decimal places when calculating the multiplier to affect base production by
+                - This also allows more consistency when calculating the lowest and highest possible coin production for an upgrade when showing the range of production values for the Factory Production Rate
+        - Fixed an issue where the "prestige factory" window had a formatting error
+        - The user's selected Timezone will now be displayed when showing when the next factory production cycle will be (ex: 10:15pm EST on Nov 7th instead of simply 10:15pm on Nov 7th)
+            - As always, this can be modified with the UserSettingsCommand (/settings)

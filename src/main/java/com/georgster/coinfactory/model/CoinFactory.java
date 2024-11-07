@@ -11,6 +11,7 @@ import com.georgster.control.manager.Manageable;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.economy.CoinBank;
 import com.georgster.economy.exception.InsufficientCoinsException;
+import com.georgster.settings.TimezoneOption;
 import com.georgster.settings.UserSettings;
 import com.georgster.util.DateTimed;
 import com.georgster.util.handler.GuildInteractionHandler;
@@ -65,25 +66,32 @@ public final class CoinFactory implements Manageable {
      * @return the new {@link CoinProductionState} of the factory after applying all upgrades.
      */
     public CoinProductionState process() {
-        CoinProductionState state = new CoinProductionState(upgrades, prestige);
-        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
-        state.markFirstBatchProcessed();
-        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
+        CoinProductionState state = new CoinProductionState(upgrades, prestige, true);
+        state.processUpgrades();
         investedCoins += state.getWorkingProductionValue();
         return state;
     }
 
     /**
-     * Returns how many coins this factory produces each production cycle based on its current {@link FactoryUpgrade FactoryUpgrades} and {@link #getinvestedCoins() production value}.
+     * Simulates the coin production of the factory based on its current {@link FactoryUpgrade FactoryUpgrades}
+     * and returns the resulting {@link CoinProductionState} without modifying the factory's {@link #getinvestedCoins() invested coins}.
+     * 
+     * @return the resulting {@link CoinProductionState} of the factory after applying all upgrades.
+     */
+    public CoinProductionState simulateProductionCycle() {
+        CoinProductionState state = new CoinProductionState(upgrades, prestige, false);
+        state.processUpgrades();
+        return state;
+    }
+
+    /**
+     * Returns how many coins this factory produces each production cycle based on its current {@link FactoryUpgrade FactoryUpgrades} and {@link #getinvestedCoins() production value}
+     * based on a {@link #simulateProductionCycle() simulated production cycle}.
      * 
      * @return how many coins this factory produces each production cycle.
      */
     public long getProductionRateValue() {
-        CoinProductionState state = new CoinProductionState(upgrades, prestige);
-        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
-        state.markFirstBatchProcessed();
-        upgrades.forEach(upgrade -> upgrade.applyUpgrade(state));
-        return state.getWorkingProductionValue();
+        return simulateProductionCycle().getWorkingProductionValue();
     }
 
     /**
@@ -427,14 +435,16 @@ public final class CoinFactory implements Manageable {
      * @return An {@link EmbedCreateSpec} with the details of this {@link CoinFactory}.
      */
     public EmbedCreateSpec getDetailEmbed(UserProfileManager manager, UserSettings userSettings) {
+        CoinProductionState simulatedState = simulateProductionCycle();
+
         String factoryOwner = new GuildInteractionHandler(manager.getGuild()).getMemberById(memberId).getUsername();
 
         StringBuilder description = new StringBuilder();
         description.append("***PRESTIGE: " + prestige + "***\n\n");
         description.append("**Invested Coins:** *" + investedCoins + " coins*\n");
-        description.append("**Production Rate:** *" + getProductionRateValue() + " coins per cycle*\n");
+        description.append("**Production Rate:** *" + simulatedState.getLowestPossibleWorkingValue() + " - " + simulatedState.getHighestPossibleWorkingValue() + " coins per cycle*\n");
         DateTimed nextProcessTime = manager.getNextFactoryProcessTime();
-        description.append("This Factory will process coins next at *" + nextProcessTime.getFormattedTime(userSettings) + "* on *" + nextProcessTime.getFormattedDate(userSettings) + "*.\n\n");
+        description.append("This Factory will process coins next at *" + nextProcessTime.getFormattedTime(userSettings) + " " + TimezoneOption.getSettingDisplay(userSettings.getTimezoneSetting()) + "* on *" + nextProcessTime.getFormattedDate(userSettings) + "*.\n\n");
         description.append("**Number of Upgrades:** *" + getUpgradeCount() + "*\n");
         description.append("- **Level 1 Upgrades:** *" + getUpgradeCountByLevel(1) + "*\n");
         description.append("- **Level 2 Upgrades:** *" + getUpgradeCountByLevel(2) + "*\n");

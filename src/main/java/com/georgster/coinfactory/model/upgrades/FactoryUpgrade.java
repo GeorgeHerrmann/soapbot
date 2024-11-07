@@ -142,4 +142,19 @@ public abstract class FactoryUpgrade {
         return trackName;
     }
 
+    /**
+     * Returns whether the upgrade has a random chance for an effect to be applied.
+     * <p>
+     * Upgrades with a random chance should register their <i>lowest</i> and <i>highest</i> possible values
+     * to the {@link CoinProductionState} via {@link CoinProductionState#registerHighestPossibleWorkingValue(long)}
+     * and {@link CoinProductionState#registerLowestPossibleWorkingValue(long)} respectively.
+     * <p>
+     * An upgrade which does <b>NOT</b> have a random chance will automatically register working or base
+     * production increases as the highest and lowest possible increases to the {@link CoinProductionState}. However,
+     * lowest and highest possible production increases can still be registered manually <b>AFTER</b> the upgrade to production is applied.
+     * 
+     * @return True if the upgrade has a random chance, false otherwise
+     */
+    public abstract boolean hasRandomChance();
+
 }

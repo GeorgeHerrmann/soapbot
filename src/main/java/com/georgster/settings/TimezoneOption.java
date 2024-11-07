@@ -93,8 +93,9 @@ public final class TimezoneOption extends UserSettings.SettingsOption {
      * 
      * @param option The {@link SettingsOption} to get the display of.
      * @return The display of the given {@link SettingsOption}.
+     * @throws IllegalArgumentException If the option is not a {@link TimezoneOption}.
      */
-    public static String getSettingDisplay(SettingsOption option) {
+    public static String getSettingDisplay(SettingsOption option) throws IllegalArgumentException {
         if (option instanceof TimezoneOption) {
             if (option.currentOption().equals("-05:00")) {
                 return "EST";

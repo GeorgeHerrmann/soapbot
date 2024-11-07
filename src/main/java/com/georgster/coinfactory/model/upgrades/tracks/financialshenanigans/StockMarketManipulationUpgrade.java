@@ -17,6 +17,16 @@ public final class StockMarketManipulationUpgrade extends FactoryUpgrade {
             state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.75));
             state.upgradeWorkingProductionValue(100);
         }
+
+        /* If the upgrade is disabled, no coins are produced. So the lowest possible working increase is zero, therefore does not need to be registered */
+        state.registerHighestPossibleWorkingValue(100 + ((long) (state.getHighestPossibleWorkingValue() * 0.75)));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return true;
     }
 
 }

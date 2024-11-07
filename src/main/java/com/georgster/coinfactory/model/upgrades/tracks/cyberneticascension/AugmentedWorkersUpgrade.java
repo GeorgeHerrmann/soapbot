@@ -16,4 +16,11 @@ public final class AugmentedWorkersUpgrade extends FactoryUpgrade {
         state.upgradeWorkingProductionValue(80);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }

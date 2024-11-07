@@ -1,5 +1,7 @@
 package com.georgster.coinfactory.model.upgrades;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,26 +20,51 @@ import java.util.List;
  * upgrades <b>DO NOT</b> affect the base production value.</i>
  */
 public final class CoinProductionState {
+    private FactoryUpgrade currentlyProcessingUpgrade; // the upgrade currently being processed
+
     private long startingProductionValue; // starting production value of the factory
     private long baseProductionValue; // base production value of the factory (for multiplicative upgrades)
     private long workingProductionValue; // production value of the factory while working (for additive upgrades)
     private final List<FactoryUpgrade> upgrades;
     private final int prestigeLevel; // the prestige level of the factory
 
+    private long lowestPossibleWorkingValue; // the lowest possible working production value of the factory
+    private long highestPossibleWorkingValue; // the highest possible working production value of the factory
+
     private boolean hasProcessedStartingModifiers; // whether the state has processed any upgrades that modify the starting production value (they go first)
+    private final boolean isTrueProcessCycle; // whether the state is in a true processing cycle (true) or a simulation cycle (false)
 
     /**
      * Constructs a new CoinProductionState
      * <p>
      * <b>This signifies the start of a coin production cycle.</b>
      */
-    public CoinProductionState(List<FactoryUpgrade> upgrades, int prestigeLevel) {
+    public CoinProductionState(List<FactoryUpgrade> upgrades, int prestigeLevel, final boolean isTrueProcessCycle) {
+        this.currentlyProcessingUpgrade = new AbsentFactoryUpgrade();
         this.startingProductionValue = 1;
+        this.lowestPossibleWorkingValue = startingProductionValue;
+        this.highestPossibleWorkingValue = startingProductionValue;
         this.baseProductionValue = startingProductionValue;
         this.workingProductionValue = startingProductionValue;
         this.upgrades = new ArrayList<>(upgrades);
         this.prestigeLevel = prestigeLevel;
         this.hasProcessedStartingModifiers = false;
+        this.isTrueProcessCycle = isTrueProcessCycle;
+    }
+
+    /**
+     * Processes the state by applying all upgrades in the state to the production values of the factory.
+     */
+    public void processUpgrades() {
+        upgrades.forEach(upgrade -> {
+            currentlyProcessingUpgrade = upgrade;
+            upgrade.applyUpgrade(this);
+        });
+        markFirstBatchProcessed();
+        upgrades.forEach(upgrade -> {
+            currentlyProcessingUpgrade = upgrade;
+            upgrade.applyUpgrade(this);
+        });
     }
 
     /**
@@ -78,10 +105,33 @@ public final class CoinProductionState {
     public void upgradeBaseProductionValue(long value) {
         value *= (prestigeLevel * 0.1) + 1;
 
+        double multiplier = round(value / (double) baseProductionValue, 2);
+
         if (hasProcessedStartingModifiers) {
             baseProductionValue += value;
             workingProductionValue += value;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPossibleWorkingValue += (lowestPossibleWorkingValue * multiplier);
+                highestPossibleWorkingValue += (highestPossibleWorkingValue * multiplier);
+            }
         }
+    }
+
+    /**
+     * Rounds the given double to the given number of decimal places.
+     * 
+     * @param value The value to round
+     * @param places The number of decimal places to round to
+     * @return The rounded double
+     * @throws IllegalArgumentException If the number of decimal places is negative
+     */
+    private static double round(double value, int places) throws IllegalArgumentException{
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     /**
@@ -96,6 +146,11 @@ public final class CoinProductionState {
 
         if (hasProcessedStartingModifiers) {
             workingProductionValue += value;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPossibleWorkingValue += value;
+                highestPossibleWorkingValue += value;
+            }
         }
     }
 
@@ -135,8 +190,13 @@ public final class CoinProductionState {
     public void decreaseWorkingProductionValue(long value) {
         value *= (prestigeLevel * 0.1) + 1;
 
-        if (!hasProcessedStartingModifiers) {
+        if (hasProcessedStartingModifiers) {
             workingProductionValue -= value;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPossibleWorkingValue -= value;
+                highestPossibleWorkingValue -= value;
+            }
         }
 
         // set to zero if negative, or keep value if positive
@@ -151,9 +211,14 @@ public final class CoinProductionState {
     public void decreaseBaseProductionValue(long value) {
         value *= (prestigeLevel * 0.1) + 1;
 
-        if (!hasProcessedStartingModifiers) {
+        if (hasProcessedStartingModifiers) {
             baseProductionValue -= value;
             workingProductionValue -= value;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPossibleWorkingValue -= value;
+                highestPossibleWorkingValue -= value;
+            }
         }
 
         // set to zero if negative, or keep value if positive
@@ -162,7 +227,7 @@ public final class CoinProductionState {
     }
 
     /**
-     * Wipes the given value of coins from the factory, draining the base and working production values first, then the starting production value if needed.
+     * Wipes the given value of coins from the factory's production values.
      * <p>
      * <i>Values should not go negative and should stop at zero no matter how large the value is.</i>
      * 
@@ -178,8 +243,94 @@ public final class CoinProductionState {
         // wipe from working and base production values, ensuring they do not go below zero
         baseProductionValue = Math.max(0, baseProductionValue - value);
         workingProductionValue = Math.max(0, workingProductionValue - value);
+    }
 
+    /**
+     * Wipes a percentage of the total coins from the factory's production values.
+     * <p>
+     * <i>Values should not go negative and should stop at zero no matter how large the value is.</i>
+     * 
+     * @param percentage The percentage of the total coins to wipe from the factory
+     */
+    public void wipeCoinsPercentage(double percentage) {
+        if (!hasProcessedStartingModifiers) {
+            return;
+        }
 
+        baseProductionValue = Math.max(0, (long) (baseProductionValue - (baseProductionValue * percentage)));
+        workingProductionValue = Math.max(0, (long) (workingProductionValue - (workingProductionValue * percentage)));
+    }
+
+    /**
+     * Registers the lowest possible working production value of the factory.
+     * <p>
+     * This will add the given value to the current lowest possible working production value.
+     * 
+     * @param value The value to register as the lowest possible working production value
+     */
+    public void registerLowestPossibleWorkingValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
+        if (hasProcessedStartingModifiers) {
+            lowestPossibleWorkingValue += value;
+        }
+    }
+
+    /**
+     * Registers a possible wipe of {@code value} coins from the factory during a production cycle.
+     * <p>
+     * This will subtract the given value from the current lowest and highest possible working production values.
+     * <p>
+     * This method does <b>NOT</b> wipe coins from the factory, it only registers the possible wipe.
+     * Use {@link CoinProductionState#wipeCoins(long)} to properly wipe coins from the factory.
+     * 
+     * @param value The value to register as a possible coin wipe
+     */
+    public void registerPossibleCoinWipe(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
+        if (!hasProcessedStartingModifiers) {
+            return;
+        }
+
+        lowestPossibleWorkingValue = Math.max(0, lowestPossibleWorkingValue - value);
+        //highestPossibleWorkingValue = Math.max(0, highestPossibleWorkingValue - value);
+    }
+
+    /**
+     * Registers a possible wipe of a percentage of the total coins from the factory during a production cycle.
+     * <p>
+     * This will subtract the given percentage of the total coins from the current lowest and highest possible working production values.
+     * <p>
+     * This method does <b>NOT</b> wipe coins from the factory, it only registers the possible wipe.
+     * Use {@link CoinProductionState#wipeCoinsPercentage(double)} to properly wipe coins from the factory.
+     * 
+     * @param percentage The percentage of the total coins to register as a possible coin wipe
+     */
+    public void registerPossibleCoinPercentageWipe(double percentage) {
+        if (!hasProcessedStartingModifiers) {
+            return;
+        }
+
+        long lowestValue = (long) (lowestPossibleWorkingValue * percentage);
+        //long highestValue = (long) (highestPossibleWorkingValue * percentage);
+        lowestPossibleWorkingValue = Math.max(0, lowestPossibleWorkingValue - lowestValue);
+        //highestPossibleWorkingValue = Math.max(0, highestPossibleWorkingValue - highestValue);
+    }
+
+    /**
+     * Registers the highest possible working production value of the factory.
+     * <p>
+     * This will add the given value to the current highest possible working production value.
+     * 
+     * @param value The value to register as the highest possible working production value
+     */
+    public void registerHighestPossibleWorkingValue(long value) {
+        value *= (prestigeLevel * 0.1) + 1;
+
+        if (hasProcessedStartingModifiers) {
+            highestPossibleWorkingValue += value;
+        }
     }
 
     /**
@@ -210,6 +361,30 @@ public final class CoinProductionState {
     }
 
     /**
+     * Returns the lowest possible working production value of the factory.
+     * This value is used to determine the lowest possible production value of the factory during a production cycle.
+     * <p>
+     * <i>Generally used for upgrades with random chances.</i>
+     * 
+     * @return The lowest possible working production value of the factory
+     */
+    public long getLowestPossibleWorkingValue() {
+        return lowestPossibleWorkingValue;
+    }
+
+    /**
+     * Returns the highest possible working production value of the factory.
+     * This value is used to determine the highest possible production value of the factory during a production cycle.
+     * <p>
+     * <i>Generally used for upgrades with random chances.</i>
+     * 
+     * @return The highest possible working production value of the factory
+     */
+    public long getHighestPossibleWorkingValue() {
+        return highestPossibleWorkingValue;
+    }
+
+    /**
      * Returns the total production value of the factory <i>(the sum of the starting production value and the working production value)</i>.
      * 
      * @return The total production value of the factory
@@ -228,6 +403,26 @@ public final class CoinProductionState {
     }
 
     /**
+     * Returns the number of upgrades in the state.
+     * 
+     * @return The number of upgrades in the state
+     */
+    public int getUpgradeCount() {
+        return upgrades.size();
+    }
+
+    /**
+     * Returns the upgrade currently being processed, or the last processed upgrade if a full process cycle was already completed with this state.
+     * <p>
+     * If a process cycle has not started and an upgrade has not been processed, an {@link AbsentFactoryUpgrade} is returned.
+     *  
+     * @return The upgrade currently being processed, the last processed upgrade if a full process cycle was already completed with this state, or a {@link AbsentFactoryUpgrade} if no upgrades have been processed.
+     */
+    public FactoryUpgrade getCurrentlyProcessingUpgrade() {
+        return currentlyProcessingUpgrade;
+    }
+
+    /**
      * Marks the state as having processed the starting modifiers <i>(upgrades that modify the starting production value)</i>.
      * <p>
      * Upgrades which affect the starting production value should be processed first before any other upgrades.
@@ -236,6 +431,8 @@ public final class CoinProductionState {
         hasProcessedStartingModifiers = true;
         workingProductionValue = startingProductionValue;
         baseProductionValue = startingProductionValue;
+        lowestPossibleWorkingValue = startingProductionValue;
+        highestPossibleWorkingValue = startingProductionValue;
     }
 
     /**
@@ -249,5 +446,18 @@ public final class CoinProductionState {
      */
     public boolean hasProcessedStartingModifiers() {
         return hasProcessedStartingModifiers;
+    }
+
+    /**
+     * Returns whether the state is in a true processing cycle.
+     * <p>
+     * A true processing cycle is a cycle where the state is being processed for a production cycle.
+     * <p>
+     * A simulation cycle is a cycle where the state is being processed for a simulation of a production cycle.
+     * 
+     * @return Whether the state is in a true processing cycle
+     */
+    public boolean isTrueProcessCycle() {
+        return isTrueProcessCycle;
     }
 }

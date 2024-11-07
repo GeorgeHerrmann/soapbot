@@ -16,4 +16,11 @@ public final class NeuralNetworkCoordinationUpgrade extends FactoryUpgrade {
         state.upgradeBaseProductionValue((long) (state.getBaseProductionValue() * 0.3));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }

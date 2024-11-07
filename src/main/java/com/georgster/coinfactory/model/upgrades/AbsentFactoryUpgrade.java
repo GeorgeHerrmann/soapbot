@@ -35,5 +35,12 @@ public final class AbsentFactoryUpgrade extends FactoryUpgrade {
     public boolean isOwned() {
         return false;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
     
 }

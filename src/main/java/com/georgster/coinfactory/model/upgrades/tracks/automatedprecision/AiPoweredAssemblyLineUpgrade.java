@@ -16,4 +16,11 @@ public final class AiPoweredAssemblyLineUpgrade extends FactoryUpgrade {
         state.upgradeStartingProductionValue((long) (state.getStartingProductionValue() * 0.3));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }

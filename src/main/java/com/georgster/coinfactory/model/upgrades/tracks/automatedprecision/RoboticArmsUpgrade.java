@@ -16,4 +16,11 @@ public final class RoboticArmsUpgrade extends FactoryUpgrade {
         state.upgradeWorkingProductionValue(20);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }

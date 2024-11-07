@@ -16,4 +16,11 @@ public final class AntimatterReactorUpgrade extends FactoryUpgrade {
         state.upgradeStartingProductionValue((long) (state.getStartingProductionValue() * 0.25));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }

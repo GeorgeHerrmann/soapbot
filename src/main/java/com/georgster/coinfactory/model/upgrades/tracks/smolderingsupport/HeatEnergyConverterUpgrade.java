@@ -16,4 +16,11 @@ public final class HeatEnergyConverterUpgrade extends FactoryUpgrade {
         state.upgradeStartingProductionValue(15);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }

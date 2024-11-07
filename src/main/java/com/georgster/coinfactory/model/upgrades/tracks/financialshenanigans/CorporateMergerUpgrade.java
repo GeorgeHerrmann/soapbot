@@ -20,4 +20,11 @@ public final class CorporateMergerUpgrade extends FactoryUpgrade {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }

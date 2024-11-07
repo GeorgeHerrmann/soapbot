@@ -17,4 +17,11 @@ public final class WarmthProducingJoggersUpgrade extends FactoryUpgrade {
         state.upgradeStartingProductionValue(5);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean hasRandomChance() {
+        return false;
+    }
+
 }
