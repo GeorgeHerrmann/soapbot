@@ -77,7 +77,7 @@ public abstract class FactoryUpgrade {
      * @return The cost of the upgrade
      */
     public long getCost(int prestigeLevel) {
-        return (long) (cost * ((prestigeLevel * 0.25) + 1));
+        return (long) (cost * ((prestigeLevel * 0.5) + 1));
     }
 
     /**

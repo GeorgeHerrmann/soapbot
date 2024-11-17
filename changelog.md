@@ -533,3 +533,13 @@
         - Fixed an issue where the "prestige factory" window had a formatting error
         - The user's selected Timezone will now be displayed when showing when the next factory production cycle will be (ex: 10:15pm EST on Nov 7th instead of simply 10:15pm on Nov 7th)
             - As always, this can be modified with the UserSettingsCommand (/settings)
+
+2.802
+    Mention Groups
+        - Increased the timeout duration for the MentionGroupWizard from 30 seconds to 2 minutes
+    
+    Coin Factory
+    - Prestiges
+        - Increased the prestige upgrade cost increase multiplier from +25% per prestige level to +50% per prestige level
+        - Changed the cost of prestiging to be the total cost of all upgrades rather than the refund cost (effectively doubles the prestige cost)
+            - Note: The amount of coins created when all upgrades are owned is fairly substantial, so it is important that the prestige requirements reflect this

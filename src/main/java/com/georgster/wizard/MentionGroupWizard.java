@@ -27,7 +27,7 @@ public final class MentionGroupWizard extends InputWizard {
      * @param isEdit If this wizard should start on the edit path
      */
     public MentionGroupWizard(CommandExecutionEvent event, boolean isEdit) {
-        super(event, InputListenerFactory.createButtonMessageListener(event, "Mention Group Wizard").builder().requireMatch(false, false).build());
+        super(event, InputListenerFactory.createButtonMessageListener(event, "Mention Group Wizard").builder().requireMatch(false, false).withTimeoutDuration(120000).build());
         this.manager = event.getMentionGroupManager();
         this.isEdit = isEdit;
     }
