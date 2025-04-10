@@ -13,7 +13,7 @@ public final class HeatEnergyConverterUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeStartingProductionValue(15);
+        state.upgradeStartingProduction(15);
     }
 
     /**

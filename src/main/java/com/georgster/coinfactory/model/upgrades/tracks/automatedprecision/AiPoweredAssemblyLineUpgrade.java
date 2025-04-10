@@ -13,7 +13,7 @@ public final class AiPoweredAssemblyLineUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeStartingProductionValue((long) (state.getStartingProductionValue() * 0.3));
+        state.upgradeStartingProduction((long) (state.getStartingProductionValue() * 0.3));
     }
 
     /**

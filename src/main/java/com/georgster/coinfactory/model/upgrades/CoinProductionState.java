@@ -1,55 +1,64 @@
 package com.georgster.coinfactory.model.upgrades;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.georgster.coinfactory.model.CoinFactoryContext;
+
 /**
- * A state of a {@link com.georgster.coinfactory.model.CoinFactory CoinFactory} that holds the production values of the factory
- * during a production cycle. The state is modified by {@link FactoryUpgrade FactoryUpgrades} to change the production values.
+ * A state of the coin production of a {@link CoinFactory} that is used to process upgrades and calculate production values.
  * <p>
- * A {@link CoinProductionState} has a starting production value, a base production value, and a working production value.
+ * The <b>STARTING</b> production value is the amount of processed coins that are produced at the start of a production cycle.
+ * Starting production upgrades are processed first before working or base production upgrades and can be multiplicative or additive.
+ * After all starting production upgrades have been processed, the base and working production values are set to the calculated starting production value.
  * <p>
- * <i>The starting production value is the production value of the factory at the start of a production cycle and is not modified unless decreased by an upgrade.
+ * The <b>BASE</b> production value is the amount of base coins that multiplicative upgrades will be based off for coin production.
+ * Base production upgrades should only be additive and are <i>NOT</i> representative of the actual amount of coins produced in a cycle.
  * <p>
- * The base production value is the production value of the factory that is modified by multiplicative upgrades. Base production value
- * upgrades <b>also affect</b> the working production value.
+ * The <b>WORKING</b> production value is the actual amount of produced coins that are produced in a production cycle.
+ * Working production upgrades should be multiplicative and are based off of the current base production value.
+ * For Example: If the base production value is 50, and a working production upgrade is applied with a value of 0.5, 25 <i>(50 * .5)</i> coins will
+ * be added to the working production.
  * <p>
- * The working production value is the production value of the factory that is modified by additive upgrades. Working production value
- * upgrades <b>DO NOT</b> affect the base production value.</i>
+ * The {@link CoinProductionState} is also responsible for applying prestige-level increases to the production values of the factory.
+ * <p>
+ * A {@code true process cycle} is a cycle where the state is being processed for a production cycle, and the resulting amount of working coins is
+ * intended to be deposited into a {@link CoinFactory}, whereas a {@code simulation cycle} is a cycle where the state is being processed for a simulation of a production cycle,
+ * and the resulting amount of working coins is not intended to be deposited into a {@link CoinFactory}.
  */
 public final class CoinProductionState {
+    public static final double PRESTIGE_MULTIPLIER = 0.1; // The multiplier for the prestige level of the factory
+
     private FactoryUpgrade currentlyProcessingUpgrade; // the upgrade currently being processed
+    private final List<FactoryUpgrade> upgrades; // List of upgrades this factory has purchased
 
     private long startingProductionValue; // starting production value of the factory
     private long baseProductionValue; // base production value of the factory (for multiplicative upgrades)
     private long workingProductionValue; // production value of the factory while working (for additive upgrades)
-    private final List<FactoryUpgrade> upgrades;
-    private final int prestigeLevel; // the prestige level of the factory
 
     private long lowestPossibleWorkingValue; // the lowest possible working production value of the factory
     private long highestPossibleWorkingValue; // the highest possible working production value of the factory
 
     private boolean hasProcessedStartingModifiers; // whether the state has processed any upgrades that modify the starting production value (they go first)
     private final boolean isTrueProcessCycle; // whether the state is in a true processing cycle (true) or a simulation cycle (false)
+    
+    private final CoinFactoryContext factoryContext;
 
     /**
-     * Constructs a new CoinProductionState
-     * <p>
-     * <b>This signifies the start of a coin production cycle.</b>
+     * Creates a new {@link CoinProductionState} with the given factory context and whether the state is in a true processing cycle.
+     * 
+     * @param factoryContext The context of the {@link CoinFactory} that this state will process coins for.
+     * @param isTrueProcessCycle Whether the state is in a true processing cycle (true) or a simulation cycle (false)
      */
-    public CoinProductionState(List<FactoryUpgrade> upgrades, int prestigeLevel, final boolean isTrueProcessCycle) {
-        this.currentlyProcessingUpgrade = new AbsentFactoryUpgrade();
-        this.startingProductionValue = 1;
-        this.lowestPossibleWorkingValue = startingProductionValue;
-        this.highestPossibleWorkingValue = startingProductionValue;
-        this.baseProductionValue = startingProductionValue;
-        this.workingProductionValue = startingProductionValue;
-        this.upgrades = new ArrayList<>(upgrades);
-        this.prestigeLevel = prestigeLevel;
-        this.hasProcessedStartingModifiers = false;
+    public CoinProductionState(CoinFactoryContext factoryContext, boolean isTrueProcessCycle) {
+        this.factoryContext = factoryContext;
+        this.upgrades = factoryContext.getUpgrades();
         this.isTrueProcessCycle = isTrueProcessCycle;
+        this.startingProductionValue = 1;
+        this.baseProductionValue = startingProductionValue; // base production value of the factory (for multiplicative upgrades)
+        this.workingProductionValue = startingProductionValue; // production value of the factory while working (for additive upgrades)
+        this.lowestPossibleWorkingValue = startingProductionValue; // the lowest possible working production value of the factory
+        this.highestPossibleWorkingValue = startingProductionValue; // the highest possible working production value of the factory
+        this.hasProcessedStartingModifiers = false; // whether the state has processed any upgrades that modify the starting production value (they go first)
     }
 
     /**
@@ -93,244 +102,6 @@ public final class CoinProductionState {
      */
     public List<FactoryUpgrade> getUpgrades() {
         return upgrades;
-    }
-
-    /**
-     * Adds to the base production value of the factory by the given value.
-     * <p>
-     * <i>Upgrading the base production value should generally only be used for multiplicative upgrades.</i>
-     * 
-     * @param value The value to add to the base production value
-     */
-    public void upgradeBaseProductionValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        double multiplier = round(value / (double) baseProductionValue, 2);
-
-        if (hasProcessedStartingModifiers) {
-            baseProductionValue += value;
-            workingProductionValue += value;
-
-            if (!currentlyProcessingUpgrade.hasRandomChance()) {
-                lowestPossibleWorkingValue += (lowestPossibleWorkingValue * multiplier);
-                highestPossibleWorkingValue += (highestPossibleWorkingValue * multiplier);
-            }
-        }
-    }
-
-    /**
-     * Rounds the given double to the given number of decimal places.
-     * 
-     * @param value The value to round
-     * @param places The number of decimal places to round to
-     * @return The rounded double
-     * @throws IllegalArgumentException If the number of decimal places is negative
-     */
-    private static double round(double value, int places) throws IllegalArgumentException{
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal bd = new BigDecimal(Double.toString(value));
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
-    }
-
-    /**
-     * Adds to the working production value of the factory by the given value.
-     * <p>
-     * <i>Upgrading the working production value should generally only be used for additive upgrades.</i>
-     * 
-     * @param value The value to add to the working production value
-     */
-    public void upgradeWorkingProductionValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (hasProcessedStartingModifiers) {
-            workingProductionValue += value;
-
-            if (!currentlyProcessingUpgrade.hasRandomChance()) {
-                lowestPossibleWorkingValue += value;
-                highestPossibleWorkingValue += value;
-            }
-        }
-    }
-
-    /**
-     * Adds to the starting production value of the factory by the given value.
-     * 
-     * @param value The value to add to the starting production value
-     */
-    public void upgradeStartingProductionValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (!hasProcessedStartingModifiers) {
-            startingProductionValue += value;
-        }
-    }
-
-    /**
-     * Decreases the starting production value of the factory by the given value.
-     * 
-     * @param value The value to decrease the starting production value by
-     */
-    public void decreaseStartingProductionValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (!hasProcessedStartingModifiers) {
-            startingProductionValue -= value;
-        }
-
-        startingProductionValue = Math.max(0, startingProductionValue);
-    }
-
-    /**
-     * Decreases the working production value of the factory by the given value.
-     * 
-     * @param value The value to decrease the working production value by
-     */
-    public void decreaseWorkingProductionValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (hasProcessedStartingModifiers) {
-            workingProductionValue -= value;
-
-            if (!currentlyProcessingUpgrade.hasRandomChance()) {
-                lowestPossibleWorkingValue -= value;
-                highestPossibleWorkingValue -= value;
-            }
-        }
-
-        // set to zero if negative, or keep value if positive
-        workingProductionValue = Math.max(0, workingProductionValue);
-    }
-    
-    /**
-     * Decreases the base production value of the factory by the given value.
-     * 
-     * @param value The value to decrease the base production value by
-     */
-    public void decreaseBaseProductionValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (hasProcessedStartingModifiers) {
-            baseProductionValue -= value;
-            workingProductionValue -= value;
-
-            if (!currentlyProcessingUpgrade.hasRandomChance()) {
-                lowestPossibleWorkingValue -= value;
-                highestPossibleWorkingValue -= value;
-            }
-        }
-
-        // set to zero if negative, or keep value if positive
-        baseProductionValue = Math.max(0, baseProductionValue);
-        workingProductionValue = Math.max(0, workingProductionValue);
-    }
-
-    /**
-     * Wipes the given value of coins from the factory's production values.
-     * <p>
-     * <i>Values should not go negative and should stop at zero no matter how large the value is.</i>
-     * 
-     * @param value The value of coins to wipe from the factory
-     */
-    public void wipeCoins(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (!hasProcessedStartingModifiers) {
-            return;
-        }
-
-        // wipe from working and base production values, ensuring they do not go below zero
-        baseProductionValue = Math.max(0, baseProductionValue - value);
-        workingProductionValue = Math.max(0, workingProductionValue - value);
-    }
-
-    /**
-     * Wipes a percentage of the total coins from the factory's production values.
-     * <p>
-     * <i>Values should not go negative and should stop at zero no matter how large the value is.</i>
-     * 
-     * @param percentage The percentage of the total coins to wipe from the factory
-     */
-    public void wipeCoinsPercentage(double percentage) {
-        if (!hasProcessedStartingModifiers) {
-            return;
-        }
-
-        baseProductionValue = Math.max(0, (long) (baseProductionValue - (baseProductionValue * percentage)));
-        workingProductionValue = Math.max(0, (long) (workingProductionValue - (workingProductionValue * percentage)));
-    }
-
-    /**
-     * Registers the lowest possible working production value of the factory.
-     * <p>
-     * This will add the given value to the current lowest possible working production value.
-     * 
-     * @param value The value to register as the lowest possible working production value
-     */
-    public void registerLowestPossibleWorkingValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (hasProcessedStartingModifiers) {
-            lowestPossibleWorkingValue += value;
-        }
-    }
-
-    /**
-     * Registers a possible wipe of {@code value} coins from the factory during a production cycle.
-     * <p>
-     * This will subtract the given value from the current lowest and highest possible working production values.
-     * <p>
-     * This method does <b>NOT</b> wipe coins from the factory, it only registers the possible wipe.
-     * Use {@link CoinProductionState#wipeCoins(long)} to properly wipe coins from the factory.
-     * 
-     * @param value The value to register as a possible coin wipe
-     */
-    public void registerPossibleCoinWipe(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (!hasProcessedStartingModifiers) {
-            return;
-        }
-
-        lowestPossibleWorkingValue = Math.max(0, lowestPossibleWorkingValue - value);
-        //highestPossibleWorkingValue = Math.max(0, highestPossibleWorkingValue - value);
-    }
-
-    /**
-     * Registers a possible wipe of a percentage of the total coins from the factory during a production cycle.
-     * <p>
-     * This will subtract the given percentage of the total coins from the current lowest and highest possible working production values.
-     * <p>
-     * This method does <b>NOT</b> wipe coins from the factory, it only registers the possible wipe.
-     * Use {@link CoinProductionState#wipeCoinsPercentage(double)} to properly wipe coins from the factory.
-     * 
-     * @param percentage The percentage of the total coins to register as a possible coin wipe
-     */
-    public void registerPossibleCoinPercentageWipe(double percentage) {
-        if (!hasProcessedStartingModifiers) {
-            return;
-        }
-
-        long lowestValue = (long) (lowestPossibleWorkingValue * percentage);
-        //long highestValue = (long) (highestPossibleWorkingValue * percentage);
-        lowestPossibleWorkingValue = Math.max(0, lowestPossibleWorkingValue - lowestValue);
-        //highestPossibleWorkingValue = Math.max(0, highestPossibleWorkingValue - highestValue);
-    }
-
-    /**
-     * Registers the highest possible working production value of the factory.
-     * <p>
-     * This will add the given value to the current highest possible working production value.
-     * 
-     * @param value The value to register as the highest possible working production value
-     */
-    public void registerHighestPossibleWorkingValue(long value) {
-        value *= (prestigeLevel * 0.1) + 1;
-
-        if (hasProcessedStartingModifiers) {
-            highestPossibleWorkingValue += value;
-        }
     }
 
     /**
@@ -399,7 +170,7 @@ public final class CoinProductionState {
      * @return The prestige level of the factory
      */
     public int getPrestigeLevel() {
-        return prestigeLevel;
+        return factoryContext.getPrestige();
     }
 
     /**
@@ -459,5 +230,199 @@ public final class CoinProductionState {
      */
     public boolean isTrueProcessCycle() {
         return isTrueProcessCycle;
+    }
+
+    /**
+     * Increases the base production value by the given {@code value}.
+     * 
+     * @param value The value to increase the base production value by
+     */
+    public void upgradeBaseProduction(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the base production value
+
+        if (hasProcessedStartingModifiers) {
+            baseProductionValue += value;
+        }
+    }
+
+    /**
+     * Increases the working production value based off the given {@code multiplier}.
+     * <p>
+     * The multiplier is applied to the base production value to calculate the additive working value.
+     * <p>
+     * For example: A multiplier of 0.5 will add 50% of the base production value to the working production value.
+     * 
+     * @param multiplier The multiplier to apply to the base production value to calculate the additive working value
+     */
+    public void upgradeWorkingProduction(double multiplier) {
+        if (hasProcessedStartingModifiers) {
+            long additiveValue = (long) (baseProductionValue * multiplier); // Calculate the additive value based on the base production value
+            baseProductionValue += additiveValue;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPossibleWorkingValue += additiveValue; // Update the lowest possible working value
+                highestPossibleWorkingValue += additiveValue; // Update the highest possible working value
+            }
+        }
+    }
+
+    /**
+     * Increases the working production value by the given {@code value}.
+     * 
+     * @param value The value to increase the working production value by
+     */
+    public void upgradeStartingProduction(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the starting production value
+        
+        if (!hasProcessedStartingModifiers) {
+            startingProductionValue += value;
+        }
+    }
+
+    /**
+     * Increases the starting production value based off the given {@code multiplier}.
+     * <p>
+     * The multiplier is applied to the starting production value to calculate the additive starting value.
+     * <p>
+     * For example: A multiplier of 0.5 will add 50% of the starting production value to the starting production value.
+     * 
+     * @param multiplier The multiplier to apply to the starting production value to calculate the additive starting value
+     */
+    public void upgradeStartingProduction(double multiplier) {
+        if (!hasProcessedStartingModifiers) {
+            long additiveValue = (long) (startingProductionValue * multiplier);
+            startingProductionValue += additiveValue;
+        }
+    }
+
+    /**
+     * Decreases the starting production value by the given {@code value}.
+     * 
+     * @param value The value to decrease the starting production value by
+     */
+    public void decreaseStartingProduction(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the starting production value
+        
+        if (!hasProcessedStartingModifiers) {
+            startingProductionValue -= value;
+        }
+
+        startingProductionValue = Math.max(startingProductionValue, 0); // Ensure the starting production value is at least 1
+    }
+
+    /**
+     * Decreases the base production value by the given {@code value}.
+     * 
+     * @param value The value to decrease the base production value by
+     */
+    public void decreaseBaseProduction(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the base production value
+
+        if (hasProcessedStartingModifiers) {
+            baseProductionValue -= value;
+        }
+
+        baseProductionValue = Math.max(baseProductionValue, 0); // Ensure the base production value is at least 1
+    }
+
+    /**
+     * Decreases the working production value by the given {@code value}.
+     * <p>
+     * This decreases working production by a static amount. To decrease working production by a percentage of the base production value, use {@link #wipeCoins(double)}.
+     * 
+     * @param value The value to decrease the working production value by
+     * @see #wipeCoins(double)
+     */
+    public void decreaseWorkingProduction(long value) {
+        if (hasProcessedStartingModifiers) {
+            workingProductionValue -= value;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPossibleWorkingValue -= value; // Update the lowest possible working value
+                highestPossibleWorkingValue -= value; // Update the highest possible working value
+            }
+        }
+
+        lowestPossibleWorkingValue = Math.max(lowestPossibleWorkingValue, 0); // Ensure the lowest possible working value is at least 1
+        highestPossibleWorkingValue = Math.max(highestPossibleWorkingValue, 0); // Ensure the highest possible working value is at least 1
+        workingProductionValue = Math.max(workingProductionValue, 0); // Ensure the working production value is at least 1
+    }
+
+    /**
+     * Wipes the working production value by the given {@code percentage}.
+     * 
+     * @param percentage The percentage to wipe the working production value by
+     */
+    public void wipeCoins(double percentage) {
+        if (hasProcessedStartingModifiers) {
+            long wipeValue = (long) (workingProductionValue * percentage); // Calculate the wipe value based on the working production value
+            workingProductionValue -= wipeValue;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPossibleWorkingValue -= wipeValue; // Update the lowest possible working value
+                highestPossibleWorkingValue -= wipeValue; // Update the highest possible working value
+            }
+        }
+
+        lowestPossibleWorkingValue = Math.max(lowestPossibleWorkingValue, 0); // Ensure the lowest possible working value is at least 1
+        highestPossibleWorkingValue = Math.max(highestPossibleWorkingValue, 0); // Ensure the highest possible working value is at least 1
+        workingProductionValue = Math.max(workingProductionValue, 0); // Ensure the working production value is at least 1
+    }
+
+    /**
+     * Increases the lowest possible working value of the factory by the given {@code value}.
+     * <p>
+     * The lowest and highest possible working values are <b>NOT</b> representative of the actual amount of coins produced in a cycle,
+     * rather are used to gather a range of possible production values for upgrades with random chances.
+     * 
+     * @param value The value to increase the lowest possible working value by
+     */
+    public void registerLowestPossibleWorkingValue(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the lowest possible working value
+
+        if (hasProcessedStartingModifiers) {
+            lowestPossibleWorkingValue += value; // Update the lowest possible working value
+        }
+    }
+
+    /**
+     * Increases the highest possible working value of the factory by the given {@code value}.
+     * <p>
+     * The lowest and highest possible working values are <b>NOT</b> representative of the actual amount of coins produced in a cycle,
+     * rather are used to gather a range of possible production values for upgrades with random chances.
+     * 
+     * @param value The value to increase the highest possible working value by
+     */
+    public void registerHighestPossibleWorkingValue(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the highest possible working value
+
+        if (hasProcessedStartingModifiers) {
+            highestPossibleWorkingValue += value; // Update the highest possible working value
+        }
+    }
+
+    /**
+     * Registers a possible static-amount coin wipe value to the lowest possible working value of the factory.
+     * 
+     * @param value The value to register as a possible static-amount coin wipe value
+     */
+    public void registerPossibleCoinWipe(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the possible coin wipe value
+
+        if (hasProcessedStartingModifiers) {
+            lowestPossibleWorkingValue = Math.max(0, lowestPossibleWorkingValue - value);
+        }
+    }
+
+    /**
+     * Registers a possible percentage-based coin wipe value to the lowest possible working value of the factory.
+     * 
+     * @param percentage The percentage to register as a possible percentage-based coin wipe value
+     */
+    public void registerPossibleCoinWipe(double percentage) {
+        if (hasProcessedStartingModifiers) {
+            long wipeValue = (long) (workingProductionValue * percentage); // Calculate the wipe value based on the working production value
+            lowestPossibleWorkingValue = Math.max(0, lowestPossibleWorkingValue - wipeValue); // Update the lowest possible working value
+        }
     }
 }

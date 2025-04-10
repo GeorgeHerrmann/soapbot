@@ -29,13 +29,7 @@ import discord4j.rest.util.Color;
  * {@link FactoryUpgrade FactoryUpgrades} can be purchased and applied to the factory to increase its production rate and will be processed in the order maintained in the {@link #getUpgrades() upgrades} list.
  */
 public final class CoinFactory implements Manageable {
-    private final String memberId; // Snowflake id of the user that owns this factory
-
-    private final List<FactoryUpgrade> upgrades; // List of upgrades this factory has purchased
-
-    private long investedCoins; // The current production value of the factory (aka the number of coins invested)
-
-    private int prestige; // The number of times the factory has been prestiged
+    private final CoinFactoryContext context; // The context of the factory
 
     /**
      * Constructs a new {@link CoinFactory} with the given member id.
@@ -43,10 +37,19 @@ public final class CoinFactory implements Manageable {
      * @param memberId the Snowflake id of the user that owns this factory.
      */
     public CoinFactory(String memberId) {
-        this.memberId = memberId;
-        this.upgrades = new ArrayList<>();
-        this.investedCoins = 1;
-        this.prestige = 0;
+        this.context = new CoinFactoryContext(memberId);
+    }
+
+    /**
+     * Constructs a new {@link CoinFactory} with the given member id, upgrades, invested coins, and prestige level.
+     * 
+     * @param memberId the Snowflake id of the user that owns this factory.
+     * @param upgrades the list of {@link FactoryUpgrade FactoryUpgrades} owned by the factory.
+     * @param investedCoins the current production value of the factory (aka the number of coins invested).
+     * @param prestige the number of times the factory has been prestiged.
+     */
+    public CoinFactory(String memberId, List<FactoryUpgrade> upgrades, long investedCoins, int prestige) {
+        this.context = new CoinFactoryContext(memberId, upgrades, investedCoins, prestige);
     }
 
     /**
@@ -55,7 +58,7 @@ public final class CoinFactory implements Manageable {
      * This {@link Manageable Manageble's} identifier the user's member id.
      */
     public String getIdentifier() {
-        return memberId;
+        return context.getMemberId();
     }
 
     /**
@@ -66,9 +69,9 @@ public final class CoinFactory implements Manageable {
      * @return the new {@link CoinProductionState} of the factory after applying all upgrades.
      */
     public CoinProductionState process() {
-        CoinProductionState state = new CoinProductionState(upgrades, prestige, true);
+        CoinProductionState state = new CoinProductionState(context, true);
         state.processUpgrades();
-        investedCoins += state.getWorkingProductionValue();
+        context.addInvestedCoins(state.getWorkingProductionValue());
         return state;
     }
 
@@ -79,7 +82,7 @@ public final class CoinFactory implements Manageable {
      * @return the resulting {@link CoinProductionState} of the factory after applying all upgrades.
      */
     public CoinProductionState simulateProductionCycle() {
-        CoinProductionState state = new CoinProductionState(upgrades, prestige, false);
+        CoinProductionState state = new CoinProductionState(context, false);
         state.processUpgrades();
         return state;
     }
@@ -100,7 +103,7 @@ public final class CoinFactory implements Manageable {
      * @return the current production value of the factory.
      */
     public long getInvestedCoins() {
-        return investedCoins;
+        return context.getInvestedCoins();
     }
 
     /**
@@ -109,7 +112,7 @@ public final class CoinFactory implements Manageable {
      * @return all {@link FactoryUpgrade FactoryUpgrades} owned by the factory.
      */
     public List<FactoryUpgrade> getUpgrades() {
-        return new ArrayList<>(upgrades);
+        return new ArrayList<>(context.getUpgrades());
     }
 
     /**
@@ -120,7 +123,7 @@ public final class CoinFactory implements Manageable {
      * @throws IllegalArgumentException if no upgrade with the given name is owned by the factory.
      */
     public FactoryUpgrade getUpgrade(String upgradeName) throws IllegalArgumentException {
-        return upgrades.stream()
+        return getUpgrades().stream()
                 .filter(u -> u.getName().equalsIgnoreCase(upgradeName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No upgrade with name " + upgradeName + " in factory."));
@@ -135,7 +138,7 @@ public final class CoinFactory implements Manageable {
      * @throws IllegalArgumentException if no upgrade with the given name and reward track name is owned by the factory.
      */
     public FactoryUpgrade getUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException {
-        return upgrades.stream()
+        return getUpgrades().stream()
                 .filter(u -> u.getName().equalsIgnoreCase(upgradeName) && u.getTrackName().equalsIgnoreCase(rewardTrackName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No upgrade with name " + upgradeName + " in factory."));
@@ -151,12 +154,12 @@ public final class CoinFactory implements Manageable {
      */
     public void purchaseUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException, InsufficientCoinsException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
-        if (investedCoins < upgrade.getCost(prestige)) {
-            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost(prestige) + " when the factory has only produced " + investedCoins + " coins.");
+        if (getInvestedCoins() < upgrade.getCost(getPrestige())) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost(getPrestige()) + " when the factory has only produced " + getInvestedCoins() + " coins.");
         } else {
-            investedCoins -= upgrade.getCost(prestige);
+            context.removeInvestedCoins(upgrade.getCost(getPrestige()));
             upgrade.markAsOwned();
-            upgrades.add(upgrade);
+            context.addUpgrade(upgrade);
         }
     }
 
@@ -167,12 +170,12 @@ public final class CoinFactory implements Manageable {
      * @throws InsufficientCoinsException if the factory does not have enough coins to purchase the upgrade.
      */
     public void purchaseUpgrade(FactoryUpgrade upgrade) throws InsufficientCoinsException {
-        if (investedCoins < upgrade.getCost(prestige)) {
-            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost(prestige) + " when the factory has only produced " + investedCoins + " coins.");
+        if (getInvestedCoins() < upgrade.getCost(getPrestige())) {
+            throw new InsufficientCoinsException("Cannot purchase upgrade " + upgrade.getName() + " with cost " + upgrade.getCost(getPrestige()) + " when the factory has only produced " + getInvestedCoins() + " coins.");
         } else {
-            investedCoins -= upgrade.getCost(prestige);
+            context.removeInvestedCoins(upgrade.getCost(getPrestige()));
             upgrade.markAsOwned();
-            upgrades.add(upgrade);
+            context.addUpgrade(upgrade);
         }
     }
 
@@ -186,8 +189,8 @@ public final class CoinFactory implements Manageable {
     public void refundUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
         upgrade.markAsUnowned();
-        if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
-            investedCoins += upgrade.getRefundValue(prestige);
+        if (getUpgrades().removeIf(u -> u.getName().equals(upgrade.getName()))) {
+            context.addInvestedCoins(upgrade.getRefundValue(getPrestige()));
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
         }
@@ -201,8 +204,8 @@ public final class CoinFactory implements Manageable {
      */
     public void refundUpgrade(FactoryUpgrade upgrade) throws IllegalArgumentException {
         upgrade.markAsUnowned();
-        if (upgrades.removeIf(u -> u.getName().equals(upgrade.getName()))) {
-            investedCoins += upgrade.getRefundValue(prestige);
+        if (getUpgrades().removeIf(u -> u.getName().equals(upgrade.getName()))) {
+            context.addInvestedCoins(upgrade.getRefundValue(getPrestige()));
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
         }
@@ -215,7 +218,7 @@ public final class CoinFactory implements Manageable {
      * @return whether the factory has the upgrade with the given name.
      */
     public boolean hasUpgrade(FactoryUpgrade upgrade) {
-        return upgrades.stream().anyMatch(u -> u.getName().equals(upgrade.getName()));
+        return getUpgrades().stream().anyMatch(u -> u.getName().equals(upgrade.getName()));
     }
 
     /**
@@ -228,7 +231,7 @@ public final class CoinFactory implements Manageable {
      */
     public boolean hasUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
-        return upgrades.stream().anyMatch(u -> u.getName().equals(upgrade.getName()));
+        return getUpgrades().stream().anyMatch(u -> u.getName().equals(upgrade.getName()));
     }
 
     /**
@@ -238,13 +241,13 @@ public final class CoinFactory implements Manageable {
      */
     public List<FactoryUpgradeTrack> getCurrentUpgradeTracks() {
         List<FactoryUpgradeTrack> currentUpgradeTracks = new ArrayList<>(FactoryUpgradeTracks.getAvailableUpgradeTracks());
-        currentUpgradeTracks.forEach(track -> {
+        currentUpgradeTracks.forEach(track -> 
             track.getUpgrades().forEach(upgrade -> {
                 if (hasUpgrade(upgrade)) {
                     upgrade.markAsOwned();
                 }
-            });
-        });
+            })
+        );
         return currentUpgradeTracks;
     }
 
@@ -254,7 +257,7 @@ public final class CoinFactory implements Manageable {
      * @return the number of upgrades owned by the factory.
      */
     public int getUpgradeCount() {
-        return upgrades.size();
+        return getUpgrades().size();
     }
 
     /**
@@ -268,7 +271,7 @@ public final class CoinFactory implements Manageable {
         if (level <= 0) {
             throw new IllegalArgumentException("Cannot get upgrade count by level for a non-positive level.");
         } else {
-            return (int) upgrades.stream().filter(u -> u.getLevel() == level).count();
+            return (int) getUpgrades().stream().filter(u -> u.getLevel() == level).count();
         }
     }
 
@@ -283,10 +286,10 @@ public final class CoinFactory implements Manageable {
     public void withdraw(long amount, CoinBank bank) throws IllegalArgumentException, InsufficientCoinsException {
         if (amount < 1) {
             throw new IllegalArgumentException("Cannot withdrawl a negative amount of coins.");
-        } else if (investedCoins < amount) {
+        } else if (context.getInvestedCoins() < amount) {
             throw new InsufficientCoinsException("Cannot withdrawl more coins than the factory has produced.");
         } else {
-            investedCoins -= amount;
+            context.removeInvestedCoins(amount);
             bank.deposit(amount);
         }
     }
@@ -302,7 +305,7 @@ public final class CoinFactory implements Manageable {
     public void deposit(long amount, CoinBank bank) throws IllegalArgumentException, InsufficientCoinsException {
         if (amount > 0) {
             bank.withdrawl(amount);
-            investedCoins += amount;
+            context.addInvestedCoins(amount);
         } else {
             throw new IllegalArgumentException("Cannot deposit a negative amount of coins.");
         }
@@ -316,6 +319,7 @@ public final class CoinFactory implements Manageable {
      * @throws IllegalArgumentException if the new spot is out of bounds.
      */
     public void swap (FactoryUpgrade upgrade, int newSpot) throws IllegalArgumentException {
+        List<FactoryUpgrade> upgrades = getUpgrades();
         if (newSpot < 0 || newSpot >= upgrades.size()) {
             throw new IllegalArgumentException("Cannot swap upgrade to spot " + newSpot + " because it is out of bounds.");
         } else {
@@ -339,6 +343,7 @@ public final class CoinFactory implements Manageable {
         boolean canBePrestiged = canBePrestiged();
         boolean ownsAllUpgrades = ownsAllUpgrades();
         long prestigeCost = getPrestigeCost();
+        long investedCoins = getInvestedCoins();
 
         if (!canBePrestiged && !ownsAllUpgrades) {
             throw new IllegalStateException("Cannot prestige the factory when the factory does not own all upgrades.");
@@ -348,9 +353,9 @@ public final class CoinFactory implements Manageable {
             throw new InsufficientCoinsException("Cannot prestige the factory when the factory has only produced " + investedCoins + " coins and the cost of prestige is " + prestigeCost + " coins.");
         }
 
-        upgrades.clear();
-        investedCoins -= prestigeCost;
-        prestige++;
+        context.clearUpgrades(); // Clear all upgrades
+        context.removeInvestedCoins(prestigeCost);
+        context.addPrestige(); // Increment prestige level
     }
 
     /**
@@ -359,7 +364,7 @@ public final class CoinFactory implements Manageable {
      * @return True if the factory can be prestiged, false otherwise.
      */
     public boolean canBePrestiged() {
-        if (investedCoins < getPrestigeCost()) {
+        if (getInvestedCoins() < getPrestigeCost()) {
             return false;
         }
 
@@ -376,6 +381,7 @@ public final class CoinFactory implements Manageable {
      * @return the cost of prestige for the factory.
      */
     public long getPrestigeCost() {
+        int prestige = getPrestige();
         return (prestige + 1) * (getCurrentUpgradeTracks().stream().flatMap(track -> track.getUpgrades().stream()).mapToLong(upgrade -> upgrade.getRefundValue(prestige)).sum());
     }
 
@@ -395,7 +401,7 @@ public final class CoinFactory implements Manageable {
      * @return the number of times the factory has been prestiged.
      */
     public int getPrestige() {
-        return prestige;
+        return context.getPrestige();
     }
 
     /**
@@ -424,7 +430,7 @@ public final class CoinFactory implements Manageable {
      * @return the {@link Color} associated with this factory's current prestige level.
      */
     public Color getPrestigeColor() {
-        return CoinFactory.getPrestigeColor(prestige);
+        return CoinFactory.getPrestigeColor(getPrestige());
     }
 
     /**
@@ -437,11 +443,11 @@ public final class CoinFactory implements Manageable {
     public EmbedCreateSpec getDetailEmbed(UserProfileManager manager, UserSettings userSettings) {
         CoinProductionState simulatedState = simulateProductionCycle();
 
-        String factoryOwner = new GuildInteractionHandler(manager.getGuild()).getMemberById(memberId).getUsername();
+        String factoryOwner = new GuildInteractionHandler(manager.getGuild()).getMemberById(getIdentifier()).getUsername();
 
         StringBuilder description = new StringBuilder();
-        description.append("***PRESTIGE: " + prestige + "***\n\n");
-        description.append("**Invested Coins:** *" + investedCoins + " coins*\n");
+        description.append("***PRESTIGE: " + getPrestige() + "***\n\n");
+        description.append("**Invested Coins:** *" + getInvestedCoins() + " coins*\n");
         description.append("**Production Rate:** *" + simulatedState.getLowestPossibleWorkingValue() + " - " + simulatedState.getHighestPossibleWorkingValue() + " coins per cycle*\n");
         DateTimed nextProcessTime = manager.getNextFactoryProcessTime();
         description.append("This Factory will process coins next at *" + nextProcessTime.getFormattedTime(userSettings) + " " + TimezoneOption.getSettingDisplay(userSettings.getTimezoneSetting()) + "* on *" + nextProcessTime.getFormattedDate(userSettings) + "*.\n\n");

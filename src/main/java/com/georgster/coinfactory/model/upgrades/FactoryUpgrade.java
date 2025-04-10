@@ -35,7 +35,7 @@ public abstract class FactoryUpgrade {
     }
 
     /**
-     * Applies the upgrade to the given {@link CoinProductionState CoinProductionState}, modifying its production values during a production cycle.
+     * Applies the upgrade to the given {@link CoinProductionState}, modifying its production values during a production cycle.
      * 
      * @param state The CoinProductionState to apply the upgrade to
      */

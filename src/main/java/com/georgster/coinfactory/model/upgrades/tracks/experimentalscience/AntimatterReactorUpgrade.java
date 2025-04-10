@@ -13,7 +13,7 @@ public final class AntimatterReactorUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeStartingProductionValue((long) (state.getStartingProductionValue() * 0.25));
+        state.upgradeStartingProduction(0.25);
     }
 
     /**
