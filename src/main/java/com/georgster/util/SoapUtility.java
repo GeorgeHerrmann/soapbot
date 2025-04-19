@@ -12,6 +12,8 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Intended to house all the general SOAP Bot methods that are not specific to any one class.
+ * <p>
+ * For random number generation, use {@link SoapNumbers} instead.
  */
 public class SoapUtility {
 
