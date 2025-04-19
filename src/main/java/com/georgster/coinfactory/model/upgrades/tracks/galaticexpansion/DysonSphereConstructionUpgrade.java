@@ -3,6 +3,7 @@ package com.georgster.coinfactory.model.upgrades.tracks.galaticexpansion;
 import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
 import com.georgster.coinfactory.model.upgrades.tracks.automatedprecision.QuantumComputingIntegrationUpgrade;
+import com.georgster.util.SoapNumbers;
 
 public final class DysonSphereConstructionUpgrade extends FactoryUpgrade {
     
@@ -16,7 +17,7 @@ public final class DysonSphereConstructionUpgrade extends FactoryUpgrade {
     public void applyUpgrade(CoinProductionState state) {
         if (state.getUpgrades().stream().noneMatch(QuantumComputingIntegrationUpgrade.class::isInstance)) {
             state.registerPossibleCoinWipe(0.5);
-            if (Math.random() < 0.05) {
+            if (SoapNumbers.getRandomDouble(0, 1) < 0.05) {
                 state.wipeCoins(0.5);
             }
         }
@@ -24,7 +25,7 @@ public final class DysonSphereConstructionUpgrade extends FactoryUpgrade {
         state.upgradeWorkingProduction(0.5);
         state.upgradeBaseProduction(200);
 
-        state.registerHighestPossibleWorkingValue(200 + ((long) (state.getHighestPossibleWorkingValue() * 0.5)));
+        state.registerHighestPossibleWorkingValue(200 + ((long) (state.getBaseProductionValue() * 0.5)));
     }
 
     /**

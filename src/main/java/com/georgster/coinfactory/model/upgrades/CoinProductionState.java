@@ -243,6 +243,8 @@ public final class CoinProductionState {
         if (hasProcessedStartingModifiers) {
             baseProductionValue += value;
         }
+
+        baseProductionValue = Math.max(baseProductionValue, 0);
     }
 
     /**
@@ -257,12 +259,17 @@ public final class CoinProductionState {
     public void upgradeWorkingProduction(double multiplier) {
         if (hasProcessedStartingModifiers) {
             long additiveValue = (long) (baseProductionValue * multiplier); // Calculate the additive value based on the base production value
-            baseProductionValue += additiveValue;
+            workingProductionValue += additiveValue;
 
             if (!currentlyProcessingUpgrade.hasRandomChance()) {
                 lowestPossibleWorkingValue += additiveValue; // Update the lowest possible working value
                 highestPossibleWorkingValue += additiveValue; // Update the highest possible working value
             }
+
+            //ensure values dont go below 0
+            lowestPossibleWorkingValue = Math.max(lowestPossibleWorkingValue, 0);
+            highestPossibleWorkingValue = Math.max(highestPossibleWorkingValue, 0);
+            workingProductionValue = Math.max(workingProductionValue, 0);
         }
     }
 
@@ -277,6 +284,8 @@ public final class CoinProductionState {
         if (!hasProcessedStartingModifiers) {
             startingProductionValue += value;
         }
+
+        startingProductionValue = Math.max(startingProductionValue, 0); // Ensure the starting production value is at least 0
     }
 
     /**
@@ -292,6 +301,8 @@ public final class CoinProductionState {
         if (!hasProcessedStartingModifiers) {
             long additiveValue = (long) (startingProductionValue * multiplier);
             startingProductionValue += additiveValue;
+
+            startingProductionValue = Math.max(startingProductionValue, 0); // Ensure the starting production value is at least 0
         }
     }
 

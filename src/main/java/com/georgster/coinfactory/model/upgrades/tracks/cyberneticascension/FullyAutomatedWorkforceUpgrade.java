@@ -2,6 +2,7 @@ package com.georgster.coinfactory.model.upgrades.tracks.cyberneticascension;
 
 import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
+import com.georgster.util.SoapNumbers;
 
 public final class FullyAutomatedWorkforceUpgrade extends FactoryUpgrade {
     
@@ -16,8 +17,8 @@ public final class FullyAutomatedWorkforceUpgrade extends FactoryUpgrade {
         state.registerPossibleCoinWipe(1);
 
         for (int i = 0; i < state.getUpgradeCount(); i++) {
-            state.registerHighestPossibleWorkingValue((long) (state.getHighestPossibleWorkingValue() * 0.1));
-            if (Math.random() < 0.01) {
+            state.registerHighestPossibleWorkingValue((long) (state.getBaseProductionValue() * 0.1));
+            if (SoapNumbers.getRandomDouble(0, 1) < 0.01) {
                 state.wipeCoins(1);
                 break;
             } else {

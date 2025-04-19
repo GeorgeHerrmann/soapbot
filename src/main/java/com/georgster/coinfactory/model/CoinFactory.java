@@ -189,7 +189,8 @@ public final class CoinFactory implements Manageable {
     public void refundUpgrade(String rewardTrackName, String upgradeName) throws IllegalArgumentException {
         FactoryUpgrade upgrade = FactoryUpgradeTracks.getUpgrade(rewardTrackName, upgradeName);
         upgrade.markAsUnowned();
-        if (getUpgrades().removeIf(u -> u.getName().equals(upgrade.getName()))) {
+        if (getUpgrades().stream().anyMatch(u -> u.getName().equals(upgrade.getName()))) {
+            context.removeUpgrade(upgrade);
             context.addInvestedCoins(upgrade.getRefundValue(getPrestige()));
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
@@ -204,7 +205,8 @@ public final class CoinFactory implements Manageable {
      */
     public void refundUpgrade(FactoryUpgrade upgrade) throws IllegalArgumentException {
         upgrade.markAsUnowned();
-        if (getUpgrades().removeIf(u -> u.getName().equals(upgrade.getName()))) {
+        if (getUpgrades().stream().anyMatch(u -> u.getName().equals(upgrade.getName()))) {
+            context.removeUpgrade(upgrade);
             context.addInvestedCoins(upgrade.getRefundValue(getPrestige()));
         } else {
             throw new IllegalArgumentException("Cannot refund upgrade " + upgrade.getName() + " because it is not owned by the factory.");
@@ -319,14 +321,7 @@ public final class CoinFactory implements Manageable {
      * @throws IllegalArgumentException if the new spot is out of bounds.
      */
     public void swap (FactoryUpgrade upgrade, int newSpot) throws IllegalArgumentException {
-        List<FactoryUpgrade> upgrades = getUpgrades();
-        if (newSpot < 0 || newSpot >= upgrades.size()) {
-            throw new IllegalArgumentException("Cannot swap upgrade to spot " + newSpot + " because it is out of bounds.");
-        } else {
-            int oldSpot = upgrades.indexOf(upgrade);
-            upgrades.set(oldSpot, upgrades.get(newSpot));
-            upgrades.set(newSpot, upgrade);
-        }
+        context.swap(upgrade, newSpot);
     }
 
     /**

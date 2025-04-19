@@ -2,6 +2,7 @@ package com.georgster.coinfactory.model.upgrades.tracks.experimentalscience;
 
 import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
+import com.georgster.util.SoapNumbers;
 
 public final class TimeManipulatorUpgrade extends FactoryUpgrade {
     
@@ -16,9 +17,9 @@ public final class TimeManipulatorUpgrade extends FactoryUpgrade {
         state.upgradeStartingProduction(100);
 
         state.registerLowestPossibleWorkingValue(75);
-        state.registerHighestPossibleWorkingValue((long) (state.getHighestPossibleWorkingValue() * 0.7));
+        state.registerHighestPossibleWorkingValue((long) (state.getBaseProductionValue() * 0.7));
 
-        if (Math.random() < 0.5) {
+        if (SoapNumbers.getRandomDouble(0, 1) < 0.5) {
             state.upgradeWorkingProduction(0.7);
         } else {
             state.upgradeBaseProduction(75);

@@ -404,6 +404,7 @@ public final class CoinFactoryWizard extends InputWizard {
                 manager.update(profile);
             } else if (response.equals("^")) {
                 factory.swap(upgrade, currentPosition - 1);
+                manager.update(profile);
             }
         }, true, prompt.toString(), options);
     }

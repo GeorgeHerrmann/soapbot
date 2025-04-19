@@ -65,6 +65,19 @@ public final class CoinFactoryContext {
     }
 
     /**
+     * Returns a {@link FactoryUpgrade} with the given name from the factory of this context.
+     * 
+     * @param upgradeName The name of the {@link FactoryUpgrade} to return.
+     * @return The {@link FactoryUpgrade} with the given name, or null if it does not exist.
+     */
+    public FactoryUpgrade getUpgrade(String upgradeName) {
+        return upgrades.stream()
+            .filter(upgrade -> upgrade.getName().equalsIgnoreCase(upgradeName))
+            .findFirst()
+            .orElse(null);
+    }
+
+    /**
      * Adds a {@link FactoryUpgrade} to the factory of this context.
      * 
      * @param upgrade The {@link FactoryUpgrade} to add to the factory of this context.
@@ -80,7 +93,7 @@ public final class CoinFactoryContext {
      * @throws IllegalArgumentException if the upgrade is not owned by the factory of this context.
      */
     public void removeUpgrade(FactoryUpgrade upgrade) {
-        this.upgrades.remove(upgrade);
+        this.upgrades.remove(getUpgrade(upgrade.getName()));
     }
 
     /**
@@ -152,5 +165,22 @@ public final class CoinFactoryContext {
      */
     public void addPrestige() {
         this.prestige++;
+    }
+
+    /**
+     * Swaps the given {@link FactoryUpgrade} with the upgrade at the given spot in the {@link #getUpgrades() upgrades} list.
+     * 
+     * @param upgrade the upgrade to swap.
+     * @param newSpot the spot in the {@link #getUpgrades() upgrades} list to swap the upgrade to.
+     * @throws IllegalArgumentException if the new spot is out of bounds.
+     */
+    public void swap (FactoryUpgrade upgrade, int newSpot) throws IllegalArgumentException {
+        if (newSpot < 0 || newSpot >= upgrades.size()) {
+            throw new IllegalArgumentException("Cannot swap upgrade to spot " + newSpot + " because it is out of bounds.");
+        } else {
+            int oldSpot = upgrades.indexOf(upgrade);
+            upgrades.set(oldSpot, upgrades.get(newSpot));
+            upgrades.set(newSpot, upgrade);
+        }
     }
 }

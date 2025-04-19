@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
 import com.georgster.util.DateTimed;
+import com.georgster.util.SoapNumbers;
 
 public final class RealityBendingPortalUpgrade extends FactoryUpgrade {
     
@@ -21,11 +22,11 @@ public final class RealityBendingPortalUpgrade extends FactoryUpgrade {
         // give a 10% chance at 1am, decreasing by 0.4% every hour
         double chance = 0.1 - (now.getHour() * 0.004);
 
-        if (Math.random() < chance) {
+        if (SoapNumbers.getRandomDouble(0, 1) < chance) {
             state.upgradeWorkingProduction(2.0);
         }
 
-        state.registerHighestPossibleWorkingValue(state.getHighestPossibleWorkingValue() * 2);
+        state.registerHighestPossibleWorkingValue(state.getBaseProductionValue() * 2);
     }
 
     /**

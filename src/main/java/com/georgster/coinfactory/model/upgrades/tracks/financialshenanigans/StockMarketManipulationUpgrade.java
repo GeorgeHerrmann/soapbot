@@ -2,6 +2,7 @@ package com.georgster.coinfactory.model.upgrades.tracks.financialshenanigans;
 
 import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
+import com.georgster.util.SoapNumbers;
 
 public final class StockMarketManipulationUpgrade extends FactoryUpgrade {
     
@@ -13,13 +14,13 @@ public final class StockMarketManipulationUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        if (Math.random() > 0.05) {
+        if (SoapNumbers.getRandomDouble(0, 1) < 0.05) {
             state.upgradeWorkingProduction(0.5);
             state.upgradeBaseProduction(100);
         }
 
         /* If the upgrade is disabled, no coins are produced. So the lowest possible working increase is zero, therefore does not need to be registered */
-        state.registerHighestPossibleWorkingValue(100 + ((long) (state.getHighestPossibleWorkingValue() * 0.5)));
+        state.registerHighestPossibleWorkingValue(100 + ((long) (state.getBaseProductionValue() * 0.5)));
     }
 
     /**

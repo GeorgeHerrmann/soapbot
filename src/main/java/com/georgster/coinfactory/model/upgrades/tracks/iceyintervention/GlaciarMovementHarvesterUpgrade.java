@@ -1,9 +1,8 @@
 package com.georgster.coinfactory.model.upgrades.tracks.iceyintervention;
 
-import java.util.Random;
-
 import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
+import com.georgster.util.SoapNumbers;
 
 public final class GlaciarMovementHarvesterUpgrade extends FactoryUpgrade {
     
@@ -15,11 +14,12 @@ public final class GlaciarMovementHarvesterUpgrade extends FactoryUpgrade {
     }
 
     public void applyUpgrade(CoinProductionState state) {
-        state.upgradeWorkingProduction(0.1 + new Random().nextLong() * 0.4);
+        double number = SoapNumbers.getRandomDouble(1.1, 2.5) - 1;
+        state.upgradeWorkingProduction(number);
 
         // Register x1.1 as the lowest possible value for the working production value and x2.5 as the highest possible value
-        state.registerLowestPossibleWorkingValue((long) (state.getLowestPossibleWorkingValue() * 0.1));
-        state.registerHighestPossibleWorkingValue((long) (state.getHighestPossibleWorkingValue() * 1.5));
+        state.registerLowestPossibleWorkingValue((long) (state.getBaseProductionValue() * 0.1));
+        state.registerHighestPossibleWorkingValue((long) (state.getBaseProductionValue() * 1.5));
     }
 
     /**

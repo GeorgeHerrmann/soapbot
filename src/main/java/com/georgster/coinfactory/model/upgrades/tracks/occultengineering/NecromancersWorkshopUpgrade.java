@@ -2,6 +2,7 @@ package com.georgster.coinfactory.model.upgrades.tracks.occultengineering;
 
 import com.georgster.coinfactory.model.upgrades.CoinProductionState;
 import com.georgster.coinfactory.model.upgrades.FactoryUpgrade;
+import com.georgster.util.SoapNumbers;
 
 public final class NecromancersWorkshopUpgrade extends FactoryUpgrade {
     
@@ -14,7 +15,7 @@ public final class NecromancersWorkshopUpgrade extends FactoryUpgrade {
 
     public void applyUpgrade(CoinProductionState state) {
         for (int i = 0; i < state.getUpgrades().size(); i++) {
-            if (Math.random() < 0.1) {
+            if (SoapNumbers.getRandomDouble(0, 1) < 0.1) {
                 state.upgradeBaseProduction(400);
             }
         }
