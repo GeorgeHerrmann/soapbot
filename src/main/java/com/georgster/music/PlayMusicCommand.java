@@ -13,7 +13,6 @@ import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
 import com.georgster.util.commands.ParsedArguments;
 import com.georgster.util.handler.GuildInteractionHandler;
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
 import discord4j.core.object.VoiceState;
@@ -32,7 +31,6 @@ public class PlayMusicCommand implements ParseableCommand {
 
     private AudioProvider provider;
     private AudioPlayerManager playerManager;
-    private AudioPlayer player;
     private TrackScheduler scheduler;
 
     /**
@@ -43,9 +41,7 @@ public class PlayMusicCommand implements ParseableCommand {
     public PlayMusicCommand(ClientContext context) {
         this.provider = context.getAudioContext().getProvider();
         this.playerManager = context.getAudioContext().getPlayerManager();
-        this.player = context.getAudioContext().getPlayer();
         this.scheduler = context.getAudioContext().getScheduler();
-        this.player.addListener(scheduler);
     }
 
     /**

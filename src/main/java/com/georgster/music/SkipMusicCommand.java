@@ -49,8 +49,7 @@ public class SkipMusicCommand implements ParseableCommand {
             }, "all");
 
             subcommands.on(() -> {
-                logger.append("- No tracks found in queue", LogDestination.NONAPI);
-                handler.sendMessage("No tracks are currently playing");
+                handler.sendMessage("Skipping current track");
             });
             player.stopTrack();
             logger.append("- Skipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);

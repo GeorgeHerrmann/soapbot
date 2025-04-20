@@ -18,8 +18,8 @@ public final class GlaciarMovementHarvesterUpgrade extends FactoryUpgrade {
         state.upgradeWorkingProduction(number);
 
         // Register x1.1 as the lowest possible value for the working production value and x2.5 as the highest possible value
-        state.registerLowestPossibleWorkingValue((long) (state.getBaseProductionValue() * 0.1));
-        state.registerHighestPossibleWorkingValue((long) (state.getBaseProductionValue() * 1.5));
+        state.registerLowestPossibleWorkingValue((long) (state.getLowestPossibleWorkingValue() * 0.1));
+        state.registerHighestPossibleWorkingValue((long) (state.getHighestPossibleWorkingValue() * 1.5));
     }
 
     /**

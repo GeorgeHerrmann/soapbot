@@ -543,3 +543,43 @@
         - Increased the prestige upgrade cost increase multiplier from +25% per prestige level to +50% per prestige level
         - Changed the cost of prestiging to be the total cost of all upgrades rather than the refund cost (effectively doubles the prestige cost)
             - Note: The amount of coins created when all upgrades are owned is fairly substantial, so it is important that the prestige requirements reflect this
+        
+2.9
+    Coin Factory
+        - Rewrote the factory's coin calculation system to address multiple issues with calculations causing crashing
+            - New System:
+                - Backend model reorganized for a more streamlined data pipeline
+                - Starting upgrades still processed first, can be additive or multiplicative but not random
+                - Base and working upgrades still present
+                    - Working value is the ACTUAL amount of produced coins
+                    - Base value is the current baseline value that is used to determine how many coins are produced by a working value upgrade, base value upgrades are additive
+                    - Multiplicative upgrades will NOT affect base value (i.e. Working upgrades do not affect base upgrades)
+                    - Goal is to keep base value relatively small to prevent giant number increases
+            - Fixed an issue causing all coin factories to stop processing upgrades when the working value got extraordinarily high during coin calculation
+            - Fixed an issue causing the predicted coin production range to be different value each time it was calculated when certain random-chance upgrades were purchased
+            - Fixed an issue causing problems not allowing proper triggers with upgrades that calculated a random chance
+            - All upgrades have gotten the following changes:
+                - Any multiplicative upgrades are no longer BASE upgrades and are now WORKING upgrades
+                - Any additive upgrades are no longer WORKING upgrades and are now BASE upgrades
+            - Individual Upgrade Tweaks:
+                - The Singularity: No longer switches on and off. +10000 Working -> +5000 Base; x2 Base -> x1.5 Working
+                - Stock Market Manipulation: x1.75 Base -> x1.5 Working
+                - Asteroid Mining: x1.25 Base -> x1.2 Working
+                - Dyson Sphere Construction: x1.7 Base -> x1.5 Working
+                - Warmth Producing Joggers: +5 Starting -> +15 Starting
+                - Demon Powered Furnace: +200 Working -> +250 Base; +30 Starting -> +40 Starting
+                - Necromancers Workshop: +500 Working per hit -> +400 Base per hit
+                - Summoning Circle of Fortune: Either +75000 Working/x2 Base -> Either +50000 Base/x2 Working
+            - As a result of this system rewrite, all CoinFactories were reset.
+    
+    Music
+        - Fixed an issue causing audio to not play via direct source links or keyword searches
+        - SOAP Bot can now play music again via Youtube and Soundcloud (please use, this was a pain to fix)
+            - Note: SOAP Bot will select from the best available audio client based on the Discord client you are using and audio source you have selected.
+                    Because of Youtube restrictions, there may be intermittent issues with Youtube audio streaming.
+                    If SOAP Bot's audio player disconnects, simply requeue the tracks and it will restart.
+        SkipMusicCommand
+            - Fixed the success message on single track skip
+            - Removed double log messages on single track skip
+        QueueMusicCommand
+            - Fixed an issue where all the track numbers on the displayed queue were "1"

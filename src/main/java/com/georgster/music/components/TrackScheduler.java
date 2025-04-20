@@ -26,6 +26,8 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     private LinkedBlockingQueue<AudioTrack> queue;
     private VoiceConnection connection;
 
+    private AudioTrack currentTrack;
+
     /**
      * Creates a track scheduler that will schedule and play tracks with the provided player in the given voice channel.
      * 
@@ -36,6 +38,8 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
         handler = null;
         connection = null;
         queue = new LinkedBlockingQueue<>();
+
+        currentTrack = null;
     }
 
     /**
@@ -67,7 +71,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void playlistLoaded(final AudioPlaylist playlist) {
         boolean first = (queue.isEmpty()); //If the queue is empty, we will play the first track in the playlist.
-        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Queued up track: " + handler.sendMessage("Queued up playlist: " + playlist.getName())));
+        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Queued up playlist: " + playlist.getName()));
         for (AudioTrack i : playlist.getTracks()) { //Add all tracks in the playlist to the queue.
             try {
                 queue.put(i);
@@ -91,7 +95,10 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         try {
-            if (!queue.isEmpty()) queue.take();
+            if (!queue.isEmpty()) {
+                queue.take();
+                currentTrack = null;
+            }
             if (!queue.isEmpty()) {
                 player.playTrack(queue.peek());
             } else {
@@ -112,7 +119,10 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
      */
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
-        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Now Playing: " + track.getInfo().title)); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
+        if (currentTrack == null) {
+            currentTrack = track; //If the track is different from the last one, we will set it as the current track.
+            ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Now Playing: " + track.getInfo().title)); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
+        }
     }
 
     /**
@@ -175,5 +185,14 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     public void setChannelData(GuildInteractionHandler handler, VoiceConnection connection) {
         this.handler = handler;
         this.connection = connection;
+    }
+
+    /**
+     * Returns the current {@link AudioTrack} being played, or null if no track is being played.
+     * 
+     * @return the current {@link AudioTrack} being played, or null if no track is being played
+     */
+    public AudioTrack getCurrentTrack() {
+        return currentTrack;
     }
 }

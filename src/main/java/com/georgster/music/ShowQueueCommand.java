@@ -41,6 +41,7 @@ public class ShowQueueCommand implements Command {
 
         for (AudioTrack i : queue.toArray(new AudioTrack[queue.size()])) {
             response.append("- " + x + ") " + i.getInfo().title + "\n");
+            x++;
         }
         
         new IterableStringWizard(event, "Current Audio Queue", SoapUtility.splitAtEvery(response.toString(), 10)).begin();
