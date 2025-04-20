@@ -55,7 +55,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
             if (queue.size() == 1) {
                 player.playTrack(track); //If it is the only track in the queue we will play it here as well.
             } else {
-                ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Queued up track: " + track.getInfo().title));
+                ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Queued up track: **" + track.getInfo().title + "**", "Audio Player"));
             }
         } catch (InterruptedException e) { //There is something wrong with the queue, so we will stop the player.
             e.printStackTrace();
@@ -71,7 +71,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void playlistLoaded(final AudioPlaylist playlist) {
         boolean first = (queue.isEmpty()); //If the queue is empty, we will play the first track in the playlist.
-        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Queued up playlist: " + playlist.getName()));
+        ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Queued up playlist: **" + playlist.getName() + "**", "Audio Player"));
         for (AudioTrack i : playlist.getTracks()) { //Add all tracks in the playlist to the queue.
             try {
                 queue.put(i);
@@ -121,7 +121,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
         if (currentTrack == null) {
             currentTrack = track; //If the track is different from the last one, we will set it as the current track.
-            ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Now Playing: " + track.getInfo().title)); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
+            ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> handler.sendMessage("Now Playing: **" + track.getInfo().title + "**", "Audio Player")); //The queuing and playing happens in onTrackLoaded, so we will just send a message here.
         }
     }
 
@@ -131,7 +131,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void noMatches() {
         ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> {
-            handler.sendMessage("Failed to grab audio from the provided arguments", MessageFormatting.ERROR);
+            handler.sendMessage("Failed to grab audio from the provided arguments", "Audio Player", MessageFormatting.ERROR);
             if (!isActive()) {
                 connection.disconnect().block(); //If the queue is empty, we will disconnect from the voice channel.
             }
@@ -144,7 +144,7 @@ public final class TrackScheduler extends AudioEventAdapter implements AudioLoad
     @Override
     public void loadFailed(final FriendlyException exception) {
         ThreadPoolFactory.scheduleVoiceTask(handler.getId(), () -> {
-            handler.sendMessage("Failed to load track: " + exception.getMessage(), MessageFormatting.ERROR);
+            handler.sendMessage("Failed to load track: *" + exception.getMessage(), MessageFormatting.ERROR + "*", "Audio Player");
             if (!isActive()) {
                 connection.disconnect().block(); //If the queue is empty, we will disconnect from the voice channel.
             }

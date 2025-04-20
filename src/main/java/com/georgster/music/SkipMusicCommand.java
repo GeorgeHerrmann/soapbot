@@ -45,11 +45,11 @@ public class SkipMusicCommand implements ParseableCommand {
         if (scheduler.isActive()) {
             subcommands.on(parser -> {
                 scheduler.clearQueue();
-                handler.sendMessage("Skipping all tracks in the queue");
+                handler.sendMessage("Skipping all tracks in the queue", "Audio Player");
             }, "all");
 
             subcommands.on(() -> {
-                handler.sendMessage("Skipping current track");
+                handler.sendMessage("Skipping current track", "Audio Player");
             });
             player.stopTrack();
             logger.append("- Skipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
