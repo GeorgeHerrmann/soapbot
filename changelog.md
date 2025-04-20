@@ -570,6 +570,7 @@
                 - Demon Powered Furnace: +200 Working -> +250 Base; +30 Starting -> +40 Starting
                 - Necromancers Workshop: +500 Working per hit -> +400 Base per hit
                 - Summoning Circle of Fortune: Either +75000 Working/x2 Base -> Either +50000 Base/x2 Working
+                - Glacial Movement Harvester: Now gives a static x1.9 Working increase
             - As a result of this system rewrite, all CoinFactories were reset.
     
     Music
@@ -578,6 +579,7 @@
             - Note: SOAP Bot will select from the best available audio client based on the Discord client you are using and audio source you have selected.
                     Because of Youtube restrictions, there may be intermittent issues with Youtube audio streaming.
                     If SOAP Bot's audio player disconnects, simply requeue the tracks and it will restart.
+        - Updated various audio-related messages to a cleaner format
         SkipMusicCommand
             - Fixed the success message on single track skip
             - Removed double log messages on single track skip
