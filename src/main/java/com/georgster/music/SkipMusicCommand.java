@@ -55,7 +55,7 @@ public class SkipMusicCommand implements ParseableCommand {
             logger.append("- Skipping one or more tracks in a voice channel", LogDestination.API, LogDestination.NONAPI);
         } else {
             logger.append("- No tracks found in queue", LogDestination.NONAPI);
-            handler.sendMessage("No tracks are currently playing", MessageFormatting.ERROR);
+            handler.sendMessage("No tracks are currently playing", "Audio Player", MessageFormatting.ERROR);
         }
     }
 
