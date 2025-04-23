@@ -15,12 +15,13 @@ public final class StockMarketManipulationUpgrade extends FactoryUpgrade {
 
     public void applyUpgrade(CoinProductionState state) {
         if (SoapNumbers.getRandomDouble(0, 1) < 0.05) {
-            state.upgradeWorkingProduction(0.5);
             state.upgradeBaseProduction(100);
+            state.upgradeWorkingProduction(0.5);
         }
 
         /* If the upgrade is disabled, no coins are produced. So the lowest possible working increase is zero, therefore does not need to be registered */
-        state.registerHighestPossibleWorkingValue(100 + ((long) (state.getBaseProductionValue() * 0.5)));
+        state.registerHighestPossibleBaseValue(100);
+        state.registerHighestPossibleWorkingValue(0.5);
     }
 
     /**

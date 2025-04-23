@@ -49,7 +49,7 @@ public final class SoapNumbers {
      * @return a random double between min and max (inclusive)
      */
     public static double getRandomDouble(double min, double max) {
-        return min + (RAND.nextDouble() * (max - min));
+        return round(3, min + (RAND.nextDouble() * (max - min)));
     }
 
     /**
@@ -59,6 +59,18 @@ public final class SoapNumbers {
      */
     public Random getRandom() {
         return RAND;
+    }
+
+    /**
+     * Rounds a double value to the specified number of decimal places.
+     * 
+     * @param decimalPlaces the number of decimal places to round to
+     * @param value the value to round
+     * @return the rounded value
+     */
+    private static double round(int decimalPlaces, double value) {
+        double scale = Math.pow(10, decimalPlaces);
+        return Math.round(value * scale) / scale;
     }
     
 }

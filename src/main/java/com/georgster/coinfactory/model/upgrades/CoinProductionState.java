@@ -35,8 +35,10 @@ public final class CoinProductionState {
     private long baseProductionValue; // base production value of the factory (for multiplicative upgrades)
     private long workingProductionValue; // production value of the factory while working (for additive upgrades)
 
-    private long lowestPossibleWorkingValue; // the lowest possible working production value of the factory
-    private long highestPossibleWorkingValue; // the highest possible working production value of the factory
+    private long lowestPoissbleBaseValue; // the lowest possible base production value of the factory (for coin projections)
+    private long highestPossibleBaseValue; // the highest possible base production value of the factory (for coin projections)
+    private long lowestPossibleWorkingValue; // the lowest possible working production value of the factory (for coin projections)
+    private long highestPossibleWorkingValue; // the highest possible working production value of the factory (for coin projections)
 
     private boolean hasProcessedStartingModifiers; // whether the state has processed any upgrades that modify the starting production value (they go first)
     private final boolean isTrueProcessCycle; // whether the state is in a true processing cycle (true) or a simulation cycle (false)
@@ -58,6 +60,8 @@ public final class CoinProductionState {
         this.workingProductionValue = startingProductionValue; // production value of the factory while working (for additive upgrades)
         this.lowestPossibleWorkingValue = startingProductionValue; // the lowest possible working production value of the factory
         this.highestPossibleWorkingValue = startingProductionValue; // the highest possible working production value of the factory
+        this.lowestPoissbleBaseValue = startingProductionValue; // the lowest possible base production value of the factory
+        this.highestPossibleBaseValue = startingProductionValue; // the highest possible base production value of the factory
         this.hasProcessedStartingModifiers = false; // whether the state has processed any upgrades that modify the starting production value (they go first)
     }
 
@@ -156,6 +160,30 @@ public final class CoinProductionState {
     }
 
     /**
+     * Returns the lowest possible base production value of the factory.
+     * This value is used to determine the lowest possible production value of the factory during a production cycle.
+     * <p>
+     * <i>Generally used for upgrades with random chances.</i>
+     * 
+     * @return The lowest possible base production value of the factory
+     */
+    public long getLowestPossibleBaseValue() {
+        return lowestPoissbleBaseValue;
+    }
+
+    /**
+     * Returns the highest possible base production value of the factory.
+     * This value is used to determine the highest possible production value of the factory during a production cycle.
+     * <p>
+     * <i>Generally used for upgrades with random chances.</i>
+     * 
+     * @return The highest possible base production value of the factory
+     */
+    public long getHighestPossibleBaseValue() {
+        return highestPossibleBaseValue;
+    }
+
+    /**
      * Returns the total production value of the factory <i>(the sum of the starting production value and the working production value)</i>.
      * 
      * @return The total production value of the factory
@@ -204,6 +232,8 @@ public final class CoinProductionState {
         baseProductionValue = startingProductionValue;
         lowestPossibleWorkingValue = startingProductionValue;
         highestPossibleWorkingValue = startingProductionValue;
+        lowestPoissbleBaseValue = startingProductionValue;
+        highestPossibleBaseValue = startingProductionValue;
     }
 
     /**
@@ -242,8 +272,15 @@ public final class CoinProductionState {
 
         if (hasProcessedStartingModifiers) {
             baseProductionValue += value;
+
+            if (!currentlyProcessingUpgrade.hasRandomChance()) {
+                lowestPoissbleBaseValue += value; // Update the lowest possible base production value
+                highestPossibleBaseValue += value; // Update the highest possible base production value
+            }
         }
 
+        lowestPoissbleBaseValue = Math.max(lowestPoissbleBaseValue, 0); // Ensure the lowest possible base production value is at least 1
+        highestPossibleBaseValue = Math.max(highestPossibleBaseValue, 0); // Ensure the highest possible base production value is at least 1
         baseProductionValue = Math.max(baseProductionValue, 0);
     }
 
@@ -262,8 +299,8 @@ public final class CoinProductionState {
             workingProductionValue += additiveValue;
 
             if (!currentlyProcessingUpgrade.hasRandomChance()) {
-                lowestPossibleWorkingValue += additiveValue; // Update the lowest possible working value
-                highestPossibleWorkingValue += additiveValue; // Update the highest possible working value
+                lowestPossibleWorkingValue += (long) (lowestPoissbleBaseValue * multiplier); // Update the lowest possible working value
+                highestPossibleWorkingValue += (long) (highestPossibleBaseValue * multiplier); // Update the highest possible working value
             }
 
             //ensure values dont go below 0
@@ -333,6 +370,13 @@ public final class CoinProductionState {
             baseProductionValue -= value;
         }
 
+        if (!currentlyProcessingUpgrade.hasRandomChance()) {
+            lowestPoissbleBaseValue -= value; // Update the lowest possible base production value
+            highestPossibleBaseValue -= value; // Update the highest possible base production value
+        }
+
+        lowestPoissbleBaseValue = Math.max(lowestPoissbleBaseValue, 0); // Ensure the lowest possible base production value is at least 1
+        highestPossibleBaseValue = Math.max(highestPossibleBaseValue, 0); // Ensure the highest possible base production value is at least 1
         baseProductionValue = Math.max(baseProductionValue, 0); // Ensure the base production value is at least 1
     }
 
@@ -389,8 +433,6 @@ public final class CoinProductionState {
      * @param value The value to increase the lowest possible working value by
      */
     public void registerLowestPossibleWorkingValue(long value) {
-        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the lowest possible working value
-
         if (hasProcessedStartingModifiers) {
             lowestPossibleWorkingValue += value; // Update the lowest possible working value
         }
@@ -405,10 +447,72 @@ public final class CoinProductionState {
      * @param value The value to increase the highest possible working value by
      */
     public void registerHighestPossibleWorkingValue(long value) {
-        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the highest possible working value
-
         if (hasProcessedStartingModifiers) {
             highestPossibleWorkingValue += value; // Update the highest possible working value
+        }
+    }
+
+    /**
+     * Registers a possible percentage-based working value to the highest possible working value of the factory.
+     * <p>
+     * The lowest and highest possible working values are <b>NOT</b> representative of the actual amount of coins produced in a cycle,
+     * rather are used to gather a range of possible production values for upgrades with random chances.
+     * 
+     * @param percentage The percentage to register as a possible percentage-based working value
+     */
+    public void registerHighestPossibleWorkingValue(double percentage) {
+        if (hasProcessedStartingModifiers) {
+            long additiveValue = (long) (highestPossibleBaseValue * percentage); // Calculate the additive value based on the base production value
+            highestPossibleWorkingValue += additiveValue;
+            highestPossibleWorkingValue = Math.max(highestPossibleWorkingValue, 0);
+        }
+    }
+
+    /**
+     * Registers a possible percentage-based working value to the lowest possible working value of the factory.
+     * <p>
+     * The lowest and highest possible working values are <b>NOT</b> representative of the actual amount of coins produced in a cycle,
+     * rather are used to gather a range of possible production values for upgrades with random chances.
+     * 
+     * @param percentage The percentage to register as a possible percentage-based working value
+     */
+    public void registerLowestPossibleWorkingValue(double percentage) {
+        if (hasProcessedStartingModifiers) {
+            long additiveValue = (long) (lowestPoissbleBaseValue * percentage); // Calculate the additive value based on the base production value
+            lowestPossibleWorkingValue += additiveValue;
+            lowestPossibleWorkingValue = Math.max(lowestPossibleWorkingValue, 0);
+        }
+    }
+
+    /**
+     * Registers a possible static-amount base value to the lowest possible base value of the factory.
+     * <p>
+     * The lowest and highest possible base values are <b>NOT</b> representative of the actual amount of coins produced in a cycle,
+     * rather are used to gather a range of possible production values for upgrades with random chances.
+     * 
+     * @param value The value to register as a possible static-amount base value
+     */
+    public void registerLowestPossibleBaseValue(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the lowest possible base value
+
+        if (hasProcessedStartingModifiers) {
+            lowestPoissbleBaseValue += value; // Update the lowest possible base value
+        }
+    }
+
+    /**
+     * Registers a possible static-amount base value to the highest possible base value of the factory.
+     * <p>
+     * The lowest and highest possible base values are <b>NOT</b> representative of the actual amount of coins produced in a cycle,
+     * rather are used to gather a range of possible production values for upgrades with random chances.
+     * 
+     * @param value The value to register as a possible static-amount base value
+     */
+    public void registerHighestPossibleBaseValue(long value) {
+        value *= (getPrestigeLevel() * PRESTIGE_MULTIPLIER) + 1; // Apply the prestige multiplier to the highest possible base value
+
+        if (hasProcessedStartingModifiers) {
+            highestPossibleBaseValue += value; // Update the highest possible base value
         }
     }
 

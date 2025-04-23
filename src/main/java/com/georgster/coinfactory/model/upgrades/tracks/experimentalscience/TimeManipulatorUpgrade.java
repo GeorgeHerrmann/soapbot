@@ -16,8 +16,8 @@ public final class TimeManipulatorUpgrade extends FactoryUpgrade {
     public void applyUpgrade(CoinProductionState state) {
         state.upgradeStartingProduction(100);
 
-        state.registerLowestPossibleWorkingValue(75);
-        state.registerHighestPossibleWorkingValue((long) (state.getBaseProductionValue() * 0.7));
+        state.registerHighestPossibleWorkingValue(0.7);
+        state.registerHighestPossibleBaseValue(75);
 
         if (SoapNumbers.getRandomDouble(0, 1) < 0.5) {
             state.upgradeWorkingProduction(0.7);

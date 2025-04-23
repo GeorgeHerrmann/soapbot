@@ -544,7 +544,7 @@
         - Changed the cost of prestiging to be the total cost of all upgrades rather than the refund cost (effectively doubles the prestige cost)
             - Note: The amount of coins created when all upgrades are owned is fairly substantial, so it is important that the prestige requirements reflect this
         
-2.9
+2.900
     Coin Factory
         - Rewrote the factory's coin calculation system to address multiple issues with calculations causing crashing
             - New System:
@@ -585,3 +585,8 @@
             - Removed double log messages on single track skip
         QueueMusicCommand
             - Fixed an issue where all the track numbers on the displayed queue were "1"
+
+2.901
+    Coin Factory
+        - Fixed an issue where random chance upgrades would provide inconsistent values when calculating coin projections
+        - The coin projection (i.e "Your factory will produce x - x amount of coins per process cycle") should now be 100% accurate!

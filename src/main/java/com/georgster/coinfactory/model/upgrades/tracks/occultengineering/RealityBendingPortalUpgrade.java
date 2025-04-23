@@ -26,7 +26,7 @@ public final class RealityBendingPortalUpgrade extends FactoryUpgrade {
             state.upgradeWorkingProduction(2.0);
         }
 
-        state.registerHighestPossibleWorkingValue(state.getBaseProductionValue() * 2);
+        state.registerHighestPossibleWorkingValue(2.0);
     }
 
     /**

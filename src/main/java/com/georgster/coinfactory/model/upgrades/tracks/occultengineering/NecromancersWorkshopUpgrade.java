@@ -20,8 +20,7 @@ public final class NecromancersWorkshopUpgrade extends FactoryUpgrade {
             }
         }
 
-        /* Technically the lowest possible value is zero, so it does not need to be registered */
-        state.registerHighestPossibleWorkingValue((long) state.getUpgradeCount() * 500);
+        state.registerHighestPossibleBaseValue(state.getUpgradeCount() * 400);
     }
 
     /**

@@ -22,10 +22,11 @@ public final class DysonSphereConstructionUpgrade extends FactoryUpgrade {
             }
         }
 
-        state.upgradeWorkingProduction(0.5);
         state.upgradeBaseProduction(200);
+        state.upgradeWorkingProduction(0.5);
 
-        state.registerHighestPossibleWorkingValue(200 + ((long) (state.getBaseProductionValue() * 0.5)));
+        state.registerHighestPossibleBaseValue(200);
+        state.registerHighestPossibleWorkingValue(0.5);
     }
 
     /**
