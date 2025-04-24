@@ -74,14 +74,9 @@ public final class CoinProductionState {
             upgrade.applyUpgrade(this);
         });
         markFirstBatchProcessed();
-        System.out.println("Starting production value: " + startingProductionValue);
         upgrades.forEach(upgrade -> {
             currentlyProcessingUpgrade = upgrade;
             upgrade.applyUpgrade(this);
-            System.out.println("Uprgrade: " + upgrade.getName());
-            System.out.println("\tBase production value: " + baseProductionValue + " | Working production value: " + workingProductionValue);
-            System.out.println("\tLowest possible base value: " + lowestPoissbleBaseValue + " | Highest possible base value: " + highestPossibleBaseValue);
-            System.out.println("\tLowest possible working value: " + lowestPossibleWorkingValue + " | Highest possible working value: " + highestPossibleWorkingValue);
         });
     }
 

@@ -400,6 +400,54 @@ public final class CoinFactory implements Manageable {
     }
 
     /**
+     * Purchases all available upgrades using the factory's {@link #getinvestedCoins() invested coins} and marks them as owned.
+     * <p>
+     * If the factory does not have enough coins to purchase all upgrades, an {@link InsufficientCoinsException} is thrown with the number of successful and failed purchases.
+     * 
+     * @throws InsufficientCoinsException if the factory does not have enough coins to purchase all upgrades.
+     * @see {@link #getAvailableUpgrades()} for all available upgrades that can be purchased.
+     */
+    public void purchaseAllAvailableUpgrades() throws InsufficientCoinsException {
+        int successfulPurchases = 0;
+        int failedPurchases = 0;
+        for (FactoryUpgradeTrack track : getCurrentUpgradeTracks()) {
+            for (FactoryUpgrade upgrade : track.getUpgrades()) {
+                if (!upgrade.isOwned()) {
+                    try {
+                        purchaseUpgrade(upgrade);
+                        successfulPurchases++;
+                    } catch (InsufficientCoinsException e) {
+                        failedPurchases++;
+                    }
+                }
+            }
+        }
+
+        if (failedPurchases > 0) {
+            throw new InsufficientCoinsException("Failed to purchase " + failedPurchases + " upgrades. Successfully purchased " + successfulPurchases + " upgrades.");
+        }
+    }
+
+    /**
+     * Returns the total cost of all available upgrades that can be purchased.
+     * 
+     * @return the total cost of all available upgrades that can be purchased.
+     * @see {@link #getAvailableUpgrades()} for all available upgrades that can be purchased.
+     */
+    public long getAvailableUpgradeCost() {
+        return getCurrentUpgradeTracks().stream().flatMap(track -> track.getUpgrades().stream()).filter(upgrade -> !upgrade.isOwned()).mapToLong(upgrade -> upgrade.getCost(getPrestige())).sum();
+    }
+
+    /**
+     * Returns a list of all available upgrades that can be purchased.
+     * 
+     * @return a list of all available upgrades that can be purchased.
+     */
+    public List<FactoryUpgrade> getAvailableUpgrades() {
+        return getCurrentUpgradeTracks().stream().flatMap(track -> track.getUpgrades().stream()).filter(upgrade -> !upgrade.isOwned()).toList();
+    }
+
+    /**
      * Returns the {@link Color} associated with the given prestige level.
      * 
      * @param prestigeLevel the prestige level to get the color for.

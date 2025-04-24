@@ -55,6 +55,16 @@ public final class CoinFactoryWizard extends InputWizard {
      * as defined by the embed returned by {@link CoinFactory#getDetailEmbed(UserProfileManager)}.
      */
     public void factoryHome() {
+        List<String> options = new ArrayList<>();
+        options.add("View Upgrade Tracks");
+        options.add("Manage Upgrade Order");
+        options.add("View Investment");
+        if (factory.ownsAllUpgrades()) {
+            options.add("Prestige");
+        } else {
+            options.add("Purchase All Upgrades");
+        }
+
 
         withResponse(response -> {
             if (response.equals("view upgrade tracks")) {
@@ -73,8 +83,10 @@ public final class CoinFactoryWizard extends InputWizard {
                 } else {
                     nextWindow("prestigeFactory");
                 }
+            } else if (response.equals("purchase all upgrades")) {
+                nextWindow("purchaseAllUpgrades");
             }
-        }, false, factory.getDetailEmbed(manager, userSettings), "View Upgrade Tracks", "Manage Upgrade Order", "View Investment", "Prestige");
+        }, false, factory.getDetailEmbed(manager, userSettings), options.toArray(new String[options.size()]));
     }
 
     /**
@@ -430,5 +442,38 @@ public final class CoinFactoryWizard extends InputWizard {
                 goBack();
             }
         }, true, prompt.toString(), "Prestige Factory");
+    }
+
+    /**
+     * Allows the user to purchase all available upgrades in the {@link CoinFactory}.
+     */
+    public void purchaseAllUpgrades() {
+        List<FactoryUpgrade> availableUpgrades = factory.getAvailableUpgrades();
+
+        StringBuilder prompt = new StringBuilder("Your factory cannot be prestiged until you purchase all upgrades.\n\n");
+        prompt.append("Would you like to purchase all available **" + availableUpgrades.size() + "** upgrades?\n");
+        prompt.append("*Clicking* **'purchase all upgrades'** *will purchase as many upgrades as possible with your invested coins, even if you do not have enough coins to purchase all upgrades.*\n\n");
+        prompt.append("Your factory will attempt to purchase them in the following order:\n");
+        availableUpgrades.forEach(upgrade -> {
+            prompt.append("- ").append(upgrade.getName()).append(" *(Level ").append(upgrade.getLevel()).append(")*\n");
+        });
+        prompt.append("\n*You currently have* **" + factory.getInvestedCoins() + "** *coins invested.*\n");
+        prompt.append("\n*The cost of all upgrades is * **" + factory.getAvailableUpgradeCost() + "** *coins.*\n\n");
+
+        withResponse(response -> {
+            if (response.equals("purchase all upgrades")) {
+                try {
+                    factory.purchaseAllAvailableUpgrades();
+                    manager.update(profile);
+                    sendMessage("You have successfully purchased all available upgrades.\n" +
+                                "*Your CoinFactory now has* **" + factory.getInvestedCoins() + "** *coins invested. You may now prestige your factory if you have enough invested coins.*", "All Upgrades Purchased");
+                    goBack();
+                } catch (InsufficientCoinsException e) {
+                    sendMessage(e.getMessage(), "Insufficient Coins");
+                }
+            } else if (response.equals("view coin investment")) {
+                nextWindow("viewCoinInvestment");
+            }
+        }, true, prompt.toString(), "Purchase All Upgrades", "View Coin Investment");
     }
 }
