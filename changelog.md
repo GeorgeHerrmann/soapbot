@@ -589,4 +589,5 @@
 2.901
     Coin Factory
         - Fixed an issue where random chance upgrades would provide inconsistent values when calculating coin projections
-        - The coin projection (i.e "Your factory will produce x - x amount of coins per process cycle") should now be 100% accurate!
+            - The coin projection (i.e "Your factory will produce x - x amount of coins per process cycle") should now be 100% accurate!
+        - Fixed an issue where the Fully Automated Workforce upgrade could cause a coin wipe during coin projection calculation, causing incorrection projection values

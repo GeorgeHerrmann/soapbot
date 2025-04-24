@@ -15,14 +15,16 @@ public final class FullyAutomatedWorkforceUpgrade extends FactoryUpgrade {
 
     public void applyUpgrade(CoinProductionState state) {
         state.registerPossibleCoinWipe(1.0);
+        boolean wipe = false;
 
         for (int i = 0; i < state.getUpgradeCount(); i++) {
             state.registerHighestPossibleWorkingValue(0.1);
-            if (SoapNumbers.getRandomDouble(0, 1) < 0.01) {
-                state.wipeCoins(1);
-                break;
-            } else {
+            if (!wipe) {
                 state.upgradeWorkingProduction(0.1);
+                if (SoapNumbers.getRandomDouble(0, 1) < 0.01) {
+                    state.wipeCoins(1);
+                    wipe = true;
+                }
             }
         }
     }
