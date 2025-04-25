@@ -70,10 +70,11 @@ public final class CoinFactoryCommand implements ParseableCommand {
             output.append("- Each process cycle, your coin factory will produce coins based on its upgrades. Upgrades can influence various factors which affect how many coins will be produced.\n" +
                             "- The Coin Factory processes coins with the following algorithm:\n" +
                             "- All upgrades which affect **STARTING PRODUCTION** are processed first, increasing the starting number of coins the factory will work with.\n" +
-                            "- Then, the factory will examine **BASE** and **WORKING** values. Any upgrade which influences **WORKING** production will ALSO influence **BASE** production, while **BASE** production increases DO NOT influence **WORKING** production.\n" +
-                            "\t- ***For example:*** An upgrade which increases **STARTING** production by +15, **WORKING** production by +20, and **BASE** production by 1.15x will be processed as follows:\n" +
-                            "\t- **STARTING** *production will be increased by +15, then any other upgrades that influence* **STARTING** *production will be processed.*\n" +
-                            "\t- *Then, the* **WORKING** *and* **BASE** *productions will be increased by +20 and then the* **BASE** *production will further be increased by 15%.*\n");
+                            "- Then, the factory will examine **BASE** and **WORKING** values. Any upgrade which influences **BASE** production is additive and does not represent the actual amount of produced coins in a cycle." +
+                            " Instead, **WORKING** production upgrades, which are multiplicative, are based off the current **BASE** production value, and the resulting value is added to the current **WORKING** production, which is the actual amount of produced coins in a cycle.\n" +
+                            "\t- ***For example:*** An upgrade which increases **STARTING** production by +20, **BASE** production by +20, and **WORKING** production by 1.15x will be processed as follows:\n" +
+                            "\t- **STARTING** *production will be increased by +20, then any other upgrades that influence* **STARTING** *production will be processed.*\n" +
+                            "\t- *Then, the* **BASE** *production will be increased by +20 and then the* **WORKING** *production will be increased by 40 x (0.15) = 6*\n");
             
             output.append("\n**PRESTIGES**\n");
             output.append("- You can prestige your factory for greater coin production, but the cost of your upgrades will also increase.\n" +
