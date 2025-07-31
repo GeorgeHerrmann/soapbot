@@ -12,6 +12,7 @@ import com.georgster.control.util.ClientContext;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.dm.MessageCommand;
 import com.georgster.economy.BankCommand;
+import com.georgster.elo.EloCommand;
 import com.georgster.events.reserve.ReserveEventCommand;
 import com.georgster.events.poll.PollEventCommand;
 import com.georgster.events.reserve.ReserveCommand;
@@ -83,7 +84,8 @@ public final class CommandRegistry {
             CardCommand.class,
             MentionGroupCommand.class,
             UserSettingsCommand.class,
-            CoinFactoryCommand.class
+            CoinFactoryCommand.class,
+            EloCommand.class
         ));
     }
 

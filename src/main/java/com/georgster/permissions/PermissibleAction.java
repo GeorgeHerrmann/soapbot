@@ -30,5 +30,6 @@ public enum PermissibleAction {
     BANKCOMMAND,
     MENTIONGROUPCOMMAND,
     COINFACTORYCOMMAND,
+    ELOCOMMAND,
     DEFAULT
 }

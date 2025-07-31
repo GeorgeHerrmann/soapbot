@@ -8,6 +8,7 @@ import com.georgster.collectable.Collected;
 import com.georgster.collectable.trade.Tradeable;
 import com.georgster.control.util.identify.util.MemberIdentified;
 import com.georgster.economy.CoinBank;
+import com.georgster.elo.EloRating;
 import com.georgster.gpt.MemberChatCompletions;
 
 /**
@@ -25,6 +26,7 @@ public final class UserProfile extends MemberIdentified {
     private final CoinBank bank;
     private final CoinFactory factory;
     private final List<Collected> collecteds;
+    private final EloRating eloRating;
 
     /**
      * Creates a new {@link UserProfile} for a specific {@code Member} inside of a {@code Guild}.
@@ -41,6 +43,7 @@ public final class UserProfile extends MemberIdentified {
         this.bank = new CoinBank(userId);
         this.collecteds = new ArrayList<>();
         this.factory = new CoinFactory(userId);
+        this.eloRating = new EloRating(userId);
     }
 
     /**
@@ -53,8 +56,11 @@ public final class UserProfile extends MemberIdentified {
      * @param user The username of the user
      * @param completions The {@link MemberChatCompletions} of the user
      * @param bank The {@link CoinBank} of the user
+     * @param factory The {@link CoinFactory} of the user
+     * @param collecteds The {@link Collected} items of the user
+     * @param eloRating The {@link EloRating} of the user
      */
-    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, CoinFactory factory, List<Collected> collecteds) {
+    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, CoinFactory factory, List<Collected> collecteds, EloRating eloRating) {
         super(userId);
         this.guildId = serverId;
         this.username = user;
@@ -62,6 +68,7 @@ public final class UserProfile extends MemberIdentified {
         this.bank = bank;
         this.collecteds = collecteds;
         this.factory = factory;
+        this.eloRating = eloRating != null ? eloRating : new EloRating(userId);
     }
 
     /**
@@ -147,6 +154,15 @@ public final class UserProfile extends MemberIdentified {
      */
     public CoinFactory getFactory() {
         return this.factory;
+    }
+
+    /**
+     * Gets the {@link EloRating} of the {@code Member} associated with this profile.
+     * 
+     * @return The {@link EloRating} of the Member associated with this profile.
+     */
+    public EloRating getEloRating() {
+        return this.eloRating;
     }
 
     /**

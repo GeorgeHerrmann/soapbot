@@ -27,5 +27,13 @@ public enum ProfileType {
     /**
      * Represents the global user settings profile.
      */
-    SETTINGS
+    SETTINGS,
+    /**
+     * Represents a guild's Elo ratings profile.
+     */
+    ELO_RATINGS,
+    /**
+     * Represents a guild's Elo battles profile.
+     */
+    ELO_BATTLES
 }

@@ -12,6 +12,7 @@ import com.georgster.collectable.Collected;
 import com.georgster.control.util.ClientContext;
 import com.georgster.database.ProfileType;
 import com.georgster.economy.CoinBank;
+import com.georgster.elo.EloRating;
 import com.georgster.gpt.MemberChatCompletions;
 import com.georgster.profile.UserProfile;
 import com.georgster.util.DateTimed;
@@ -140,8 +141,10 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
                 if (collecteds == null) collecteds = new ArrayList<>();
                 CoinFactory factory = profile.getFactory();
                 if (factory == null) factory = new CoinFactory(id);
+                EloRating eloRating = profile.getEloRating();
+                if (eloRating == null) eloRating = new EloRating(id);
 
-                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, factory, collecteds));
+                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, factory, collecteds, eloRating));
             } else {
                 add(new UserProfile(event.getGuild().getId().asString(), id, member.getTag()));
             }
