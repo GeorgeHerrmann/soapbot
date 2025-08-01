@@ -319,7 +319,7 @@ public class EloCommand implements ParseableCommand {
         sb.append("Best Rating: ").append(rating.getBestRating()).append("\n");
         
         // Calculate rating change from start
-        int ratingChange = rating.getRating() - 1500;
+        int ratingChange = rating.getRating() - 1000;
         sb.append("Rating Change from Start: ");
         if (ratingChange > 0) {
             sb.append("+").append(ratingChange);
@@ -456,8 +456,8 @@ public class EloCommand implements ParseableCommand {
         helpMessage.append("• `!elo history [@user]` - Battle history for you (or another user)\n\n");
         
         helpMessage.append("## ⚔️ **Battle Commands**\n");
-        helpMessage.append("• `!!elo battle` - Start a new ELO battle against another player\n");
-        helpMessage.append("• `!!battle` - Alternative command to start battles\n\n");
+        helpMessage.append("• `!elo battle` - Start a new ELO battle against another player\n");
+        helpMessage.append("• `!battle` - Alternative command to start battles\n\n");
         
         helpMessage.append("## 🎯 **How Battles Work**\n");
         helpMessage.append("1. **Challenge** - Use `!!elo battle` to start a battle wizard\n");

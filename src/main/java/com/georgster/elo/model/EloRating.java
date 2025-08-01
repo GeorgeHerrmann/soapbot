@@ -27,12 +27,12 @@ public class EloRating implements Manageable {
      */
     public EloRating(String memberId) {
         this.memberId = memberId;
-        this.rating = 1500;
+        this.rating = 1000;
         this.matchesPlayed = 0;
         this.wins = 0;
         this.losses = 0;
         this.winStreak = 0;
-        this.bestRating = 1500;
+        this.bestRating = 1000;
         this.opponentHistory = new HashMap<>();
         this.lastMatch = null;
     }

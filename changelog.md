@@ -597,3 +597,11 @@
         - Added the "Purchase All Upgrades" button to the homepage of the wizard
             - This button will replace the "prestige" button if all upgrades are not currently owned.
             - This button will purchase all upgrades that can possibly be purchased with the factory's invested coins.
+
+2.910
+    Elo Ratings and Battles
+        - Added Elo Ratings and battles
+            - Use !help elo or !elo help for more information
+
+    Timezones
+        - Fixed an issue where MST was not properly converting for daylight savings

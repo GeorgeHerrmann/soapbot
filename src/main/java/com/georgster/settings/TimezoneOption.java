@@ -124,8 +124,12 @@ public final class TimezoneOption extends UserSettings.SettingsOption {
         if (option instanceof TimezoneOption) {
             if (option.currentOption().equals("-05:00")) {
                 return "America/New_York";
+            } if (option.currentOption().equals("-07:00")) {
+                return "America/Denver";
+            } else if (option.currentOption().equals("-10:00")) {
+                return "America/Los_Angeles";  
             } else {
-                return option.currentOption(); // Flips the map and gets the key from the value
+                return option.currentOption();
             }
         } else {
             throw new IllegalArgumentException("Invalid SettingsOption: " + option.name() + " is not a TimezoneOption");
