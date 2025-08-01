@@ -13,6 +13,9 @@ import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.SoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.manager.UserSettingsManager;
+import com.georgster.elo.manager.EloManager;
+import com.georgster.elo.manager.EloBattleManager;
+import com.georgster.elo.manager.BattleWizardStateManager;
 import com.georgster.music.components.AudioContext;
 
 import discord4j.core.event.EventDispatcher;
@@ -138,6 +141,33 @@ public class ClientContext {
      */
     public UserSettingsManager getUserSettingsManager() {
         return (UserSettingsManager) managers.stream().filter(UserSettingsManager.class::isInstance).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the EloManager.
+     * 
+     * @return the elo manager.
+     */
+    public EloManager getEloManager() {
+        return (EloManager) managers.stream().filter(EloManager.class::isInstance).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the EloBattleManager.
+     * 
+     * @return the elo battle manager.
+     */
+    public EloBattleManager getEloBattleManager() {
+        return (EloBattleManager) managers.stream().filter(EloBattleManager.class::isInstance).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the BattleWizardStateManager.
+     * 
+     * @return the battle wizard state manager.
+     */
+    public BattleWizardStateManager getBattleWizardStateManager() {
+        return (BattleWizardStateManager) managers.stream().filter(BattleWizardStateManager.class::isInstance).findFirst().orElse(null);
     }
 
     /**
