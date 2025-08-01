@@ -135,9 +135,13 @@ public class EloBattle implements Manageable {
     /**
      * Gets when the battle was created.
      * 
-     * @return The creation timestamp
+     * @return The creation timestamp, or current time if null
      */
     public DateTimed getCreatedAt() {
+        if (createdAt == null) {
+            // Initialize with current time for legacy battles
+            createdAt = DateTimed.fromLocalDateTime(DateTimed.getCurrentLocalDateTime());
+        }
         return createdAt;
     }
 

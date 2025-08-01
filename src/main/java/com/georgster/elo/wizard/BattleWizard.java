@@ -265,7 +265,7 @@ public class BattleWizard extends InputWizard {
         String prompt = "**Battle Challenge Received!**\n\n" +
                        "⚔️ **" + challengerName + "** has challenged you to a battle!\n" +
                        "🆔 Battle ID: `" + battle.getBattleId() + "`\n" +
-                       "📅 Created: " + battle.getCreatedAt().toString() + "\n\n" +
+                       "📅 Created: " + (battle.getCreatedAt() != null ? battle.getCreatedAt().getFormattedDate() : "Unknown") + "\n\n" +
                        "Do you accept this challenge?";
 
         String[] options = {"Accept Challenge", "Decline Challenge"};
