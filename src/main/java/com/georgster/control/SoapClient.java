@@ -7,6 +7,9 @@ import com.georgster.control.manager.SoapEventManager;
 import com.georgster.control.manager.SoapManager;
 import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.ClientContext;
+import com.georgster.elo.manager.EloManager;
+import com.georgster.elo.manager.EloBattleManager;
+import com.georgster.elo.manager.BattleWizardStateManager;
 import com.georgster.logs.LogDestination;
 import com.georgster.logs.MultiLogger;
 import com.georgster.music.components.AudioContext;
@@ -45,7 +48,10 @@ public final class SoapClient {
                            new PermissionsManager(context),
                            new UserProfileManager(context),
                            new CollectableManager(context),
-                           new MentionGroupManager(context));
+                           new MentionGroupManager(context),
+                           new EloManager(context),
+                           new EloBattleManager(context),
+                           new BattleWizardStateManager(context));
         this.context.setCommandRegistry(new CommandRegistry(context));
         this.context.getCommandRegistry().registerGlobalCommands();
     }

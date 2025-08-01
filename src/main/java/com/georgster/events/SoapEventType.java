@@ -11,5 +11,9 @@ public enum SoapEventType {
     /**
      * Represents a PollEvent.
      */
-    POLL
+    POLL,
+    /**
+     * Represents an EloBattle.
+     */
+    ELO_BATTLE
 }
