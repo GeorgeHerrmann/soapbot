@@ -482,11 +482,11 @@ public class EloCommand implements ParseableCommand {
         helpMessage.append("• **Only one result submission per battle** - First valid result is final\n\n");
         
         helpMessage.append("## 🔗 **Command Aliases**\n");
-        helpMessage.append("• `!!elo r` = `!!elo rank`\n");
-        helpMessage.append("• `!!elo lb` = `!!elo leaderboard`\n");
-        helpMessage.append("• `!!elo s` = `!!elo stats`\n");
-        helpMessage.append("• `!!elo h` = `!!elo history`\n");
-        helpMessage.append("• `!!elo help` = `!!elo ?` - Show this help menu\n\n");
+        helpMessage.append("• `!elo r` = `!elo rank`\n");
+        helpMessage.append("• `!elo lb` = `!elo leaderboard`\n");
+        helpMessage.append("• `!elo s` = `!elo stats`\n");
+        helpMessage.append("• `!elo h` = `!elo history`\n");
+        helpMessage.append("• `!elo help` = `!elo ?` - Show this help menu\n\n");
         
         helpMessage.append("*Need more help? Contact a server administrator.*");
 
