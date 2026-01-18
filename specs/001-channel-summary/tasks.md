@@ -51,12 +51,12 @@ description: "Task list for Channel Summary feature"
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Implement `execute()` to retrieve 50 messages, filter bots/system, call `UserProfileManager.createSummaryCompletion`, and post reply in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T009 [P] [US1] Implement `getAliases()` with ["summary", "summarize", "recap"] in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T010 [P] [US1] Implement `getCommandParser()` (no-arg) in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T011 [P] [US1] Implement `help()` text in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T012 [US1] Implement `shouldDefer()` returning `true` in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T013 [US1] Add `MultiLogger` success/error logs in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T008 [US1] Implement `execute()` to retrieve 50 messages, filter bots/system, call `UserProfileManager.createSummaryCompletion`, and post reply in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T009 [P] [US1] Implement `getAliases()` with ["summary", "summarize", "recap"] in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T010 [P] [US1] Implement `getCommandParser()` (no-arg) in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T011 [P] [US1] Implement `help()` text in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T012 [US1] Implement `shouldDefer()` returning `true` in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T013 [US1] Add `MultiLogger` success/error logs in src/main/java/com/georgster/summary/SummaryCommand.java
 
 **Checkpoint**: User Story 1 functional and independently testable
 
@@ -70,9 +70,9 @@ description: "Task list for Channel Summary feature"
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] Ensure logic summarizes available messages (<50) in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T015 [P] [US2] Post "No messages to summarize in this channel." when none/filtered-empty in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T016 [P] [US2] Ensure prompt construction handles variable message counts in src/main/java/com/georgster/control/manager/UserProfileManager.java
+- [X] T014 [US2] Ensure logic summarizes available messages (<50) in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T015 [P] [US2] Post "No messages to summarize in this channel." when none/filtered-empty in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T016 [P] [US2] Ensure prompt construction handles variable message counts in src/main/java/com/georgster/control/manager/UserProfileManager.java
 
 **Checkpoint**: User Stories 1 and 2 work independently
 
