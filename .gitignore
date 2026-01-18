@@ -14,3 +14,6 @@ target/classes/com/georgster/database/dbconnection.txt
 
 src/main/java/com/georgster/gpt/openaikey.txt
 target/classes/com/georgster/gpt/openaikey.txt
+.specify/
+.github/
+.vscode/
