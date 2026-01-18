@@ -22,7 +22,7 @@
 
 ### User Story 1 - User Requests Channel Summary (Priority: P1)
 
-A user in a Discord guild invokes the summary command in any text channel. The bot retrieves the last 50 messages from that channel and sends them to the existing AI agent (used in the ask command) to generate a concise one-paragraph recap. The recap is posted as a reply to the user's command invocation, providing a quick overview of recent conversation topics.
+A user in a Discord guild invokes the summary command (a simple standalone command like `!summary` or `/summary` slash command) in any text channel. The bot retrieves the last 50 messages from that channel and sends them to the existing AI agent (used in the ask command) to generate a concise one-paragraph recap. The recap is posted as a reply to the user's command invocation, providing a quick overview of recent conversation topics.
 
 **Why this priority**: This is the core functionality and primary use case. Without this, the feature has no value.
 
@@ -69,9 +69,9 @@ The summary command should only summarize messages from the specific channel whe
 
 ### Edge Cases
 
-- What happens when a channel has 0 messages? System should notify the user there are no messages to summarize.
-- What happens when the AI agent fails to generate a summary? System should return a user-friendly error message.
-- What happens when the summary exceeds 75 words? The AI agent should be instructed to prioritize brevity and stay within the limit.
+- What happens when a channel has 0 messages? System should notify the user with a friendly message: "No messages to summarize in this channel."
+- What happens when the AI agent fails to generate a summary? System should return a user-friendly error message: "Summary generation failed. Please try again later." Technical error details are logged internally.
+- What happens when the summary exceeds 75 words? The AI agent should be instructed to prioritize brevity and stay within the limit via the dedicated system prompt.
 - What happens when messages contain sensitive information? No additional filtering is assumed; existing AI agent guidelines apply.
 
 ## Requirements *(mandatory)*
@@ -79,14 +79,17 @@ The summary command should only summarize messages from the specific channel whe
 ### Functional Requirements
 
 - **FR-001**: System MUST retrieve the last 50 messages from the channel where the command is invoked
-- **FR-002**: System MUST pass the retrieved messages to the existing AI agent (ask command's AI agent)
-- **FR-003**: System MUST ensure the AI agent generates a summary of one paragraph
-- **FR-004**: System MUST ensure the summary is under 75 words
-- **FR-005**: System MUST post the generated summary as a reply in the same channel
-- **FR-006**: System MUST handle cases where fewer than 50 messages exist by summarizing all available messages
-- **FR-007**: System MUST notify the user if the channel has no messages to summarize
-- **FR-008**: System MUST handle AI agent failures gracefully with a user-friendly error message
-- **FR-009**: System MUST only summarize messages from the specific channel where the command was invoked
+- **FR-002**: System MUST filter out bot messages and Discord system messages (joins, pins, member updates, etc.) before processing
+- **FR-003**: System MUST include all user-generated text content in the message set sent to the AI agent
+- **FR-004**: System MUST pass the filtered messages to the existing AI agent with a dedicated summary system prompt
+- **FR-005**: System MUST ensure the dedicated summary prompt instructs AI to generate a summary of one paragraph
+- **FR-006**: System MUST ensure the summary prompt explicitly constrains output to under 75 words
+- **FR-007**: System MUST post the generated summary as a reply in the same channel
+- **FR-008**: System MUST handle cases where fewer than 50 user messages exist by summarizing all available user-generated messages
+- **FR-009**: System MUST notify the user if the channel has no user messages to summarize
+- **FR-010**: System MUST handle AI agent failures gracefully with a user-friendly error message
+- **FR-011**: System MUST only summarize messages from the specific channel where the command was invoked
+- **FR-012**: The dedicated summary system prompt MUST focus AI output on main conversation topics while respecting paragraph and word constraints
 
 ### Key Entities
 
@@ -110,3 +113,12 @@ The summary command should only summarize messages from the specific channel whe
 - Discord API access is already established for retrieving message history
 - Users have appropriate permissions to invoke commands in channels where they use the summary feature
 - "Under 75 words" is interpreted as a hard constraint that the AI agent must respect via prompt instructions
+
+## Clarifications
+
+### Session 2026-01-17
+
+- Q: How should users invoke the summary command? → A: Simple standalone command (e.g., `!summary` or `/summary` slash command) that can be invoked anywhere in the channel without parameters
+- Q: How should the AI agent be instructed to format and constrain output? → A: Use a dedicated system prompt for summary requests that specifies paragraph, word, and format constraints separate from the ask command
+- Q: Should the system filter message types before summarization? → A: Exclude bot messages and Discord system messages (joins, pins, etc.), but include all user-generated text content
+- Q: What level of error detail should be shown to users? → A: User-friendly concise messages only; technical error details logged internally but not shown to users
