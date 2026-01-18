@@ -17,10 +17,10 @@ import java.util.List;
 
 /**
  * A command for generating a summary of recent messages in a Discord text channel.
- * Retrieves the last 50 messages (excluding bots and system messages) and uses
+ * Retrieves the last 100 messages (excluding bots and system messages) and uses
  * OpenAI to create a concise one-paragraph recap under 75 words.
  */
-public class SummaryCommand implements ParseableCommand {
+public class SummaryCommand implements Command {
     private final UserProfileManager manager;
     
     /**
@@ -33,17 +33,12 @@ public class SummaryCommand implements ParseableCommand {
     /**
      * {@inheritDoc}
      * 
-     * Retrieves last 50 messages from the channel, filters to user messages only,
+     * Retrieves last 100 messages from the channel, filters to user messages only,
      * generates AI summary, and posts result to channel.
      */
     public void execute(CommandExecutionEvent event);
     
-    /**
-     * {@inheritDoc}
-     * 
-     * @return "V" - No arguments required (though we implement ParseableCommand for consistency)
-     */
-    public CommandParser getCommandParser();
+
     
     /**
      * {@inheritDoc}
@@ -108,8 +103,8 @@ public class SummaryCommand implements ParseableCommand {
  */
 public void execute(CommandExecutionEvent event) {
     // Implementation steps:
-    // 1. Get channel from event.getDiscordEvent().getMessage().getChannel() or slash command channel
-    // 2. Call channel.getMessagesBefore(Snowflake.of(Instant.now())).take(50).collectList()
+    // 1. Get channel from event.getDiscordEvent().getChannel()
+    // 2. Call channel.getMessagesBefore(Snowflake.of(Instant.now())).take(100).collectList()
     // 3. Filter: msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false)
     // 4. Filter: msg -> msg.getType() == Message.Type.DEFAULT || msg.getType() == Message.Type.REPLY
     // 5. If filtered list is empty: sendMessage("No messages to summarize", INFO), return

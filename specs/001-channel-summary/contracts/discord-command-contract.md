@@ -12,7 +12,7 @@
 ```json
 {
   "name": "summary",
-  "description": "Generate a summary of the last 50 messages in this channel",
+  "description": "Generate a summary of the last 100 messages in this channel",
   "type": 1,
   "options": []
 }
@@ -29,7 +29,7 @@
 ```java
 ApplicationCommandRequest.builder()
     .name("summary")
-    .description("Generate a summary of the last 50 messages in this channel")
+    .description("Generate a summary of the last 100 messages in this channel")
     .build()
 ```
 
@@ -220,8 +220,8 @@ public String createSummaryCompletion(List<String> messages, String channelName)
 1. **User Input**: `/summary` (in #general channel)
 2. **Bot Action**: 
    - Defers response (Discord slash command acknowledgment)
-   - Retrieves last 50 messages from #general
-   - Filters to 38 user messages (12 bot/system messages excluded)
+   - Retrieves last 100 messages from #general
+   - Filters to 78 user messages (22 bot/system messages excluded)
    - Formats messages into prompt
    - Calls OpenAI API
 3. **Bot Response** (5 seconds later):
@@ -265,8 +265,8 @@ public String createSummaryCompletion(List<String> messages, String channelName)
 
 ### Test Cases
 
-1. **TC-001**: Command in channel with 50+ messages → Summary posted
-2. **TC-002**: Command in channel with <50 messages → Summary of all available messages
+1. **TC-001**: Command in channel with 100+ messages → Summary posted
+2. **TC-002**: Command in channel with <100 messages → Summary of all available messages
 3. **TC-003**: Command in channel with 0 messages → "No messages to summarize"
 4. **TC-004**: Command in channel with only bot messages → "No messages to summarize"
 5. **TC-005**: Command with missing permissions → Permission error message
