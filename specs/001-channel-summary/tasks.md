@@ -24,9 +24,9 @@ description: "Task list for Channel Summary feature"
 
 **Purpose**: Minimal project setup and structure
 
-- [ ] T001 Create `SummaryCommand.java` in src/main/java/com/georgster/summary/SummaryCommand.java
-- [ ] T002 [P] Verify OpenAI key is present in src/main/java/com/georgster/gpt/openaikey.txt
-- [ ] T003 [P] Verify Discord4J and OpenAI SDK dependencies in pom.xml
+- [X] T001 Create `SummaryCommand.java` in src/main/java/com/georgster/summary/SummaryCommand.java
+- [X] T002 [P] Verify OpenAI key is present in src/main/java/com/georgster/gpt/openaikey.txt
+- [X] T003 [P] Verify Discord4J and OpenAI SDK dependencies in pom.xml
 
 ---
 
@@ -34,10 +34,10 @@ description: "Task list for Channel Summary feature"
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story
 
-- [ ] T004 [P] Add `SUMMARYCOMMAND` to enum in src/main/java/com/georgster/permissions/PermissibleAction.java
-- [ ] T005 Implement `createSummaryCompletion(List<String>, String)` in src/main/java/com/georgster/control/manager/UserProfileManager.java
-- [ ] T006 [P] Register `SummaryCommand` in src/main/java/com/georgster/control/CommandRegistry.java
-- [ ] T007 [P] Add slash command descriptor in src/main/java/com/georgster/summary/SummaryCommand.java via `getCommandApplicationInformation()`
+- [X] T004 [P] Add `SUMMARYCOMMAND` to enum in src/main/java/com/georgster/permissions/PermissibleAction.java
+- [X] T005 Implement `createSummaryCompletion(List<String>, String)` in src/main/java/com/georgster/control/manager/UserProfileManager.java
+- [X] T006 [P] Register `SummaryCommand` in src/main/java/com/georgster/control/CommandRegistry.java
+- [X] T007 [P] Add slash command descriptor in src/main/java/com/georgster/summary/SummaryCommand.java via `getCommandApplicationInformation()`
 
 **Checkpoint**: Foundation ready — user story implementation can begin
 
