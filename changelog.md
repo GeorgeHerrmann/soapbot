@@ -600,8 +600,23 @@
 
 2.910
     Elo Ratings and Battles
-        - Added Elo Ratings and battles
-            - Use !help elo or !elo help for more information
-
+        - Created a brand new Elo Rating and Battle System!
+            - Users can battle each other in 1v1 Elo Battles to increase their Elo Rating
+                - Use !elo help or !help elo for more information
+            - Users can view their own Elo Rating with !elo or !elo rating
+            - Users can view another user's Elo Rating with !elo @[USER]
+            - Users can challenge another user to an Elo Battle with !elo challenge @[USER]
+                - The challenged user has 2 minutes to accept or reject the challenge
+            - Users can view the Elo Leaderboard with !elo leaderboard
+                - Shows the top 10 users with the highest Elo Ratings in the Guild  
     Timezones
         - Fixed an issue where MST was not properly converting for daylight savings
+ 
+2.920
+    Channel Summary
+        - Added Channel Summary command to summarize recent messages in a channel.
+        - Implemented message filtering, AI prompting, and error handling across phases.
+        - Supports small message sets (MVP) and scales to larger windows.
+        - Added convenience scripts for running and building (run.bat, run.sh).
+        - Added specification, plans, and tasks under specs/001-channel-summary/.
+
