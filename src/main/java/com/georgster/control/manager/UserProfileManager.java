@@ -198,6 +198,67 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
     }
 
     /**
+     * Creates a summary of the provided Discord messages using OpenAI's GPT model.
+     * 
+     * This method is distinct from createCompletion() in that it:
+     * - Does NOT save the summary to any user's chat completion history
+     * - Does NOT include conversation context from previous completions
+     * - Uses a dedicated summary system prompt with strict formatting constraints
+     * - Is stateless and ephemeral (no persistence side effects)
+     * 
+     * The AI is instructed to create a single paragraph under 75 words focusing on
+     * main conversation topics without mentioning specific users.
+     * 
+     * @param messages List of message content strings to summarize, ordered oldest to newest.
+     *                 Should be pre-filtered to exclude bot/system messages. Must not be empty.
+     * @param channelName Name of the Discord channel being summarized (e.g., "general").
+     *                    Used for logging and context. Must not be null.
+     * 
+     * @return A string containing the AI-generated summary (single paragraph, ~50-75 words)
+     * 
+     * @throws RuntimeException if OpenAI API call times out, rate limit exceeded, or service error
+     * @throws IllegalArgumentException if messages list is null or empty
+     */
+    public String createSummaryCompletion(List<String> messages, String channelName) {
+        // Validation
+        if (messages == null || messages.isEmpty()) {
+            throw new IllegalArgumentException("Messages list cannot be null or empty");
+        }
+        if (channelName == null) {
+            throw new IllegalArgumentException("Channel name cannot be null");
+        }
+
+        // Construct system prompt
+        String systemPrompt = "You are summarizing a Discord text channel conversation. Create a single " +
+                            "paragraph summary under 75 words that captures the main topics discussed. " +
+                            "Focus on what was talked about, not who said what. Be concise and clear.";
+
+        // Construct user prompt
+        StringBuilder userPrompt = new StringBuilder();
+        userPrompt.append("Summarize these messages from the #").append(channelName).append(" channel:\n\n");
+        
+        for (int i = 0; i < messages.size(); i++) {
+            userPrompt.append("[Message ").append(i + 1).append("]: ").append(messages.get(i)).append("\n");
+        }
+
+        // Create chat messages
+        List<ChatMessage> chatMessages = new ArrayList<>();
+        chatMessages.add(new ChatMessage("system", systemPrompt));
+        chatMessages.add(new ChatMessage("user", userPrompt.toString()));
+
+        // Create and execute request
+        ChatCompletionRequest request = ChatCompletionRequest.builder()
+                .messages(chatMessages)
+                .model("gpt-3.5-turbo")
+                .build();
+
+        ChatCompletionResult result = aiService.createChatCompletion(request);
+        
+        // Extract and return summary
+        return result.getChoices().get(0).getMessage().getContent();
+    }
+
+    /**
      * Creates a ChatCompletionRequest to OpenAI using the {@code gpt-3.5-turbo} model.
      * 
      * @param prompt The prompt from the user.

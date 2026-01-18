@@ -1,0 +1,9 @@
+@echo off
+echo Cleaning project...
+call mvn clean
+
+echo Building project...
+call mvn compile
+
+echo Running SoapBot...
+call mvn exec:java

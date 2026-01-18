@@ -14,3 +14,27 @@ target/classes/com/georgster/database/dbconnection.txt
 
 src/main/java/com/georgster/gpt/openaikey.txt
 target/classes/com/georgster/gpt/openaikey.txt
+.specify/
+.github/
+.vscode/
+
+# Maven/Java build artifacts
+target/
+*.class
+*.jar
+!maven-wrapper.jar
+*.war
+*.ear
+*.nar
+*.log
+
+# IDE files
+.idea/
+*.iml
+*.iws
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
