@@ -112,11 +112,45 @@ public class CS2EmbedFormatter {
         );
         
         String performanceStats = String.format(
-            "**K/D Ratio**: %.2f\n**ADR**: %.1f\n**HS%%**: %.1f%%\n**MVPs/Match**: %.2f",
+            "**K/D Ratio**: %.2f\n**ADR**: %.1f\n**HS%%**: %.1f%%",
             stats.getKillDeathRatio(),
             stats.getAverageDamageRound(),
-            stats.getHeadshotPercentage(),
-            stats.getMVPsPerMatch()
+            stats.getHeadshotPercentage()
+        );
+        
+        // Clutch statistics
+        String clutchStats = String.format(
+            "**1v1**: %d/%d (%.0f%% win rate)\n**1v2**: %d/%d (%.0f%% win rate)",
+            stats.getTotalOneVOneWins(),
+            stats.getTotalOneVOneCount(),
+            stats.getOneVOneWinRate() * 100,
+            stats.getTotalOneVTwoWins(),
+            stats.getTotalOneVTwoCount(),
+            stats.getOneVTwoWinRate() * 100
+        );
+        
+        // Utility & Flash statistics
+        String utilityStats = String.format(
+            "**Utility/Round**: %.2f (%.0f%% success)\n**Utility Dmg/Round**: %.1f\n**Flashes/Round**: %.2f (%.0f%% success)\n**Enemies Flashed/Round**: %.2f",
+            stats.getUtilityUsagePerRound(),
+            stats.getUtilitySuccessRate() * 100,
+            stats.getUtilityDamagePerRound(),
+            stats.getFlashesPerRound(),
+            stats.getFlashSuccessRate() * 100,
+            stats.getEnemiesFlashedPerRound()
+        );
+        
+        // Entry & Sniper statistics
+        String specialStats = String.format(
+            "**Entry Rate**: %.0f%% (%.0f%% success)\n**Entry Frags**: %d/%d\n**Sniper Kills**: %d (%.0f%% of rounds)\n**Longest Win Streak**: %d\n**Current Win Streak**: %d",
+            stats.getEntryRate() * 100,
+            stats.getEntrySuccessRate() * 100,
+            stats.getTotalEntryWins(),
+            stats.getTotalEntryCount(),
+            stats.getTotalSniperKills(),
+            stats.getSniperKillRate() * 100,
+            stats.getLongestWinStreak(),
+            stats.getCurrentWinStreak()
         );
         
         String recentForm = formatRecentForm(stats.getRecentForm());
@@ -127,7 +161,10 @@ public class CS2EmbedFormatter {
                 .thumbnail(player.getAvatar() != null ? player.getAvatar() : "")
                 .addField("Profile", profileInfo, true)
                 .addField("Match History", matchStats, true)
-                .addField("Performance", performanceStats, false);
+                .addField("Performance", performanceStats, false)
+                .addField("Clutch Performance", clutchStats, true)
+                .addField("Utility & Flashes", utilityStats, true)
+                .addField("Advanced Stats", specialStats, false);
         
         if (!recentForm.isEmpty()) {
             builder.addField("Recent Form (Last 5)", recentForm, false);

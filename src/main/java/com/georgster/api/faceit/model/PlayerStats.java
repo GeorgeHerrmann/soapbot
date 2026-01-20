@@ -45,6 +45,75 @@ public class PlayerStats {
     @SerializedName("recent_form")
     private List<String> recentForm; // e.g., ["W", "L", "W", "W", "L"]
     
+    // Clutch statistics
+    @SerializedName("1v1_win_rate")
+    private double oneVOneWinRate;
+    
+    @SerializedName("total_1v1_wins")
+    private int totalOneVOneWins;
+    
+    @SerializedName("total_1v1_count")
+    private int totalOneVOneCount;
+    
+    @SerializedName("1v2_win_rate")
+    private double oneVTwoWinRate;
+    
+    @SerializedName("total_1v2_wins")
+    private int totalOneVTwoWins;
+    
+    @SerializedName("total_1v2_count")
+    private int totalOneVTwoCount;
+    
+    // Utility statistics
+    @SerializedName("utility_usage_per_round")
+    private double utilityUsagePerRound;
+    
+    @SerializedName("utility_damage_per_round")
+    private double utilityDamagePerRound;
+    
+    @SerializedName("utility_success_rate")
+    private double utilitySuccessRate;
+    
+    @SerializedName("total_utility_damage")
+    private int totalUtilityDamage;
+    
+    // Flash statistics
+    @SerializedName("flashes_per_round")
+    private double flashesPerRound;
+    
+    @SerializedName("enemies_flashed_per_round")
+    private double enemiesFlashedPerRound;
+    
+    @SerializedName("flash_success_rate")
+    private double flashSuccessRate;
+    
+    // Entry statistics
+    @SerializedName("entry_rate")
+    private double entryRate;
+    
+    @SerializedName("entry_success_rate")
+    private double entrySuccessRate;
+    
+    @SerializedName("total_entry_wins")
+    private int totalEntryWins;
+    
+    @SerializedName("total_entry_count")
+    private int totalEntryCount;
+    
+    // Sniper statistics
+    @SerializedName("sniper_kill_rate")
+    private double sniperKillRate;
+    
+    @SerializedName("total_sniper_kills")
+    private int totalSniperKills;
+    
+    // Streak statistics
+    @SerializedName("longest_win_streak")
+    private int longestWinStreak;
+    
+    @SerializedName("current_win_streak")
+    private int currentWinStreak;
+    
     /**
      * Creates a new PlayerStats instance.
      */
@@ -232,6 +301,81 @@ public class PlayerStats {
     public void setRecentForm(List<String> recentForm) {
         this.recentForm = recentForm;
     }
+    
+    // Clutch statistics getters/setters
+    
+    public double getOneVOneWinRate() { return oneVOneWinRate; }
+    public void setOneVOneWinRate(double oneVOneWinRate) { this.oneVOneWinRate = oneVOneWinRate; }
+    
+    public int getTotalOneVOneWins() { return totalOneVOneWins; }
+    public void setTotalOneVOneWins(int totalOneVOneWins) { this.totalOneVOneWins = totalOneVOneWins; }
+    
+    public int getTotalOneVOneCount() { return totalOneVOneCount; }
+    public void setTotalOneVOneCount(int totalOneVOneCount) { this.totalOneVOneCount = totalOneVOneCount; }
+    
+    public double getOneVTwoWinRate() { return oneVTwoWinRate; }
+    public void setOneVTwoWinRate(double oneVTwoWinRate) { this.oneVTwoWinRate = oneVTwoWinRate; }
+    
+    public int getTotalOneVTwoWins() { return totalOneVTwoWins; }
+    public void setTotalOneVTwoWins(int totalOneVTwoWins) { this.totalOneVTwoWins = totalOneVTwoWins; }
+    
+    public int getTotalOneVTwoCount() { return totalOneVTwoCount; }
+    public void setTotalOneVTwoCount(int totalOneVTwoCount) { this.totalOneVTwoCount = totalOneVTwoCount; }
+    
+    // Utility statistics getters/setters
+    
+    public double getUtilityUsagePerRound() { return utilityUsagePerRound; }
+    public void setUtilityUsagePerRound(double utilityUsagePerRound) { this.utilityUsagePerRound = utilityUsagePerRound; }
+    
+    public double getUtilityDamagePerRound() { return utilityDamagePerRound; }
+    public void setUtilityDamagePerRound(double utilityDamagePerRound) { this.utilityDamagePerRound = utilityDamagePerRound; }
+    
+    public double getUtilitySuccessRate() { return utilitySuccessRate; }
+    public void setUtilitySuccessRate(double utilitySuccessRate) { this.utilitySuccessRate = utilitySuccessRate; }
+    
+    public int getTotalUtilityDamage() { return totalUtilityDamage; }
+    public void setTotalUtilityDamage(int totalUtilityDamage) { this.totalUtilityDamage = totalUtilityDamage; }
+    
+    // Flash statistics getters/setters
+    
+    public double getFlashesPerRound() { return flashesPerRound; }
+    public void setFlashesPerRound(double flashesPerRound) { this.flashesPerRound = flashesPerRound; }
+    
+    public double getEnemiesFlashedPerRound() { return enemiesFlashedPerRound; }
+    public void setEnemiesFlashedPerRound(double enemiesFlashedPerRound) { this.enemiesFlashedPerRound = enemiesFlashedPerRound; }
+    
+    public double getFlashSuccessRate() { return flashSuccessRate; }
+    public void setFlashSuccessRate(double flashSuccessRate) { this.flashSuccessRate = flashSuccessRate; }
+    
+    // Entry statistics getters/setters
+    
+    public double getEntryRate() { return entryRate; }
+    public void setEntryRate(double entryRate) { this.entryRate = entryRate; }
+    
+    public double getEntrySuccessRate() { return entrySuccessRate; }
+    public void setEntrySuccessRate(double entrySuccessRate) { this.entrySuccessRate = entrySuccessRate; }
+    
+    public int getTotalEntryWins() { return totalEntryWins; }
+    public void setTotalEntryWins(int totalEntryWins) { this.totalEntryWins = totalEntryWins; }
+    
+    public int getTotalEntryCount() { return totalEntryCount; }
+    public void setTotalEntryCount(int totalEntryCount) { this.totalEntryCount = totalEntryCount; }
+    
+    // Sniper statistics getters/setters
+    
+    public double getSniperKillRate() { return sniperKillRate; }
+    public void setSniperKillRate(double sniperKillRate) { this.sniperKillRate = sniperKillRate; }
+    
+    public int getTotalSniperKills() { return totalSniperKills; }
+    public void setTotalSniperKills(int totalSniperKills) { this.totalSniperKills = totalSniperKills; }
+    
+    // Streak statistics getters/setters
+    
+    public int getLongestWinStreak() { return longestWinStreak; }
+    public void setLongestWinStreak(int longestWinStreak) { this.longestWinStreak = longestWinStreak; }
+    
+    public int getCurrentWinStreak() { return currentWinStreak; }
+    public void setCurrentWinStreak(int currentWinStreak) { this.currentWinStreak = currentWinStreak; }
     
     /**
      * Nested class representing statistics for a specific map.

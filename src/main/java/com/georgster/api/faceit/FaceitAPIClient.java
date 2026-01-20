@@ -306,15 +306,51 @@ public class FaceitAPIClient {
         stats.setWins(getIntOrZero(lifetime, "Wins"));
         stats.setLosses(getIntOrZero(lifetime, "Matches") - getIntOrZero(lifetime, "Wins"));
         
-        double winRate = stats.getTotalMatches() > 0 
-            ? (stats.getWins() * 100.0 / stats.getTotalMatches()) 
-            : 0.0;
+        // Use API-provided win rate if available, otherwise calculate
+        double winRate = getDoubleOrZero(lifetime, "Win Rate %");
+        if (winRate == 0.0 && stats.getTotalMatches() > 0) {
+            winRate = stats.getWins() * 100.0 / stats.getTotalMatches();
+        }
         stats.setWinRate(winRate);
         
         stats.setKillDeathRatio(getDoubleOrZero(lifetime, "Average K/D Ratio"));
-        stats.setAverageDamageRound(getDoubleOrZero(lifetime, "Average ADR"));
+        stats.setAverageDamageRound(getDoubleOrZero(lifetime, "ADR"));
         stats.setHeadshotPercentage(getDoubleOrZero(lifetime, "Average Headshots %"));
-        stats.setMVPsPerMatch(getDoubleOrZero(lifetime, "Average MVPs"));
+        // Note: MVPs per match not available in lifetime stats API response
+        stats.setMVPsPerMatch(0.0);
+        
+        // Clutch statistics
+        stats.setOneVOneWinRate(getDoubleOrZero(lifetime, "1v1 Win Rate"));
+        stats.setTotalOneVOneWins(getIntOrZero(lifetime, "Total 1v1 Wins"));
+        stats.setTotalOneVOneCount(getIntOrZero(lifetime, "Total 1v1 Count"));
+        stats.setOneVTwoWinRate(getDoubleOrZero(lifetime, "1v2 Win Rate"));
+        stats.setTotalOneVTwoWins(getIntOrZero(lifetime, "Total 1v2 Wins"));
+        stats.setTotalOneVTwoCount(getIntOrZero(lifetime, "Total 1v2 Count"));
+        
+        // Utility statistics
+        stats.setUtilityUsagePerRound(getDoubleOrZero(lifetime, "Utility Usage per Round"));
+        stats.setUtilityDamagePerRound(getDoubleOrZero(lifetime, "Utility Damage per Round"));
+        stats.setUtilitySuccessRate(getDoubleOrZero(lifetime, "Utility Success Rate"));
+        stats.setTotalUtilityDamage(getIntOrZero(lifetime, "Total Utility Damage"));
+        
+        // Flash statistics
+        stats.setFlashesPerRound(getDoubleOrZero(lifetime, "Flashes per Round"));
+        stats.setEnemiesFlashedPerRound(getDoubleOrZero(lifetime, "Enemies Flashed per Round"));
+        stats.setFlashSuccessRate(getDoubleOrZero(lifetime, "Flash Success Rate"));
+        
+        // Entry statistics
+        stats.setEntryRate(getDoubleOrZero(lifetime, "Entry Rate"));
+        stats.setEntrySuccessRate(getDoubleOrZero(lifetime, "Entry Success Rate"));
+        stats.setTotalEntryWins(getIntOrZero(lifetime, "Total Entry Wins"));
+        stats.setTotalEntryCount(getIntOrZero(lifetime, "Total Entry Count"));
+        
+        // Sniper statistics
+        stats.setSniperKillRate(getDoubleOrZero(lifetime, "Sniper Kill Rate"));
+        stats.setTotalSniperKills(getIntOrZero(lifetime, "Total Sniper Kills"));
+        
+        // Streak statistics
+        stats.setLongestWinStreak(getIntOrZero(lifetime, "Longest Win Streak"));
+        stats.setCurrentWinStreak(getIntOrZero(lifetime, "Current Win Streak"));
         
         // Recent form would need to be fetched from match history
         stats.setRecentForm(new ArrayList<>());
