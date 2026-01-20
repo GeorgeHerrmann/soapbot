@@ -253,6 +253,34 @@ public class CS2EmbedFormatter {
     }
     
     /**
+     * Formats a link success embed.
+     * 
+     * @param player The Faceit player that was linked
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatLinkSuccess(FaceitPlayer player) {
+        String description = String.format(
+            "**Nickname**: %s\n**Faceit Level**: %d\n**Elo**: %d\n**Country**: %s",
+            player.getNickname(),
+            player.getFaceitLevel(),
+            player.getElo(),
+            player.getCountry() != null ? player.getCountry() : "Unknown"
+        );
+        
+        String statusMessage = "Account linked successfully. Use `/cs2 stats` to view your stats.";
+        
+        return EmbedCreateSpec.builder()
+                .title("✅ Faceit Account Linked!")
+                .description(description)
+                .addField("Status", statusMessage, false)
+                .color(SUCCESS_COLOR)
+                .thumbnail(player.getAvatar() != null ? player.getAvatar() : "")
+                .footer("Data from Faceit API", null)
+                .timestamp(Instant.now())
+                .build();
+    }
+    
+    /**
      * Formats an error message embed.
      * 
      * @param errorMessage The error message to display

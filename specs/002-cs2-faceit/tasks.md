@@ -193,7 +193,7 @@ Enable Discord users to link their Faceit account to their Discord profile so th
 
 ### Implementation Tasks
 
-- [ ] T017 Create CS2LinkCommand in `src/main/java/com/georgster/game/cs2/commands/CS2LinkCommand.java`
+- [X] T017 Create CS2LinkCommand in `src/main/java/com/georgster/game/cs2/commands/CS2LinkCommand.java`
   - **Commit**: `feat(002-cs2-faceit): Implement CS2LinkCommand for account linking`
   - **Details**:
     - Extend ParseableCommand interface (follow existing pattern)
@@ -207,7 +207,7 @@ Enable Discord users to link their Faceit account to their Discord profile so th
     - Handle FaceitAPIException → display "Service temporarily unavailable" (FR-011)
   - **File**: src/main/java/com/georgster/game/cs2/commands/CS2LinkCommand.java
 
-- [ ] T018 Create CS2UnlinkCommand in `src/main/java/com/georgster/game/cs2/commands/CS2UnlinkCommand.java`
+- [X] T018 Create CS2UnlinkCommand in `src/main/java/com/georgster/game/cs2/commands/CS2UnlinkCommand.java`
   - **Commit**: `feat(002-cs2-faceit): Implement CS2UnlinkCommand for account unlinking`
   - **Details**:
     - Extend ParseableCommand interface
@@ -218,7 +218,7 @@ Enable Discord users to link their Faceit account to their Discord profile so th
     - Return confirmation embed: "Faceit account unlinked"
   - **File**: src/main/java/com/georgster/game/cs2/commands/CS2UnlinkCommand.java
 
-- [ ] T019 Create CS2HelpCommand in `src/main/java/com/georgster/game/cs2/commands/CS2HelpCommand.java`
+- [X] T019 Create CS2HelpCommand in `src/main/java/com/georgster/game/cs2/commands/CS2HelpCommand.java`
   - **Commit**: `feat(002-cs2-faceit): Implement CS2HelpCommand with usage examples`
   - **Details**:
     - Extend ParseableCommand interface
@@ -228,7 +228,7 @@ Enable Discord users to link their Faceit account to their Discord profile so th
     - Format as Discord embed with command list
   - **File**: src/main/java/com/georgster/game/cs2/commands/CS2HelpCommand.java
 
-- [ ] T020 Create main CS2Command router in `src/main/java/com/georgster/game/cs2/CS2Command.java`
+- [X] T020 Create main CS2Command router in `src/main/java/com/georgster/game/cs2/CS2Command.java`
   - **Commit**: `feat(002-cs2-faceit): Implement CS2Command main router`
   - **Details**:
     - Extend ParseableCommand interface to dispatch to subcommands
@@ -239,7 +239,7 @@ Enable Discord users to link their Faceit account to their Discord profile so th
     - Validate user input and provide clear error messages for invalid subcommands
   - **File**: src/main/java/com/georgster/game/cs2/CS2Command.java
 
-- [ ] T021 [P] Create unit tests for CS2LinkCommand in `src/test/java/com/georgster/game/cs2/commands/CS2LinkCommandTest.java`
+- [X] T021 [P] Create unit tests for CS2LinkCommand in `src/test/java/com/georgster/game/cs2/commands/CS2LinkCommandTest.java`
   - **Commit**: `test(002-cs2-faceit): Add unit tests for CS2LinkCommand`
   - **Details**:
     - Mock FaceitAPIClient.fetchPlayer() to return valid FaceitPlayer
@@ -252,7 +252,7 @@ Enable Discord users to link their Faceit account to their Discord profile so th
       - User without permission → permission denied error
   - **File**: src/test/java/com/georgster/game/cs2/commands/CS2LinkCommandTest.java
 
-- [ ] T022 [P] Create unit tests for CS2UnlinkCommand in `src/test/java/com/georgster/game/cs2/commands/CS2UnlinkCommandTest.java`
+- [X] T022 [P] Create unit tests for CS2UnlinkCommand in `src/test/java/com/georgster/game/cs2/commands/CS2UnlinkCommandTest.java`
   - **Commit**: `test(002-cs2-faceit): Add unit tests for CS2UnlinkCommand`
   - **Details**:
     - Mock UserProfileManager to verify update() clears CS2Profile
@@ -262,7 +262,7 @@ Enable Discord users to link their Faceit account to their Discord profile so th
       - User without permission → permission denied error
   - **File**: src/test/java/com/georgster/game/cs2/commands/CS2UnlinkCommandTest.java
 
-- [ ] T023 [P] Create unit tests for PlayerLookup in `src/test/java/com/georgster/game/cs2/util/PlayerLookupTest.java`
+- [X] T023 [P] Create unit tests for PlayerLookup in `src/test/java/com/georgster/game/cs2/util/PlayerLookupTest.java`
   - **Commit**: `test(002-cs2-faceit): Add unit tests for PlayerLookup precedence resolution`
   - **Details**:
     - Mock FaceitAPIClient and UserProfileManager

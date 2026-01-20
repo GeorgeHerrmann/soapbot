@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.checkerframework.checker.units.qual.s;
+
 import com.georgster.control.SoapClientManager;
 
 /**
@@ -24,6 +26,8 @@ public class App {
         /* Creates a manager that will control the SoapClient for each Guild */
         SoapClientManager soapManager = new SoapClientManager(token);
         soapManager.listenToEvents(); //Subscribes the manager to Discord's event stream
+        // DO NOT COMMIT THIS LINE BELOW, ONLY FOR TESTING PURPOSES
+        soapManager.enableTestMode();
         soapManager.start(); //Starts the manager, finalizing the connection to Discord's API
     }
 }
