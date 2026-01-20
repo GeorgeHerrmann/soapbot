@@ -68,10 +68,12 @@ public class PlayerLookup {
             UserProfile profile = profileManager.get(userId);
             if (profile != null && profile.hasLinkedFaceit()) {
                 UserProfile.CS2Profile cs2Profile = profile.getCS2Profile();
-                logger.info("Found linked Faceit account for Discord user {}: {}", userId, cs2Profile.getFaceitNickname());
+                String playerId = cs2Profile.getFaceitPlayerId();
+                logger.info("Found linked Faceit account for Discord user {}: {} (ID: {})", 
+                        userId, cs2Profile.getFaceitNickname(), playerId);
                 
-                // Fetch fresh player data from API
-                return apiClient.fetchPlayer(cs2Profile.getFaceitNickname());
+                // Fetch fresh player data from API using the stored player_id
+                return apiClient.fetchPlayerById(playerId);
             } else {
                 throw new PlayerNotFoundException("Discord user <@" + userId + "> has not linked a Faceit account. Use `!cs2 link <faceit-username>` to link.");
             }

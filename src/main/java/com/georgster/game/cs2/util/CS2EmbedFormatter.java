@@ -283,15 +283,67 @@ public class CS2EmbedFormatter {
     /**
      * Formats an error message embed.
      * 
+     * @param title The error title
+     * @param errorMessage The error message to display
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatError(String title, String errorMessage) {
+        return EmbedCreateSpec.builder()
+                .title(title)
+                .description(errorMessage)
+                .color(ERROR_COLOR)
+                .footer("If this persists, contact server admins", null)
+                .timestamp(Instant.now())
+                .build();
+    }
+    
+    /**
+     * Formats an error message embed with default title.
+     * 
      * @param errorMessage The error message to display
      * @return EmbedCreateSpec ready for Discord message
      */
     public static EmbedCreateSpec formatError(String errorMessage) {
+        return formatError("❌ Error", errorMessage);
+    }
+    
+    /**
+     * Formats a loading message embed.
+     * 
+     * @param message The loading message to display
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatLoadingMessage(String message) {
         return EmbedCreateSpec.builder()
-                .title("❌ Error")
-                .description(errorMessage)
-                .color(ERROR_COLOR)
-                .footer("If this persists, contact server admins", null)
+                .title("⏳ Loading...")
+                .description(message)
+                .color(PRIMARY_COLOR)
+                .timestamp(Instant.now())
+                .build();
+    }
+    
+    /**
+     * Formats a "no recent matches" message embed with player profile info.
+     * 
+     * @param player The player's Faceit profile
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatNoRecentMatches(FaceitPlayer player) {
+        String profileInfo = String.format(
+            "**Nickname**: %s\n**Level**: %d\n**Elo**: %d",
+            player.getNickname(),
+            player.getFaceitLevel(),
+            player.getElo()
+        );
+        
+        return EmbedCreateSpec.builder()
+                .title("📭 No Recent Matches")
+                .description(player.getNickname() + " has no recent matches on record.")
+                .addField("Player Profile", profileInfo, false)
+                .addField("Status", "Play a match and try again in a few minutes.", false)
+                .color(Color.of(0xf39c12)) // Orange color
+                .thumbnail(player.getAvatar() != null ? player.getAvatar() : "")
+                .footer("Data from Faceit API", null)
                 .timestamp(Instant.now())
                 .build();
     }

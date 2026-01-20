@@ -81,12 +81,16 @@ public class CS2Command implements ParseableCommand {
                 helpCommand.execute(event);
             }, "help");
             
-            // Match subcommand (Phase 4 - not yet implemented)
+            // Match subcommand
             subcommands.on(p -> {
-                handler.sendMessage("⚠️ **Coming Soon**\n\n" +
-                        "The `!cs2 match` command is not yet implemented. " +
-                        "This feature will be available in Phase 4.", 
-                        "CS2 Match", MessageFormatting.INFO);
+                try {
+                    CS2MatchCommand matchCommand = new CS2MatchCommand();
+                    matchCommand.execute(event);
+                } catch (FaceitAPIException e) {
+                    logger.error("Failed to initialize CS2MatchCommand: {}", e.getMessage(), e);
+                    handler.sendMessage("Failed to initialize Faceit API client. Please contact server admins.", 
+                            "CS2 Match", MessageFormatting.ERROR);
+                }
             }, "match");
             
             // Stats subcommand (Phase 5 - not yet implemented)

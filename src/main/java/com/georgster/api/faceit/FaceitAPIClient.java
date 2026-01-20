@@ -125,6 +125,35 @@ public class FaceitAPIClient {
     }
     
     /**
+     * Fetches a player profile by player ID.
+     * 
+     * @param playerId The player's Faceit ID (UUID format)
+     * @return FaceitPlayer object with player data
+     * @throws PlayerNotFoundException if player not found
+     * @throws FaceitAPIException if API error occurs
+     */
+    public FaceitPlayer fetchPlayerById(String playerId) throws FaceitAPIException {
+        String url = BASE_URL + "/players/" + playerId;
+        
+        try {
+            String responseBody = executeRequest(url);
+            FaceitPlayer player = gson.fromJson(responseBody, FaceitPlayer.class);
+            
+            if (player == null || player.getPlayerId() == null) {
+                throw new PlayerNotFoundException("Player with ID '" + playerId + "' not found on Faceit");
+            }
+            
+            logger.debug("Fetched player by ID: {} ({})", player.getNickname(), player.getPlayerId());
+            return player;
+            
+        } catch (PlayerNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new FaceitAPIException("Failed to fetch player by ID: " + playerId, e);
+        }
+    }
+    
+    /**
      * Fetches detailed statistics for a player.
      * 
      * @param playerId The player's Faceit ID
@@ -135,7 +164,9 @@ public class FaceitAPIClient {
         String url = BASE_URL + "/players/" + playerId + "/stats/" + CS2_GAME_ID;
         
         try {
+            System.out.println("[DEBUG FaceitAPIClient] Fetching player stats from URL: " + url);
             String responseBody = executeRequest(url);
+            System.out.println("[DEBUG FaceitAPIClient] Player stats response body: " + responseBody);
             JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
             
             // Parse lifetime stats from nested JSON structure
@@ -178,7 +209,9 @@ public class FaceitAPIClient {
         String url = BASE_URL + "/players/" + playerId + "/history?game=" + CS2_GAME_ID + "&offset=0&limit=" + Math.min(limit, 100);
         
         try {
+            System.out.println("[DEBUG FaceitAPIClient] Fetching match history from URL: " + url);
             String responseBody = executeRequest(url);
+            System.out.println("[DEBUG FaceitAPIClient] Match history response body: " + responseBody);
             JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
             JsonArray items = jsonObject.getAsJsonArray("items");
             
@@ -291,6 +324,26 @@ public class FaceitAPIClient {
     }
     
     /**
+     * Fetches detailed match statistics from Faceit API.
+     * 
+     * @param matchId The match ID
+     * @return JsonObject containing match statistics, or null if not found
+     */
+    private JsonObject fetchMatchStats(String matchId) {
+        String url = BASE_URL + "/matches/" + matchId + "/stats";
+        
+        try {
+            System.out.println("[DEBUG FaceitAPIClient] Fetching match stats from URL: " + url);
+            String responseBody = executeRequest(url);
+            System.out.println("[DEBUG FaceitAPIClient] Match stats response: " + responseBody);
+            return gson.fromJson(responseBody, JsonObject.class);
+        } catch (Exception e) {
+            logger.warn("Failed to fetch match stats for match ID {}: {}", matchId, e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
      * Parses MatchDetails from Faceit API match JSON object.
      * 
      * @param matchJson JsonObject containing match data
@@ -301,26 +354,70 @@ public class FaceitAPIClient {
         try {
             MatchDetails match = new MatchDetails();
             
-            match.setMatchId(getString(matchJson, "match_id"));
+            String matchId = getString(matchJson, "match_id");
+            match.setMatchId(matchId);
             match.setPlayerId(playerId);
             match.setMatchTimestamp(getLong(matchJson, "started_at"));
             
-            // Extract match details from nested structure
-            JsonObject stats = matchJson.getAsJsonObject("stats");
-            if (stats != null) {
-                match.setKills(getIntOrZero(stats, "Kills"));
-                match.setDeaths(getIntOrZero(stats, "Deaths"));
-                match.setAssists(getIntOrZero(stats, "Assists"));
-                match.setAverageDamageRound(getDoubleOrZero(stats, "ADR"));
-                match.setHeadshotPercentage(getDoubleOrZero(stats, "Headshots %"));
-                match.setMvps(getIntOrZero(stats, "MVPs"));
-            }
+            // Fetch detailed match statistics from /matches/{match_id}/stats
+            JsonObject matchStatsResponse = fetchMatchStats(matchId);
             
-            // Extract map and score
-            match.setMapName(getString(matchJson, "map"));
-            match.setScore(getString(matchJson, "score"));
-            match.setResult(getString(matchJson, "result")); // "win" or "loss"
-            match.setRoundsPlayed(getIntOrZero(matchJson, "rounds"));
+            if (matchStatsResponse != null) {
+                // Navigate to rounds array
+                JsonArray rounds = matchStatsResponse.getAsJsonArray("rounds");
+                if (rounds != null && rounds.size() > 0) {
+                    JsonObject round = rounds.get(0).getAsJsonObject();
+                    
+                    // Extract map name from round_stats
+                    JsonObject roundStats = round.getAsJsonObject("round_stats");
+                    if (roundStats != null) {
+                        match.setMapName(getString(roundStats, "Map"));
+                        match.setScore(getString(roundStats, "Score"));
+                        String rounds_str = getString(roundStats, "Rounds");
+                        if (!rounds_str.isEmpty()) {
+                            try {
+                                match.setRoundsPlayed(Integer.parseInt(rounds_str));
+                            } catch (NumberFormatException e) {
+                                match.setRoundsPlayed(0);
+                            }
+                        }
+                    }
+                    
+                    // Find player stats in teams array
+                    JsonArray teams = round.getAsJsonArray("teams");
+                    if (teams != null) {
+                        for (int i = 0; i < teams.size(); i++) {
+                            JsonObject team = teams.get(i).getAsJsonObject();
+                            JsonArray players = team.getAsJsonArray("players");
+                            
+                            if (players != null) {
+                                for (int j = 0; j < players.size(); j++) {
+                                    JsonObject player = players.get(j).getAsJsonObject();
+                                    String currentPlayerId = getString(player, "player_id");
+                                    
+                                    if (currentPlayerId.equals(playerId)) {
+                                        // Found the target player - extract their stats
+                                        JsonObject playerStats = player.getAsJsonObject("player_stats");
+                                        if (playerStats != null) {
+                                            match.setKills(getIntOrZero(playerStats, "Kills"));
+                                            match.setDeaths(getIntOrZero(playerStats, "Deaths"));
+                                            match.setAssists(getIntOrZero(playerStats, "Assists"));
+                                            match.setAverageDamageRound(getDoubleOrZero(playerStats, "ADR"));
+                                            match.setHeadshotPercentage(getDoubleOrZero(playerStats, "Headshots %"));
+                                            match.setMvps(getIntOrZero(playerStats, "MVPs"));
+                                            
+                                            // Result: "1" = win, "0" = loss
+                                            String result = getString(playerStats, "Result");
+                                            match.setResult("1".equals(result) ? "win" : "loss");
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             
             match.setTeamRoster(new ArrayList<>());
             
