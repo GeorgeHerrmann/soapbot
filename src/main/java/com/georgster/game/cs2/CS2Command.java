@@ -48,6 +48,13 @@ public class CS2Command implements ParseableCommand {
     public void execute(CommandExecutionEvent event) {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         SubcommandSystem subcommands = event.createSubcommandSystem();
+        // Debug prints to trace CS2 command flow and argument casing
+        try {
+            System.out.println("[DEBUG CS2Command] Raw formatted message: '" + event.getDiscordEvent().getFormattedMessage() + "'");
+            System.out.println("[DEBUG CS2Command] Parsed args at router: " + event.getParsedArguments().getArguments());
+        } catch (Exception e) {
+            // Swallow any debug-print failures to avoid impacting normal execution
+        }
         
         try {
             // Link subcommand
@@ -148,7 +155,11 @@ public class CS2Command implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder("1L").build();
+        // Parse first token as required subcommand, then capture remaining input
+        // as a single variable optional argument so subcommands can access it.
+        // Disable auto-formatting so subcommand arguments (like Faceit usernames)
+        // preserve the exact casing the user typed.
+        return new ParseBuilder("1R", "VO").withoutAutoFormatting().build();
     }
     
     /**

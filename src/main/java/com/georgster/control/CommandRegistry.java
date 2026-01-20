@@ -20,6 +20,7 @@ import com.georgster.events.reserve.ReserveCommand;
 import com.georgster.events.reserve.UnreserveCommand;
 import com.georgster.game.blackjack.BlackjackCommand;
 import com.georgster.game.plinko.PlinkoCommand;
+import com.georgster.game.cs2.CS2Command;
 import com.georgster.gpt.GPTCommand;
 import com.georgster.logs.MultiLogger;
 import com.georgster.mentiongroups.MentionGroupCommand;
@@ -89,7 +90,8 @@ public final class CommandRegistry {
             CoinFactoryCommand.class,
             EloCommand.class,
             BattleCommand.class,
-            SummaryCommand.class
+            SummaryCommand.class,
+            CS2Command.class
         ));
     }
 

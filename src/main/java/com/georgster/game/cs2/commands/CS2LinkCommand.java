@@ -63,13 +63,31 @@ public class CS2LinkCommand implements ParseableCommand {
         UserProfileManager profileManager = event.getClientContext().getUserProfileManager();
         
         List<String> args = event.getParsedArguments().getArguments();
+        // Debug prints to trace CS2 link argument flow and casing
+        try {
+            System.out.println("[DEBUG CS2LinkCommand] Incoming parsed args: " + args);
+        } catch (Exception e) {
+            // Ignore debug-print issues
+        }
         if (args.isEmpty()) {
             handler.sendMessage("Please provide your Faceit username. Usage: `!cs2 link <faceit-username>`", 
                     "CS2 Link", MessageFormatting.ERROR);
             return;
         }
         
-        String faceitUsername = args.get(0).trim();
+        // When invoked via the cs2 router, args typically look like: ["link", "<username ...>"]
+        // When invoked directly as /cs2link or !cs2link, args look like: ["<username ...>"]
+        String faceitUsername;
+        if (args.size() >= 2 && args.get(0).equalsIgnoreCase("link")) {
+            faceitUsername = args.get(1).trim();
+        } else {
+            faceitUsername = args.get(0).trim();
+        }
+        try {
+            System.out.println("[DEBUG CS2LinkCommand] faceitUsername before API call: '" + faceitUsername + "'");
+        } catch (Exception e) {
+            // Ignore debug-print issues
+        }
         String userId = event.getDiscordEvent().getUser().getId().asString();
         
         logger.info("Attempting to link Faceit account '{}' for Discord user {}", faceitUsername, userId);
@@ -108,6 +126,11 @@ public class CS2LinkCommand implements ParseableCommand {
             
         } catch (PlayerNotFoundException e) {
             logger.warn("Player not found: {}", faceitUsername);
+            try {
+                System.out.println("[DEBUG CS2LinkCommand] PlayerNotFoundException for username: '" + faceitUsername + "'");
+            } catch (Exception ex) {
+                // Ignore debug-print issues
+            }
             handler.sendMessage("❌ **Account Link Failed**\n\n" +
                     "Player not found. Please check your Faceit username and try again.\n\n" +
                     "**Username Provided**: " + faceitUsername + "\n" +
@@ -140,7 +163,8 @@ public class CS2LinkCommand implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        return new ParseBuilder("1R").build();
+        // Disable auto-formatting so Faceit usernames preserve user-provided casing
+        return new ParseBuilder("1R").withoutAutoFormatting().build();
     }
     
     /**
