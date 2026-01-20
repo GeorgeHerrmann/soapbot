@@ -66,8 +66,30 @@ public class PlayerLookup {
             logger.debug("Resolving player from Discord mention: {}", userId);
             
             UserProfile profile = profileManager.get(userId);
-            if (profile != null && profile.hasLinkedFaceit()) {
-                UserProfile.CS2Profile cs2Profile = profile.getCS2Profile();
+            
+            // Debug logging to diagnose the issue
+            if (profile == null) {
+                logger.warn("UserProfile is NULL for Discord user {}", userId);
+                throw new PlayerNotFoundException("Discord user <@" + userId + "> has not linked a Faceit account. Use `!cs2 link <faceit-username>` to link.");
+            }
+            
+            logger.debug("UserProfile found for user {}", userId);
+            UserProfile.CS2Profile cs2Profile = profile.getCS2Profile();
+            
+            if (cs2Profile == null) {
+                logger.warn("CS2Profile is NULL for Discord user {}", userId);
+                throw new PlayerNotFoundException("Discord user <@" + userId + "> has not linked a Faceit account. Use `!cs2 link <faceit-username>` to link.");
+            }
+            
+            logger.debug("CS2Profile found. isLinked: {}, faceitPlayerId: {}, faceitNickname: {}", 
+                    cs2Profile.isLinked(), cs2Profile.getFaceitPlayerId(), cs2Profile.getFaceitNickname());
+            
+            if (!cs2Profile.isLinked()) {
+                logger.warn("CS2Profile exists but isLinked is FALSE for Discord user {}", userId);
+                throw new PlayerNotFoundException("Discord user <@" + userId + "> has not linked a Faceit account. Use `!cs2 link <faceit-username>` to link.");
+            }
+            
+            if (profile.hasLinkedFaceit()) {
                 String playerId = cs2Profile.getFaceitPlayerId();
                 logger.info("Found linked Faceit account for Discord user {}: {} (ID: {})", 
                         userId, cs2Profile.getFaceitNickname(), playerId);

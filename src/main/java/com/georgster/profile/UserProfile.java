@@ -57,8 +57,9 @@ public final class UserProfile extends MemberIdentified {
      * @param bank The {@link CoinBank} of the user
      * @param factory The {@link CoinFactory} of the user
      * @param collecteds The {@link Collected} items of the user
+     * @param cs2Profile The {@link CS2Profile} of the user (nullable)
      */
-    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, CoinFactory factory, List<Collected> collecteds) {
+    public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, CoinFactory factory, List<Collected> collecteds, CS2Profile cs2Profile) {
         super(userId);
         this.guildId = serverId;
         this.username = user;
@@ -66,7 +67,7 @@ public final class UserProfile extends MemberIdentified {
         this.bank = bank;
         this.collecteds = collecteds;
         this.factory = factory;
-        this.cs2Profile = null; // Not linked by default, will be loaded from database if exists
+        this.cs2Profile = cs2Profile; // Preserve CS2Profile from database
     }
 
     /**
