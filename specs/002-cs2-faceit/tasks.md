@@ -144,7 +144,7 @@ Build shared infrastructure required by all CS2 commands: API client, DTOs, cach
     - Thread-safe for concurrent access from multiple Discord command executions
   - **File**: src/main/java/com/georgster/cache/FaceitCache.java
 
-- [ ] T014 Create PlayerLookup utility in `src/main/java/com/georgster/game/cs2/util/PlayerLookup.java`
+- [X] T014 Create PlayerLookup utility in `src/main/java/com/georgster/game/cs2/util/PlayerLookup.java`
   - **Commit**: `feat(002-cs2-faceit): Implement PlayerLookup with precedence resolution`
   - **Details**:
     - Static method `resolveFaceitPlayer(String reference, UserProfileManager manager, FaceitAPIClient client)` returns FaceitPlayer
@@ -153,7 +153,7 @@ Build shared infrastructure required by all CS2 commands: API client, DTOs, cach
     - Unit tests: validate each precedence path with mocked API responses
   - **File**: src/main/java/com/georgster/game/cs2/util/PlayerLookup.java
 
-- [ ] T015 Extend UserProfile with CS2Profile nested class in `src/main/java/com/georgster/profile/UserProfile.java`
+- [X] T015 Extend UserProfile with CS2Profile nested class in `src/main/java/com/georgster/profile/UserProfile.java`
   - **Commit**: `feat(002-cs2-faceit): Extend UserProfile with CS2Profile for Faceit linkage`
   - **Details**:
     - Add field: `private CS2Profile cs2Profile;` (nullable)
@@ -163,7 +163,7 @@ Build shared infrastructure required by all CS2 commands: API client, DTOs, cach
     - Update MongoDB persistence model (add cs2Profile to BSON schema if needed)
   - **File**: src/main/java/com/georgster/profile/UserProfile.java
 
-- [ ] T016 Create CS2EmbedFormatter utility in `src/main/java/com/georgster/game/cs2/util/CS2EmbedFormatter.java`
+- [X] T016 Create CS2EmbedFormatter utility in `src/main/java/com/georgster/game/cs2/util/CS2EmbedFormatter.java`
   - **Commit**: `feat(002-cs2-faceit): Implement Discord embed formatting utilities`
   - **Details**:
     - Static methods for formatting Discord4J EmbedCreateSpec:
