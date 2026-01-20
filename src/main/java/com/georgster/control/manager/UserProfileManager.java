@@ -114,7 +114,9 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
     private static void createAiService() {
         try {
             if (aiService == null) {
-                aiService = new OpenAiService(Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "gpt", "openaikey.txt")));
+                String apiKey = Files.readString(Path.of(System.getProperty("user.dir"),"src", "main", "java", "com", "georgster", "gpt", "openaikey.txt"));
+                // Configure with 120 second timeout for GPT-5 Mini which requires more processing time
+                aiService = new OpenAiService(apiKey, java.time.Duration.ofSeconds(120));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -155,7 +157,7 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
      * The response will be based on the previous ten chat completions for that member
      * in this manager.
      * <p>
-     * Uses OpenAI's gpt-3.5-turbo model.
+     * Uses OpenAI's gpt-5-nano model.
      * <p>
      * <b>Note:</b> Only the first response will be saved in the member's chat completion log.
      * 
@@ -168,7 +170,10 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
 
         List<String> responses = new ArrayList<>();
 
-        createCompletionRequest(prompt, member).getChoices().forEach(choice -> responses.add(choice.getMessage().getContent()));
+        String systemPrompt = "You are a Discord bot called SOAP Bot.";
+        ChatCompletionResult result = executeAiRequest(systemPrompt, prompt, member.getId().asString());
+        
+        result.getChoices().forEach(choice -> responses.add(choice.getMessage().getContent()));
         profile.getCompletions().addCompletion(prompt, responses.get(0));
 
         update(profile);
@@ -180,7 +185,7 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
      * Creates a new ChatCompletion for the provided {@link Member} based on the given
      * prompt and returns the first response.
      * The response will be based on the previous ten chat completions for that member
-     * in this manager. Uses OpenAI's gpt-3.5-turbo model.
+     * in this manager. Uses OpenAI's gpt-4o-mini model.
      * 
      * @param prompt The prompt from the user.
      * @param member The member who prompted the completion request.
@@ -189,7 +194,10 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
     public String createCompletion(String prompt, Member member) {
         UserProfile profile = get(member.getId().asString());
 
-        String response = createCompletionRequest(prompt, member).getChoices().get(0).getMessage().getContent();
+        String systemPrompt = "You are a Discord bot called SOAP Bot.";
+        ChatCompletionResult result = executeAiRequest(systemPrompt, prompt, member.getId().asString());
+        
+        String response = result.getChoices().get(0).getMessage().getContent();
         profile.getCompletions().addCompletion(prompt, response);
 
         update(profile);
@@ -230,8 +238,8 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
 
         // Construct system prompt
         String systemPrompt = "You are summarizing a Discord text channel conversation. Create a single " +
-                            "paragraph summary under 75 words that captures the main topics discussed. " +
-                            "Focus on what was talked about, not who said what. Be concise and clear.";
+                            "paragraph summary under 100 words that captures the main topics discussed. " +
+                            "Focus on what was talked about. Be concise and clear.";
 
         // Construct user prompt
         StringBuilder userPrompt = new StringBuilder();
@@ -241,48 +249,45 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
             userPrompt.append("[Message ").append(i + 1).append("]: ").append(messages.get(i)).append("\n");
         }
 
-        // Create chat messages
-        List<ChatMessage> chatMessages = new ArrayList<>();
-        chatMessages.add(new ChatMessage("system", systemPrompt));
-        chatMessages.add(new ChatMessage("user", userPrompt.toString()));
-
-        // Create and execute request
-        ChatCompletionRequest request = ChatCompletionRequest.builder()
-                .messages(chatMessages)
-                .model("gpt-3.5-turbo")
-                .build();
-
-        ChatCompletionResult result = aiService.createChatCompletion(request);
+        // Execute request without conversation history
+        ChatCompletionResult result = executeAiRequest(systemPrompt, userPrompt.toString(), null);
         
         // Extract and return summary
         return result.getChoices().get(0).getMessage().getContent();
     }
 
     /**
-     * Creates a ChatCompletionRequest to OpenAI using the {@code gpt-3.5-turbo} model.
+     * Executes an AI completion request with OpenAI using the {@code gpt-4o-mini} model.
+     * This is a reusable helper method that can be used for both conversational completions
+     * (with history) and stateless completions (without history).
      * 
-     * @param prompt The prompt from the user.
-     * @param member The member who prompted the completion request.
-     * @return The result of the request.
+     * @param systemPrompt The system prompt that defines the AI's behavior and role.
+     * @param userPrompt The user's prompt or message to send to the AI.
+     * @param memberId The member ID to include conversation history from. If null, no history is included.
+     * @return The result of the AI completion request.
      */
-    private ChatCompletionResult createCompletionRequest(String prompt, Member member) {
-        String id = member.getId().asString();
-
+    private ChatCompletionResult executeAiRequest(String systemPrompt, String userPrompt, String memberId) {
         List<ChatMessage> messages = new ArrayList<>();
-        messages.add(new ChatMessage("system", "You are a Discord bot called SOAP Bot."));
+        messages.add(new ChatMessage("system", systemPrompt));
 
-        get(id).getCompletions().getTokens().forEach(token -> 
-            token.forEach((k,v) -> {
-                messages.add(new ChatMessage("user", k));
-                messages.add(new ChatMessage("assistant", v));
-            })
-        );
+        // Include conversation history if memberId is provided
+        if (memberId != null) {
+            get(memberId).getCompletions().getTokens().forEach(token -> 
+                token.forEach((k,v) -> {
+                    messages.add(new ChatMessage("user", k));
+                    messages.add(new ChatMessage("assistant", v));
+                })
+            );
+        }
 
-        messages.add(new ChatMessage("user", prompt));
+        messages.add(new ChatMessage("user", userPrompt));
 
-        ChatCompletionRequest request = ChatCompletionRequest.builder().messages(messages).model("gpt-3.5-turbo").build();
+        ChatCompletionRequest request = ChatCompletionRequest.builder()
+                .messages(messages)
+                .model("gpt-5-nano-2025-08-07")
+                .build();
 
-       return aiService.createChatCompletion(request);
+        return aiService.createChatCompletion(request);
     }
 
     /**

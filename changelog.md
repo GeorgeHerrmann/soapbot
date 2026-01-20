@@ -620,3 +620,7 @@
         - Added convenience scripts for running and building (run.bat, run.sh).
         - Added specification, plans, and tasks under specs/001-channel-summary/.
 
+2.921
+    - Updated all instances of gpt to gpt-5-nano. 
+    - Fixed GPT-5 Nano timeout issues by increasing OpenAI API timeout from default 30s to 120s.
+    GPT-5 Nano requires more processing time than GPT-3.5 Turbo for complex requests.

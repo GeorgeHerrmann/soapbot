@@ -22,7 +22,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 /**
  * A command for generating a summary of recent messages in a Discord text channel.
- * Retrieves the last 100 messages (excluding bots and system messages) and uses
+ * Retrieves the last 50 messages (excluding bots and system messages) and uses
  * OpenAI to create a concise one-paragraph recap under 75 words.
  */
 public class SummaryCommand implements Command {
@@ -41,7 +41,7 @@ public class SummaryCommand implements Command {
     /**
      * {@inheritDoc}
      * 
-     * Retrieves last 100 messages from the channel, filters to user messages only,
+     * Retrieves last 50 messages from the channel, filters to user messages only,
      * generates AI summary, and posts result to channel.
      */
     @Override
@@ -49,7 +49,7 @@ public class SummaryCommand implements Command {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
         MultiLogger logger = event.getLogger();
 
-        logger.append("- Retrieving last 100 messages from channel\n", LogDestination.NONAPI, LogDestination.API);
+        logger.append("- Retrieving last 50 messages from channel\n", LogDestination.NONAPI, LogDestination.API);
 
         try {
             // 1. Get the channel where command was invoked
@@ -64,9 +64,9 @@ public class SummaryCommand implements Command {
             MessageChannel channel = (MessageChannel) channelObj;
             String channelName = channel.getMention();
 
-            // 2. Retrieve last 100 messages
+            // 2. Retrieve last 50 messages
             List<Message> messages = channel.getMessagesBefore(Snowflake.of(Instant.now()))
-                .take(100)
+                .take(50)
                 .collectList()
                 .block();
 
