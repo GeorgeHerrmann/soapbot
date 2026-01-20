@@ -349,6 +349,33 @@ public class CS2EmbedFormatter {
     }
     
     /**
+     * Formats an "insufficient data" message embed for players with limited match history.
+     * 
+     * @param player The player's Faceit profile
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatInsufficientData(FaceitPlayer player) {
+        String profileInfo = String.format(
+            "**Nickname**: %s\n**Level**: %d\n**Elo**: %d\n**Country**: %s",
+            player.getNickname(),
+            player.getFaceitLevel(),
+            player.getElo(),
+            player.getCountry() != null ? player.getCountry() : "Unknown"
+        );
+        
+        return EmbedCreateSpec.builder()
+                .title("📭 Limited Match History")
+                .description(player.getNickname() + " has limited CS2 match history.")
+                .addField("Player Profile", profileInfo, false)
+                .addField("Note", "Statistics improve with more matches. Play some games and check back!", false)
+                .color(Color.of(0xf39c12)) // Orange color
+                .thumbnail(player.getAvatar() != null ? player.getAvatar() : "")
+                .footer("Data from Faceit API", null)
+                .timestamp(Instant.now())
+                .build();
+    }
+    
+    /**
      * Formats a success message embed.
      * 
      * @param message The success message to display

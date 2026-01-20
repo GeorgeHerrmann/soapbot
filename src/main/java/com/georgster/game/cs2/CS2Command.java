@@ -93,12 +93,16 @@ public class CS2Command implements ParseableCommand {
                 }
             }, "match");
             
-            // Stats subcommand (Phase 5 - not yet implemented)
+            // Stats subcommand (Phase 5)
             subcommands.on(p -> {
-                handler.sendMessage("⚠️ **Coming Soon**\n\n" +
-                        "The `!cs2 stats` command is not yet implemented. " +
-                        "This feature will be available in Phase 5.", 
-                        "CS2 Stats", MessageFormatting.INFO);
+                try {
+                    CS2StatsCommand statsCommand = new CS2StatsCommand();
+                    statsCommand.execute(event);
+                } catch (FaceitAPIException e) {
+                    logger.error("Failed to initialize CS2StatsCommand: {}", e.getMessage(), e);
+                    handler.sendMessage("Failed to initialize Faceit API client. Please contact server admins.", 
+                            "CS2 Stats", MessageFormatting.ERROR);
+                }
             }, "stats");
             
             // History subcommand (Phase 6 - not yet implemented)
