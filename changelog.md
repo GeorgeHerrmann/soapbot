@@ -671,4 +671,8 @@
         - Main Router
             - Implemented CS2Command main router for subcommand dispatch
             - Supports both prefix (!cs2) and slash (/) command syntax
+
+3.001
+    CS2 Faceit Integration
+        - Fixed an issue where the Application Command for the cs2 command wasn't allowing for user inputs
     

@@ -243,6 +243,18 @@ public class CS2Command implements ParseableCommand {
                                 .value("leaderboard")
                                 .build())
                         .build())
+                    .addOption(ApplicationCommandOptionData.builder()
+                        .name("user1")
+                        .description("First User for the desired action")
+                        .type(ApplicationCommandOption.Type.USER.getValue())
+                        .required(true)
+                        .build())
+                    .addOption(ApplicationCommandOptionData.builder()
+                        .name("user2")
+                        .description("Second User for the desired action (only for compare)")
+                        .type(ApplicationCommandOption.Type.USER.getValue())
+                        .required(true)
+                        .build())
                 .build();
     }
     
@@ -268,5 +280,13 @@ public class CS2Command implements ParseableCommand {
                 "\n- Available subcommands: link, unlink, match, stats, history, compare, leaderboard, help" +
                 "\n- Use '!cs2 help' for detailed usage information" +
                 "\n\n*Main command for CS2 Faceit integration. Use help subcommand for full documentation.*";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean shouldDefer() {
+        return true;
     }
 }
