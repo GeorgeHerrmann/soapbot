@@ -31,5 +31,6 @@ public enum PermissibleAction {
     MENTIONGROUPCOMMAND,
     COINFACTORYCOMMAND,
     SUMMARYCOMMAND,
+    CS2COMMAND,
     DEFAULT
 }

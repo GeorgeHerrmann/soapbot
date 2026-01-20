@@ -624,3 +624,51 @@
     - Updated all instances of gpt to gpt-5-nano. 
     - Fixed GPT-5 Nano timeout issues by increasing OpenAI API timeout from default 30s to 120s.
     GPT-5 Nano requires more processing time than GPT-3.5 Turbo for complex requests.
+
+3.000
+    CS2 Faceit Integration
+        - Complete CS2 Faceit integration with 6 core commands
+        - Infrastructure
+            - Added Maven dependencies (OkHttp3, Caffeine)
+            - Extended PermissibleAction enum with CS2COMMAND permission
+            - Created project directory structure for CS2 feature
+            - Configured Faceit API key management
+        - API Client & Caching
+            - Implemented FaceitAPIClient with OkHttp3 for REST API calls
+            - Implemented Caffeine-based FaceitCache with configurable TTL
+            - Created DTOs for FaceitPlayer, PlayerStats, MatchDetails, LeaderboardEntry
+            - Added FaceitAPIException and PlayerNotFoundException for error handling
+        - User Story 1: Account Linking
+            - Implemented /cs2 link command to link Faceit accounts to Discord profiles
+            - Implemented /cs2 unlink command to remove Faceit associations
+            - Extended UserProfile with CS2Profile nested class for Faceit linkage persistence
+        - User Story 2: Match Reports
+            - Implemented /cs2 match command to view most recent match statistics
+            - Displays K/D, ADR, headshot %, MVPs, and map
+            - Shows comparison to player's lifetime averages
+        - User Story 3: Player Statistics
+            - Implemented /cs2 stats command for comprehensive lifetime statistics
+            - Displays Faceit level, total matches, win rate, K/D, ADR, headshot %
+            - Shows top 3 maps with individual statistics
+            - Displays recent form (last 5 match results)
+        - User Story 4: Player Comparison
+            - Implemented /cs2 compare command for side-by-side player comparison
+            - Compares Elo, K/D, ADR, headshot %, and win rates
+            - Visual indicators show which player performs better
+        - User Story 5: Server Leaderboard
+            - Implemented /cs2 leaderboard command to view top 10 linked players
+            - Displays rank position, nickname, level, K/D, and Elo
+            - Shows server average Elo
+            - Implemented ServerLeaderboardManager and LeaderboardRefreshTask for periodic updates
+        - User Story 6: Match History
+            - Implemented /cs2 history command to view last 10 matches
+            - Displays map, score, K/D, ADR, result (W/L), and timestamp for each match
+            - Shows recent stats summary with win rate and average K/D
+        - Utilities & Formatting
+            - Implemented PlayerLookup with precedence resolution (Discord mention → username → Steam ID → Faceit ID)
+            - Created CS2EmbedFormatter for consistent Discord embed formatting
+            - Implemented CS2HelpCommand with simplified, concise usage guide
+        - Main Router
+            - Implemented CS2Command main router for subcommand dispatch
+            - Supports both prefix (!cs2) and slash (/) command syntax
+    

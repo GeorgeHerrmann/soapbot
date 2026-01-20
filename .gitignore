@@ -1,5 +1,6 @@
 key.txt
 youtube_oauth_token.txt
+faceit_api_key.txt
 src/main/java/com/georgster/profile/profiles/*
 target/classes/com/georgster/profile/profiles/*
 src/main/java/com/georgster/api/data/*
@@ -41,3 +42,4 @@ Thumbs.db
 # Environment files
 .env
 .env.*
+CS2_FACEIT_INTEGRATION_GUIDE.md

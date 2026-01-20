@@ -142,8 +142,9 @@ public class UserProfileManager extends GuildedSoapManager<UserProfile> {
                 if (collecteds == null) collecteds = new ArrayList<>();
                 CoinFactory factory = profile.getFactory();
                 if (factory == null) factory = new CoinFactory(id);
+                UserProfile.CS2Profile cs2Profile = profile.getCS2Profile(); // Preserve CS2Profile
 
-                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, factory, collecteds));
+                update(new UserProfile(event.getGuild().getId().asString(), id, member.getTag(), completions, bank, factory, collecteds, cs2Profile));
             } else {
                 add(new UserProfile(event.getGuild().getId().asString(), id, member.getTag()));
             }
