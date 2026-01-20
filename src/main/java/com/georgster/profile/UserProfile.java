@@ -25,6 +25,7 @@ public final class UserProfile extends MemberIdentified {
     private final CoinBank bank;
     private final CoinFactory factory;
     private final List<Collected> collecteds;
+    private CS2Profile cs2Profile; // CS2 Faceit account linkage (nullable)
 
     /**
      * Creates a new {@link UserProfile} for a specific {@code Member} inside of a {@code Guild}.
@@ -41,6 +42,7 @@ public final class UserProfile extends MemberIdentified {
         this.bank = new CoinBank(userId);
         this.collecteds = new ArrayList<>();
         this.factory = new CoinFactory(userId);
+        this.cs2Profile = null; // Not linked by default
     }
 
     /**
@@ -53,6 +55,8 @@ public final class UserProfile extends MemberIdentified {
      * @param user The username of the user
      * @param completions The {@link MemberChatCompletions} of the user
      * @param bank The {@link CoinBank} of the user
+     * @param factory The {@link CoinFactory} of the user
+     * @param collecteds The {@link Collected} items of the user
      */
     public UserProfile(String serverId, String userId, String user, MemberChatCompletions completions, CoinBank bank, CoinFactory factory, List<Collected> collecteds) {
         super(userId);
@@ -62,6 +66,7 @@ public final class UserProfile extends MemberIdentified {
         this.bank = bank;
         this.collecteds = collecteds;
         this.factory = factory;
+        this.cs2Profile = null; // Not linked by default, will be loaded from database if exists
     }
 
     /**
@@ -187,5 +192,164 @@ public final class UserProfile extends MemberIdentified {
     public void updateCollected(Collected c) {
         collecteds.removeIf(collected -> collected.getId().equals(c.getId()));
         collecteds.add(c);
+    }
+    
+    /**
+     * Gets the CS2Profile associated with this user's Faceit account.
+     * 
+     * @return The CS2Profile, or null if user has not linked a Faceit account
+     */
+    public CS2Profile getCS2Profile() {
+        return cs2Profile;
+    }
+    
+    /**
+     * Sets the CS2Profile associated with this user's Faceit account.
+     * 
+     * @param cs2Profile The CS2Profile to associate with this user
+     */
+    public void setCS2Profile(CS2Profile cs2Profile) {
+        this.cs2Profile = cs2Profile;
+    }
+    
+    /**
+     * Checks if the user has linked a Faceit account.
+     * 
+     * @return true if user has a linked Faceit account, false otherwise
+     */
+    public boolean hasLinkedFaceit() {
+        return cs2Profile != null && cs2Profile.isLinked();
+    }
+    
+    /**
+     * Nested class representing a user's CS2 Faceit account linkage.
+     * <p>
+     * Contains Faceit player information and linkage metadata.
+     */
+    public static class CS2Profile {
+        private String faceitPlayerId;
+        private String faceitNickname;
+        private String steamId;
+        private long lastUpdated; // Unix timestamp
+        private boolean isLinked;
+        
+        /**
+         * Creates a new CS2Profile with the specified Faceit player information.
+         * 
+         * @param faceitPlayerId The player's Faceit ID
+         * @param faceitNickname The player's Faceit nickname
+         * @param steamId The player's Steam ID (optional, may be null)
+         */
+        public CS2Profile(String faceitPlayerId, String faceitNickname, String steamId) {
+            this.faceitPlayerId = faceitPlayerId;
+            this.faceitNickname = faceitNickname;
+            this.steamId = steamId;
+            this.lastUpdated = System.currentTimeMillis();
+            this.isLinked = true;
+        }
+        
+        /**
+         * Default constructor for deserialization.
+         */
+        public CS2Profile() {
+            this.isLinked = false;
+        }
+        
+        /**
+         * Gets the Faceit player ID.
+         * 
+         * @return The Faceit player ID
+         */
+        public String getFaceitPlayerId() {
+            return faceitPlayerId;
+        }
+        
+        /**
+         * Gets the Faceit nickname.
+         * 
+         * @return The Faceit nickname
+         */
+        public String getFaceitNickname() {
+            return faceitNickname;
+        }
+        
+        /**
+         * Gets the Steam ID.
+         * 
+         * @return The Steam ID, or null if not linked
+         */
+        public String getSteamId() {
+            return steamId;
+        }
+        
+        /**
+         * Gets the last updated timestamp.
+         * 
+         * @return Unix timestamp of last update
+         */
+        public long getLastUpdated() {
+            return lastUpdated;
+        }
+        
+        /**
+         * Checks if the Faceit account is currently linked.
+         * 
+         * @return true if linked, false otherwise
+         */
+        public boolean isLinked() {
+            return isLinked;
+        }
+        
+        /**
+         * Sets the Faceit player ID.
+         * 
+         * @param faceitPlayerId The Faceit player ID
+         */
+        public void setFaceitPlayerId(String faceitPlayerId) {
+            this.faceitPlayerId = faceitPlayerId;
+        }
+        
+        /**
+         * Sets the Faceit nickname.
+         * 
+         * @param faceitNickname The Faceit nickname
+         */
+        public void setFaceitNickname(String faceitNickname) {
+            this.faceitNickname = faceitNickname;
+        }
+        
+        /**
+         * Sets the Steam ID.
+         * 
+         * @param steamId The Steam ID
+         */
+        public void setSteamId(String steamId) {
+            this.steamId = steamId;
+        }
+        
+        /**
+         * Sets the last updated timestamp.
+         * 
+         * @param lastUpdated Unix timestamp
+         */
+        public void setLastUpdated(long lastUpdated) {
+            this.lastUpdated = lastUpdated;
+        }
+        
+        /**
+         * Sets the linked status.
+         * 
+         * @param linked true if linked, false otherwise
+         */
+        public void setLinked(boolean linked) {
+            this.isLinked = linked;
+        }
+        
+        /**
+         * Updates the last updated timestamp to the current time.
+         */
+        public void markUpdated() {
+            this.lastUpdated = System.currentTimeMillis();
+        }
     }
 }

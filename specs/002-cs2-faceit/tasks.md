@@ -89,42 +89,42 @@ Build shared infrastructure required by all CS2 commands: API client, DTOs, cach
 
 ### Implementation Tasks
 
-- [ ] T005 [P] Create FaceitPlayer DTO in `src/main/java/com/georgster/api/faceit/model/FaceitPlayer.java`
+- [X] T005 [P] Create FaceitPlayer DTO in `src/main/java/com/georgster/api/faceit/model/FaceitPlayer.java`
   - **Commit**: `feat(002-cs2-faceit): Add FaceitPlayer DTO`
   - **Details**: Fields: playerId, nickname, avatar, country, faceitLevel, elo, steamId with Gson deserialization annotations
   - **File**: src/main/java/com/georgster/api/faceit/model/FaceitPlayer.java
 
-- [ ] T006 [P] Create PlayerStats DTO in `src/main/java/com/georgster/api/faceit/model/PlayerStats.java`
+- [X] T006 [P] Create PlayerStats DTO in `src/main/java/com/georgster/api/faceit/model/PlayerStats.java`
   - **Commit**: `feat(002-cs2-faceit): Add PlayerStats DTO with lifetime statistics`
   - **Details**: Fields: totalMatches, wins, losses, winRate, killDeathRatio, averageDamageRound, headshotPercentage, mVPsPerMatch, topMaps, recentForm with MapStats nested class
   - **File**: src/main/java/com/georgster/api/faceit/model/PlayerStats.java
 
-- [ ] T007 [P] Create MatchDetails DTO in `src/main/java/com/georgster/api/faceit/model/MatchDetails.java`
+- [X] T007 [P] Create MatchDetails DTO in `src/main/java/com/georgster/api/faceit/model/MatchDetails.java`
   - **Commit**: `feat(002-cs2-faceit): Add MatchDetails DTO for individual match statistics`
   - **Details**: Fields: matchId, playerId, mapName, score, kills, deaths, assists, averageDamageRound, headshotPercentage, mvps, result, matchTimestamp, teamRoster, roundsPlayed
   - **File**: src/main/java/com/georgster/api/faceit/model/MatchDetails.java
 
-- [ ] T008 [P] Create LeaderboardEntry DTO in `src/main/java/com/georgster/api/faceit/model/LeaderboardEntry.java`
+- [X] T008 [P] Create LeaderboardEntry DTO in `src/main/java/com/georgster/api/faceit/model/LeaderboardEntry.java`
   - **Commit**: `feat(002-cs2-faceit): Add LeaderboardEntry DTO for server rankings`
   - **Details**: Fields: rank, faceitNickname, faceitLevel, elo, killDeathRatio, discordMentionId
   - **File**: src/main/java/com/georgster/api/faceit/model/LeaderboardEntry.java
 
-- [ ] T009 [P] Create ServerLeaderboard DTO in `src/main/java/com/georgster/api/faceit/model/ServerLeaderboard.java`
+- [X] T009 [P] Create ServerLeaderboard DTO in `src/main/java/com/georgster/api/faceit/model/ServerLeaderboard.java`
   - **Commit**: `feat(002-cs2-faceit): Add ServerLeaderboard DTO for guild rankings cache`
   - **Details**: Fields: guildId, entries List, serverAverageElo, generatedAt, refreshedAt
   - **File**: src/main/java/com/georgster/api/faceit/model/ServerLeaderboard.java
 
-- [ ] T010 [P] Create FaceitAPIException in `src/main/java/com/georgster/api/faceit/exception/FaceitAPIException.java`
+- [X] T010 [P] Create FaceitAPIException in `src/main/java/com/georgster/api/faceit/exception/FaceitAPIException.java`
   - **Commit**: `feat(002-cs2-faceit): Add FaceitAPIException for error handling`
   - **Details**: Custom exception with message and optional cause; supports FR-011 standardized error responses
   - **File**: src/main/java/com/georgster/api/faceit/exception/FaceitAPIException.java
 
-- [ ] T011 [P] Create PlayerNotFoundException in `src/main/java/com/georgster/api/faceit/exception/PlayerNotFoundException.java`
+- [X] T011 [P] Create PlayerNotFoundException in `src/main/java/com/georgster/api/faceit/exception/PlayerNotFoundException.java`
   - **Commit**: `feat(002-cs2-faceit): Add PlayerNotFoundException for lookup failures`
   - **Details**: Custom exception extends FaceitAPIException; used when player not found via any lookup method
   - **File**: src/main/java/com/georgster/api/faceit/exception/PlayerNotFoundException.java
 
-- [ ] T012 Create FaceitAPIClient in `src/main/java/com/georgster/api/faceit/FaceitAPIClient.java`
+- [X] T012 Create FaceitAPIClient in `src/main/java/com/georgster/api/faceit/FaceitAPIClient.java`
   - **Commit**: `feat(002-cs2-faceit): Implement FaceitAPIClient with OkHttp3`
   - **Details**: 
     - Initialize OkHttp3 client with 10-connection pool, 30s timeout, exponential backoff
@@ -134,7 +134,7 @@ Build shared infrastructure required by all CS2 commands: API client, DTOs, cach
     - Deserialize JSON responses into DTOs using Gson (existing dependency)
   - **File**: src/main/java/com/georgster/api/faceit/FaceitAPIClient.java
 
-- [ ] T013 Create FaceitCache in `src/main/java/com/georgster/cache/FaceitCache.java`
+- [X] T013 Create FaceitCache in `src/main/java/com/georgster/cache/FaceitCache.java`
   - **Commit**: `feat(002-cs2-faceit): Implement Caffeine-based caching for Faceit data`
   - **Details**:
     - Extend GuildedSoapManager<CachedData> pattern or implement as standalone singleton cache manager
