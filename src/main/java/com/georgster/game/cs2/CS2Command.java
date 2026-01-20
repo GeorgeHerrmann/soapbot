@@ -247,13 +247,13 @@ public class CS2Command implements ParseableCommand {
                         .name("user1")
                         .description("First User for the desired action")
                         .type(ApplicationCommandOption.Type.USER.getValue())
-                        .required(true)
+                        .required(false)
                         .build())
                     .addOption(ApplicationCommandOptionData.builder()
                         .name("user2")
                         .description("Second User for the desired action (only for compare)")
                         .type(ApplicationCommandOption.Type.USER.getValue())
-                        .required(true)
+                        .required(false)
                         .build())
                 .build();
     }
