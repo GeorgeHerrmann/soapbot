@@ -188,6 +188,52 @@ public class MatchDetails {
 
 ---
 
+### 4a. FullMatchDetails (Complete Match with All Players)
+
+**Purpose**: Store comprehensive statistics for an entire match including all players from both teams
+
+**Fields**:
+```java
+public class FullMatchDetails {
+    private String matchId;             // Faceit match unique ID
+    private String mapName;             // Map played (e.g., "de_mirage")
+    private String matchResult;         // "W" or "L" from perspective of team1
+    private String finalScore;          // e.g., "16-14"
+    private long matchTimestamp;        // Unix timestamp when match played
+    private TeamRoster team1;           // Winning team roster
+    private TeamRoster team2;           // Losing team roster
+}
+
+public class TeamRoster {
+    private String teamName;            // Team name (e.g., "Team A")
+    private List<PlayerMatchPerformance> players; // All players on this team
+}
+
+public class PlayerMatchPerformance {
+    private String nickname;            // Faceit username
+    private int kills;                  // Kills in match
+    private int deaths;                 // Deaths in match
+    private int assists;                // Assists in match
+    private double adr;                 // Average damage per round
+    private double headshotPercentage;  // Headshot percentage
+}
+```
+
+**Source**: Deserialized from Faceit API `GET /matches/{match_id}` and `GET /matches/{match_id}/stats`
+
+**Relationships**:
+- 1:1 with MatchDetails (via matchId)
+- Used by CS2MatchWizard for full match view
+
+**Validation Rules**:
+- `matchId`: REQUIRED, matches existing MatchDetails.matchId
+- `team1`, `team2`: Each must have 1-5 players
+- `finalScore`: Format "XX-YY" where XX and YY are integers 0-30
+- `matchResult`: Must be "W" or "L"
+- MVP identification: Player with highest ADR across both teams
+
+---
+
 ### 5. ServerLeaderboard (Aggregated Ranking)
 
 **Purpose**: Cache top-10 linked players per server, ranked by Faceit Elo
@@ -247,6 +293,13 @@ TTL: 5 minutes
 Key: "{guildId}:{playerId}:match"
 Value: MatchDetails + fetchedAt timestamp
 TTL: 5 minutes
+```
+
+**CachedFullMatchDetails** (Caffeine Cache):
+```
+Key: "{guildId}:{matchId}:fullmatch"
+Value: FullMatchDetails + fetchedAt timestamp
+TTL: 10 minutes
 ```
 
 **CachedMatchHistory** (Caffeine Cache):

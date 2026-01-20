@@ -639,6 +639,87 @@ public class CS2EmbedFormatter {
     }
     
     /**
+     * Formats a full match stats embed showing all players from both teams.
+     * <p>
+     * Displays comprehensive match statistics including team rosters, individual player
+     * performance, and MVP identification. Used by CS2MatchWizard.
+     * 
+     * @param fullMatch The full match details with all players
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatFullMatchStats(FullMatchDetails fullMatch) {
+        String title = String.format("🎮 Full Match Stats - %s", fullMatch.getMapName());
+        
+        // Determine winning and losing teams
+        FullMatchDetails.TeamRoster winningTeam;
+        FullMatchDetails.TeamRoster losingTeam;
+        String winningTeamName;
+        String losingTeamName;
+        
+        if ("W".equalsIgnoreCase(fullMatch.getMatchResult())) {
+            winningTeam = fullMatch.getTeam1();
+            losingTeam = fullMatch.getTeam2();
+            winningTeamName = fullMatch.getTeam1().getTeamName();
+            losingTeamName = fullMatch.getTeam2().getTeamName();
+        } else {
+            winningTeam = fullMatch.getTeam2();
+            losingTeam = fullMatch.getTeam1();
+            winningTeamName = fullMatch.getTeam2().getTeamName();
+            losingTeamName = fullMatch.getTeam1().getTeamName();
+        }
+        
+        String description = String.format("**%s** defeated **%s** (%s)",
+            winningTeamName, losingTeamName, fullMatch.getFinalScore());
+        
+        // Identify MVP
+        FullMatchDetails.PlayerMatchPerformance mvp = fullMatch.getMVP();
+        String mvpNickname = mvp != null ? mvp.getNickname() : "";
+        
+        // Format winning team
+        StringBuilder winningTeamStats = new StringBuilder();
+        if (winningTeam.getPlayers() != null) {
+            for (FullMatchDetails.PlayerMatchPerformance player : winningTeam.getPlayers()) {
+                String mvpMarker = player.getNickname().equals(mvpNickname) ? " 🏆" : "";
+                winningTeamStats.append(String.format(
+                    "**%s**%s: %s | %.1f ADR\n",
+                    player.getNickname(),
+                    mvpMarker,
+                    player.getKDA(),
+                    player.getAdr()
+                ));
+            }
+        }
+        
+        // Format losing team
+        StringBuilder losingTeamStats = new StringBuilder();
+        if (losingTeam.getPlayers() != null) {
+            for (FullMatchDetails.PlayerMatchPerformance player : losingTeam.getPlayers()) {
+                String mvpMarker = player.getNickname().equals(mvpNickname) ? " 🏆" : "";
+                losingTeamStats.append(String.format(
+                    "**%s**%s: %s | %.1f ADR\n",
+                    player.getNickname(),
+                    mvpMarker,
+                    player.getKDA(),
+                    player.getAdr()
+                ));
+            }
+        }
+        
+        return EmbedCreateSpec.builder()
+            .title(title)
+            .description(description)
+            .color(SUCCESS_COLOR)
+            .addField(String.format("🟢 %s (Winners)", winningTeamName), 
+                winningTeamStats.length() > 0 ? winningTeamStats.toString() : "No player data", true)
+            .addField(String.format("🔴 %s", losingTeamName), 
+                losingTeamStats.length() > 0 ? losingTeamStats.toString() : "No player data", true)
+            .addField("Legend", "🏆 = Game MVP", false)
+            .footer("Match played at " + formatTimestamp(fullMatch.getMatchTimestamp() / 1000), null)
+            .timestamp(Instant.now())
+            .build();
+    }
+    
+    /**
      * Formats a success message embed.
      * 
      * @param message The success message to display

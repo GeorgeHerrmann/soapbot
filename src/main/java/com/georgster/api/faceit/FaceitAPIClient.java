@@ -3,6 +3,7 @@ package com.georgster.api.faceit;
 import com.georgster.api.faceit.exception.FaceitAPIException;
 import com.georgster.api.faceit.exception.PlayerNotFoundException;
 import com.georgster.api.faceit.model.FaceitPlayer;
+import com.georgster.api.faceit.model.FullMatchDetails;
 import com.georgster.api.faceit.model.MatchDetails;
 import com.georgster.api.faceit.model.PlayerStats;
 import com.google.gson.Gson;
@@ -512,6 +513,179 @@ public class FaceitAPIClient {
             return obj.has(key) ? obj.get(key).getAsString() : "";
         } catch (Exception e) {
             return "";
+        }
+    }
+    
+    /**
+     * Fetches full match details including all players from both teams.
+     * <p>
+     * Used by CS2MatchWizard to display comprehensive match statistics.
+     * Combines data from /matches/{matchId} and /matches/{matchId}/stats endpoints.
+     * 
+     * @param matchId The Faceit match ID
+     * @return FullMatchDetails object with complete match data
+     * @throws PlayerNotFoundException if match not found
+     * @throws FaceitAPIException if API request fails
+     */
+    public FullMatchDetails fetchFullMatchDetails(String matchId) throws FaceitAPIException {
+        
+        try {
+            // First, fetch basic match info
+            String matchUrl = BASE_URL + "/matches/" + matchId;
+            Request matchRequest = new Request.Builder()
+                    .url(matchUrl)
+                    .addHeader("Authorization", "Bearer " + apiKey)
+                    .build();
+            
+            JsonObject matchData;
+            try (Response matchResponse = client.newCall(matchRequest).execute()) {
+                if (matchResponse.code() == 404) {
+                    throw new PlayerNotFoundException("Match not found: " + matchId);
+                }
+                if (!matchResponse.isSuccessful()) {
+                    throw new FaceitAPIException("Failed to fetch match info: HTTP " + matchResponse.code());
+                }
+                
+                String matchBody = matchResponse.body().string();
+                matchData = gson.fromJson(matchBody, JsonObject.class);
+            }
+            
+            // Then fetch match stats
+            String statsUrl = BASE_URL + "/matches/" + matchId + "/stats";
+            Request statsRequest = new Request.Builder()
+                    .url(statsUrl)
+                    .addHeader("Authorization", "Bearer " + apiKey)
+                    .build();
+            
+            JsonObject statsData;
+            try (Response statsResponse = client.newCall(statsRequest).execute()) {
+                if (!statsResponse.isSuccessful()) {
+                    throw new FaceitAPIException("Failed to fetch match stats: HTTP " + statsResponse.code());
+                }
+                
+                String statsBody = statsResponse.body().string();
+                statsData = gson.fromJson(statsBody, JsonObject.class);
+            }
+            
+            // Parse the combined data into FullMatchDetails
+            return parseFullMatchDetails(matchId, matchData, statsData);
+            
+        } catch (IOException e) {
+            logger.error("Network error fetching full match details", e);
+            throw new FaceitAPIException("Network error: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Parses match and stats data into FullMatchDetails object.
+     * 
+     * @param matchId The match ID
+     * @param matchData Basic match info from /matches endpoint
+     * @param statsData Detailed stats from /matches/stats endpoint
+     * @return Parsed FullMatchDetails object
+     */
+    private FullMatchDetails parseFullMatchDetails(String matchId, JsonObject matchData, JsonObject statsData) {
+        FullMatchDetails fullMatch = new FullMatchDetails();
+        fullMatch.setMatchId(matchId);
+        
+        // Extract basic match info
+        if (matchData != null) {
+            // Match timestamp
+            long finishedAt = getLong(matchData, "finished_at");
+            fullMatch.setMatchTimestamp(finishedAt * 1000); // Convert to milliseconds
+            
+            // Teams data
+            JsonObject teams = matchData.getAsJsonObject("teams");
+            if (teams != null) {
+                JsonObject faction1 = teams.getAsJsonObject("faction1");
+                JsonObject faction2 = teams.getAsJsonObject("faction2");
+                
+                if (faction1 != null && faction2 != null) {
+                    // Determine winner
+                    String faction1Result = getString(faction1, "faction_id");
+                    String winnerFaction = "";
+                    JsonObject results = matchData.getAsJsonObject("results");
+                    if (results != null) {
+                        winnerFaction = getString(results, "winner");
+                    }
+                    
+                    boolean team1Won = faction1Result.equals(winnerFaction);
+                    fullMatch.setMatchResult(team1Won ? "W" : "L");
+                    
+                    // Set team names
+                    FullMatchDetails.TeamRoster team1Roster = new FullMatchDetails.TeamRoster();
+                    team1Roster.setTeamName(getString(faction1, "name"));
+                    
+                    FullMatchDetails.TeamRoster team2Roster = new FullMatchDetails.TeamRoster();
+                    team2Roster.setTeamName(getString(faction2, "name"));
+                    
+                    fullMatch.setTeam1(team1Roster);
+                    fullMatch.setTeam2(team2Roster);
+                }
+            }
+        }
+        
+        // Extract detailed player stats
+        if (statsData != null) {
+            JsonArray rounds = statsData.getAsJsonArray("rounds");
+            if (rounds != null && rounds.size() > 0) {
+                JsonObject round = rounds.get(0).getAsJsonObject();
+                
+                // Extract map name and score
+                JsonObject roundStats = round.getAsJsonObject("round_stats");
+                if (roundStats != null) {
+                    fullMatch.setMapName(getString(roundStats, "Map"));
+                    fullMatch.setFinalScore(getString(roundStats, "Score"));
+                }
+                
+                // Extract team rosters with player stats
+                JsonArray teams = round.getAsJsonArray("teams");
+                if (teams != null && teams.size() >= 2) {
+                    // Team 1 (index 0)
+                    JsonObject team1Data = teams.get(0).getAsJsonObject();
+                    parseTeamPlayers(team1Data, fullMatch.getTeam1());
+                    
+                    // Team 2 (index 1)
+                    JsonObject team2Data = teams.get(1).getAsJsonObject();
+                    parseTeamPlayers(team2Data, fullMatch.getTeam2());
+                }
+            }
+        }
+        
+        return fullMatch;
+    }
+    
+    /**
+     * Parses player stats from a team and adds them to the TeamRoster.
+     * 
+     * @param teamData JSON object containing team data
+     * @param roster TeamRoster to populate
+     */
+    private void parseTeamPlayers(JsonObject teamData, FullMatchDetails.TeamRoster roster) {
+        JsonArray players = teamData.getAsJsonArray("players");
+        if (players == null) {
+            return;
+        }
+        
+        for (int i = 0; i < players.size(); i++) {
+            JsonObject playerData = players.get(i).getAsJsonObject();
+            JsonObject playerStats = playerData.getAsJsonObject("player_stats");
+            
+            if (playerStats != null) {
+                FullMatchDetails.PlayerMatchPerformance performance = new FullMatchDetails.PlayerMatchPerformance();
+                
+                // Player nickname
+                performance.setNickname(getString(playerData, "nickname"));
+                
+                // Stats
+                performance.setKills(getIntOrZero(playerStats, "Kills"));
+                performance.setDeaths(getIntOrZero(playerStats, "Deaths"));
+                performance.setAssists(getIntOrZero(playerStats, "Assists"));
+                performance.setAdr(getDoubleOrZero(playerStats, "ADR"));
+                performance.setHeadshotPercentage(getDoubleOrZero(playerStats, "Headshots %"));
+                
+                roster.addPlayer(performance);
+            }
         }
     }
     

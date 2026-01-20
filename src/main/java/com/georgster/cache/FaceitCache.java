@@ -1,5 +1,6 @@
 package com.georgster.cache;
 
+import com.georgster.api.faceit.model.FullMatchDetails;
 import com.georgster.api.faceit.model.MatchDetails;
 import com.georgster.api.faceit.model.PlayerStats;
 import com.georgster.api.faceit.model.ServerLeaderboard;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
  * - Player stats: 5 minutes
  * - Match reports: 5 minutes
  * - Match history: 5 minutes
+ * - Full match details: 10 minutes
  * - Server leaderboards: 10 minutes
  * <p>
  * Thread-safe: Supports concurrent access from multiple Discord command executions.
@@ -37,12 +39,14 @@ public class FaceitCache {
     private final Cache<String, PlayerStats> statsCache;
     private final Cache<String, MatchDetails> matchCache;
     private final Cache<String, List<MatchDetails>> historyCache;
+    private final Cache<String, FullMatchDetails> fullMatchCache;
     private final Cache<String, ServerLeaderboard> leaderboardCache;
     
     // Cache TTL constants (in minutes)
     private static final int STATS_TTL = 5;
     private static final int MATCH_TTL = 5;
     private static final int HISTORY_TTL = 5;
+    private static final int FULL_MATCH_TTL = 10;
     private static final int LEADERBOARD_TTL = 10;
     
     // Maximum cache size to prevent memory overflow
@@ -68,6 +72,12 @@ public class FaceitCache {
         
         this.historyCache = Caffeine.newBuilder()
                 .expireAfterWrite(HISTORY_TTL, TimeUnit.MINUTES)
+                .maximumSize(MAX_CACHE_SIZE)
+                .recordStats()
+                .build();
+        
+        this.fullMatchCache = Caffeine.newBuilder()
+                .expireAfterWrite(FULL_MATCH_TTL, TimeUnit.MINUTES)
                 .maximumSize(MAX_CACHE_SIZE)
                 .recordStats()
                 .build();
@@ -288,9 +298,10 @@ public class FaceitCache {
         statsCache.asMap().keySet().removeIf(key -> key.startsWith(guildId + ":"));
         matchCache.asMap().keySet().removeIf(key -> key.startsWith(guildId + ":"));
         historyCache.asMap().keySet().removeIf(key -> key.startsWith(guildId + ":"));
+        fullMatchCache.asMap().keySet().removeIf(key -> key.startsWith(guildId + ":"));
         leaderboardCache.invalidate(buildLeaderboardKey(guildId));
         
-
+        logger.debug("Cleared all cache entries for guild {}", guildId);
     }
     
     /**
@@ -302,9 +313,57 @@ public class FaceitCache {
         statsCache.invalidateAll();
         matchCache.invalidateAll();
         historyCache.invalidateAll();
+        fullMatchCache.invalidateAll();
         leaderboardCache.invalidateAll();
         
-        logger.warn("Cleared all caches (stats, matches, history, leaderboards)");
+        logger.warn("Cleared all caches (stats, matches, history, full matches, leaderboards)");
+    }
+    
+    // ===== Full Match Details Cache =====
+    
+    /**
+     * Retrieves cached full match details.
+     * 
+     * @param guildId The Discord guild ID
+     * @param matchId The Faceit match ID
+     * @return FullMatchDetails object if cached, null otherwise
+     */
+    public FullMatchDetails getFullMatchDetails(String guildId, String matchId) {
+        String key = buildFullMatchKey(guildId, matchId);
+        FullMatchDetails fullMatch = fullMatchCache.getIfPresent(key);
+        if (fullMatch != null) {
+            logger.debug("Cache HIT: Full match details for match {} in guild {}", matchId, guildId);
+        } else {
+            logger.debug("Cache MISS: Full match details for match {} in guild {}", matchId, guildId);
+        }
+        return fullMatch;
+    }
+    
+    /**
+     * Stores full match details in cache.
+     * 
+     * @param guildId The Discord guild ID
+     * @param matchId The Faceit match ID
+     * @param fullMatch The FullMatchDetails object to cache
+     */
+    public void putFullMatchDetails(String guildId, String matchId, FullMatchDetails fullMatch) {
+        String key = buildFullMatchKey(guildId, matchId);
+        fullMatchCache.put(key, fullMatch);
+    }
+    
+    /**
+     * Invalidates cached full match details.
+     * 
+     * @param guildId The Discord guild ID
+     * @param matchId The Faceit match ID
+     */
+    public void invalidateFullMatchDetails(String guildId, String matchId) {
+        String key = buildFullMatchKey(guildId, matchId);
+        fullMatchCache.invalidate(key);
+    }
+    
+    private String buildFullMatchKey(String guildId, String matchId) {
+        return guildId + ":" + matchId + ":fullmatch";
     }
     
     /**
@@ -317,10 +376,12 @@ public class FaceitCache {
             "FaceitCache Stats | Stats: %d entries (%.1f%% hit rate) | " +
             "Matches: %d entries (%.1f%% hit rate) | " +
             "History: %d entries (%.1f%% hit rate) | " +
+            "Full Matches: %d entries (%.1f%% hit rate) | " +
             "Leaderboards: %d entries (%.1f%% hit rate)",
             statsCache.estimatedSize(), calculateHitRate(statsCache.stats()),
             matchCache.estimatedSize(), calculateHitRate(matchCache.stats()),
             historyCache.estimatedSize(), calculateHitRate(historyCache.stats()),
+            fullMatchCache.estimatedSize(), calculateHitRate(fullMatchCache.stats()),
             leaderboardCache.estimatedSize(), calculateHitRate(leaderboardCache.stats())
         );
     }

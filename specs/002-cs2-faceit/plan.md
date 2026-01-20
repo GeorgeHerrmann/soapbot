@@ -71,7 +71,6 @@ specs/002-cs2-faceit/
 │   ├── cs2-history-contract.md
 │   ├── cs2-compare-contract.md
 │   ├── cs2-leaderboard-contract.md
-│   ├── cs2-team-contract.md
 │   └── cs2-help-contract.md
 └── tasks.md             # Phase 2: Implementation tasks (NOT yet created)
 ```
@@ -90,8 +89,9 @@ src/main/java/com/georgster/
 │   │   ├── CS2HistoryCommand.java    # Subcommand: history
 │   │   ├── CS2CompareCommand.java    # Subcommand: compare
 │   │   ├── CS2LeaderboardCommand.java # Subcommand: leaderboard
-│   │   ├── CS2TeamCommand.java       # Subcommand: team
 │   │   └── CS2HelpCommand.java       # Subcommand: help
+│   ├── wizard/
+│   │   └── CS2MatchWizard.java       # Wizard for full match details view
 │   └── util/
 │       ├── CS2EmbedFormatter.java    # Discord embed formatting utilities
 │       └── PlayerLookup.java         # Player resolution (mention/username/steam)
@@ -102,6 +102,7 @@ src/main/java/com/georgster/
 │       │   ├── FaceitPlayer.java     # DTO: Player profile
 │       │   ├── PlayerStats.java      # DTO: Career statistics
 │       │   ├── MatchDetails.java     # DTO: Single match record
+│       │   ├── FullMatchDetails.java # DTO: Complete match with all players
 │       │   └── LeaderboardEntry.java # DTO: Leaderboard rank entry
 │       └── exception/
 │           ├── PlayerNotFoundException.java

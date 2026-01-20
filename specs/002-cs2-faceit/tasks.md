@@ -18,7 +18,7 @@
 - **Phase 6**: User Story 4 - Player Comparison (competitive/social element)
 - **Phase 7**: User Story 5 - Server Leaderboard (community engagement)
 - **Phase 8**: User Story 6 - Match History (trend analysis)
-- **Phase 9**: User Story 7 - Team Statistics (team-focused servers)
+- **Phase 9**: User Story 7 - Full Match Details with Wizard (interactive full match view)
 - **Phase 10**: Polish & Cross-Cutting Concerns (performance, edge cases, documentation)
 
 ### Execution Strategy
@@ -537,45 +537,90 @@ Enable Discord users to view their last 10 matches with quick stats (map, score,
 
 ---
 
-## Phase 9: User Story 7 - Team Statistics (Priority P3)
+## Phase 9: User Story 7 - Full Match Details with Wizard (Priority P3)
 
 ### Story Goal
-Enable Discord users to look up a team's match statistics including roster performance, combined K/D, and recent match details.
+Enable Discord users to view detailed full match statistics showing all players' performance when viewing their last match. Users see their individual match stats first, then can click a "Full Game Stats" button to view a comprehensive breakdown of all players in the match (both teams) with KDA, ADR, and match outcome.
 
 ### Independent Test Criteria
-- [ ] User can execute `!cs2 team <team-name>` and view team's last match
-- [ ] Team match displays each player's K/D, ADR, and team result
-- [ ] MVP (highest ADR player) is highlighted
-- [ ] Graceful error handling for team not found or API failures
+- [ ] User can execute `!cs2 match` and see their last match stats
+- [ ] "Full Game Stats" button appears at the bottom of the match embed
+- [ ] Clicking button displays wizard screen showing all players from both teams
+- [ ] Full match view shows: team rosters, round scores, individual KDA and ADR for each player
+- [ ] Top of full match view clearly indicates winning team and final score
+- [ ] Graceful error handling for full match data unavailable or API failures
 
 ### Implementation Tasks
 
-- [ ] T036 Create CS2TeamCommand in `src/main/java/com/georgster/game/cs2/commands/CS2TeamCommand.java`
-  - **Commit**: `feat(002-cs2-faceit): Implement CS2TeamCommand for team statistics`
+- [X] T036 [US7] Create FullMatchDetails DTO in `src/main/java/com/georgster/api/faceit/model/FullMatchDetails.java`
+  - **Commit**: `feat(002-cs2-faceit): Add FullMatchDetails DTO for complete match data`
   - **Details**:
-    - Extend ParseableCommand interface
-    - Parse input: `!cs2 team <team-name>`
-    - Require CS2COMMAND permission
-    - Call FaceitAPIClient.fetchTeamLastMatch(teamName) - may need to implement this endpoint
-    - Format embed via CS2EmbedFormatter (new method for team matches)
-    - Display each roster player's K/D and ADR
-    - Highlight MVP (highest ADR player)
-    - Display team result (W/L)
-    - Handle team not found → clear error message
-    - Handle API errors → "Service temporarily unavailable" (FR-011)
-  - **File**: src/main/java/com/georgster/game/cs2/commands/CS2TeamCommand.java
+    - Fields: matchId, mapName, matchResult (W/L), finalScore (e.g., "16-14"), timestamp
+    - Nested class TeamRoster with fields: teamName, players List<PlayerMatchPerformance>
+    - Nested class PlayerMatchPerformance with fields: nickname, kills, deaths, assists, adr, headshotPercentage
+    - Two TeamRoster objects: team1 (winning team) and team2 (losing team)
+    - Gson deserialization annotations for Faceit API response
+    - Method to identify MVP (player with highest ADR across both teams)
+  - **File**: src/main/java/com/georgster/api/faceit/model/FullMatchDetails.java
 
-- [ ] T037 [P] Create unit tests for CS2TeamCommand in `src/test/java/com/georgster/game/cs2/commands/CS2TeamCommandTest.java`
-  - **Commit**: `test(002-cs2-faceit): Add unit tests for CS2TeamCommand`
+- [X] T037 [P] [US7] Add fetchFullMatchDetails method to FaceitAPIClient in `src/main/java/com/georgster/api/faceit/FaceitAPIClient.java`
+  - **Commit**: `feat(002-cs2-faceit): Add fetchFullMatchDetails API method`
   - **Details**:
-    - Mock FaceitAPIClient
-    - Test cases:
-      - Valid team name with recent match → team match displayed
-      - MVP correctly identified (highest ADR)
-      - Team not found → "Team not found" error
-      - API failure → "Service temporarily unavailable" error
-      - User without permission → permission denied error
-  - **File**: src/test/java/com/georgster/game/cs2/commands/CS2TeamCommandTest.java
+    - Method signature: `FullMatchDetails fetchFullMatchDetails(String matchId) throws FaceitAPIException`
+    - Endpoint: GET `/matches/{matchId}` and `/matches/{matchId}/stats`
+    - Parse response into FullMatchDetails DTO
+    - Extract all players from both teams with their performance stats
+    - Handle API errors → throw FaceitAPIException with standardized messages
+    - Handle match not found → throw PlayerNotFoundException
+  - **File**: src/main/java/com/georgster/api/faceit/FaceitAPIClient.java
+
+- [X] T038 [P] [US7] Add formatFullMatchStats method to CS2EmbedFormatter in `src/main/java/com/georgster/game/cs2/util/CS2EmbedFormatter.java`
+  - **Commit**: `feat(002-cs2-faceit): Add embed formatter for full match stats`
+  - **Details**:
+    - Method signature: `EmbedCreateSpec formatFullMatchStats(FullMatchDetails matchDetails)`
+    - Title: "🎮 Full Match Stats - {mapName}"
+    - Description: "**{winningTeam}** defeated **{losingTeam}** ({finalScore})"
+    - Two sections: "Team 1 (Winners)" and "Team 2"
+    - For each player: "{nickname}: {kills}/{deaths}/{assists} KDA | {adr} ADR"
+    - Highlight MVP with emoji (🏆) next to their name
+    - Color: Green for winning team section, Red for losing team section
+    - Footer: "Match played at {timestamp}"
+    - Concise format optimized for readability
+  - **File**: src/main/java/com/georgster/game/cs2/util/CS2EmbedFormatter.java
+
+- [X] T039 [US7] Create CS2MatchWizard in `src/main/java/com/georgster/game/cs2/wizard/CS2MatchWizard.java`
+  - **Commit**: `feat(002-cs2-faceit): Implement CS2MatchWizard for full match view`
+  - **Details**:
+    - Extend InputWizard abstract class
+    - Constructor accepts: CommandExecutionEvent, MatchDetails (from initial match command)
+    - begin() method: displays initial prompt with "Full Game Stats" button
+    - showFullMatchStats() method: fetches FullMatchDetails and displays formatted embed
+    - Use ButtonMessageListener for "Full Game Stats" button interaction
+    - Handle button click → fetch full match data → display formatted embed
+    - Error handling: if full match data unavailable → display "Full match data unavailable" message
+    - Allow users to go back to original match view (optional "Back" button)
+  - **File**: src/main/java/com/georgster/game/cs2/wizard/CS2MatchWizard.java
+
+- [X] T040 [US7] Update CS2MatchCommand to integrate wizard in `src/main/java/com/georgster/game/cs2/commands/CS2MatchCommand.java`
+  - **Commit**: `feat(002-cs2-faceit): Integrate wizard into CS2MatchCommand`
+  - **Details**:
+    - After displaying individual match embed, add "Full Game Stats" button using ButtonMessageListener
+    - When button clicked → launch CS2MatchWizard with current MatchDetails
+    - Pass matchId to wizard so it can fetch full match details
+    - Maintain existing async refresh behavior for individual match stats
+    - Ensure wizard activation doesn't interfere with background data refresh
+    - Button placement: bottom of the match embed as an ActionRow
+  - **File**: src/main/java/com/georgster/game/cs2/commands/CS2MatchCommand.java
+
+- [X] T041 [P] [US7] Add caching for full match details in FaceitCache in `src/main/java/com/georgster/cache/FaceitCache.java`
+  - **Commit**: `feat(002-cs2-faceit): Add caching for full match details`
+  - **Details**:
+    - Cache key format: "{guildId}:{matchId}:fullmatch"
+    - TTL: 10 minutes (longer than individual match stats since full match data changes less frequently)
+    - Methods: putFullMatchDetails(guildId, matchId, fullMatchDetails), getFullMatchDetails(guildId, matchId)
+    - Cache eviction policy: LRU with max 100 entries per guild
+    - Reduce API calls when multiple users view same match
+  - **File**: src/main/java/com/georgster/cache/FaceitCache.java
 
 ---
 

@@ -12,6 +12,7 @@ import com.georgster.control.manager.UserProfileManager;
 import com.georgster.control.util.CommandExecutionEvent;
 import com.georgster.game.cs2.util.CS2EmbedFormatter;
 import com.georgster.game.cs2.util.PlayerLookup;
+import com.georgster.game.cs2.wizard.CS2MatchWizard;
 import com.georgster.permissions.PermissibleAction;
 import com.georgster.util.commands.CommandParser;
 import com.georgster.util.commands.ParseBuilder;
@@ -121,53 +122,48 @@ public class CS2MatchCommand implements ParseableCommand {
             final Message finalResponseMessage = responseMessage;
             final String finalPlayerId = playerId;
             final FaceitPlayer finalPlayer = player;
+            final CommandExecutionEvent finalEvent = event;
+            final MatchDetails[] freshMatchHolder = new MatchDetails[1]; // Holder to pass match to wizard
+            
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    logger.info("Starting async fetch for player {} in guild {}", finalPlayerId, guildId);
-                    System.out.println("[DEBUG CS2MatchCommand] Starting async fetch for player: " + finalPlayerId);
-                    
                     // Fetch fresh match details and player stats
                     MatchDetails freshMatch = apiClient.fetchLastMatch(finalPlayerId);
-                    System.out.println("[DEBUG CS2MatchCommand] fetchLastMatch returned: " + (freshMatch != null ? "NOT NULL" : "NULL"));
-                    if (freshMatch != null) {
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - matchId: " + freshMatch.getMatchId());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - kills: " + freshMatch.getKills());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - deaths: " + freshMatch.getDeaths());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - assists: " + freshMatch.getAssists());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - adr: " + freshMatch.getAverageDamageRound());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - hs%: " + freshMatch.getHeadshotPercentage());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - mvps: " + freshMatch.getMvps());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - map: " + freshMatch.getMapName());
-                        System.out.println("[DEBUG CS2MatchCommand] MatchDetails - result: " + freshMatch.getResult());
-                    }
+                    freshMatchHolder[0] = freshMatch; // Store for wizard
                     
                     PlayerStats freshStats = apiClient.fetchPlayerStats(finalPlayerId);
-                    System.out.println("[DEBUG CS2MatchCommand] fetchPlayerStats returned: " + (freshStats != null ? "NOT NULL" : "NULL"));
-                    if (freshStats != null) {
-                        System.out.println("[DEBUG CS2MatchCommand] PlayerStats - totalMatches: " + freshStats.getTotalMatches());
-                        System.out.println("[DEBUG CS2MatchCommand] PlayerStats - wins: " + freshStats.getWins());
-                        System.out.println("[DEBUG CS2MatchCommand] PlayerStats - kd: " + freshStats.getKillDeathRatio());
-                        System.out.println("[DEBUG CS2MatchCommand] PlayerStats - adr: " + freshStats.getAverageDamageRound());
-                        System.out.println("[DEBUG CS2MatchCommand] PlayerStats - hs%: " + freshStats.getHeadshotPercentage());
-                    }
                     
                     // Update cache
                     cache.putMatchReport(guildId, finalPlayerId, freshMatch);
                     cache.putPlayerStats(guildId, finalPlayerId, freshStats);
                     
-                    logger.info("Successfully fetched fresh match data for player {}", finalPlayerId);
-                    System.out.println("[DEBUG CS2MatchCommand] About to format embed with player: " + finalPlayer.getNickname());
-                    
                     // Format updated embed
                     EmbedCreateSpec freshEmbed = CS2EmbedFormatter.formatMatchReport(freshMatch, freshStats, finalPlayer);
-                    System.out.println("[DEBUG CS2MatchCommand] Embed formatted successfully");
                     
                     // Update original message with fresh data
                     if (finalResponseMessage != null) {
                         finalResponseMessage.edit()
                                 .withEmbeds(freshEmbed)
                                 .subscribe(
-                                    updatedMsg -> logger.debug("Successfully updated embed with fresh match data"),
+                                    updatedMsg -> {
+                                        logger.debug("Successfully updated embed with fresh match data");
+                                        
+                                        // After successful update, launch wizard for full match view
+                                        if (freshMatchHolder[0] != null) {
+                                            try {
+                                                CS2MatchWizard wizard = new CS2MatchWizard(
+                                                    finalEvent, 
+                                                    freshMatchHolder[0], 
+                                                    apiClient, 
+                                                    cache, 
+                                                    guildId
+                                                );
+                                                wizard.begin();
+                                            } catch (Exception wizardError) {
+                                                logger.error("Failed to launch CS2MatchWizard: {}", wizardError.getMessage());
+                                            }
+                                        }
+                                    },
                                     error -> logger.error("Failed to update embed with fresh match data: {}", error.getMessage())
                                 );
                     }
