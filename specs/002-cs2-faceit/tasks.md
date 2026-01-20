@@ -48,28 +48,28 @@
 Initialize project structure, add Maven dependencies, and prepare development environment for CS2 Faceit integration.
 
 ### Independent Test Criteria
-- [ ] All new Maven dependencies compile successfully
-- [ ] Existing code still builds without errors
-- [ ] No breaking changes to existing SoapBot functionality
+- [X] All new Maven dependencies compile successfully
+- [X] Existing code still builds without errors
+- [X] No breaking changes to existing SoapBot functionality
 
 ### Implementation Tasks
 
-- [ ] T001 Add Maven dependencies (OkHttp3, Caffeine, JUnit5, Mockito) to `pom.xml`
+- [X] T001 Add Maven dependencies (OkHttp3, Caffeine, JUnit5, Mockito) to `pom.xml`
   - **Commit**: `feat(002-cs2-faceit): Add Maven dependencies for Faceit integration`
   - **Details**: Add OkHttp3 3.11.0, Caffeine 3.1.2, JUnit5 5.9.2, Mockito 5.2.0
   - **File**: pom.xml
 
-- [ ] T002 [P] Extend `PermissibleAction` enum with `CS2COMMAND` permission in `src/main/java/com/georgster/permissions/PermissibleAction.java`
+- [X] T002 [P] Extend `PermissibleAction` enum with `CS2COMMAND` permission in `src/main/java/com/georgster/permissions/PermissibleAction.java`
   - **Commit**: `feat(002-cs2-faceit): Add CS2COMMAND permission to PermissibleAction enum`
   - **Details**: Add enum value `CS2COMMAND("cs2_command")` following existing pattern
   - **File**: src/main/java/com/georgster/permissions/PermissibleAction.java
 
-- [ ] T003 [P] Create project directory structure for CS2 feature under `src/main/java/com/georgster/game/`
+- [X] T003 [P] Create project directory structure for CS2 feature under `src/main/java/com/georgster/game/`
   - **Commit**: `feat(002-cs2-faceit): Create project directory structure`
   - **Details**: Create directories: cs2/, cs2/commands/, cs2/util/, api/faceit/, api/faceit/model/, api/faceit/exception/, cache/
   - **File**: src/main/java/com/georgster/game/ (directory structure)
 
-- [ ] T004 [P] Configure Faceit API key management in `.gitignore` and document setup
+- [X] T004 [P] Configure Faceit API key management in `.gitignore` and document setup
   - **Commit**: `docs(002-cs2-faceit): Add Faceit API key configuration to .gitignore`
   - **Details**: Add `faceit_api_key.txt` and `*_oauth_token.txt` patterns to .gitignore; ensure environment variable fallback documented in quickstart.md
   - **File**: .gitignore
