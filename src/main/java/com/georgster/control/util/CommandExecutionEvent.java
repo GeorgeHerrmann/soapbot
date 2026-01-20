@@ -110,6 +110,7 @@ public class CommandExecutionEvent {
             }
         } else {
             args = Collections.emptyList();
+            deferIfNecessary();
             executeIfPermission(args);
         }
 
