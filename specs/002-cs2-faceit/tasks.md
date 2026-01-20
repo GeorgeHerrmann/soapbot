@@ -505,7 +505,7 @@ Enable Discord users to view their last 10 matches with quick stats (map, score,
 
 ### Implementation Tasks
 
-- [ ] T034 Create CS2HistoryCommand in `src/main/java/com/georgster/game/cs2/commands/CS2HistoryCommand.java`
+- [X] T034 Create CS2HistoryCommand in `src/main/java/com/georgster/game/cs2/commands/CS2HistoryCommand.java`
   - **Commit**: `feat(002-cs2-faceit): Implement CS2HistoryCommand for match history`
   - **Details**:
     - Extend ParseableCommand interface

@@ -541,6 +541,104 @@ public class CS2EmbedFormatter {
     }
     
     /**
+     * Formats a match history embed showing last matches with quick stats.
+     * 
+     * @param matches List of MatchDetails (up to 10 matches)
+     * @param player The player's Faceit profile
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatMatchHistory(List<MatchDetails> matches, FaceitPlayer player) {
+        String title = String.format("📋 Match History - %s", player.getNickname());
+        String subtitle = String.format("Last %d Matches", Math.min(matches.size(), 10));
+        
+        // Build match list
+        StringBuilder matchList = new StringBuilder();
+        int count = Math.min(matches.size(), 10);
+        for (int i = 0; i < count; i++) {
+            MatchDetails match = matches.get(i);
+            String resultEmoji = match.getResult().equalsIgnoreCase("win") ? "✅" : "❌";
+            String matchLine = String.format(
+                "**#%d** %s **%s** | %s | K/D: %d/%d (%.2f) | ADR: %.1f | %s",
+                i + 1,
+                resultEmoji,
+                match.getMapName(),
+                match.getScore(),
+                match.getKills(),
+                match.getDeaths(),
+                match.getKDRatio(),
+                match.getAverageDamageRound(),
+                formatTimestamp(match.getMatchTimestamp())
+            );
+            matchList.append(matchLine).append("\n");
+        }
+        
+        // Calculate recent statistics summary
+        int wins = 0;
+        double totalKD = 0.0;
+        double totalADR = 0.0;
+        StringBuilder recentFormEmojis = new StringBuilder();
+        
+        for (MatchDetails match : matches) {
+            if (match.getResult().equalsIgnoreCase("win")) {
+                wins++;
+                recentFormEmojis.append("🟢 ");
+            } else {
+                recentFormEmojis.append("🔴 ");
+            }
+            totalKD += match.getKDRatio();
+            totalADR += match.getAverageDamageRound();
+        }
+        
+        int totalMatches = matches.size();
+        int losses = totalMatches - wins;
+        double winRate = (totalMatches > 0) ? (wins * 100.0 / totalMatches) : 0.0;
+        double avgKD = (totalMatches > 0) ? (totalKD / totalMatches) : 0.0;
+        double avgADR = (totalMatches > 0) ? (totalADR / totalMatches) : 0.0;
+        
+        String summaryStats = String.format(
+            "**Record**: %dW - %dL (%.1f%% win rate)\n**Average K/D**: %.2f\n**Average ADR**: %.1f",
+            wins, losses, winRate, avgKD, avgADR
+        );
+        
+        return EmbedCreateSpec.builder()
+                .title(title)
+                .description(subtitle)
+                .color(PRIMARY_COLOR)
+                .thumbnail(player.getAvatar() != null ? player.getAvatar() : "")
+                .addField("Recent Form", recentFormEmojis.toString().trim(), false)
+                .addField("Match List", matchList.toString(), false)
+                .addField("Last " + totalMatches + " Matches Summary", summaryStats, false)
+                .footer("Fetched from Faceit API", null)
+                .timestamp(Instant.now())
+                .build();
+    }
+    
+    /**
+     * Formats a "no match history" message embed for players with 0 recorded matches.
+     * 
+     * @param player The player's Faceit profile
+     * @return EmbedCreateSpec ready for Discord message
+     */
+    public static EmbedCreateSpec formatNoMatchHistory(FaceitPlayer player) {
+        String profileInfo = String.format(
+            "**Level**: %d\n**Elo**: %d",
+            player.getFaceitLevel(),
+            player.getElo()
+        );
+        
+        return EmbedCreateSpec.builder()
+                .title("📭 No Match History")
+                .description(player.getNickname() + " has no recorded matches yet.")
+                .addField("Profile", profileInfo, false)
+                .addField("Status", "Play some matches and check back!", false)
+                .color(Color.of(0xf39c12)) // Orange color
+                .thumbnail(player.getAvatar() != null ? player.getAvatar() : "")
+                .footer("Data from Faceit API", null)
+                .timestamp(Instant.now())
+                .build();
+    }
+    
+    /**
      * Formats a success message embed.
      * 
      * @param message The success message to display
