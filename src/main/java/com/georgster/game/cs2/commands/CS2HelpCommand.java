@@ -43,62 +43,29 @@ public class CS2HelpCommand implements ParseableCommand {
         logger.debug("Displaying CS2 help for user {}", event.getDiscordEvent().getUser().getId().asString());
         
         EmbedCreateSpec helpEmbed = EmbedCreateSpec.builder()
-                .title("📖 CS2 Faceit Integration Help")
-                .description("Complete guide to all available commands")
+                .title("CS2 Faceit Commands")
                 .color(BLUE_COLOR)
                 
-                // Account Management
-                .addField("═══ ACCOUNT MANAGEMENT ═══", "", false)
-                .addField("/cs2 link <username>", 
-                        "Link your Faceit account to your Discord profile\n" +
-                        "Example: `/cs2 link GeorgsterCS`", false)
-                .addField("/cs2 unlink", 
-                        "Unlink your Faceit account from Discord", false)
+                .addField("Account", 
+                        "`/cs2 link <username>` - Faceit username (Case-sensitive)\n" +
+                        "`/cs2 unlink` - Unlink your account", false)
                 
-                // Player Statistics
-                .addField("═══ PLAYER STATISTICS ═══", "", false)
-                .addField("/cs2 stats [@player]", 
-                        "View comprehensive CS2 statistics\n" +
-                        "Example: `/cs2 stats` or `/cs2 stats @friend`", false)
-                .addField("/cs2 match [@player]", 
-                        "View your most recent match report\n" +
-                        "Example: `/cs2 match` or `/cs2 match @friend`", false)
-                .addField("/cs2 history [@player]", 
-                        "View last 10 matches and recent form\n" +
-                        "Example: `/cs2 history`", false)
+                .addField("Statistics (No parameters = yourself)", 
+                        "`/cs2 stats [@player]` - View player statistics\n" +
+                        "`/cs2 match [@player]` - View most recent match\n" +
+                        "`/cs2 history [@player]` - View last 10 matches", false)
                 
-                // Comparisons & Leaderboards
-                .addField("═══ COMPARISONS & LEADERBOARDS ═══", "", false)
-                .addField("/cs2 compare @player1 @player2", 
-                        "Compare two players' statistics side-by-side\n" +
-                        "Example: `/cs2 compare @you @friend`", false)
-                .addField("/cs2 leaderboard", 
-                        "View top 10 linked players in this server ranked by Elo", false)
+                .addField("Comparison", 
+                        "`/cs2 compare @player1 @player2` - Compare two players\n" +
+                        "`/cs2 leaderboard` - View server leaderboard", false)
                 
-                // Team Lookup
-                .addField("═══ TEAM LOOKUP ═══", "", false)
-                .addField("/cs2 team <team-name>", 
-                        "View team's last match statistics\n" +
-                        "Example: `/cs2 team Astralis`", false)
+                .addField("Player Lookup", 
+                        "`@user` - Linked Discord user\n" +
+                        "`username` - Faceit username\n" +
+                        "`faceit:username` - Explicit Faceit lookup\n" +
+                        "`steam:id` - Steam ID lookup", false)
                 
-                // Player Lookup Formats
-                .addField("═══ PLAYER LOOKUP FORMATS ═══", "", false)
-                .addField("Lookup Reference", 
-                        "`@Discord_User` - Use linked account\n" +
-                        "`faceit:username` - Explicit Faceit username\n" +
-                        "`steam:STEAMID` - Steam ID lookup\n" +
-                        "`username` - Default Faceit username", false)
-                
-                // Notes
-                .addField("═══ NOTES ═══", "", false)
-                .addField("⏱️ Performance", 
-                        "Stats cached for 5 minutes. Leaderboard updates every 10 minutes.", true)
-                .addField("🔐 Permissions", 
-                        "All commands require `CS2COMMAND` permission", true)
-                .addField("📌 API Info", 
-                        "Data sourced from Faceit API. Errors handled gracefully with standardized messages.", false)
-                
-                .footer("Created for SoapBot | CS2 Faceit Integration", null)
+                .footer("Data from Faceit API", null)
                 .timestamp(Instant.now())
                 .build();
         

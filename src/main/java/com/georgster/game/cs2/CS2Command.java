@@ -31,7 +31,6 @@ import java.util.List;
  * - compare: Compare players (Phase 6)
  * - history: View match history (Phase 8)
  * - leaderboard: View server leaderboard (Phase 7)
- * - team: View team statistics (Phase 9)
  * <p>
  * Usage: !cs2 <subcommand> [args]
  * <p>
@@ -145,14 +144,6 @@ public class CS2Command implements ParseableCommand {
                 }
             }, "leaderboard", "lb");
             
-            // Team subcommand (Phase 9 - not yet implemented)
-            subcommands.on(p -> {
-                handler.sendMessage("⚠️ **Coming Soon**\n\n" +
-                        "The `!cs2 team` command is not yet implemented. " +
-                        "This feature will be available in Phase 9.", 
-                        "CS2 Team", MessageFormatting.INFO);
-            }, "team");
-            
             // If no subcommand matched and system hasn't executed, show help
             if (!subcommands.hasExecuted()) {
                 System.out.println("[DEBUG CS2Command] No subcommand matched! Args were: " + event.getParsedArguments().getArguments());
@@ -191,7 +182,7 @@ public class CS2Command implements ParseableCommand {
             // And "compare player1" as ["compare", "player1"]
             // And "compare" as ["compare"]
             CommandParser parser = new ParseBuilder("1R", "VO")
-                    .withIdentifiers("link", "unlink", "help", "match", "stats", "compare", "history", "leaderboard", "lb", "team")
+                    .withIdentifiers("link", "unlink", "help", "match", "stats", "compare", "history", "leaderboard", "lb")
                     .withRules("I", ">")
                     .withoutAutoFormatting()
                     .build();
@@ -251,10 +242,6 @@ public class CS2Command implements ParseableCommand {
                                 .name("leaderboard")
                                 .value("leaderboard")
                                 .build())
-                        .addChoice(ApplicationCommandOptionChoiceData.builder()
-                                .name("team")
-                                .value("team")
-                                .build())
                         .build())
                 .build();
     }
@@ -278,7 +265,7 @@ public class CS2Command implements ParseableCommand {
     public String help() {
         return "Aliases: " + getAliases().toString() +
                 "\n- '!cs2 <subcommand> [args]' to interact with CS2 Faceit integration" +
-                "\n- Available subcommands: link, unlink, match, stats, history, compare, leaderboard, team, help" +
+                "\n- Available subcommands: link, unlink, match, stats, history, compare, leaderboard, help" +
                 "\n- Use '!cs2 help' for detailed usage information" +
                 "\n\n*Main command for CS2 Faceit integration. Use help subcommand for full documentation.*";
     }
