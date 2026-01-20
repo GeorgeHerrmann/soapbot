@@ -84,7 +84,7 @@ public class CS2MatchCommand implements ParseableCommand {
             playerReference = "<@" + executorId + ">";
         } else if (args.size() >= 2 && args.get(0).equalsIgnoreCase("match")) {
             // Command invoked via cs2 router: !cs2 match <player>
-            playerReference = args.get(1).trim();
+            playerReference = event.getParsedArguments().getOriginalMessage().split(" ")[2].trim();
         } else {
             // Command invoked directly: !cs2match <player>
             playerReference = args.get(0).trim();

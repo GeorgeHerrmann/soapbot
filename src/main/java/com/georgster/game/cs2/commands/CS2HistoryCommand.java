@@ -82,7 +82,7 @@ public class CS2HistoryCommand implements ParseableCommand {
             playerReference = "<@" + executorId + ">";
         } else if (args.size() >= 2 && args.get(0).equalsIgnoreCase("history")) {
             // Command invoked via cs2 router: !cs2 history <player>
-            playerReference = args.get(1).trim();
+            playerReference = event.getParsedArguments().getOriginalMessage().split(" ")[2].trim();
         } else {
             // Command invoked directly: !cs2history <player>
             playerReference = args.get(0).trim();

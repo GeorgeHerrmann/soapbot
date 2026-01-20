@@ -102,11 +102,12 @@ public class CS2CompareCommand implements ParseableCommand {
             if (playerTokens.length == 1) {
                 // Single player: compare executor to that player
                 player1Reference = "<@" + executorId + ">";
-                player2Reference = playerTokens[0];
+                player2Reference = event.getParsedArguments().getOriginalMessage().split(" ")[2].trim();
             } else {
                 // Two or more players: compare player1 to player2
-                player1Reference = playerTokens[0];
-                player2Reference = playerTokens[1];
+                String[] playerNamesMessage = event.getParsedArguments().getOriginalMessage().split(" ");
+                player1Reference = playerNamesMessage[2];
+                player2Reference = playerNamesMessage[3];
             }
         } else if (args.size() == 1) {
             // Command invoked directly: !cs2compare <player>
