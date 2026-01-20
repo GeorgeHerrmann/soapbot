@@ -129,12 +129,16 @@ public class CS2Command implements ParseableCommand {
                 }
             }, "compare");
             
-            // Leaderboard subcommand (Phase 7 - not yet implemented)
+            // Leaderboard subcommand (Phase 7)
             subcommands.on(p -> {
-                handler.sendMessage("⚠️ **Coming Soon**\n\n" +
-                        "The `!cs2 leaderboard` command is not yet implemented. " +
-                        "This feature will be available in Phase 7.", 
-                        "CS2 Leaderboard", MessageFormatting.INFO);
+                try {
+                    CS2LeaderboardCommand leaderboardCommand = new CS2LeaderboardCommand();
+                    leaderboardCommand.execute(event);
+                } catch (FaceitAPIException e) {
+                    logger.error("Failed to initialize CS2LeaderboardCommand: {}", e.getMessage(), e);
+                    handler.sendMessage("Failed to initialize Faceit API client. Please contact server admins.", 
+                            "CS2 Leaderboard", MessageFormatting.ERROR);
+                }
             }, "leaderboard", "lb");
             
             // Team subcommand (Phase 9 - not yet implemented)
