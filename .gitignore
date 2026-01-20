@@ -17,6 +17,7 @@ target/classes/com/georgster/gpt/openaikey.txt
 .specify/
 .github/
 .vscode/
+specs/
 
 # Maven/Java build artifacts
 target/
