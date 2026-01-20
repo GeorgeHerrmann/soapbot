@@ -7,6 +7,7 @@ import java.util.List;
  * The resulting arguments parsed by a {@link CommandParser}. Arguments can be retrieved with {@link #getArguments()}.
  */
 public class ParsedArguments {
+    private String originalMessage;
     private List<String> args;
     private CommandParser parser;
 
@@ -16,9 +17,10 @@ public class ParsedArguments {
      * @param args The arguments after parsing.
      * @param parser The CommandParser which parsed the arguments.
      */
-    protected ParsedArguments(List<String> args, CommandParser parser) {
+    protected ParsedArguments(List<String> args, CommandParser parser, String originalMessage) {
         this.args = args;
         this.parser = parser;
+        this.originalMessage = originalMessage;
     }
 
     /**
@@ -173,6 +175,15 @@ public class ParsedArguments {
      */
     public List<String> getCombined(int index1, int index2) throws IndexOutOfBoundsException {
         return args.subList(index1, index2);
+    }
+
+    /**
+     * Returns the unformatted message from the input of the Command Parse.
+     * 
+     * @return The unformatted message.
+     */
+    public String getOriginalMessage() {
+        return originalMessage;
     }
 
     

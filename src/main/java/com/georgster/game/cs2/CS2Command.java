@@ -184,7 +184,6 @@ public class CS2Command implements ParseableCommand {
             CommandParser parser = new ParseBuilder("1R", "VO")
                     .withIdentifiers("link", "unlink", "help", "match", "stats", "compare", "history", "leaderboard", "lb")
                     .withRules("I", ">")
-                    .withoutAutoFormatting()
                     .build();
             System.out.println("[DEBUG CS2Command] Parser created successfully with pattern 1R VO");
             System.out.flush();
@@ -243,13 +242,13 @@ public class CS2Command implements ParseableCommand {
                                 .value("leaderboard")
                                 .build())
                         .build())
-                    .addOption(ApplicationCommandOptionData.builder()
+                .addOption(ApplicationCommandOptionData.builder()
                         .name("user1")
                         .description("First User")
                         .type(ApplicationCommandOption.Type.USER.getValue())
                         .required(false)
                         .build())
-                    .addOption(ApplicationCommandOptionData.builder()
+                .addOption(ApplicationCommandOptionData.builder()
                         .name("user2")
                         .description("Second User (compare only)")
                         .type(ApplicationCommandOption.Type.USER.getValue())

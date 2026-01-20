@@ -485,6 +485,7 @@ public final class CommandParser {
      * @return A {@link ParsedArguments} containing the output and various utility for it.
      */
     public ParsedArguments parse(String input) throws CommandParserException {
+        String originalInput = input;
         if (input.contains(" ")) {
             input = input.substring(input.indexOf(' ') + 1);
         } else {
@@ -493,7 +494,7 @@ public final class CommandParser {
 
         if (input.isEmpty()) {
             if (!hasRequiredArg()) {
-                return new ParsedArguments(new ArrayList<>(), this);
+                return new ParsedArguments(new ArrayList<>(), this, originalInput);
             } else {
                 throw new ParseInputException(input, this);
             }
@@ -515,7 +516,7 @@ public final class CommandParser {
 
         currentParse.finish();
 
-        return new ParsedArguments(currentParse.getCurrentArgs(), this);
+        return new ParsedArguments(currentParse.getCurrentArgs(), this, originalInput);
     }
 
     /**

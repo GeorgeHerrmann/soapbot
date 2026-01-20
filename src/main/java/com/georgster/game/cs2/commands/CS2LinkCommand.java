@@ -79,9 +79,9 @@ public class CS2LinkCommand implements ParseableCommand {
         // When invoked directly as /cs2link or !cs2link, args look like: ["<username ...>"]
         String faceitUsername;
         if (args.size() >= 2 && args.get(0).equalsIgnoreCase("link")) {
-            faceitUsername = args.get(1).trim();
+            faceitUsername = event.getParsedArguments().getOriginalMessage().split(" ")[2].trim();
         } else {
-            faceitUsername = args.get(0).trim();
+            faceitUsername = event.getParsedArguments().getOriginalMessage().split(" ")[1].trim();
         }
         try {
             System.out.println("[DEBUG CS2LinkCommand] faceitUsername before API call: '" + faceitUsername + "'");
