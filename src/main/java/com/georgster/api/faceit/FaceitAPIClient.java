@@ -63,7 +63,7 @@ public class FaceitAPIClient {
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
         
-        logger.info("FaceitAPIClient initialized with connection pool (max 10 connections)");
+        
     }
     
     /**
@@ -76,7 +76,6 @@ public class FaceitAPIClient {
         // Try environment variable first
         String key = System.getenv("FACEIT_API_KEY");
         if (key != null && !key.isEmpty()) {
-            logger.info("Loaded Faceit API key from environment variable");
             return key;
         }
         
@@ -85,7 +84,6 @@ public class FaceitAPIClient {
             Path keyPath = Path.of(System.getProperty("user.dir"), "faceit_api_key.txt");
             if (Files.exists(keyPath)) {
                 key = Files.readString(keyPath).trim();
-                logger.info("Loaded Faceit API key from file: faceit_api_key.txt");
                 return key;
             }
         } catch (IOException e) {
@@ -164,9 +162,7 @@ public class FaceitAPIClient {
         String url = BASE_URL + "/players/" + playerId + "/stats/" + CS2_GAME_ID;
         
         try {
-            System.out.println("[DEBUG FaceitAPIClient] Fetching player stats from URL: " + url);
             String responseBody = executeRequest(url);
-            System.out.println("[DEBUG FaceitAPIClient] Player stats response body: " + responseBody);
             JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
             
             // Parse lifetime stats from nested JSON structure
@@ -526,6 +522,5 @@ public class FaceitAPIClient {
     public void shutdown() {
         client.dispatcher().executorService().shutdown();
         client.connectionPool().evictAll();
-        logger.info("FaceitAPIClient shutdown complete");
     }
 }

@@ -78,8 +78,6 @@ public class FaceitCache {
                 .recordStats()
                 .build();
         
-        logger.info("FaceitCache initialized with TTLs: stats={}m, match={}m, history={}m, leaderboard={}m", 
-                   STATS_TTL, MATCH_TTL, HISTORY_TTL, LEADERBOARD_TTL);
     }
     
     // ===== Player Stats Cache =====
@@ -292,7 +290,7 @@ public class FaceitCache {
         historyCache.asMap().keySet().removeIf(key -> key.startsWith(guildId + ":"));
         leaderboardCache.invalidate(buildLeaderboardKey(guildId));
         
-        logger.info("Cleared all cached data for guild {}", guildId);
+
     }
     
     /**

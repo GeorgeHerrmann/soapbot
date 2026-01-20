@@ -126,30 +126,15 @@ public class CS2StatsCommand implements ParseableCommand {
             final FaceitPlayer finalPlayer = player;
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    logger.info("Starting async fetch for player stats {} in guild {}", finalPlayerId, guildId);
-                    System.out.println("[DEBUG CS2StatsCommand] Starting async fetch for player: " + finalPlayerId);
-                    
                     // Fetch fresh player stats
                     PlayerStats freshStats = apiClient.fetchPlayerStats(finalPlayerId);
-                    System.out.println("[DEBUG CS2StatsCommand] fetchPlayerStats returned: " + (freshStats != null ? "NOT NULL" : "NULL"));
-                    if (freshStats != null) {
-                        System.out.println("[DEBUG CS2StatsCommand] PlayerStats - totalMatches: " + freshStats.getTotalMatches());
-                        System.out.println("[DEBUG CS2StatsCommand] PlayerStats - wins: " + freshStats.getWins());
-                        System.out.println("[DEBUG CS2StatsCommand] PlayerStats - kd: " + freshStats.getKillDeathRatio());
-                        System.out.println("[DEBUG CS2StatsCommand] PlayerStats - adr: " + freshStats.getAverageDamageRound());
-                        System.out.println("[DEBUG CS2StatsCommand] PlayerStats - hs%: " + freshStats.getHeadshotPercentage());
-                        System.out.println("[DEBUG CS2StatsCommand] PlayerStats - winRate: " + freshStats.getWinRate());
-                    }
                     
                     // Update cache
                     cache.putPlayerStats(guildId, finalPlayerId, freshStats);
                     
-                    logger.info("Successfully fetched fresh stats data for player {}", finalPlayerId);
-                    System.out.println("[DEBUG CS2StatsCommand] About to format embed with player: " + finalPlayer.getNickname());
-                    
+
                     // Format updated embed
                     EmbedCreateSpec freshEmbed = CS2EmbedFormatter.formatPlayerStats(freshStats, finalPlayer);
-                    System.out.println("[DEBUG CS2StatsCommand] Embed formatted successfully");
                     
                     // Update original message with fresh data
                     if (finalResponseMessage != null) {

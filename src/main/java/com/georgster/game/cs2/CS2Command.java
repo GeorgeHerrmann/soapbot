@@ -28,9 +28,9 @@ import java.util.List;
  * - help: Display help information
  * - match: View match report (Phase 4)
  * - stats: View player statistics (Phase 5)
- * - history: View match history (Phase 6)
- * - compare: Compare players (Phase 7)
- * - leaderboard: View server leaderboard (Phase 8)
+ * - compare: Compare players (Phase 6)
+ * - history: View match history (Phase 8)
+ * - leaderboard: View server leaderboard (Phase 7)
  * - team: View team statistics (Phase 9)
  * <p>
  * Usage: !cs2 <subcommand> [args]
@@ -47,14 +47,18 @@ public class CS2Command implements ParseableCommand {
     @Override
     public void execute(CommandExecutionEvent event) {
         GuildInteractionHandler handler = event.getGuildInteractionHandler();
-        SubcommandSystem subcommands = event.createSubcommandSystem();
+        
         // Debug prints to trace CS2 command flow and argument casing
         try {
             System.out.println("[DEBUG CS2Command] Raw formatted message: '" + event.getDiscordEvent().getFormattedMessage() + "'");
             System.out.println("[DEBUG CS2Command] Parsed args at router: " + event.getParsedArguments().getArguments());
+            System.out.flush();
         } catch (Exception e) {
-            // Swallow any debug-print failures to avoid impacting normal execution
+            System.out.println("[DEBUG CS2Command] Exception in debug prints: " + e.getMessage());
+            e.printStackTrace();
         }
+        
+        SubcommandSystem subcommands = event.createSubcommandSystem();
         
         try {
             // Link subcommand
@@ -105,27 +109,31 @@ public class CS2Command implements ParseableCommand {
                 }
             }, "stats");
             
-            // History subcommand (Phase 6 - not yet implemented)
+            // History subcommand (Phase 8 - not yet implemented)
             subcommands.on(p -> {
                 handler.sendMessage("⚠️ **Coming Soon**\n\n" +
                         "The `!cs2 history` command is not yet implemented. " +
-                        "This feature will be available in Phase 6.", 
+                        "This feature will be available in Phase 8.", 
                         "CS2 History", MessageFormatting.INFO);
             }, "history");
             
-            // Compare subcommand (Phase 7 - not yet implemented)
+            // Compare subcommand (Phase 6)
             subcommands.on(p -> {
-                handler.sendMessage("⚠️ **Coming Soon**\n\n" +
-                        "The `!cs2 compare` command is not yet implemented. " +
-                        "This feature will be available in Phase 7.", 
-                        "CS2 Compare", MessageFormatting.INFO);
+                try {
+                    CS2CompareCommand compareCommand = new CS2CompareCommand();
+                    compareCommand.execute(event);
+                } catch (FaceitAPIException e) {
+                    logger.error("Failed to initialize CS2CompareCommand: {}", e.getMessage(), e);
+                    handler.sendMessage("Failed to initialize Faceit API client. Please contact server admins.", 
+                            "CS2 Compare", MessageFormatting.ERROR);
+                }
             }, "compare");
             
-            // Leaderboard subcommand (Phase 8 - not yet implemented)
+            // Leaderboard subcommand (Phase 7 - not yet implemented)
             subcommands.on(p -> {
                 handler.sendMessage("⚠️ **Coming Soon**\n\n" +
                         "The `!cs2 leaderboard` command is not yet implemented. " +
-                        "This feature will be available in Phase 8.", 
+                        "This feature will be available in Phase 7.", 
                         "CS2 Leaderboard", MessageFormatting.INFO);
             }, "leaderboard", "lb");
             
@@ -139,8 +147,11 @@ public class CS2Command implements ParseableCommand {
             
             // If no subcommand matched and system hasn't executed, show help
             if (!subcommands.hasExecuted()) {
+                System.out.println("[DEBUG CS2Command] No subcommand matched! Args were: " + event.getParsedArguments().getArguments());
                 CS2HelpCommand helpCommand = new CS2HelpCommand();
                 helpCommand.execute(event);
+            } else {
+                System.out.println("[DEBUG CS2Command] Subcommand executed successfully");
             }
             
         } catch (Exception e) {
@@ -163,11 +174,28 @@ public class CS2Command implements ParseableCommand {
      */
     @Override
     public CommandParser getCommandParser() {
-        // Parse first token as required subcommand, then capture remaining input
-        // as a single variable optional argument so subcommands can access it.
-        // Disable auto-formatting so subcommand arguments (like Faceit usernames)
-        // preserve the exact casing the user typed.
-        return new ParseBuilder("1R", "VO").withoutAutoFormatting().build();
+        System.out.println("[DEBUG CS2Command] getCommandParser() called");
+        System.out.flush();
+        try {
+            // Pattern: 1R (required subcommand - must be an identifier), VO (variable optional args after subcommand)
+            // Rules: I (first arg must be identifier), > (second arg must come after identifier)
+            // This will parse "compare player1 player2" as ["compare", "player1 player2"]
+            // And "compare player1" as ["compare", "player1"]
+            // And "compare" as ["compare"]
+            CommandParser parser = new ParseBuilder("1R", "VO")
+                    .withIdentifiers("link", "unlink", "help", "match", "stats", "compare", "history", "leaderboard", "lb", "team")
+                    .withRules("I", ">")
+                    .withoutAutoFormatting()
+                    .build();
+            System.out.println("[DEBUG CS2Command] Parser created successfully with pattern 1R VO");
+            System.out.flush();
+            return parser;
+        } catch (Exception e) {
+            System.out.println("[DEBUG CS2Command] ERROR creating parser: " + e.getMessage());
+            e.printStackTrace();
+            System.out.flush();
+            throw e;
+        }
     }
     
     /**

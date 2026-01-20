@@ -192,57 +192,185 @@ public class CS2EmbedFormatter {
      * @return EmbedCreateSpec ready for Discord message
      */
     public static EmbedCreateSpec formatComparison(PlayerStats stats1, PlayerStats stats2, FaceitPlayer player1, FaceitPlayer player2) {
-        String title = String.format("⚔️ Player Comparison");
+        String title = String.format("Player Comparison - %s vs %s", player1.getNickname(), player2.getNickname());
         
-        String eloComparison = String.format(
-            "%s: **%d** %s\n%s: **%d** %s",
-            player1.getNickname(), player1.getElo(), player1.getElo() > player2.getElo() ? "🔥" : "",
-            player2.getNickname(), player2.getElo(), player2.getElo() > player1.getElo() ? "🔥" : ""
-        );
+        // Color codes for visual distinction
+        String p1Color = "`🔴`";  // Red for player 1
+        String p2Color = "`🔵`";  // Blue for player 2
         
-        String kdComparison = String.format(
-            "%s: **%.2f** %s\n%s: **%.2f** %s",
-            player1.getNickname(), stats1.getKillDeathRatio(), stats1.getKillDeathRatio() > stats2.getKillDeathRatio() ? "↑" : "",
-            player2.getNickname(), stats2.getKillDeathRatio(), stats2.getKillDeathRatio() > stats1.getKillDeathRatio() ? "↑" : ""
-        );
+        // Rank Section
+        String eloComp = player1.getElo() > player2.getElo()
+            ? String.format("%s **%s** (Lvl %d) - Elo: %d / **%s** (Lvl %d) - Elo: %d", p1Color, player1.getNickname(), player1.getFaceitLevel(), player1.getElo(), player2.getNickname(), player2.getFaceitLevel(), player2.getElo())
+            : player2.getElo() > player1.getElo()
+            ? String.format("**%s** (Lvl %d) - Elo: %d / %s **%s** (Lvl %d) - Elo: %d", player1.getNickname(), player1.getFaceitLevel(), player1.getElo(), p2Color, player2.getNickname(), player2.getFaceitLevel(), player2.getElo())
+            : String.format("**%s** (Lvl %d) - Elo: %d / **%s** (Lvl %d) - Elo: %d", player1.getNickname(), player1.getFaceitLevel(), player1.getElo(), player2.getNickname(), player2.getFaceitLevel(), player2.getElo());
         
-        String adrComparison = String.format(
-            "%s: **%.1f** %s\n%s: **%.1f** %s",
-            player1.getNickname(), stats1.getAverageDamageRound(), stats1.getAverageDamageRound() > stats2.getAverageDamageRound() ? "↑" : "",
-            player2.getNickname(), stats2.getAverageDamageRound(), stats2.getAverageDamageRound() > stats1.getAverageDamageRound() ? "↑" : ""
-        );
+        String rankSection = eloComp;
         
-        String winRateComparison = String.format(
-            "%s: **%.1f%%** %s\n%s: **%.1f%%** %s",
-            player1.getNickname(), stats1.getWinRate(), stats1.getWinRate() > stats2.getWinRate() ? "↑" : "",
-            player2.getNickname(), stats2.getWinRate(), stats2.getWinRate() > stats1.getWinRate() ? "↑" : ""
-        );
+        // Core Stats with player indicators (only on winning stat)
+        String kdComparison = stats1.getKillDeathRatio() > stats2.getKillDeathRatio() 
+            ? String.format("%s **K/D**: %.2f / %.2f", p1Color, stats1.getKillDeathRatio(), stats2.getKillDeathRatio())
+            : stats2.getKillDeathRatio() > stats1.getKillDeathRatio()
+            ? String.format("**K/D**: %.2f / %s **%.2f**", stats1.getKillDeathRatio(), p2Color, stats2.getKillDeathRatio())
+            : String.format("**K/D**: %.2f / %.2f", stats1.getKillDeathRatio(), stats2.getKillDeathRatio());
         
-        // Summary
+        String adrComparison = stats1.getAverageDamageRound() > stats2.getAverageDamageRound()
+            ? String.format("%s **ADR**: %.1f / %.1f", p1Color, stats1.getAverageDamageRound(), stats2.getAverageDamageRound())
+            : stats2.getAverageDamageRound() > stats1.getAverageDamageRound()
+            ? String.format("**ADR**: %.1f / %s **%.1f**", stats1.getAverageDamageRound(), p2Color, stats2.getAverageDamageRound())
+            : String.format("**ADR**: %.1f / %.1f", stats1.getAverageDamageRound(), stats2.getAverageDamageRound());
+        
+        String hsComparison = stats1.getHeadshotPercentage() > stats2.getHeadshotPercentage()
+            ? String.format("%s **HS%%**: %.1f%% / %.1f%%", p1Color, stats1.getHeadshotPercentage(), stats2.getHeadshotPercentage())
+            : stats2.getHeadshotPercentage() > stats1.getHeadshotPercentage()
+            ? String.format("**HS%%**: %.1f%% / %s **%.1f%%**", stats1.getHeadshotPercentage(), p2Color, stats2.getHeadshotPercentage())
+            : String.format("**HS%%**: %.1f%% / %.1f%%", stats1.getHeadshotPercentage(), stats2.getHeadshotPercentage());
+        
+        String coreStats = String.format("%s\n%s\n%s", kdComparison, adrComparison, hsComparison);
+        
+        // Match Record with player indicators (only on winning stat)
+        String matchRecord = stats1.getWinRate() > stats2.getWinRate()
+            ? String.format("%s **Matches**: %d W/L (%d%% WR) / **%d** W/L (%d%% WR)", p1Color, stats1.getTotalMatches(), Math.round(stats1.getWinRate()), stats2.getTotalMatches(), Math.round(stats2.getWinRate()))
+            : stats2.getWinRate() > stats1.getWinRate()
+            ? String.format("**Matches**: %d W/L (%d%% WR) / %s **%d** W/L (%d%% WR)", stats1.getTotalMatches(), Math.round(stats1.getWinRate()), p2Color, stats2.getTotalMatches(), Math.round(stats2.getWinRate()))
+            : String.format("**Matches**: %d W/L (%d%% WR) / **%d** W/L (%d%% WR)", stats1.getTotalMatches(), Math.round(stats1.getWinRate()), stats2.getTotalMatches(), Math.round(stats2.getWinRate()));
+        
+        // Determine each player's unique strengths
+        String player1Strengths = getPlayerStrengths(stats1, stats2, player1.getNickname());
+        String player2Strengths = getPlayerStrengths(stats2, stats1, player2.getNickname());
+        
+        // Clutch Stats with player indicators (only on winning stat)
+        String ov1Comparison = stats1.getOneVOneWinRate() > stats2.getOneVOneWinRate()
+            ? String.format("%s **1v1**: %.0f%% (%d/%d) / %.0f%% (%d/%d)", p1Color, stats1.getOneVOneWinRate() * 100, stats1.getTotalOneVOneWins(), stats1.getTotalOneVOneCount(), stats2.getOneVOneWinRate() * 100, stats2.getTotalOneVOneWins(), stats2.getTotalOneVOneCount())
+            : stats2.getOneVOneWinRate() > stats1.getOneVOneWinRate()
+            ? String.format("**1v1**: %.0f%% (%d/%d) / %s **%.0f%%** (%d/%d)", stats1.getOneVOneWinRate() * 100, stats1.getTotalOneVOneWins(), stats1.getTotalOneVOneCount(), p2Color, stats2.getOneVOneWinRate() * 100, stats2.getTotalOneVOneWins(), stats2.getTotalOneVOneCount())
+            : String.format("**1v1**: %.0f%% (%d/%d) / %.0f%% (%d/%d)", stats1.getOneVOneWinRate() * 100, stats1.getTotalOneVOneWins(), stats1.getTotalOneVOneCount(), stats2.getOneVOneWinRate() * 100, stats2.getTotalOneVOneWins(), stats2.getTotalOneVOneCount());
+        
+        String ov2Comparison = stats1.getOneVTwoWinRate() > stats2.getOneVTwoWinRate()
+            ? String.format("%s **1v2**: %.0f%% (%d/%d) / %.0f%% (%d/%d)", p1Color, stats1.getOneVTwoWinRate() * 100, stats1.getTotalOneVTwoWins(), stats1.getTotalOneVTwoCount(), stats2.getOneVTwoWinRate() * 100, stats2.getTotalOneVTwoWins(), stats2.getTotalOneVTwoCount())
+            : stats2.getOneVTwoWinRate() > stats1.getOneVTwoWinRate()
+            ? String.format("**1v2**: %.0f%% (%d/%d) / %s **%.0f%%** (%d/%d)", stats1.getOneVTwoWinRate() * 100, stats1.getTotalOneVTwoWins(), stats1.getTotalOneVTwoCount(), p2Color, stats2.getOneVTwoWinRate() * 100, stats2.getTotalOneVTwoWins(), stats2.getTotalOneVTwoCount())
+            : String.format("**1v2**: %.0f%% (%d/%d) / %.0f%% (%d/%d)", stats1.getOneVTwoWinRate() * 100, stats1.getTotalOneVTwoWins(), stats1.getTotalOneVTwoCount(), stats2.getOneVTwoWinRate() * 100, stats2.getTotalOneVTwoWins(), stats2.getTotalOneVTwoCount());
+        
+        String clutchStats = String.format("%s\n%s", ov1Comparison, ov2Comparison);
+        
+        // Aggression Stats with player indicators (only on winning stat)
+        String entryRateComp = stats1.getEntryRate() > stats2.getEntryRate()
+            ? String.format("%s **Entry Rate**: %.0f%% / %.0f%%", p1Color, stats1.getEntryRate() * 100, stats2.getEntryRate() * 100)
+            : stats2.getEntryRate() > stats1.getEntryRate()
+            ? String.format("**Entry Rate**: %.0f%% / %s **%.0f%%**", stats1.getEntryRate() * 100, p2Color, stats2.getEntryRate() * 100)
+            : String.format("**Entry Rate**: %.0f%% / %.0f%%", stats1.getEntryRate() * 100, stats2.getEntryRate() * 100);
+        
+        String entrySuccessComp = stats1.getEntrySuccessRate() > stats2.getEntrySuccessRate()
+            ? String.format("%s **Entry Success**: %.0f%% / %.0f%%", p1Color, stats1.getEntrySuccessRate() * 100, stats2.getEntrySuccessRate() * 100)
+            : stats2.getEntrySuccessRate() > stats1.getEntrySuccessRate()
+            ? String.format("**Entry Success**: %.0f%% / %s **%.0f%%**", stats1.getEntrySuccessRate() * 100, p2Color, stats2.getEntrySuccessRate() * 100)
+            : String.format("**Entry Success**: %.0f%% / %.0f%%", stats1.getEntrySuccessRate() * 100, stats2.getEntrySuccessRate() * 100);
+        
+        String sniperComp = stats1.getSniperKillRate() > stats2.getSniperKillRate()
+            ? String.format("%s **Sniper Rate**: %.0f%% / %.0f%%", p1Color, stats1.getSniperKillRate() * 100, stats2.getSniperKillRate() * 100)
+            : stats2.getSniperKillRate() > stats1.getSniperKillRate()
+            ? String.format("**Sniper Rate**: %.0f%% / %s **%.0f%%**", stats1.getSniperKillRate() * 100, p2Color, stats2.getSniperKillRate() * 100)
+            : String.format("**Sniper Rate**: %.0f%% / %.0f%%", stats1.getSniperKillRate() * 100, stats2.getSniperKillRate() * 100);
+        
+        String aggressionStats = String.format("%s\n%s\n%s", entryRateComp, entrySuccessComp, sniperComp);
+        
+        // Overall winner
         int p1Wins = 0;
-        int p2Wins = 0;
-        if (player1.getElo() > player2.getElo()) p1Wins++; else p2Wins++;
-        if (stats1.getKillDeathRatio() > stats2.getKillDeathRatio()) p1Wins++; else p2Wins++;
-        if (stats1.getAverageDamageRound() > stats2.getAverageDamageRound()) p1Wins++; else p2Wins++;
-        if (stats1.getWinRate() > stats2.getWinRate()) p1Wins++; else p2Wins++;
+        if (player1.getElo() > player2.getElo()) p1Wins++;
+        if (stats1.getKillDeathRatio() > stats2.getKillDeathRatio()) p1Wins++;
+        if (stats1.getAverageDamageRound() > stats2.getAverageDamageRound()) p1Wins++;
+        if (stats1.getWinRate() > stats2.getWinRate()) p1Wins++;
+        if (stats1.getHeadshotPercentage() > stats2.getHeadshotPercentage()) p1Wins++;
+        if (stats1.getOneVOneWinRate() > stats2.getOneVOneWinRate()) p1Wins++;
+        if (stats1.getEntrySuccessRate() > stats2.getEntrySuccessRate()) p1Wins++;
         
-        String summary = p1Wins > p2Wins 
-            ? String.format("**%s** is currently performing better", player1.getNickname())
-            : p2Wins > p1Wins 
-                ? String.format("**%s** is currently performing better", player2.getNickname())
-                : "**Balanced matchup** - both players are performing similarly";
+        String verdict = "";
+        if (p1Wins > 3) {
+            verdict = String.format("%s **%s** has the edge - stronger fundamentals overall", p1Color, player1.getNickname());
+        } else if (p1Wins < 3) {
+            verdict = String.format("%s **%s** has the edge - stronger fundamentals overall", p2Color, player2.getNickname());
+        } else {
+            verdict = "**Close match** - Both players are well-balanced competitors";
+        }
         
         return EmbedCreateSpec.builder()
                 .title(title)
                 .color(GOLD_COLOR)
-                .addField("Elo Rating", eloComparison, true)
-                .addField("K/D Ratio", kdComparison, true)
-                .addField("ADR", adrComparison, true)
-                .addField("Win Rate", winRateComparison, true)
-                .addField("Summary", summary, false)
-                .footer("Data from Faceit API", null)
+                .addField("Rank & Rating", rankSection, false)
+                .addField("Core Performance", coreStats, false)
+                .addField("Win Streaks", String.format(
+                    "%s / %s\n%s / %s",
+                    stats1.getLongestWinStreak() > stats2.getLongestWinStreak() 
+                        ? String.format("%s **Longest**: %d", p1Color, stats1.getLongestWinStreak())
+                        : stats2.getLongestWinStreak() > stats1.getLongestWinStreak()
+                        ? String.format("%s **Longest**: %d", p2Color, stats2.getLongestWinStreak())
+                        : String.format("**Longest**: %d", stats1.getLongestWinStreak()),
+                    stats2.getLongestWinStreak() > stats1.getLongestWinStreak()
+                        ? String.format("%s **%d**", p2Color, stats2.getLongestWinStreak())
+                        : stats1.getLongestWinStreak() > stats2.getLongestWinStreak()
+                        ? String.format("**%d**", stats2.getLongestWinStreak())
+                        : String.format("**%d**", stats2.getLongestWinStreak()),
+                    stats1.getCurrentWinStreak() > stats2.getCurrentWinStreak()
+                        ? String.format("%s **Current**: %d", p1Color, stats1.getCurrentWinStreak())
+                        : stats2.getCurrentWinStreak() > stats1.getCurrentWinStreak()
+                        ? String.format("%s **Current**: %d", p2Color, stats2.getCurrentWinStreak())
+                        : String.format("**Current**: %d", stats1.getCurrentWinStreak()),
+                    stats2.getCurrentWinStreak() > stats1.getCurrentWinStreak()
+                        ? String.format("%s **%d**", p2Color, stats2.getCurrentWinStreak())
+                        : stats1.getCurrentWinStreak() > stats2.getCurrentWinStreak()
+                        ? String.format("**%d**", stats2.getCurrentWinStreak())
+                        : String.format("**%d**", stats2.getCurrentWinStreak())
+                ), false)
+                .addField("Match Record", matchRecord, false)
+                .addField("Clutch Performance", clutchStats, false)
+                .addField("Aggression", aggressionStats, false)
+                .addField(player1.getNickname() + "'s Strengths", player1Strengths, true)
+                .addField(player2.getNickname() + "'s Strengths", player2Strengths, true)
+                .addField("Verdict", verdict, false)
+                .footer("Only the leading player in each stat is highlighted", null)
                 .timestamp(Instant.now())
                 .build();
+    }
+    
+    private static String getPlayerStrengths(PlayerStats stats, PlayerStats opponentStats, String playerName) {
+        java.util.ArrayList<String> strengths = new java.util.ArrayList<>();
+        
+        if (stats.getKillDeathRatio() > opponentStats.getKillDeathRatio()) {
+            strengths.add("Superior K/D");
+        }
+        if (stats.getAverageDamageRound() > opponentStats.getAverageDamageRound()) {
+            strengths.add("Higher ADR");
+        }
+        if (stats.getHeadshotPercentage() > opponentStats.getHeadshotPercentage()) {
+            strengths.add("Better Precision");
+        }
+        if (stats.getOneVOneWinRate() > opponentStats.getOneVOneWinRate()) {
+            strengths.add("1v1 Clutches");
+        }
+        if (stats.getEntrySuccessRate() > opponentStats.getEntrySuccessRate()) {
+            strengths.add("Entry Fragging");
+        }
+        if (stats.getSniperKillRate() > opponentStats.getSniperKillRate()) {
+            strengths.add("Sniper Control");
+        }
+        if (stats.getFlashesPerRound() > opponentStats.getFlashesPerRound()) {
+            strengths.add("Flash Support");
+        }
+        if (stats.getWinRate() > opponentStats.getWinRate()) {
+            strengths.add("Consistency");
+        }
+        
+        if (strengths.isEmpty()) {
+            return "Balanced player";
+        }
+        
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < Math.min(3, strengths.size()); i++) {
+            if (i > 0) result.append("\n");
+            result.append("• ").append(strengths.get(i));
+        }
+        return result.toString();
     }
     
     /**

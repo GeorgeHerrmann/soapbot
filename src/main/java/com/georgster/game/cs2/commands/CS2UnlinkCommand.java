@@ -64,7 +64,6 @@ public class CS2UnlinkCommand implements ParseableCommand {
             profile.setCS2Profile(null);
             profileManager.update(profile);
             
-            logger.info("Successfully unlinked Faceit account '{}' for Discord user {}", faceitNickname, userId);
             
             // Send confirmation
             handler.sendMessage("✅ **Faceit Account Unlinked**\n\n" +

@@ -91,8 +91,6 @@ public class PlayerLookup {
             
             if (profile.hasLinkedFaceit()) {
                 String playerId = cs2Profile.getFaceitPlayerId();
-                logger.info("Found linked Faceit account for Discord user {}: {} (ID: {})", 
-                        userId, cs2Profile.getFaceitNickname(), playerId);
                 
                 // Fetch fresh player data from API using the stored player_id
                 return apiClient.fetchPlayerById(playerId);

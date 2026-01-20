@@ -90,7 +90,6 @@ public class CS2LinkCommand implements ParseableCommand {
         }
         String userId = event.getDiscordEvent().getUser().getId().asString();
         
-        logger.info("Attempting to link Faceit account '{}' for Discord user {}", faceitUsername, userId);
         
         try {
             // Validate account exists via Faceit API
@@ -117,8 +116,6 @@ public class CS2LinkCommand implements ParseableCommand {
             profile.setCS2Profile(cs2Profile);
             profileManager.update(profile);
             
-            logger.info("Successfully linked Faceit account '{}' (ID: {}) for Discord user {}", 
-                    player.getNickname(), player.getPlayerId(), userId);
             
             // Send success embed
             EmbedCreateSpec successEmbed = CS2EmbedFormatter.formatLinkSuccess(player);
