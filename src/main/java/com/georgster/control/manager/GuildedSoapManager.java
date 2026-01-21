@@ -60,7 +60,7 @@ public abstract class GuildedSoapManager<T extends Manageable> implements SoapMa
      * {@inheritDoc}
      */
     public boolean exists(T observee) {
-        return observees.contains(observee);
+        return observees.stream().anyMatch(compare -> compare.getIdentifier().equals(observee.getIdentifier()));
     }
 
     /**
